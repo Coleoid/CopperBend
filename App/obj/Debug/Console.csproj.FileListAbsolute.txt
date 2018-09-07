@@ -1,0 +1,17 @@
+K:\code\CopperBend\Console\bin\Debug\CopperBend.exe.config
+K:\code\CopperBend\Console\bin\Debug\CopperBend.exe
+K:\code\CopperBend\Console\bin\Debug\CopperBend.pdb
+K:\code\CopperBend\Console\bin\Debug\OpenTK.dll
+K:\code\CopperBend\Console\bin\Debug\RLNET.dll
+K:\code\CopperBend\Console\bin\Debug\RogueSharp.dll
+K:\code\CopperBend\Console\bin\Debug\WinMan.dll
+K:\code\CopperBend\Console\bin\Debug\YamlDotNet.dll
+K:\code\CopperBend\Console\bin\Debug\OpenTK.xml
+K:\code\CopperBend\Console\bin\Debug\OpenTK.dll.config
+K:\code\CopperBend\Console\bin\Debug\WinMan.xml
+K:\code\CopperBend\Console\bin\Debug\YamlDotNet.xml
+K:\code\CopperBend\Console\obj\Debug\Console.csprojAssemblyReference.cache
+K:\code\CopperBend\Console\obj\Debug\Console.csproj.CoreCompileInputs.cache
+K:\code\CopperBend\Console\obj\Debug\Console.csproj.CopyComplete
+K:\code\CopperBend\Console\obj\Debug\CopperBend.exe
+K:\code\CopperBend\Console\obj\Debug\CopperBend.pdb

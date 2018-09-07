@@ -1,0 +1,17 @@
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.exe.config
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.exe
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\ConsoleApp1.pdb
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\OpenTK.dll
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\RLNET.dll
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\RogueSharp.dll
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\WinMan.dll
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\OpenTK.xml
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\OpenTK.dll.config
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\WinMan.xml
+k:\code\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csprojAssemblyReference.cache
+k:\code\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csproj.CoreCompileInputs.cache
+k:\code\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.csproj.CopyComplete
+k:\code\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.exe
+k:\code\ConsoleApp1\ConsoleApp1\obj\Debug\ConsoleApp1.pdb
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\YamlDotNet.dll
+k:\code\ConsoleApp1\ConsoleApp1\bin\Debug\YamlDotNet.xml

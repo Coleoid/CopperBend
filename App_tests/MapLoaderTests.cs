@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace CopperBend.App.tests
 {
@@ -25,14 +27,13 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void LoadSomeYAML()
+        public void Work_YAML_with_low_level_stream()
         {
-            // Setup the input
-            var input = new StringReader(Document);
+           var reader = new StringReader(RoundRoomYaml);
 
             // Load the stream
             var yaml = new YamlStream();
-            yaml.Load(input);
+            yaml.Load(reader);
 
             // Examine the stream
             var mapping =
@@ -41,6 +42,8 @@ namespace CopperBend.App.tests
             foreach (var entry in mapping.Children)
             {
                 var entryName = ((YamlScalarNode) entry.Key).Value;
+
+
                 var entryValue = ((YamlScalarNode) entry.Value).Value;
                 Console.WriteLine($"{entryName}: {entryValue}");
             }
@@ -57,16 +60,44 @@ namespace CopperBend.App.tests
             //}
         }
 
-        private const string Document = @"---
+        [Test]
+        public void Deserialize_to_POCO()
+        {
+            var reader = new StringReader(RoundRoomYaml);
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
+
+            var map = deserializer.Deserialize<MapData>(reader);
+            Assert.That(map.Name, Is.EqualTo("The Round Room"));
+            Assert.That(map.Legend.Count(), Is.EqualTo(3));
+            Assert.That(map.Legend.ContainsKey("+"));
+            Assert.That(map.Legend.ContainsKey("#"));
+            Assert.That(map.Legend["."], Is.EqualTo("Dirt"));
+            Assert.That(map.Terrain.Count(), Is.EqualTo(6));
+            Assert.That(map.Terrain[1], Is.EqualTo("..#..#.."));
+
+            //  Which is beautiful--Now how do I put this into the R# map?
+        }
+
+        public class MapData
+        {
+            public string Name { get; set; }
+            public Dictionary<string,string> Legend { get; set; }
+            public List<string> Terrain { get; set; }
+        }
+
+        private const string RoundRoomYaml = @"---
 name:  The Round Room
 
 legend:
  '.': Dirt
  '#': StoneWall
+ '+': Door
 
 terrain:
  - ...##...
- - ..#..#..
+ - ..#..+..
  - .#....#.
  - .#....#.
  - ..#..#..

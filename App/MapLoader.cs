@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RogueSharp;
 using YamlDotNet.RepresentationModel;
 
 namespace CopperBend.App
@@ -60,28 +59,6 @@ namespace CopperBend.App
             return null;
         }
 
-    }
-
-    public interface IkvMap
-    {
-        int Width { get; }
-        int Height { get; }
-        TerrainType [,] Terrain { get; set; }
-    }
-
-    public class KvMap : Map, IkvMap
-    {
-        public KvMap(int xWidth, int yHeight)
-            : base(xWidth, yHeight)
-        {
-            Terrain = new TerrainType[xWidth, yHeight];
-        }
-        public TerrainType [,] Terrain { get; set; }
-
-        public TerrainType this[int x, int y]
-        {
-            get => Terrain[x, y];
-        }
     }
 
 }

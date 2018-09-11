@@ -31,11 +31,9 @@ namespace CopperBend.App.tests
         {
            var reader = new StringReader(RoundRoomYaml);
 
-            // Load the stream
             var yaml = new YamlStream();
             yaml.Load(reader);
 
-            // Examine the stream
             var mapping =
                 (YamlMappingNode)yaml.Documents[0].RootNode;
 
@@ -43,44 +41,43 @@ namespace CopperBend.App.tests
             {
                 var entryName = ((YamlScalarNode) entry.Key).Value;
 
-
                 var entryValue = ((YamlScalarNode) entry.Value).Value;
                 Console.WriteLine($"{entryName}: {entryValue}");
             }
-
-            //// List all the items
-            //var items = (YamlSequenceNode)mapping.Children[new YamlScalarNode("items")];
-            //foreach (YamlMappingNode item in items)
-            //{
-            //    Console.WriteLine(
-            //        "{0}\t{1}",
-            //        item.Children[new YamlScalarNode("part_no")],
-            //        item.Children[new YamlScalarNode("descrip")]
-            //    );
-            //}
         }
 
         [Test]
-        public void Deserialize_to_POCO()
+        public void YAML_to_DTO()
         {
             var reader = new StringReader(RoundRoomYaml);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(new CamelCaseNamingConvention())
                 .Build();
 
-            var map = deserializer.Deserialize<MapData>(reader);
-            Assert.That(map.Name, Is.EqualTo("The Round Room"));
-            Assert.That(map.Legend.Count(), Is.EqualTo(3));
-            Assert.That(map.Legend.ContainsKey("+"));
-            Assert.That(map.Legend.ContainsKey("#"));
-            Assert.That(map.Legend["."], Is.EqualTo("Dirt"));
-            Assert.That(map.Terrain.Count(), Is.EqualTo(6));
-            Assert.That(map.Terrain[1], Is.EqualTo("..#..#.."));
+            var dto = deserializer.Deserialize<MapDTO>(reader);
+            Assert.That(dto.Name, Is.EqualTo("The Round Room"));
+            Assert.That(dto.Legend.Count(), Is.EqualTo(3));
+            Assert.That(dto.Legend.ContainsKey("+"));
+            Assert.That(dto.Legend.ContainsKey("#"));
+            Assert.That(dto.Legend["."], Is.EqualTo("Dirt"));
+            Assert.That(dto.Terrain.Count(), Is.EqualTo(6));
+            Assert.That(dto.Terrain[1], Is.EqualTo("..#..#.."));
 
-            //  Which is beautiful--Now how do I put this into the R# map?
+            //  Which is great--Now how do I put this into the R# map?
         }
 
-        public class MapData
+        public void DTO_to_map()
+        {
+            var dto = new MapDTO
+            {
+                Name = "The Round Room",
+                Terrain = new List<string> { "#" }
+            };
+
+
+        }
+
+        public class MapDTO
         {
             public string Name { get; set; }
             public Dictionary<string,string> Legend { get; set; }

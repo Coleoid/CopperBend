@@ -5,28 +5,25 @@ using WinMan;
 
 namespace CopperBend.App
 {
-    //  Test code kiped from WinMan
+    //  Code originally a reference sample from WinMan
     class Program
     {
         private static MainGameScreen mainGameScreen;
 
         static void Main(string[] args)
         {
-
             var settings = new RLSettings
             {
+                Title = "Copper Bend",
                 BitmapFile = "terminal8x8.png",
                 Width = 60,
                 Height = 40,
                 CharWidth = 8,
                 CharHeight = 8,
                 Scale = 1f,
-                Title = "RLNET Window Manager Test",
                 WindowBorder = RLWindowBorder.Resizable,
-                ResizeType = RLResizeType.ResizeCells
+                ResizeType = RLResizeType.ResizeCells,
             };
-            // All the test panels here work with resize via scaling as well.
-            //settings.ResizeType = RLResizeType.ResizeScale;
 
             Engine.Init(settings);
 
@@ -62,26 +59,21 @@ namespace CopperBend.App
             public MapPanel(ResizeCalc rootX, ResizeCalc rootY, ResizeCalc width, ResizeCalc height)
                 : base(rootX, rootY, width, height, false, true)
             {
-                Random rng = new Random();
-                map = new int[Width, Height];
+                resizeMap(widthCalc(), heightCalc());
 
-                for (int x = 0; x < Width; ++x)
-                for (int y = 0; y < Height; ++y)
-                    map[x, y] = rng.Next(0, 5);
-
-                OnResize += (object s, EventArgs e) => resizeMap(widthCalc(), heightCalc());
+                OnResize += (object s, EventArgs e) => 
+                    resizeMap(widthCalc(), heightCalc());
             }
 
-            // would be unnecessary here, honestly.
-            // just a hack to resize array so i dont have to have an actual map
             private void resizeMap(int width, int height)
             {
                 Random rng = new Random();
                 map = new int[width, height];
 
+                //  half-plausible garbage map
                 for (int x = 0; x < width; ++x)
-                for (int y = 0; y < height; ++y)
-                    map[x, y] = rng.Next(0, 5);
+                    for (int y = 0; y < height; ++y)
+                        map[x, y] = rng.Next(0, 5);
             }
 
             public override void UpdateLayout(object sender, UpdateEventArgs e)
@@ -98,7 +90,8 @@ namespace CopperBend.App
 
         internal class MenuPanel : Panel
         {
-            public MenuPanel(ResizeCalc rootX, ResizeCalc rootY, ResizeCalc width, ResizeCalc height) : base(rootX, rootY, width, height, true, false)
+            public MenuPanel(ResizeCalc rootX, ResizeCalc rootY, ResizeCalc width, ResizeCalc height)
+                : base(rootX, rootY, width, height, true, false)
             {
             }
 
@@ -111,8 +104,10 @@ namespace CopperBend.App
             protected override void OnKeyPress(object sender, KeyPressEventArgs e)
             {
                 System.Console.WriteLine($"Key: [{e.KeyPress.Key}]");
-                //if (e.KeyPress.Key == RLKey.C && e.KeyPress.Control)
-                //    exit;
+                if (e.KeyPress.Key == RLKey.C && e.KeyPress.Control)
+                {
+                    //TODO:  Set some flag to be seen by outer event loop
+                }
 
                 e.Cancel = true;
             }
@@ -129,13 +124,6 @@ namespace CopperBend.App
                 this.message = message;
             }
 
-            // Reposition map based on the following center coordinates
-            //public void Reposition(int centerX, int centerY)
-            //{
-            //RootX = centerX - (message.Length / 2);
-            //RootY = centerY - 2;
-            //}
-
             public override void UpdateLayout(object sender, UpdateEventArgs e)
             {
                 console.Print(0, 2, message, RLColor.White, 2);
@@ -143,12 +131,12 @@ namespace CopperBend.App
 
             protected override void OnKeyPress(object sender, KeyPressEventArgs e)
             {
+                //  Any keypress will be swallowed and close the alert
                 if (Shown)
+                {
                     Hide();
-
-                // Greedy capture don't send it to anyone else! This basically sets this as modal window, nobody else can get any key input.
-                // Defaults to false
-                e.Cancel = true;
+                    e.Cancel = true;
+                }
             }
         }
     }

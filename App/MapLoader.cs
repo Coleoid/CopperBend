@@ -1,64 +1,78 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace CopperBend.App
 {
     public enum TerrainType
     {
         Unknown = 0,
-
-        Dirt = 1,
-        Stone = 2,
-        Blight = 9
+        Dirt,
+        StoneWall,
+        Door,
+        Blight,
     }
 
     public class MapLoader
     {
-        public IkvMap LoadMap(string mapName)
+        public IcbMap LoadMap(string mapName)
         {
-            if (mapName == "test:block")
-                return TestBlockMap();
-            else
-                return MapFromYAML(mapName);
+            return MapFromFile(mapName);
         }
 
-        public IkvMap TestBlockMap()
-        {
-            var map = new KvMap(4, 4);
-
-            map.Terrain[0, 0] = TerrainType.Stone;
-            map.Terrain[0, 1] = TerrainType.Stone;
-            map.Terrain[0, 2] = TerrainType.Stone;
-            map.Terrain[0, 3] = TerrainType.Stone;
-
-            map.Terrain[1, 0] = TerrainType.Stone;
-            map.Terrain[1, 1] = TerrainType.Blight;
-            map.Terrain[1, 2] = TerrainType.Dirt;
-            map.Terrain[1, 3] = TerrainType.Stone;
-
-            map.Terrain[2, 0] = TerrainType.Stone;
-            map.Terrain[2, 1] = TerrainType.Dirt;
-            map.Terrain[2, 2] = TerrainType.Dirt;
-            map.Terrain[2, 3] = TerrainType.Stone;
-
-            map.Terrain[3, 0] = TerrainType.Stone;
-            map.Terrain[3, 1] = TerrainType.Stone;
-            map.Terrain[3, 2] = TerrainType.Dirt;
-            map.Terrain[3, 3] = TerrainType.Stone;
-
-            return map;
-        }
-
-        public IkvMap MapFromYAML(string mapName)
+        public IcbMap MapFromFile(string mapName)
         {
             return null;
         }
 
+        public IcbMap MapFromYAML(string mapYaml)
+        {
+            var dto = DTOFromYAML(mapYaml);
+            var width = dto.Terrain.Max(t => t.Length);
+            var height = dto.Terrain.Count();
+            var map = new CbMap(width, height);
+
+            map.Name = dto.Name;
+
+            for (int y = 0; y < height; y++)
+            {
+                string row = dto.Terrain[y];
+                for (int x = 0; x < width; x++)
+                {
+                    map.Terrain[x, y] = (x < row.Length)
+                        ? TerrainFrom(row.Substring(x, 1))
+                        : TerrainType.Unknown;
+                }
+            }
+
+            return map;
+        }
+
+        public TerrainType TerrainFrom(string symbol)
+        {
+            if (symbol == ".") return TerrainType.Dirt;
+            if (symbol == "#") return TerrainType.StoneWall;
+            if (symbol == "+") return TerrainType.Door;
+            return TerrainType.Unknown;
+        }
+
+        public MapDTO DTOFromYAML(string mapYaml)
+        {
+            var reader = new StringReader(mapYaml);
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
+
+            return deserializer.Deserialize<MapDTO>(reader);
+        }
     }
 
+    public class MapDTO
+    {
+        public string Name { get; set; }
+        public Dictionary<string, string> Legend { get; set; }
+        public List<string> Terrain { get; set; }
+    }
 }

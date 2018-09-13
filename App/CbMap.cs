@@ -11,6 +11,12 @@ namespace CopperBend.App
 
     public class CbMap : Map, IcbMap
     {
+        public CbMap()
+            : base(0,0)
+        {
+
+        }
+
         public CbMap(int xWidth, int yHeight)
             : base(xWidth, yHeight)
         {

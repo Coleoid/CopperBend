@@ -44,6 +44,7 @@ namespace CopperBend.App
                     map.Terrain[x, y] = (x < row.Length)
                         ? TerrainFrom(row.Substring(x, 1))
                         : TerrainType.Unknown;
+                    //map.SetCellProperties();
                 }
             }
 
@@ -52,6 +53,7 @@ namespace CopperBend.App
 
         public TerrainType TerrainFrom(string symbol)
         {
+            //0.1
             if (symbol == ".") return TerrainType.Dirt;
             if (symbol == "#") return TerrainType.StoneWall;
             if (symbol == "+") return TerrainType.Door;

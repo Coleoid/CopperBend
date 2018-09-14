@@ -20,64 +20,59 @@ namespace CopperBend.App
 
         public static TileRepresentation OfTerrain(TerrainType terrain)
         {
-            switch (terrain)
-            {
-                case TerrainType.Unknown: return ReprUnknown;
-                case TerrainType.Dirt: return ReprFloor;
-                case TerrainType.Blight: return ReprBlight;
-                case TerrainType.StoneWall: return ReprWall;
-                case TerrainType.Door: return ReprDoor;
+            if (ReprOfTerrain == null)
+                InitRepresentationsOfTerrain();
 
-                default:
-                    throw new Exception($"No represenation coded for terrain type [{terrain}].");
-            }
+            if (ReprOfTerrain.ContainsKey(terrain))
+                return ReprOfTerrain[terrain];
+
+            throw new Exception($"No represenation coded for terrain type [{terrain}].");
         }
+        public static Dictionary<TerrainType, TileRepresentation> ReprOfTerrain;
 
-        public static TileRepresentation ReprUnknown;
-        public static TileRepresentation ReprFloor;
-        public static TileRepresentation ReprWall;
-        public static TileRepresentation ReprBlight;
-        public static TileRepresentation ReprDoor;
-
-        //NEXT:
-        //public Dictionary<TerrainType, TileRepresentation> ReprOfTerrain;
-
-        static TileRepresentation()
+        private static void InitRepresentationsOfTerrain()
         {
-            ReprUnknown = new TileRepresentation
+            ReprOfTerrain = new Dictionary<TerrainType, TileRepresentation>();
+
+            var rep = new TileRepresentation
             {
                 Symbol = '?',
             };
-            ReprUnknown.SetForeground(Palette.DbBlood, Palette.DbBlood);
-            ReprUnknown.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            rep.SetForeground(Palette.DbBlood, Palette.DbBlood);
+            rep.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            ReprOfTerrain[TerrainType.Unknown] = rep;
 
-            ReprFloor = new TileRepresentation
+            rep = new TileRepresentation
             {
                 Symbol = '.',
             };
-            ReprFloor.SetForeground(Colors.Floor, Colors.FloorSeen);
-            ReprFloor.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            rep.SetForeground(Colors.Floor, Colors.FloorSeen);
+            rep.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            ReprOfTerrain[TerrainType.Dirt] = rep;
 
-            ReprBlight = new TileRepresentation
+            rep = new TileRepresentation
             {
                 Symbol = ',',
             };
-            ReprBlight.SetForeground(Palette.DbOldBlood, Palette.DbBlood);
-            ReprBlight.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            rep.SetForeground(Palette.DbOldBlood, Palette.DbBlood);
+            rep.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            ReprOfTerrain[TerrainType.Blight] = rep;
 
-            ReprWall = new TileRepresentation
+            rep = new TileRepresentation
             {
                 Symbol = '#',
             };
-            ReprWall.SetForeground(Colors.Wall, Colors.WallSeen);
-            ReprWall.SetBackground(Colors.WallBackground, Colors.WallBackgroundSeen);
+            rep.SetForeground(Colors.Wall, Colors.WallSeen);
+            rep.SetBackground(Colors.WallBackground, Colors.WallBackgroundSeen);
+            ReprOfTerrain[TerrainType.StoneWall] = rep;
 
-            ReprDoor = new TileRepresentation
+            rep = new TileRepresentation
             {
                 Symbol = '+',
             };
-            ReprDoor.SetForeground(Colors.Wall, Colors.WallSeen);
-            ReprDoor.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            rep.SetForeground(Colors.Wall, Colors.WallSeen);
+            rep.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            ReprOfTerrain[TerrainType.Door] = rep;
         }
 
         private void SetForeground(RLColor color, RLColor colorSeen)

@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CbMap.cs" />
+    <Compile Include="MainGameScreen.cs" />
     <Compile Include="MapLoader.cs" />
     <Compile Include="Palette.cs" />
     <Compile Include="Program.cs" />

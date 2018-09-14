@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using YamlDotNet.Serialization;
@@ -6,7 +7,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace CopperBend.App
 {
-    public enum TerrainType
+    public enum TerrainType  //0.1
     {
         Unknown = 0,
         Dirt,
@@ -48,6 +49,26 @@ namespace CopperBend.App
             }
 
             return map;
+        }
+
+        internal IcbMap DemoMap()
+        {
+            string DemoMapYaml = @"---
+name:  Demo
+
+legend:
+ '.': Dirt
+ '#': StoneWall
+ '+': Door
+
+terrain:
+ - ..####..####.
+ - .##..##.#..##
+ - .#....+.####.
+ - .##..##.#..##
+ - ..####..####.
+";
+            return MapFromYAML(DemoMapYaml);
         }
 
         public TerrainType TerrainFrom(string symbol)

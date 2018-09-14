@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RLNET;
 
 namespace CopperBend.App
@@ -25,6 +26,7 @@ namespace CopperBend.App
                 case TerrainType.Dirt: return ReprFloor;
                 case TerrainType.Blight: return ReprBlight;
                 case TerrainType.StoneWall: return ReprWall;
+                case TerrainType.Door: return ReprDoor;
 
                 default:
                     throw new Exception($"No represenation coded for terrain type [{terrain}].");
@@ -35,6 +37,10 @@ namespace CopperBend.App
         public static TileRepresentation ReprFloor;
         public static TileRepresentation ReprWall;
         public static TileRepresentation ReprBlight;
+        public static TileRepresentation ReprDoor;
+
+        //NEXT:
+        //public Dictionary<TerrainType, TileRepresentation> ReprOfTerrain;
 
         static TileRepresentation()
         {
@@ -65,6 +71,13 @@ namespace CopperBend.App
             };
             ReprWall.SetForeground(Colors.Wall, Colors.WallSeen);
             ReprWall.SetBackground(Colors.WallBackground, Colors.WallBackgroundSeen);
+
+            ReprDoor = new TileRepresentation
+            {
+                Symbol = '+',
+            };
+            ReprDoor.SetForeground(Colors.Wall, Colors.WallSeen);
+            ReprDoor.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
         }
 
         private void SetForeground(RLColor color, RLColor colorSeen)

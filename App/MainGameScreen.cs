@@ -53,7 +53,7 @@ namespace CopperBend.App
             {
                 if (Map == null)
                 {
-                    console.Print(0, 0, "No map loaded.", RLColor.Yellow);
+                    console.Print(2, 2, "No map loaded.", RLColor.Yellow);
                     return;
                 }
 
@@ -68,10 +68,10 @@ namespace CopperBend.App
                 }
             }
 
-
             protected override void OnKeyPress(object sender, KeyPressEventArgs e)
             {
-                System.Console.WriteLine($"Map Key: [{e.KeyPress.Key}]");
+                //TODO:  Get hold of the main event loop and "get it"
+                Console.WriteLine($"Map Key: [{e.KeyPress.Key}]");
                 if (e.KeyPress.Key == RLKey.C && e.KeyPress.Control)
                 {
                     //TODO:  Set some flag to be seen by outer event loop
@@ -98,10 +98,11 @@ namespace CopperBend.App
 
             protected override void OnKeyPress(object sender, KeyPressEventArgs e)
             {
-                System.Console.WriteLine($"Menu Key: [{e.KeyPress.Key}]");
+                //TODO:  Set some flag to be seen by outer event loop
+
+                Console.WriteLine($"Menu Key: [{e.KeyPress.Key}]");
                 if (e.KeyPress.Key == RLKey.C && e.KeyPress.Control)
                 {
-                    //TODO:  Set some flag to be seen by outer event loop
                 }
 
                 e.Cancel = true;

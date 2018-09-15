@@ -1,5 +1,4 @@
 ﻿using RLNET;
-using WinMan;
 
 
 namespace CopperBend.App
@@ -14,7 +13,7 @@ namespace CopperBend.App
             var settings = new RLSettings
             {
                 Title = "Copper Bend",
-                BitmapFile = "terminal8x8.png",
+                BitmapFile = "assets\\terminal8x8.png",
                 Width = 60,
                 Height = 40,
                 CharWidth = 8,
@@ -24,7 +23,7 @@ namespace CopperBend.App
                 ResizeType = RLResizeType.ResizeCells,
             };
 
-            Engine.Init(settings);
+            GameLoop.Init(settings);
             mainGameScreen = new MainGameScreen();
 
             var loader = new MapLoader();
@@ -33,7 +32,7 @@ namespace CopperBend.App
             mainGameScreen.SetMap(map);
 
             mainGameScreen.Show();
-            Engine.Run();
+            GameLoop.Run();
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using RLNET;
-using WinMan;
-
 
 namespace CopperBend.App
 {
@@ -68,7 +66,7 @@ namespace CopperBend.App
                 }
             }
 
-            protected override void OnKeyPress(object sender, KeyPressEventArgs e)
+            protected override void OnKeyPress(object sender, EventArgs_KeyPress e)
             {
                 //TODO:  Get hold of the main event loop and "get it"
                 Console.WriteLine($"Map Key: [{e.KeyPress.Key}]");
@@ -92,11 +90,13 @@ namespace CopperBend.App
 
             public override void UpdateLayout(object sender, UpdateEventArgs e)
             {
+                console.Print(0, 0, $"Menu", RLColor.White, RLColor.Black);
+
                 for (int i = 0; i < 5; ++i)
-                    console.Print(1, i, $"op{i}", RLColor.White, RLColor.Black);
+                    console.Print(1, i+2, $"option {i}", RLColor.White, RLColor.Black);
             }
 
-            protected override void OnKeyPress(object sender, KeyPressEventArgs e)
+            protected override void OnKeyPress(object sender, EventArgs_KeyPress e)
             {
                 //TODO:  Set some flag to be seen by outer event loop
 
@@ -125,10 +125,10 @@ namespace CopperBend.App
                 console.Print(0, 2, message, RLColor.White, 2);
             }
 
-            protected override void OnKeyPress(object sender, KeyPressEventArgs e)
+            protected override void OnKeyPress(object sender, EventArgs_KeyPress e)
             {
                 //  Any keypress will be swallowed and close the alert
-                if (Shown)
+                if (Visible)
                 {
                     Hide();
                     e.Cancel = true;

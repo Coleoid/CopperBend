@@ -55,7 +55,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actor.cs" />
     <Compile Include="CbMap.cs" />
+    <Compile Include="CommandSystem.cs" />
+    <Compile Include="DemoLoop.cs" />
     <Compile Include="EventArgs_KeyPress.cs" />
     <Compile Include="GameLoop.cs" />
     <Compile Include="MainGameScreen.cs" />

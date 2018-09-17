@@ -69,7 +69,7 @@ namespace CopperBend.App
 
         private void DrawActor(RLConsole console, Actor actor)
         {
-            var cell = GetCell(actor.X, actor.Y);
+            var cell = GetCellAt(actor);
             if (!cell.IsExplored) return;  // unknown is undrawn
 
             if (IsInFov(actor.X, actor.Y))
@@ -83,7 +83,10 @@ namespace CopperBend.App
             }
         }
 
-
+        public ICell GetCellAt(ICoords coords)
+        {
+            return GetCell(coords.X, coords.Y);
+        }
 
 
         // Returns true when target cell is walkable and move succeeds
@@ -93,12 +96,12 @@ namespace CopperBend.App
             if (!GetCell(x, y).IsWalkable) return false;
 
             // The cell the actor was previously on is now walkable
-            SetIsWalkable(actor.X, actor.Y, true);
+            SetIsWalkable(actor, true);
             // Update the actor's position
             actor.X = x;
             actor.Y = y;
             // The new cell the actor is on is now not walkable
-            SetIsWalkable(actor.X, actor.Y, false);
+            SetIsWalkable(actor, false);
            
             // Don't forget to update the field of view if we just repositioned the player
             if (actor is Player)
@@ -125,9 +128,9 @@ namespace CopperBend.App
         }
 
         // Push this down to RogueSharp.Map, implement directly
-        public void SetIsWalkable(int x, int y, bool isWalkable)
+        public void SetIsWalkable(ICoords location, bool isWalkable)
         {
-            ICell cell = GetCell(x, y);
+            ICell cell = GetCellAt(location);
             SetCellProperties(cell.X, cell.Y, cell.IsTransparent, isWalkable, cell.IsExplored);
         }
     }

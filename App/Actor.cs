@@ -8,6 +8,12 @@ namespace CopperBend.App
         int Awareness { get; set; }
     }
 
+    public interface ICoords
+    {
+        int X { get; }
+        int Y { get; }
+    }
+
     public interface IDrawable
     {
         RLColor Color { get; set; }
@@ -16,7 +22,7 @@ namespace CopperBend.App
         int Y { get; set; }
     }
 
-    public class Actor : IActor, IDrawable
+    public class Actor : IActor, IDrawable, ICoords
     {
         // IActor
         public string Name { get; set; }

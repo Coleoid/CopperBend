@@ -1,97 +1,92 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using RLNET;
 
 namespace CopperBend.App
 {
-
-    public static class GameLoop
+    public class GameLoop
     {
-        public static RLRootConsole RootConsole { get; private set; } = null;
+        public RLRootConsole GameConsole;
+        internal IcbMap Map;
+        internal Actor Player;
 
-        /// <summary>
-        /// Any event handlers that are added to this event are called
-        /// BEFORE any offscreen consoles are blitted to the root console,
-        /// but AFTER any Update() handlers.  Used by panels that need to 
-        /// update their offscreen consoles (clear and reset them) in 
-        /// real-time (every time a render frame happens)
-        /// NOTE: the actual RENDERING is real-time regardless.  Every frame, 
-        /// the ROOT console is cleared, and all offscreen consoles from panels
-        /// are blitted to it.
-        /// </summary>
-        public static event UpdateEventHandler UpdateRealTimeLayouts = null;
-
-        /// <summary>
-        /// This is the event that is designed to call every panel's render 
-        /// function each frame.  Panels automatically add their render functions 
-        /// to this handler when they are shown, there is no need to do it manually.
-        /// </summary>
-        public static event UpdateEventHandler Render = null;
-
-        /// <summary>
-        /// To be used by panels to get keyboard events.  It is cancelable.
-        /// </summary>
-        public static event EventHandler<EventArgs_KeyPress> KeyPress = null;
-
-        /// <summary>
-        /// Whether or not the window is fullscreen.
-        /// </summary>
-        public static bool Fullscreen { get; private set; }
-
-        /// <summary>
-        /// Starts an RLRootConsole
-        /// </summary>
-        /// <param name="settings">Settings passed to root console to initialize.</param>
-        public static void Init(RLSettings settings)
+        public void Init(RLRootConsole console)
         {
-            if (RootConsole != null)
-                throw new Exception("Init already called!");
+            if (GameConsole != null)
+                throw new Exception("Second call to Init().");
 
-            Fullscreen = (settings.StartWindowState == RLWindowState.Fullscreen);
-
-            RootConsole = new RLRootConsole(settings);
-            RootConsole.Update += onUpdate;
-            RootConsole.Render += onRender;
+            GameConsole = console;
+            GameConsole.Update += onUpdate;
+            GameConsole.Render += onRender;
         }
 
-        public static void Run()
+        public void Run()
         {
-            RootConsole.Run();
+            GameConsole.Run();
         }
 
-        public static void ToggleFullscreen()
+        private void onRender(object sender, UpdateEventArgs e)
         {
-            Fullscreen = !Fullscreen;
-            RootConsole.SetWindowState(Fullscreen ? RLWindowState.Fullscreen : RLWindowState.Normal);
+            GameConsole.Clear();
+
+            ActOnMap(Map);
+            Map.Draw(GameConsole);
+
+            GameConsole.Draw();
         }
 
-
-        private static void onRender(object sender, UpdateEventArgs e)
+        private void ActOnMap(IcbMap map)
         {
-            // Tell all panels that want to update in real time to do so
-            UpdateRealTimeLayouts?.Invoke(sender, e);
-
-            // Draw all shown screens
-            RootConsole.Clear();
-            Render?.Invoke(sender, e);
-
-            RootConsole.Draw();
-        }
-
-        private static void onUpdate(object sender, UpdateEventArgs e)
-        {
-            if (KeyPress == null) return;
-            RLKeyPress key = RootConsole.Keyboard.GetKeyPress();
-            if (key == null) return;
-
-            EventArgs_KeyPress args = new EventArgs_KeyPress(key);
-
-            foreach (EventHandler<EventArgs_KeyPress> handler in KeyPress.GetInvocationList())
+            //0.1
+            if (PlayerMoveQueue.Any())
             {
-                handler(sender, args);
-                if (args.Cancel) break;
+                var player = map.Actors[0];
+                var direction = PlayerMoveQueue.Dequeue();
+                var newX = player.X;
+                var newY = player.Y;
+                if (direction == Direction.Up) newY--;
+                if (direction == Direction.Down) newY++;
+                if (direction == Direction.Left) newX--;
+                if (direction == Direction.Right) newX++;
+
+                if (map.SetActorPosition(player, newX, newY))
+                {
+                    //??
+                }
             }
         }
 
-        internal static void AddToKeyPressFront(EventHandler<EventArgs_KeyPress> handler) => KeyPress = handler + KeyPress;
+        private void onUpdate(object sender, UpdateEventArgs e)
+        {
+            //  For the short term, we only care about the keyboard
+            RLKeyPress key = GameConsole.Keyboard.GetKeyPress();
+            if (key == null) return;
+
+            PlayerMove_OnKeyPress(key);
+        }
+
+
+        private void PlayerMove_OnKeyPress(RLKeyPress keyPress)
+        {
+            var direction =
+                keyPress.Key == RLKey.Up ? Direction.Up :
+                keyPress.Key == RLKey.Down ? Direction.Down :
+                keyPress.Key == RLKey.Left ? Direction.Left :
+                keyPress.Key == RLKey.Right ? Direction.Right :
+                Direction.None;
+
+            //  Preparing decoupled move
+            if (direction != Direction.None)
+            {
+                QueuePlayerMove(direction);
+            }
+        }
+
+        private Queue<Direction> PlayerMoveQueue = new Queue<Direction>();
+        private void QueuePlayerMove(Direction direction)
+        {
+            PlayerMoveQueue.Enqueue(direction);
+        }
     }
 }

@@ -3,13 +3,17 @@
 
 namespace CopperBend.App
 {
-    //  Code originally a reference sample from WinMan
     class Program
     {
-        private static MainGameScreen mainGameScreen;
+        private static bool _renderRequired;
+        public static CommandSystem CommandSystem;
+        private static RLRootConsole _rootConsole;
 
         static void Main(string[] args)
         {
+            _renderRequired = true;
+            CommandSystem = new CommandSystem();
+
             var settings = new RLSettings
             {
                 Title = "Copper Bend",
@@ -23,16 +27,21 @@ namespace CopperBend.App
                 ResizeType = RLResizeType.ResizeCells,
             };
 
-            GameLoop.Init(settings);
-            mainGameScreen = new MainGameScreen();
+            _rootConsole = new RLRootConsole(settings);
+
+            var game = new GameLoop();
+            game.Init(_rootConsole);
 
             var loader = new MapLoader();
             var map = loader.DemoMap();
+            game.Map = map;
 
-            mainGameScreen.SetMap(map);
+            var player = new Player();
+            game.Player = player;
+            map.Actors.Add(player);
+            map.UpdatePlayerFieldOfView(player);
 
-            mainGameScreen.Show();
-            GameLoop.Run();
+            game.Run();
         }
     }
 }

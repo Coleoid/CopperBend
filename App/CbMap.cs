@@ -1,4 +1,5 @@
-﻿using RLNET;
+﻿using System.Collections.Generic;
+using RLNET;
 using RogueSharp;
 
 namespace CopperBend.App
@@ -7,8 +8,12 @@ namespace CopperBend.App
     {
         string Name { get; set; }
         TerrainType[,] Terrain { get; set; }
+        List<Actor> Actors { get; set; }
+
 
         bool SetActorPosition(Actor actor, int x, int y);
+        void UpdatePlayerFieldOfView(Actor player);
+        void Draw(RLConsole mapConsole);
     }
 
     public class CbMap : Map, IcbMap
@@ -17,10 +22,13 @@ namespace CopperBend.App
             : base(xWidth, yHeight)
         {
             Terrain = new TerrainType[xWidth, yHeight];
+            Actors = new List<Actor>();
         }
 
         public string Name { get; set; }
         public TerrainType[,] Terrain { get; set; }
+
+        public List<Actor> Actors { get; set; }
 
         public TerrainType this[int x, int y]
         {
@@ -38,11 +46,17 @@ namespace CopperBend.App
             mapConsole.Clear();
             foreach (ICell cell in GetAllCells())
             {
-                SetConsoleSymbolForCell(mapConsole, cell);
+                DrawCell(mapConsole, cell);
+            }
+
+            foreach (var actor in Actors)
+            {
+                DrawActor(mapConsole, actor);
+                //...
             }
         }
 
-        private void SetConsoleSymbolForCell(RLConsole console, ICell cell)
+        private void DrawCell(RLConsole console, ICell cell)
         {
             if (!cell.IsExplored) return;  // unknown is undrawn
 
@@ -53,10 +67,26 @@ namespace CopperBend.App
             console.Set(cell.X, cell.Y, rep.Foreground, rep.Background, rep.Symbol);
         }
 
+        private void DrawActor(RLConsole console, Actor actor)
+        {
+            var cell = GetCell(actor.X, actor.Y);
+            if (!cell.IsExplored) return;  // unknown is undrawn
+
+            if (IsInFov(actor.X, actor.Y))
+            {
+                console.Set(actor.X, actor.Y, actor.Color, Colors.FloorBackgroundSeen, actor.Symbol, 2);
+            }
+            else
+            {
+                //0.1: Upgrade by using terrain of cell
+                console.Set(actor.X, actor.Y, Colors.Floor, Colors.FloorBackground, '?', 2);
+            }
+        }
 
 
 
-        // Returns true when able to place the Actor on the cell or false otherwise
+
+        // Returns true when target cell is walkable and move succeeds
         public bool SetActorPosition(Actor actor, int x, int y)
         {
             // Only allow actor movement if the cell is walkable
@@ -69,6 +99,7 @@ namespace CopperBend.App
             actor.Y = y;
             // The new cell the actor is on is now not walkable
             SetIsWalkable(actor.X, actor.Y, false);
+           
             // Don't forget to update the field of view if we just repositioned the player
             if (actor is Player)
             {

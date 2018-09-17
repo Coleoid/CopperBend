@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using YamlDotNet.Serialization;
@@ -42,9 +41,15 @@ namespace CopperBend.App
                 string row = dto.Terrain[y];
                 for (int x = 0; x < width; x++)
                 {
-                    map.Terrain[x, y] = (x < row.Length)
+                    var terrain = (x < row.Length)
                         ? TerrainFrom(row.Substring(x, 1))
                         : TerrainType.Unknown;
+                    map.Terrain[x, y] = terrain;
+                    map.SetCellProperties(x,y,
+                        terrain != TerrainType.StoneWall
+                          && terrain != TerrainType.Door,
+                        terrain != TerrainType.StoneWall
+                        );
                 }
             }
 

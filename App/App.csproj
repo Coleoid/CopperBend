@@ -39,8 +39,8 @@
     <Reference Include="RLNET, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RLNET.1.0.6\lib\RLNET.dll</HintPath>
     </Reference>
-    <Reference Include="RogueSharp, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RogueSharp.4.1.0\lib\net40\RogueSharp.dll</HintPath>
+    <Reference Include="RogueSharp">
+      <HintPath>..\..\RogueSharp\RogueSharp\bin\Debug\net40\RogueSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

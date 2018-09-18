@@ -41,14 +41,22 @@ namespace CopperBend.App
                 string row = dto.Terrain[y];
                 for (int x = 0; x < width; x++)
                 {
-                    var terrain = (x < row.Length)
+                    var type = (x < row.Length)
                         ? TerrainFrom(row.Substring(x, 1))
                         : TerrainType.Unknown;
-                    map.Terrain[x, y] = terrain;
+                    var tile = new Tile
+                    {
+                        TerrainType = type,
+                        repr = TileRepresenter.OfTerrain(type),
+                        X = x, Y = y,
+                    };
+                    map.Tiles[x, y] = tile;
+
+                    //TODO:  push down/unify
                     map.SetCellProperties(x,y,
-                        terrain != TerrainType.StoneWall
-                          && terrain != TerrainType.Door,
-                        terrain != TerrainType.StoneWall
+                        type != TerrainType.StoneWall
+                          && type != TerrainType.Door,
+                        type != TerrainType.StoneWall
                         );
                 }
             }

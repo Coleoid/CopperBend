@@ -7,13 +7,14 @@ namespace CopperBend.App
     public interface IcbMap : IMap
     {
         string Name { get; set; }
-        TerrainType[,] Terrain { get; set; }
+        Tile[,] Tiles { get; set; }
+        List<Item> Items { get; set; }
         List<Actor> Actors { get; set; }
 
 
         bool SetActorPosition(Actor actor, int x, int y);
         void UpdatePlayerFieldOfView(Actor player);
-        void Draw(RLConsole mapConsole);
+        void DrawMap(RLConsole mapConsole);
     }
 
     public class CbMap : Map, IcbMap
@@ -21,27 +22,30 @@ namespace CopperBend.App
         public CbMap(int xWidth, int yHeight)
             : base(xWidth, yHeight)
         {
-            Terrain = new TerrainType[xWidth, yHeight];
+            Tiles = new Tile[xWidth, yHeight];
             Actors = new List<Actor>();
+            Items = new List<Item>();
         }
 
         public string Name { get; set; }
-        public TerrainType[,] Terrain { get; set; }
+        public Tile[,] Tiles { get; set; }
+
+        public List<Item> Items { get; set; }
 
         public List<Actor> Actors { get; set; }
 
-        public TerrainType this[int x, int y]
+        public Tile this[int x, int y]
         {
-            get => Terrain[x, y];
+            get => Tiles[x, y];
         }
 
         public bool IsTillable(int x, int y)
         {
-            return Terrain[x, y] == TerrainType.Dirt;
+            return Tiles[x, y].TerrainType == TerrainType.Dirt;
         }
         public bool IsTillable(Cell cell) => IsTillable(cell.X, cell.Y);
 
-        public void Draw(RLConsole mapConsole)
+        public void DrawMap(RLConsole mapConsole)
         {
             mapConsole.Clear();
             foreach (ICell cell in GetAllCells())
@@ -49,45 +53,38 @@ namespace CopperBend.App
                 DrawCell(mapConsole, cell);
             }
 
+            foreach (var item in Items)
+            {
+                Draw(mapConsole, item);
+            }
+
             foreach (var actor in Actors)
             {
-                DrawActor(mapConsole, actor);
-                //...
+                Draw(mapConsole, actor);
             }
         }
 
-        private void DrawCell(RLConsole console, ICell cell)
+        private void DrawCell(RLConsole console, ICoord coord)
         {
-            if (!cell.IsExplored) return;  // unknown is undrawn
+            if (!IsExplored(coord.X, coord.Y)) return;  // unknown is undrawn
 
-            var terrain = Terrain[cell.X, cell.Y];
-            var rep = TileRepresentation.OfTerrain(terrain);
-            rep.IsInFOV = IsInFov(cell.X, cell.Y);
+            var rep = Tiles[coord.X, coord.Y].repr;
+            var isInFOV = IsInFov(coord.X, coord.Y);
+            var fg = rep.Foreground(isInFOV);
+            var bg = rep.Background(isInFOV);
 
-            console.Set(cell.X, cell.Y, rep.Foreground, rep.Background, rep.Symbol);
+            console.Set(coord.X, coord.Y, fg, bg, rep.Symbol);
         }
 
-        private void DrawActor(RLConsole console, Actor actor)
+        private void Draw(RLConsole console, IDrawable thing)
         {
-            var cell = GetCellAt(actor);
-            if (!cell.IsExplored) return;  // unknown is undrawn
+            if (!IsExplored(thing.X, thing.Y)) return;  // unknown is undrawn
 
-            if (IsInFov(actor.X, actor.Y))
-            {
-                console.Set(actor.X, actor.Y, actor.Color, Colors.FloorBackgroundSeen, actor.Symbol, 2);
-            }
-            else
-            {
-                //0.1: Upgrade by using terrain of cell
-                console.Set(actor.X, actor.Y, Colors.Floor, Colors.FloorBackground, '?', 2);
-            }
+            IDrawable show = IsInFov(thing.X, thing.Y)
+                ? thing 
+                : (IDrawable)Tiles[thing.X, thing.Y];
+            console.Set(show.X, show.Y, show.Color, Colors.FloorBackgroundSeen, show.Symbol);
         }
-
-        public ICell GetCellAt(ICoords coords)
-        {
-            return GetCell(coords.X, coords.Y);
-        }
-
 
         // Returns true when target cell is walkable and move succeeds
         public bool SetActorPosition(Actor actor, int x, int y)
@@ -112,26 +109,16 @@ namespace CopperBend.App
             return true;
         }
 
-        // This method will be called any time we move the player to update field-of-view
+        //  Player field of view changes whenever player moves
+        //  ...more cases (shifting terrain, et c.) in the future
         public void UpdatePlayerFieldOfView(Actor player)
         {
-            // Compute the field-of-view based on the player's location and awareness
-            ComputeFov(player.X, player.Y, player.Awareness, true);
-            // Mark all cells in field-of-view as having been explored
-            foreach (Cell cell in GetAllCells())
-            {
-                if (IsInFov(cell.X, cell.Y))
-                {
-                    SetCellProperties(cell.X, cell.Y, cell.IsTransparent, cell.IsWalkable, true);
-                }
-            }
-        }
+            var fovCells = ComputeFov(player.X, player.Y, player.Awareness, true);
 
-        // Push this down to RogueSharp.Map, implement directly
-        public void SetIsWalkable(ICoords location, bool isWalkable)
-        {
-            ICell cell = GetCellAt(location);
-            SetCellProperties(cell.X, cell.Y, cell.IsTransparent, isWalkable, cell.IsExplored);
+            foreach (Cell cell in fovCells)
+            {
+                SetIsExplored(cell, true);
+            }
         }
     }
 }

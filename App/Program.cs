@@ -35,6 +35,14 @@ namespace CopperBend.App
             var loader = new MapLoader();
             var map = loader.DemoMap();
             game.Map = map;
+            var rock = new Item
+            {
+                Name = "rock",
+                Color = Palette.DbOldStone,
+                X = 5, Y = 1,
+                Symbol = '*',
+            };
+            map.Items.Add(rock);
 
             var player = new Player();
             game.Player = player;

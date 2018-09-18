@@ -31,7 +31,7 @@ namespace CopperBend.App
             GameConsole.Clear();
 
             ActOnMap(Map);
-            Map.Draw(GameConsole);
+            Map.DrawMap(GameConsole);
 
             GameConsole.Draw();
         }

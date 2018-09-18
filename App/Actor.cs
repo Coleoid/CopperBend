@@ -1,4 +1,5 @@
 ﻿using RLNET;
+using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -8,29 +9,25 @@ namespace CopperBend.App
         int Awareness { get; set; }
     }
 
-    public interface ICoords
+    public interface IDrawable : ICoord
     {
-        int X { get; }
-        int Y { get; }
-    }
-
-    public interface IDrawable
-    {
-        RLColor Color { get; set; }
-        char Symbol { get; set; }
+        RLColor Color { get; }
+        char Symbol { get; }
         int X { get; set; }
         int Y { get; set; }
     }
 
-    public class Actor : IActor, IDrawable, ICoords
+    public class Actor : IActor, IDrawable, ICoord
     {
-        // IActor
+        //  IActor
         public string Name { get; set; }
         public int Awareness { get; set; }
 
-        // IDrawable
+        //  IDrawable
         public RLColor Color { get; set; }
         public char Symbol { get; set; }
+
+        //  ICoord
         public int X { get; set; }
         public int Y { get; set; }
     }
@@ -46,5 +43,24 @@ namespace CopperBend.App
             Y = 1;
             Awareness = 4;
         }
+    }
+
+    public class Item : IDrawable, ICoord
+    {
+        public string Name { get; set; }
+
+        //  IDrawable
+        public RLColor Color { get; set; }
+        public char Symbol { get; set; }
+
+        //  ICoord
+        public int X { get; set; }
+        public int Y { get; set; }
+    }
+
+    public class Terrain
+    {
+        public TerrainType Type { get; set; }
+        public TileRepresentation Representation { get; set; }
     }
 }

@@ -15,7 +15,7 @@ namespace CopperBend.App.tests
             var map = loader.LoadMap("test:block");
 
             Assert.That(map, Is.Not.Null);
-            Assert.That(map.Terrain[0,0], Is.EqualTo(TerrainType.StoneWall));
+            Assert.That(map.Tiles[0,0], Is.EqualTo(TerrainType.StoneWall));
         }
 
         [Test]
@@ -42,8 +42,8 @@ namespace CopperBend.App.tests
             Assert.That(map.Name, Is.EqualTo("The Round Room"));
             Assert.That(map.Height, Is.EqualTo(5));
             Assert.That(map.Width, Is.EqualTo(8));
-            Assert.That(map.Terrain[1, 0], Is.EqualTo(TerrainType.Dirt));
-            Assert.That(map.Terrain[1, 1], Is.EqualTo(TerrainType.StoneWall));
+            Assert.That(map.Tiles[1, 0], Is.EqualTo(TerrainType.Dirt));
+            Assert.That(map.Tiles[1, 1], Is.EqualTo(TerrainType.StoneWall));
        }
 
         [Test]

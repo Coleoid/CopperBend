@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CopperBend.App.Model;
 using RLNET;
 
 namespace CopperBend.App
@@ -8,7 +9,7 @@ namespace CopperBend.App
     public class GameLoop
     {
         public RLRootConsole GameConsole;
-        internal IcbMap Map;
+        internal IAreaMap Map;
         internal Actor Player;
 
         public void Init(RLRootConsole console)
@@ -36,7 +37,7 @@ namespace CopperBend.App
             GameConsole.Draw();
         }
 
-        private void ActOnMap(IcbMap map)
+        private void ActOnMap(IAreaMap map)
         {
             //0.1
             if (PlayerMoveQueue.Any())

@@ -1,47 +1,36 @@
 ﻿using System.Collections.Generic;
+using CopperBend.App.Model;
 using RLNET;
 using RogueSharp;
 
 namespace CopperBend.App
 {
-    public interface IcbMap : IMap
+
+    public class AreaMap : Map, IAreaMap
     {
-        string Name { get; set; }
-        Tile[,] Tiles { get; set; }
-        List<Item> Items { get; set; }
-        List<Actor> Actors { get; set; }
-
-
-        bool SetActorPosition(Actor actor, int x, int y);
-        void UpdatePlayerFieldOfView(Actor player);
-        void DrawMap(RLConsole mapConsole);
-    }
-
-    public class CbMap : Map, IcbMap
-    {
-        public CbMap(int xWidth, int yHeight)
+        public AreaMap(int xWidth, int yHeight)
             : base(xWidth, yHeight)
         {
-            Tiles = new Tile[xWidth, yHeight];
-            Actors = new List<Actor>();
-            Items = new List<Item>();
+            Tiles = new ITile[xWidth, yHeight];
+            Actors = new List<IActor>();
+            Items = new List<IDrawable>();
         }
 
         public string Name { get; set; }
-        public Tile[,] Tiles { get; set; }
+        public ITile[,] Tiles { get; set; }
 
-        public List<Item> Items { get; set; }
+        public List<IDrawable> Items { get; set; }
 
-        public List<Actor> Actors { get; set; }
+        public List<IActor> Actors { get; set; }
 
-        public Tile this[int x, int y]
+        public ITile this[int x, int y]
         {
             get => Tiles[x, y];
         }
 
         public bool IsTillable(int x, int y)
         {
-            return Tiles[x, y].TerrainType == TerrainType.Dirt;
+            return Tiles[x, y].IsTillable();
         }
         public bool IsTillable(Cell cell) => IsTillable(cell.X, cell.Y);
 
@@ -62,14 +51,18 @@ namespace CopperBend.App
             {
                 Draw(mapConsole, actor);
             }
+
+            //MAY: DrawCell draws actor, else the top item, else
+            // the empty tile representation
         }
 
         private void DrawCell(RLConsole console, ICoord coord)
         {
             if (!IsExplored(coord.X, coord.Y)) return;  // unknown is undrawn
+            var isInFOV = IsInFov(coord);
 
-            var rep = Tiles[coord.X, coord.Y].repr;
-            var isInFOV = IsInFov(coord.X, coord.Y);
+            var tile = Tiles[coord.X, coord.Y];
+            var rep = ((Tile) tile).repr;  //TODO: FIX DA CHEESE
             var fg = rep.Foreground(isInFOV);
             var bg = rep.Background(isInFOV);
 
@@ -78,16 +71,18 @@ namespace CopperBend.App
 
         private void Draw(RLConsole console, IDrawable thing)
         {
-            if (!IsExplored(thing.X, thing.Y)) return;  // unknown is undrawn
+            if (!IsExplored(thing)) return;  // unknown is undrawn
 
-            IDrawable show = IsInFov(thing.X, thing.Y)
+            IDrawable show = IsInFov(thing)
                 ? thing 
                 : (IDrawable)Tiles[thing.X, thing.Y];
+
+            //TODO: for background, get tile.bg.inFOV
             console.Set(show.X, show.Y, show.Color, Colors.FloorBackgroundSeen, show.Symbol);
         }
 
         // Returns true when target cell is walkable and move succeeds
-        public bool SetActorPosition(Actor actor, int x, int y)
+        public bool SetActorPosition(IActor actor, int x, int y)
         {
             // Only allow actor movement if the cell is walkable
             if (!GetCell(x, y).IsWalkable) return false;
@@ -95,8 +90,9 @@ namespace CopperBend.App
             // The cell the actor was previously on is now walkable
             SetIsWalkable(actor, true);
             // Update the actor's position
-            actor.X = x;
-            actor.Y = y;
+            actor.MoveTo(x, y);
+            //actor.X = x;
+            //actor.Y = y;
             // The new cell the actor is on is now not walkable
             SetIsWalkable(actor, false);
            
@@ -111,7 +107,7 @@ namespace CopperBend.App
 
         //  Player field of view changes whenever player moves
         //  ...more cases (shifting terrain, et c.) in the future
-        public void UpdatePlayerFieldOfView(Actor player)
+        public void UpdatePlayerFieldOfView(IActor player)
         {
             var fovCells = ComputeFov(player.X, player.Y, player.Awareness, true);
 

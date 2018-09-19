@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CopperBend.App.Model;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using YamlDotNet.Serialization;
@@ -17,22 +18,22 @@ namespace CopperBend.App
 
     public class MapLoader
     {
-        public IcbMap LoadMap(string mapName)
+        public IAreaMap LoadMap(string mapName)
         {
             return MapFromFile(mapName);
         }
 
-        public IcbMap MapFromFile(string mapName)
+        public IAreaMap MapFromFile(string mapName)
         {
             return null;
         }
 
-        public IcbMap MapFromYAML(string mapYaml)
+        public IAreaMap MapFromYAML(string mapYaml)
         {
             var dto = DTOFromYAML(mapYaml);
             var width = dto.Terrain.Max(t => t.Length);
             var height = dto.Terrain.Count();
-            var map = new CbMap(width, height);
+            var map = new AreaMap(width, height);
 
             map.Name = dto.Name;
 
@@ -44,13 +45,12 @@ namespace CopperBend.App
                     var type = (x < row.Length)
                         ? TerrainFrom(row.Substring(x, 1))
                         : TerrainType.Unknown;
-                    var tile = new Tile
+
+                    map.Tiles[x, y] = new Tile(x, y)
                     {
                         TerrainType = type,
                         repr = TileRepresenter.OfTerrain(type),
-                        X = x, Y = y,
                     };
-                    map.Tiles[x, y] = tile;
 
                     //TODO:  push down/unify
                     map.SetCellProperties(x,y,
@@ -64,7 +64,7 @@ namespace CopperBend.App
             return map;
         }
 
-        internal IcbMap DemoMap()
+        internal IAreaMap DemoMap()
         {
             string DemoMapYaml = @"---
 name:  Demo

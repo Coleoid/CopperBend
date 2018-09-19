@@ -1,4 +1,4 @@
-﻿namespace CopperBend.App
+﻿namespace CopperBend.App.Model
 {
     public class Player : Actor
     {

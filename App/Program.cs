@@ -1,4 +1,5 @@
-﻿using RLNET;
+﻿using CopperBend.App.Model;
+using RLNET;
 
 
 namespace CopperBend.App
@@ -22,9 +23,9 @@ namespace CopperBend.App
             {
                 Name = "rock",
                 Color = Palette.DbOldStone,
-                X = 5, Y = 1,
                 Symbol = '*',
             };
+            rock.MoveTo(5, 1);
             map.Items.Add(rock);
 
             var player = new Player();

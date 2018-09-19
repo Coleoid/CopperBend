@@ -1,7 +1,7 @@
 ﻿using RLNET;
 using RogueSharp;
 
-namespace CopperBend.App
+namespace CopperBend.App.Model
 {
     public class Item : IDrawable, ICoord
     {
@@ -10,9 +10,14 @@ namespace CopperBend.App
         //  IDrawable
         public RLColor Color { get; set; }
         public char Symbol { get; set; }
+        public void MoveTo(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
 
         //  ICoord
-        public int X { get; set; }
-        public int Y { get; set; }
+        public int X { get; private set; }
+        public int Y { get; private set; }
     }
 }

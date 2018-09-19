@@ -39,12 +39,10 @@ namespace CopperBend.App
 
             throw new Exception($"No represenation coded for terrain type [{terrain}].");
         }
-        public static Dictionary<TerrainType, TileRepresentation> ReprOfTerrain;
+        private static Dictionary<TerrainType, TileRepresentation> ReprOfTerrain;
 
         private static void InitRepresentationsOfTerrain()
         {
-            var tile = new Tile();
-
             ReprOfTerrain = new Dictionary<TerrainType, TileRepresentation>();
 
             var rep = new TileRepresentation

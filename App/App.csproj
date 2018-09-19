@@ -55,17 +55,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actor.cs" />
-    <Compile Include="CbMap.cs" />
-    <Compile Include="Direction.cs" />
+    <Compile Include="Basis\IAreaMap.cs" />
+    <Compile Include="Model\Actor.cs" />
+    <Compile Include="AreaMap.cs" />
+    <Compile Include="Basis\Direction.cs" />
     <Compile Include="GameLoop.cs" />
-    <Compile Include="Item.cs" />
+    <Compile Include="Basis\IActor.cs" />
+    <Compile Include="Basis\IDrawable.cs" />
+    <Compile Include="Model\Item.cs" />
     <Compile Include="MapLoader.cs" />
-    <Compile Include="Palette.cs" />
-    <Compile Include="Player.cs" />
+    <Compile Include="Basis\Palette.cs" />
+    <Compile Include="Basis\ITile.cs" />
+    <Compile Include="Model\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tile.cs" />
+    <Compile Include="Model\Tile.cs" />
     <Compile Include="TileRepresentation.cs" />
   </ItemGroup>
   <ItemGroup>

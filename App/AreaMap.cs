@@ -87,13 +87,9 @@ namespace CopperBend.App
             // Only allow actor movement if the cell is walkable
             if (!GetCell(x, y).IsWalkable) return false;
 
-            // The cell the actor was previously on is now walkable
-            SetIsWalkable(actor, true);
             // Update the actor's position
+            SetIsWalkable(actor, true);
             actor.MoveTo(x, y);
-            //actor.X = x;
-            //actor.Y = y;
-            // The new cell the actor is on is now not walkable
             SetIsWalkable(actor, false);
            
             // Don't forget to update the field of view if we just repositioned the player
@@ -106,7 +102,7 @@ namespace CopperBend.App
         }
 
         //  Player field of view changes whenever player moves
-        //  ...more cases (shifting terrain, et c.) in the future
+        //FUTURE: more cases (shifting terrain, smoke cloud, et c.)
         public void UpdatePlayerFieldOfView(IActor player)
         {
             var fovCells = ComputeFov(player.X, player.Y, player.Awareness, true);

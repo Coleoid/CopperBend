@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Basis\IAreaMap.cs" />
+    <Compile Include="Basis\ISchedulable.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
     <Compile Include="Basis\Direction.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Tile.cs" />
+    <Compile Include="Scheduler.cs" />
     <Compile Include="TileRepresentation.cs" />
   </ItemGroup>
   <ItemGroup>

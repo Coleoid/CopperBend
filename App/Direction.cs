@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CopperBend.App
+﻿namespace CopperBend.App
 {
-    public class DemoLoop
-    {
-    }
-
     // Direction values correspond to numpad numbers
     public enum Direction
     {
@@ -24,6 +14,4 @@ namespace CopperBend.App
         Up = 8,
         UpRight = 9
     }
-
-
 }

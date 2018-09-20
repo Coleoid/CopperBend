@@ -58,11 +58,11 @@ namespace CopperBend.App
 
         private void DrawCell(RLConsole console, ICoord coord)
         {
-            if (!IsExplored(coord.X, coord.Y)) return;  // unknown is undrawn
+            if (!IsExplored(coord)) return;  // unknown is undrawn
             var isInFOV = IsInFov(coord);
 
             var tile = Tiles[coord.X, coord.Y];
-            var rep = ((Tile) tile).repr;  //TODO: FIX DA CHEESE
+            var rep = ((Tile) tile).repr;  //TODO: FIXME: HACK: bleh.
             var fg = rep.Foreground(isInFOV);
             var bg = rep.Background(isInFOV);
 

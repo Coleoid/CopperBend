@@ -57,10 +57,10 @@
   <ItemGroup>
     <Compile Include="Basis\IAreaMap.cs" />
     <Compile Include="Basis\ISchedulable.cs" />
+    <Compile Include="GameEngine.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
     <Compile Include="Basis\Direction.cs" />
-    <Compile Include="GameLoop.cs" />
     <Compile Include="Basis\IActor.cs" />
     <Compile Include="Basis\IDrawable.cs" />
     <Compile Include="Model\Item.cs" />

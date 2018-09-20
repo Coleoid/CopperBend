@@ -7,6 +7,12 @@ namespace CopperBend.App.Model
     {
         public string Name { get; set; }
 
+        public Item(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
         //  IDrawable
         public RLColor Color { get; set; }
         public char Symbol { get; set; }

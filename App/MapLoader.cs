@@ -85,7 +85,18 @@ terrain:
  - '#..............#'
  - '################'
 ";
-            return MapFromYAML(DemoMapYaml);
+            var map = MapFromYAML(DemoMapYaml);
+
+            var rock = new Item(5, 1)
+            {
+                Name = "rock",
+                Color = Palette.DbOldStone,
+                Symbol = '*',
+            };
+            map.Items.Add(rock);
+
+            return map;
+
         }
 
         public TerrainType TerrainFrom(string symbol)

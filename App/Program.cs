@@ -12,21 +12,12 @@ namespace CopperBend.App
         {
             InitRootConsole();
 
-            var game = new GameLoop();
+            var game = new GameEngine();
             game.Init(_rootConsole);
 
             var loader = new MapLoader();
             var map = loader.DemoMap();
             game.Map = map;
-
-            var rock = new Item
-            {
-                Name = "rock",
-                Color = Palette.DbOldStone,
-                Symbol = '*',
-            };
-            rock.MoveTo(5, 1);
-            map.Items.Add(rock);
 
             var player = new Player();
             game.Player = player;

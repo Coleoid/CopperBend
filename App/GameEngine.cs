@@ -6,7 +6,7 @@ using RLNET;
 
 namespace CopperBend.App
 {
-    public class GameLoop
+    public class GameEngine
     {
         public RLRootConsole GameConsole;
         internal IAreaMap Map;
@@ -29,12 +29,18 @@ namespace CopperBend.App
 
         private void onRender(object sender, UpdateEventArgs e)
         {
+            //TODO: better spot, from scheduler
+            ActOnMap(Map);
+
+            //  if no panel needs an update, why render?
+            if (!_displayDirty) return;
             GameConsole.Clear();
 
-            ActOnMap(Map);
+
             Map.DrawMap(GameConsole);
 
             GameConsole.Draw();
+            _displayDirty = false;
         }
 
         private void ActOnMap(IAreaMap map)
@@ -53,22 +59,50 @@ namespace CopperBend.App
 
                 if (map.SetActorPosition(player, newX, newY))
                 {
-                    //??
+                    _displayDirty = true;
                 }
             }
         }
+
+        private bool _displayDirty = true;
 
         private void onUpdate(object sender, UpdateEventArgs e)
         {
             //  For the short term, we only care about the keyboard
             RLKeyPress key = GameConsole.Keyboard.GetKeyPress();
-            if (key == null) return;
 
-            PlayerMove_OnKeyPress(key);
+            if (key != null)
+            {
+                KeyboardCommand(key);
+            }
+
+            Proceed();
         }
 
+        private bool _readyForUserCommand = true;
+        private bool _actionChosen = false;
 
-        private void PlayerMove_OnKeyPress(RLKeyPress keyPress)
+        public void Proceed()
+        {
+            if (_readyForUserCommand)
+            {
+                if (_actionChosen)
+                {
+                    PerformAction();  // which sets _ready depending on command.  (i)nventory we remain ready, attack takes time
+                }
+            }
+
+            if (!_readyForUserCommand)
+            {
+                //  work the schedule
+                 
+            }
+
+
+            //FUTURE:  advance background animation in here somewhere
+        }
+
+        private void KeyboardCommand(RLKeyPress keyPress)
         {
             var direction =
                 keyPress.Key == RLKey.Up ? Direction.Up :

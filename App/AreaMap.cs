@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CopperBend.App.Model;
 using RLNET;
 using RogueSharp;
@@ -111,6 +112,11 @@ namespace CopperBend.App
             {
                 SetIsExplored(cell, true);
             }
+        }
+
+        public IActor ActorAtLocation(int newX, int newY)
+        {
+            return Actors.Where(a => a.X == newX && a.Y == newY).FirstOrDefault();
         }
     }
 }

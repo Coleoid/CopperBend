@@ -109,7 +109,7 @@ namespace CopperBend.App
             var direction = DirectionOfKey(key);
             if (direction != Direction.None)
             {
-                MovePlayer(Player, direction);
+                Command_MoveAttack(Player, direction);
             }
             else if (key.Key == RLKey.I)
             {
@@ -210,26 +210,25 @@ namespace CopperBend.App
                 else
                 {
                     int inventorySlot = AlphaIndexOfKeyPress(key);
-                    if (inventorySlot > -1)
-                    {
-                        if (Player.Inventory.Count() > inventorySlot)
-                        {
-                            var item = Player.Inventory[inventorySlot];
-                            Player.Inventory.RemoveAt(inventorySlot);
-                            item.MoveTo(Player.X, Player.Y);
-                            Map.Items.Add(item);
-                            Console.WriteLine(item.Name);
+                    if (inventorySlot == -1) break;
 
-                            _inMultiKeyCommand = false;
-                            MultiKeyCommand = null;
-                            Command_Drop_State = Command_Drop_States.Unknown;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"No item in slot '{key.Char.Value}'.");
-                            Console.Write("Drop: ");
-                            Console.Out.Flush();
-                        }
+                    if (Player.Inventory.Count() > inventorySlot)
+                    {
+                        var item = Player.Inventory[inventorySlot];
+                        Player.Inventory.RemoveAt(inventorySlot);
+                        item.MoveTo(Player.X, Player.Y);
+                        Map.Items.Add(item);
+                        Console.WriteLine(item.Name);
+
+                        _inMultiKeyCommand = false;
+                        MultiKeyCommand = null;
+                        Command_Drop_State = Command_Drop_States.Unknown;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No item in slot '{key.Char.Value}'.");
+                        Console.Write("Drop: ");
+                        Console.Out.Flush();
                     }
                 }
                 break;
@@ -247,17 +246,15 @@ namespace CopperBend.App
             return asciiNum - 97;
         }
 
-        private Command_Drop_States Command_Drop_State;
-
         private enum Command_Drop_States
         {
             Unknown = 0,
             Starting,
             Expecting_Selection,
         }
+        private Command_Drop_States Command_Drop_State;
 
-
-        private void MovePlayer(IActor player, Direction direction)
+        private void Command_MoveAttack(IActor player, Direction direction)
         {
             var newX = player.X;
             var newY = player.Y;
@@ -266,6 +263,18 @@ namespace CopperBend.App
             if (direction == Direction.Left) newX--;
             if (direction == Direction.Right) newX++;
 
+            IActor targetActor = Map.ActorAtLocation(newX, newY);
+            if (targetActor == null)
+            {
+                Command_Move(player, newX, newY);
+            }
+            {
+                Command_Attack(targetActor, newX, newY);
+            }
+        }
+
+        private void Command_Move(IActor player, int newX, int newY)
+        {
             //  If we actually do move in that direction,
             //  we need to redraw, and the player will be busy for 12 ticks.
             if (Map.SetActorPosition(player, newX, newY))
@@ -274,6 +283,11 @@ namespace CopperBend.App
                 _readyForUserInput = false;
                 Scheduler.Add(new ScheduleEntry(12, PlayerReadyForInput));
             }
+        }
+
+        private void Command_Attack(IActor targetActor, int newX, int newY)
+        {
+            throw new NotImplementedException();
         }
 
         private IScheduleEntry PlayerReadyForInput()

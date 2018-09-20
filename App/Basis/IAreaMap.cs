@@ -16,5 +16,6 @@ namespace CopperBend.App
         bool SetActorPosition(IActor actor, int x, int y);
         void UpdatePlayerFieldOfView(IActor player);
         void DrawMap(RLConsole mapConsole);
+        IActor ActorAtLocation(int newX, int newY);
     }
 }

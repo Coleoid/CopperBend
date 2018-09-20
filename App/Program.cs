@@ -6,14 +6,10 @@ namespace CopperBend.App
 {
     class Program
     {
-        private static RLRootConsole _rootConsole;
-
         static void Main(string[] args)
         {
-            InitRootConsole();
-
-            var game = new GameEngine();
-            game.Init(_rootConsole);
+            var rootConsole = InitRootConsole();
+            var game = new GameEngine(rootConsole);
 
             var loader = new MapLoader();
             var map = loader.DemoMap();
@@ -29,7 +25,7 @@ namespace CopperBend.App
             game.Run();
         }
 
-        private static void InitRootConsole()
+        private static RLRootConsole InitRootConsole()
         {
             var consoleSettings = new RLSettings
             {
@@ -44,7 +40,7 @@ namespace CopperBend.App
                 ResizeType = RLResizeType.ResizeCells,
             };
 
-            _rootConsole = new RLRootConsole(consoleSettings);
+            return new RLRootConsole(consoleSettings);
         }
     }
 }

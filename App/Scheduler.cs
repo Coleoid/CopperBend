@@ -5,7 +5,7 @@ namespace CopperBend.App
 {
     public class Scheduler
     {
-        private readonly SortedDictionary<int, List<IScheduleable>> _schedule;
+        private readonly SortedDictionary<int, List<IScheduleEntry>> _schedule;
 
         public int CurrentTick
         {
@@ -18,22 +18,22 @@ namespace CopperBend.App
 
         public Scheduler()
         {
-            _schedule = new SortedDictionary<int, List<IScheduleable>>();
+            _schedule = new SortedDictionary<int, List<IScheduleEntry>>();
         }
 
         // New entry goes in at the current time plus .TicksUntilNextAction
-        public void Add(IScheduleable toAct)
+        public void Add(IScheduleEntry toAct)
         {
             int actionTick = CurrentTick + toAct.TicksUntilNextAction;
             if (!_schedule.ContainsKey(actionTick))
             {
-                _schedule.Add(actionTick, new List<IScheduleable>());
+                _schedule.Add(actionTick, new List<IScheduleEntry>());
             }
             _schedule[actionTick].Add(toAct);
         }
 
         //  Returns the entity scheduled to act next, removed from the schedule
-        public IScheduleable GetNext()
+        public IScheduleEntry GetNext()
         {
             if (_schedule.Count() == 0) return null;
 
@@ -45,13 +45,13 @@ namespace CopperBend.App
         }
 
         // Remove a specific object from the schedule.
-        public void Remove(IScheduleable scheduleable)
+        public void Remove(IScheduleEntry scheduleEntry)
         {
             foreach (var busyTick in _schedule)
             {
-                if (busyTick.Value.Contains(scheduleable))
+                if (busyTick.Value.Contains(scheduleEntry))
                 {
-                    busyTick.Value.Remove(scheduleable);
+                    busyTick.Value.Remove(scheduleEntry);
                     if (!busyTick.Value.Any())
                     {
                         _schedule.Remove(busyTick.Key);

@@ -1,13 +1,20 @@
-﻿using RLNET;
+﻿using System.Collections.Generic;
+using RLNET;
 using RogueSharp;
 
 namespace CopperBend.App.Model
 {
-    public class Actor : IActor//, IDrawable, ICoord
+    public class Actor : IActor
     {
+        public Actor()
+        {
+            Inventory = new List<IItem>();
+        }
+
         //  IActor
         public string Name { get; set; }
         public int Awareness { get; set; }
+        public List<IItem> Inventory { get; private set; }
 
         //  IDrawable
         public RLColor Color { get; set; }

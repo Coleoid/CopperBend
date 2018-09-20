@@ -3,6 +3,7 @@
     public class Player : Actor
     {
         public Player()
+            : base()
         {
             Name = "Our Dude";
             Symbol = '@';

@@ -9,7 +9,7 @@ namespace CopperBend.App
     {
         string Name { get; set; }
         ITile[,] Tiles { get; set; }
-        List<IDrawable> Items { get; set; }
+        List<IItem> Items { get; set; }
         List<IActor> Actors { get; set; }
 
 

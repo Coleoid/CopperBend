@@ -3,7 +3,7 @@ using RogueSharp;
 
 namespace CopperBend.App.Model
 {
-    public class Item : IDrawable, ICoord
+    public class Item : IItem, IDrawable, ICoord
     {
         public string Name { get; set; }
 

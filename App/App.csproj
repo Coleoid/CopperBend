@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Basis\IAreaMap.cs" />
+    <Compile Include="Basis\IItem.cs" />
     <Compile Include="Basis\IScheduleEntry.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="Model\Actor.cs" />

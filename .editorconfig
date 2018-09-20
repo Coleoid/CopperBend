@@ -1,0 +1,9 @@
+# .NET formatting settings:
+
+[*]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+[*.cs]
+csharp_indent_switch_labels = false

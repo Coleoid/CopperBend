@@ -13,13 +13,13 @@ namespace CopperBend.App
         {
             Tiles = new ITile[xWidth, yHeight];
             Actors = new List<IActor>();
-            Items = new List<IDrawable>();
+            Items = new List<IItem>();
         }
 
         public string Name { get; set; }
         public ITile[,] Tiles { get; set; }
 
-        public List<IDrawable> Items { get; set; }
+        public List<IItem> Items { get; set; }
 
         public List<IActor> Actors { get; set; }
 

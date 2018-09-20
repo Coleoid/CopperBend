@@ -1,4 +1,5 @@
-﻿using RogueSharp;
+﻿using System.Collections.Generic;
+using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -6,5 +7,7 @@ namespace CopperBend.App
     {
         string Name { get; set; }
         int Awareness { get; set; }
+
+        List<IItem> Inventory { get; }
     }
 }

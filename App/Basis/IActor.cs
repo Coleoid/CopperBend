@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RogueSharp;
 
 namespace CopperBend.App
@@ -12,5 +13,6 @@ namespace CopperBend.App
         int Health { get; }
 
         void Damage(int v);
+        Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; }
     }
 }

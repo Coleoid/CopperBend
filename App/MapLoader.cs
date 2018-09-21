@@ -96,7 +96,7 @@ terrain:
             };
             map.Items.Add(rock);
 
-            var glom = new Actor(3, 1)
+            var glom = new Actor(4, 1)
             {
                 Name = "glom",
                 Symbol = 'g',
@@ -105,7 +105,6 @@ terrain:
             map.Actors.Add(glom);
 
             return map;
-
         }
 
         public TerrainType TerrainFrom(string symbol)

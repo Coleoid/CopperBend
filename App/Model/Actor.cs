@@ -1,18 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using CopperBend.App.Behaviors;
 using RLNET;
-using RogueSharp;
 
 namespace CopperBend.App.Model
 {
     public class Actor : IActor
     {
-
+        private IBehavior _behavior;
         public Actor(int x, int y)
         {
             X = x;
             Y = y;
             Inventory = new List<IItem>();
             Health = 6;
+            _behavior = new StandardMoveAndAttack();
+            Strategy = _behavior.Act;
+            Awareness = 6;
         }
 
         public int Health { get; protected set; }
@@ -39,5 +43,7 @@ namespace CopperBend.App.Model
         //  ICoord
         public int X { get; protected set; }
         public int Y { get; protected set; }
+
+        public Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; private set; }
     }
 }

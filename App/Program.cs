@@ -13,7 +13,7 @@ namespace CopperBend.App
 
             var loader = new MapLoader();
             var map = loader.DemoMap();
-            game.Map = map;
+            game.LoadMap(map);
 
             var player = InitPlayer();
 

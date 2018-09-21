@@ -92,12 +92,12 @@ namespace CopperBend.App
             SetIsWalkable(actor, true);
             actor.MoveTo(x, y);
             SetIsWalkable(actor, false);
-           
+
             // Don't forget to update the field of view if we just repositioned the player
-            if (actor is Player)
-            {
+            //if (actor is Player)
+            //{
                 UpdatePlayerFieldOfView(actor);
-            }
+            //}
 
             return true;
         }

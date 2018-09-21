@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="Basis\IAreaMap.cs" />
     <Compile Include="Basis\IItem.cs" />
-    <Compile Include="Basis\IScheduleEntry.cs" />
+    <Compile Include="Behaviors\StandardAggressor.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
@@ -69,7 +69,7 @@
     <Compile Include="Basis\Palette.cs" />
     <Compile Include="Basis\ITile.cs" />
     <Compile Include="Model\Player.cs" />
-    <Compile Include="Model\ScheduleEntry.cs" />
+    <Compile Include="Basis\ScheduleEntry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Tile.cs" />

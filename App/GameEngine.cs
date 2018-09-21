@@ -13,7 +13,7 @@ namespace CopperBend.App
         private readonly Queue<RLKeyPress> InputQueue;
         private readonly Queue<Direction> PlayerMoveQueue;
 
-        public IAreaMap Map;
+        public IAreaMap Map { get; private set; }
         public Actor Player;
 
         //  True when the console needs redrawing
@@ -33,16 +33,25 @@ namespace CopperBend.App
         public GameEngine(RLRootConsole console)
         {
             GameConsole = console;
-            GameConsole.Update += onUpdate;
-            GameConsole.Render += onRender;
 
             Scheduler = new Scheduler();
             InputQueue = new Queue<RLKeyPress>();
             PlayerMoveQueue = new Queue<Direction>();
         }
 
+        public void LoadMap(IAreaMap map)
+        {
+            Map = map;
+            foreach (var actor in map.Actors)
+            {
+                Scheduler.Add(new ScheduleEntry(12, actor));
+            }
+        }
+
         public void Run()
         {
+            GameConsole.Update += onUpdate;
+            GameConsole.Render += onRender;
             GameConsole.Run();
         }
 
@@ -83,7 +92,7 @@ namespace CopperBend.App
                 var nextUp = Scheduler.GetNext();
 
                 //  The scheduled event is called here
-                var newEvent = nextUp.Action();
+                var newEvent = nextUp.Action(nextUp, Map, Player);
                 //  ...which may immediately schedule another event
                 if (newEvent != null)
                     Scheduler.Add(newEvent);
@@ -311,7 +320,7 @@ namespace CopperBend.App
             PlayerBusyFor(12);
         }
 
-        private IScheduleEntry PlayerReadyForInput()
+        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IAreaMap map, IActor player)
         {
             _readyForUserInput = true;
             return null;

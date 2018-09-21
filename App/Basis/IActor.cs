@@ -9,5 +9,8 @@ namespace CopperBend.App
         int Awareness { get; set; }
 
         List<IItem> Inventory { get; }
+        int Health { get; }
+
+        void Damage(int v);
     }
 }

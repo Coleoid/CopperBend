@@ -140,16 +140,16 @@ namespace CopperBend.App
                 .Where(i => i.X == Player.X && i.Y == Player.Y)
                 .LastOrDefault();
 
-            if (topItem != null)
-            {
-                Map.Items.Remove(topItem);
-                Player.Inventory.Add(topItem);
-                Console.WriteLine($"Picked up {topItem.Name}");
-            }
-            else
+            if (topItem == null)
             {
                 Console.WriteLine("Nothing to pick up here.");
+                return;
             }
+
+            Map.Items.Remove(topItem);
+            Player.Inventory.Add(topItem);
+            Console.WriteLine($"Picked up {topItem.Name}");
+            PlayerBusyFor(2);
         }
 
         private static void Command_Help()
@@ -182,10 +182,17 @@ namespace CopperBend.App
 
         private void Command_Drop(RLKeyPress key)
         {
+            Action leave_Drop = () =>
+            {
+                _inMultiKeyCommand = false;
+                MultiKeyCommand = null;
+                Command_Drop_State = Command_Drop_States.Unknown;
+            };
+
             switch (Command_Drop_State)
             {
             case Command_Drop_States.Unknown:
-                throw new Exception("Missed setup somewhere.");
+                throw new Exception("Missed Drop setup somewhere.");
 
             case Command_Drop_States.Starting:
                 Console.Write("Drop: ");
@@ -196,10 +203,8 @@ namespace CopperBend.App
             case Command_Drop_States.Expecting_Selection:
                 if (key.Key == RLKey.Escape)
                 {
-                    _inMultiKeyCommand = false;
-                    MultiKeyCommand = null;
-                    Command_Drop_State = Command_Drop_States.Unknown;
                     Console.WriteLine("nothing.");
+                    leave_Drop();
                 }
                 else if (key.Key == RLKey.Slash && key.Shift)
                 {
@@ -219,10 +224,9 @@ namespace CopperBend.App
                         item.MoveTo(Player.X, Player.Y);
                         Map.Items.Add(item);
                         Console.WriteLine(item.Name);
+                        PlayerBusyFor(1);
 
-                        _inMultiKeyCommand = false;
-                        MultiKeyCommand = null;
-                        Command_Drop_State = Command_Drop_States.Unknown;
+                        leave_Drop();
                     }
                     else
                     {
@@ -268,6 +272,7 @@ namespace CopperBend.App
             {
                 Command_Move(player, newX, newY);
             }
+            else
             {
                 Command_Attack(targetActor, newX, newY);
             }
@@ -280,14 +285,30 @@ namespace CopperBend.App
             if (Map.SetActorPosition(player, newX, newY))
             {
                 _displayDirty = true;
-                _readyForUserInput = false;
-                Scheduler.Add(new ScheduleEntry(12, PlayerReadyForInput));
+                PlayerBusyFor(12);
             }
+        }
+
+        private void PlayerBusyFor(int ticks)
+        {
+            _readyForUserInput = false;
+            Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
         }
 
         private void Command_Attack(IActor targetActor, int newX, int newY)
         {
-            throw new NotImplementedException();
+            //0.1
+            targetActor.Damage(2);
+            Console.WriteLine("You hit the thingy for 2 points!");
+            if (targetActor.Health < 1)
+            {
+                Console.WriteLine("Blargh...");
+                Map.Actors.Remove(targetActor);
+                _displayDirty = true;
+                //TODO: Get it out of the schedule?
+            }
+
+            PlayerBusyFor(12);
         }
 
         private IScheduleEntry PlayerReadyForInput()

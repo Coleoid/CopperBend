@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using RLNET;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -94,6 +95,14 @@ terrain:
                 Symbol = '*',
             };
             map.Items.Add(rock);
+
+            var glom = new Actor(3, 1)
+            {
+                Name = "glom",
+                Symbol = 'g',
+                Color = RLColor.Green,
+            };
+            map.Actors.Add(glom);
 
             return map;
 

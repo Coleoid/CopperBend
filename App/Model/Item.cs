@@ -11,7 +11,18 @@ namespace CopperBend.App.Model
         {
             X = x;
             Y = y;
+            Quantity = 1;
         }
+
+        public Item(int x, int y, int quantity)
+        {
+            X = x;
+            Y = y;
+            Quantity = quantity;
+        }
+
+        public int Quantity { get; set; }
+
 
         //  IDrawable
         public RLColor Color { get; set; }

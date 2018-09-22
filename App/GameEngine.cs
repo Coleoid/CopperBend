@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CopperBend.App.Model;
 using RLNET;
@@ -91,13 +92,14 @@ namespace CopperBend.App
             {
                 var nextUp = Scheduler.GetNext();
 
+                if (nextUp == null)
+                    Debugger.Break();
                 //  The scheduled event is called here
                 var newEvent = nextUp.Action(nextUp, Map, Player);
                 //  ...which may immediately schedule another event
                 if (newEvent != null)
                     Scheduler.Add(newEvent);
             }
-
 
             //FUTURE:  background real-time animation goes in around here
         }
@@ -183,7 +185,10 @@ namespace CopperBend.App
                 int asciiSlot = 97;
                 foreach (var item in Player.Inventory)
                 {
-                    Console.WriteLine($"{(char)asciiSlot}) {item.Name}");
+                    var text = item.Quantity > 1
+                        ? $"{item.Quantity} {item.Name}s"
+                        : $"a {item.Name}";
+                    Console.WriteLine($"{(char)asciiSlot})  {item.Name}");
                     asciiSlot++;
                 }
             }
@@ -311,10 +316,12 @@ namespace CopperBend.App
             Console.WriteLine("You hit the thingy for 2 points!");
             if (targetActor.Health < 1)
             {
-                Console.WriteLine("Blargh...");
+                Console.WriteLine($"Blargh...  The {targetActor.Name} dies.");
                 Map.Actors.Remove(targetActor);
+                Map.SetIsWalkable(targetActor, true);
                 _displayDirty = true;
-                //TODO: Get it out of the schedule?
+
+                Scheduler.RemoveActor(targetActor);
             }
 
             PlayerBusyFor(12);

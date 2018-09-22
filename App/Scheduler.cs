@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CopperBend.App
@@ -38,9 +39,14 @@ namespace CopperBend.App
             if (_schedule.Count() == 0) return null;
 
             var tickAgenda = _schedule.First();
+            while (tickAgenda.Value.Count() == 0)
+            {
+                _schedule.Remove(tickAgenda.Key);
+                tickAgenda = _schedule.First();
+            }
 
-            var nextDoer = tickAgenda.Value.First();
-            Remove(nextDoer);
+            var nextDoer = tickAgenda.Value.FirstOrDefault();
+            if (nextDoer != null) Remove(nextDoer);
             return nextDoer;
         }
 
@@ -59,6 +65,16 @@ namespace CopperBend.App
 
                     return;
                 }
+            }
+        }
+
+        internal void RemoveActor(IActor targetActor)
+        {
+            foreach (var busyTick in _schedule)
+            {
+                var entries = busyTick.Value.Where(e => e.Actor == targetActor).ToList();
+                foreach (var entry in entries)
+                    busyTick.Value.Remove(entry);
             }
         }
 

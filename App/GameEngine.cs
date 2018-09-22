@@ -158,7 +158,7 @@ namespace CopperBend.App
             }
 
             Map.Items.Remove(topItem);
-            Player.Inventory.Add(topItem);
+            Player.AddToInventory(topItem);
             Console.WriteLine($"Picked up {topItem.Name}");
             PlayerBusyFor(2);
         }
@@ -188,7 +188,7 @@ namespace CopperBend.App
                     var text = item.Quantity > 1
                         ? $"{item.Quantity} {item.Name}s"
                         : $"a {item.Name}";
-                    Console.WriteLine($"{(char)asciiSlot})  {item.Name}");
+                    Console.WriteLine($"{(char)asciiSlot})  {text}");
                     asciiSlot++;
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CopperBend.App.Behaviors;
 using RLNET;
 
@@ -45,5 +46,15 @@ namespace CopperBend.App.Model
         public int Y { get; protected set; }
 
         public Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; private set; }
+
+        internal void AddToInventory(IItem topItem)
+        {
+            //0.1 everything stacks
+            var existingItem = Inventory.FirstOrDefault(i => i.Name == topItem.Name);
+            if (existingItem == null)
+                Inventory.Add(topItem);
+            else
+                existingItem.Quantity += topItem.Quantity;
+        }
     }
 }

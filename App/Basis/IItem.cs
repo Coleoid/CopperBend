@@ -5,6 +5,6 @@ namespace CopperBend.App
     public interface IItem : IDrawable, ICoord
     {
         string Name { get; }
-        int Quantity { get; }
+        int Quantity { get; set; }
     }
 }

@@ -58,6 +58,8 @@ namespace CopperBend.App.Behaviors
             map.SetIsWalkable(actor, true);
             map.SetIsWalkable(target, true);
 
+            //once we can handle diagonal steps, move to:
+            //PathFinder pathFinder = new PathFinder(map, 1.0, Math.Sqrt(2));
             PathFinder pathFinder = new PathFinder(map);
 
             var pathList = pathFinder.ShortestPathList(

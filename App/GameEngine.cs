@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using CopperBend.App.Model;
 using RLNET;
+using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -273,12 +274,7 @@ namespace CopperBend.App
 
         private void Command_MoveAttack(IActor player, Direction direction)
         {
-            var newX = player.X;
-            var newY = player.Y;
-            if (direction == Direction.Up) newY--;
-            if (direction == Direction.Down) newY++;
-            if (direction == Direction.Left) newX--;
-            if (direction == Direction.Right) newX++;
+            var (newX, newY) = newCoord(player, direction);
 
             IActor targetActor = Map.ActorAtLocation(newX, newY);
             if (targetActor == null)
@@ -291,14 +287,53 @@ namespace CopperBend.App
             }
         }
 
+        private (int, int) newCoord(ICoord start, Direction direction)
+        {
+            int newX = start.X;
+            int newY = start.Y;
+
+            if (direction == Direction.Up
+                || direction == Direction.UpLeft
+                || direction == Direction.UpRight)
+            {
+                newY--;
+            }
+
+            if (direction == Direction.Down
+                || direction == Direction.DownLeft
+                || direction == Direction.DownRight)
+            {
+                newY++;
+            }
+
+            if (direction == Direction.Left
+                || direction == Direction.UpLeft
+                || direction == Direction.DownLeft)
+            {
+                newX--;
+            }
+
+            if (direction == Direction.Right
+                || direction == Direction.UpRight
+                || direction == Direction.DownRight)
+            {
+                newX++;
+            }
+
+            return (newX, newY);
+        }
+
         private void Command_Move(IActor player, int newX, int newY)
         {
             //  If we actually do move in that direction,
-            //  we need to redraw, and the player will be busy for 12 ticks.
+            //  we need to redraw, and the player will be busy for a while.
             if (Map.SetActorPosition(player, newX, newY))
             {
                 _displayDirty = true;
-                PlayerBusyFor(12);
+                if (player.X != newX && player.Y != newY)
+                    PlayerBusyFor(17);
+                else
+                    PlayerBusyFor(12);
             }
         }
 
@@ -339,6 +374,15 @@ namespace CopperBend.App
                 keyPress.Key == RLKey.Down ? Direction.Down :
                 keyPress.Key == RLKey.Left ? Direction.Left :
                 keyPress.Key == RLKey.Right ? Direction.Right :
+
+                keyPress.Key == RLKey.Keypad1 ? Direction.DownLeft :
+                keyPress.Key == RLKey.Keypad2 ? Direction.Down :
+                keyPress.Key == RLKey.Keypad3 ? Direction.DownRight :
+                keyPress.Key == RLKey.Keypad4 ? Direction.Left :
+                keyPress.Key == RLKey.Keypad6 ? Direction.Right :
+                keyPress.Key == RLKey.Keypad7 ? Direction.UpLeft :
+                keyPress.Key == RLKey.Keypad8 ? Direction.Up :
+                keyPress.Key == RLKey.Keypad9 ? Direction.UpRight :
                 Direction.None;
         }
     }

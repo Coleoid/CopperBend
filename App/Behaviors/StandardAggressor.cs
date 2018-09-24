@@ -49,18 +49,21 @@ namespace CopperBend.App.Behaviors
                 IsAlerted = TurnsAlerted <= 15;
             }
 
+            //TODO:  next move delayed depending on action taken
+            // entry.TicksUntilNextAction = isDiagMove ? 17 : 12;
+
             return entry;
         }
 
-        private static void AttemptMoveAttack(IActor actor, IAreaMap map, IActor target)
+        private static int AttemptMoveAttack(IActor actor, IAreaMap map, IActor target)
         {
             // Pathfinder needs the origin and target Cells walkable
             map.SetIsWalkable(actor, true);
             map.SetIsWalkable(target, true);
 
             //once we can handle diagonal steps, move to:
-            //PathFinder pathFinder = new PathFinder(map, 1.0, Math.Sqrt(2));
-            PathFinder pathFinder = new PathFinder(map);
+            PathFinder pathFinder = new PathFinder(map, 1.0, Math.Sqrt(2));
+            //PathFinder pathFinder = new PathFinder(map);
 
             var pathList = pathFinder.ShortestPathList(
                 map.GetCell(actor.X, actor.Y),
@@ -79,13 +82,22 @@ namespace CopperBend.App.Behaviors
                     if (target.X == cell.X && target.Y == cell.Y)
                     {
                         AttackPlayer(target);
+                        return 12;
                     }
+
+                    return 6;
+                }
+                else
+                {
+                    bool isDiag = actor.X != cell.X && actor.Y != cell.Y;
+                    return isDiag ? 17 : 12;
                 }
             }
             else
             {
                 // player in FOV, but not reachable
                 Console.WriteLine($"{actor.Name} waits...");
+                return 6;
             }
         }
 

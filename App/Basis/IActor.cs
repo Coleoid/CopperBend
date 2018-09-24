@@ -9,10 +9,12 @@ namespace CopperBend.App
         string Name { get; set; }
         int Awareness { get; set; }
 
-        List<IItem> Inventory { get; }
-        int Health { get; }
+        IEnumerable<IItem> Inventory { get; }
+        void AddToInventory(IItem topItem);
 
+        int Health { get; }
         void Damage(int v);
+
         Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; }
     }
 }

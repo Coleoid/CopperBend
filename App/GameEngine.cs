@@ -176,7 +176,7 @@ namespace CopperBend.App
         private void Command_Inventory()
         {
             Console.WriteLine("Inventory:");
-            if (Player.Inventory.Count == 0)
+            if (Player.Inventory.Count() == 0)
             {
                 Console.WriteLine("empty.");
             }
@@ -233,8 +233,7 @@ namespace CopperBend.App
 
                     if (Player.Inventory.Count() > inventorySlot)
                     {
-                        var item = Player.Inventory[inventorySlot];
-                        Player.Inventory.RemoveAt(inventorySlot);
+                        IItem item = Player.RemoveFromInventory(inventorySlot);
                         item.MoveTo(Player.X, Player.Y);
                         Map.Items.Add(item);
                         Console.WriteLine(item.Name);

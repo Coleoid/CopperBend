@@ -13,7 +13,7 @@ namespace CopperBend.App.Model
         {
             X = x;
             Y = y;
-            Inventory = new List<IItem>();
+            InventoryList = new List<IItem>();
             Health = 6;
             _behavior = new StandardMoveAndAttack();
             Strategy = _behavior.Act;
@@ -25,7 +25,12 @@ namespace CopperBend.App.Model
         //  IActor
         public string Name { get; set; }
         public int Awareness { get; set; }
-        public List<IItem> Inventory { get; private set; }
+
+        private List<IItem> InventoryList;
+        public IEnumerable<IItem> Inventory
+        {
+            get => InventoryList;
+        }
 
         public void Damage(int amount)
         {
@@ -47,14 +52,21 @@ namespace CopperBend.App.Model
 
         public Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; private set; }
 
-        internal void AddToInventory(IItem topItem)
+        public void AddToInventory(IItem topItem)
         {
             //0.1 everything stacks
             var existingItem = Inventory.FirstOrDefault(i => i.Name == topItem.Name);
             if (existingItem == null)
-                Inventory.Add(topItem);
+                InventoryList.Add(topItem);
             else
                 existingItem.Quantity += topItem.Quantity;
+        }
+
+        internal IItem RemoveFromInventory(int inventorySlot)
+        {
+            var item = InventoryList.ElementAt(inventorySlot);
+            InventoryList.RemoveAt(inventorySlot);
+            return item;
         }
     }
 }

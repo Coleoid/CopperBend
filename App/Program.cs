@@ -52,9 +52,9 @@ namespace CopperBend.App
                 Symbol = '.'
             };
 
-            player.Inventory.Add(hoe);
-            player.Inventory.Add(rock);
-            player.Inventory.Add(seed);
+            player.AddToInventory(hoe);
+            player.AddToInventory(rock);
+            player.AddToInventory(seed);
             return player;
         }
 

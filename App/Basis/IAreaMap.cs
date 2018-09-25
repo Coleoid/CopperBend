@@ -11,7 +11,7 @@ namespace CopperBend.App
         ITile[,] Tiles { get; set; }
         List<IItem> Items { get; set; }
         List<IActor> Actors { get; set; }
-
+        bool DisplayDirty { get; set; }
 
         bool SetActorPosition(IActor actor, int x, int y);
         void UpdatePlayerFieldOfView(IActor player);

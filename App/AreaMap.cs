@@ -15,6 +15,7 @@ namespace CopperBend.App
             Tiles = new ITile[xWidth, yHeight];
             Actors = new List<IActor>();
             Items = new List<IItem>();
+            DisplayDirty = true;
         }
 
         public string Name { get; set; }
@@ -23,6 +24,7 @@ namespace CopperBend.App
         public List<IItem> Items { get; set; }
 
         public List<IActor> Actors { get; set; }
+        public bool DisplayDirty { get; set; }
 
         public ITile this[int x, int y]
         {

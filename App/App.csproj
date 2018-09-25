@@ -58,6 +58,7 @@
     <Compile Include="Basis\IAreaMap.cs" />
     <Compile Include="Basis\IItem.cs" />
     <Compile Include="Behaviors\StandardAggressor.cs" />
+    <Compile Include="CommandDispatcher.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />

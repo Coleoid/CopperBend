@@ -77,11 +77,5 @@ namespace CopperBend.App
                     busyTick.Value.Remove(entry);
             }
         }
-
-        //// Clear out the schedule
-        //public void Clear()
-        //{
-        //    _schedule.Clear();
-        //}
     }
 }

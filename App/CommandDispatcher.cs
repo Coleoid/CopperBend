@@ -44,7 +44,7 @@ namespace CopperBend.App
             var direction = DirectionOfKey(key);
             if (direction != Direction.None)
             {
-                Command_MoveAttack(Player, direction);
+                Command_Direction(Player, direction);
             }
             else if (key.Key == RLKey.A)
             {
@@ -76,59 +76,67 @@ namespace CopperBend.App
             //TODO: all the other commands
         }
 
+
+        private void Command_Direction(IActor player, Direction direction)
+        {
+            var (newX, newY) = newCoord(player, direction);
+
+            IActor targetActor = Map.ActorAtLocation(newX, newY);
+            if (targetActor == null)
+            {
+                Command_DirectionMove(player, newX, newY);
+            }
+            else
+            {
+                Command_DirectionAttack(targetActor, newX, newY);
+            }
+        }
+
+        private void Command_DirectionMove(IActor player, int newX, int newY)
+        {
+            //  If we actually do move in that direction,
+            //  we need to redraw, and the player will be busy for a while.
+            if (Map.SetActorPosition(player, newX, newY))
+            {
+                Map.DisplayDirty = true;
+                if (player.X != newX && player.Y != newY)
+                    PlayerBusyFor(17);
+                else
+                    PlayerBusyFor(12);
+            }
+        }
+
+        private void Command_DirectionAttack(IActor targetActor, int newX, int newY)
+        {
+            //0.1
+            targetActor.Damage(2);
+            Console.WriteLine("You hit the thingy for 2 points!");
+            if (targetActor.Health < 1)
+            {
+                Console.WriteLine($"Blargh...  The {targetActor.Name} dies.");
+                Map.Actors.Remove(targetActor);
+                Map.SetIsWalkable(targetActor, true);
+                Map.DisplayDirty = true;
+
+                Scheduler.RemoveActor(targetActor);
+            }
+
+            PlayerBusyFor(12);
+        }
+
+
         private void Command_ApplyTool(RLKeyPress key)
         {
             throw new NotImplementedException();
         }
-
-        private void Command_PickUp()
+        private enum Command_Apply_States
         {
-            var topItem = Map.Items
-                .Where(i => i.X == Player.X && i.Y == Player.Y)
-                .LastOrDefault();
-
-            if (topItem == null)
-            {
-                Console.WriteLine("Nothing to pick up here.");
-                return;
-            }
-
-            Map.Items.Remove(topItem);
-            Player.AddToInventory(topItem);
-            Console.WriteLine($"Picked up {topItem.Name}");
-            PlayerBusyFor(2);
+            Unknown = 0,
+            Direction_or_ChangeTool,
+            Select_new_Tool,
         }
+        private Command_Apply_States Command_Apply_State;
 
-        private static void Command_Help()
-        {
-            Console.WriteLine("Help:");
-            Console.WriteLine("Arrow keys to move");
-            Console.WriteLine("i)nventory");
-            Console.WriteLine("h)elp (or ?)");
-            Console.WriteLine(",) Pick up object");
-            Console.WriteLine("d)rop item from inventory");
-        }
-
-        private void Command_Inventory()
-        {
-            Console.WriteLine("Inventory:");
-            if (Player.Inventory.Count() == 0)
-            {
-                Console.WriteLine("empty.");
-            }
-            else
-            {
-                int asciiSlot = 97;
-                foreach (var item in Player.Inventory)
-                {
-                    var text = item.Quantity > 1
-                        ? $"{item.Quantity} {item.Name}s"
-                        : $"a {item.Name}";
-                    Console.WriteLine($"{(char)asciiSlot})  {text}");
-                    asciiSlot++;
-                }
-            }
-        }
 
         private void Command_Drop(RLKeyPress key)
         {
@@ -190,6 +198,66 @@ namespace CopperBend.App
                 throw new Exception("Command_Drop went to a weird place.");
             }
         }
+        private enum Command_Drop_States
+        {
+            Unknown = 0,
+            Starting,
+            Expecting_Selection,
+        }
+        private Command_Drop_States Command_Drop_State;
+
+
+        private void Command_Help()
+        {
+            Console.WriteLine("Help:");
+            Console.WriteLine("Arrow keys to move");
+            Console.WriteLine("i)nventory");
+            Console.WriteLine("h)elp (or ?)");
+            Console.WriteLine(",) Pick up object");
+            Console.WriteLine("d)rop item from inventory");
+        }
+
+
+        private void Command_Inventory()
+        {
+            Console.WriteLine("Inventory:");
+            if (Player.Inventory.Count() == 0)
+            {
+                Console.WriteLine("empty.");
+            }
+            else
+            {
+                int asciiSlot = 97;
+                foreach (var item in Player.Inventory)
+                {
+                    var text = item.Quantity > 1
+                        ? $"{item.Quantity} {item.Name}s"
+                        : $"a {item.Name}";
+                    Console.WriteLine($"{(char)asciiSlot})  {text}");
+                    asciiSlot++;
+                }
+            }
+        }
+
+
+        private void Command_PickUp()
+        {
+            var topItem = Map.Items
+                .Where(i => i.X == Player.X && i.Y == Player.Y)
+                .LastOrDefault();
+
+            if (topItem == null)
+            {
+                Console.WriteLine("Nothing to pick up here.");
+                return;
+            }
+
+            Map.Items.Remove(topItem);
+            Player.AddToInventory(topItem);
+            Console.WriteLine($"Picked up {topItem.Name}");
+            PlayerBusyFor(2);
+        }
+
 
         private int AlphaIndexOfKeyPress(RLKeyPress key)
         {
@@ -199,35 +267,16 @@ namespace CopperBend.App
             return asciiNum - 97;
         }
 
-        private enum Command_Apply_States
+        private void PlayerBusyFor(int ticks)
         {
-            Unknown = 0,
-            Direction_or_ChangeTool,
-            Select_new_Tool,
+            ReadyForUserInput = false;
+            Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
         }
-        private Command_Apply_States Command_Apply_State;
 
-        private enum Command_Drop_States
+        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IAreaMap map, IActor player)
         {
-            Unknown = 0,
-            Starting,
-            Expecting_Selection,
-        }
-        private Command_Drop_States Command_Drop_State;
-
-        private void Command_MoveAttack(IActor player, Direction direction)
-        {
-            var (newX, newY) = newCoord(player, direction);
-
-            IActor targetActor = Map.ActorAtLocation(newX, newY);
-            if (targetActor == null)
-            {
-                Command_Move(player, newX, newY);
-            }
-            else
-            {
-                Command_Attack(targetActor, newX, newY);
-            }
+            ReadyForUserInput = true;
+            return null;
         }
 
         private (int, int) newCoord(ICoord start, Direction direction)
@@ -264,50 +313,6 @@ namespace CopperBend.App
             }
 
             return (newX, newY);
-        }
-
-        private void Command_Move(IActor player, int newX, int newY)
-        {
-            //  If we actually do move in that direction,
-            //  we need to redraw, and the player will be busy for a while.
-            if (Map.SetActorPosition(player, newX, newY))
-            {
-                Map.DisplayDirty = true;
-                if (player.X != newX && player.Y != newY)
-                    PlayerBusyFor(17);
-                else
-                    PlayerBusyFor(12);
-            }
-        }
-
-        private void PlayerBusyFor(int ticks)
-        {
-            ReadyForUserInput = false;
-            Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
-        }
-
-        private void Command_Attack(IActor targetActor, int newX, int newY)
-        {
-            //0.1
-            targetActor.Damage(2);
-            Console.WriteLine("You hit the thingy for 2 points!");
-            if (targetActor.Health < 1)
-            {
-                Console.WriteLine($"Blargh...  The {targetActor.Name} dies.");
-                Map.Actors.Remove(targetActor);
-                Map.SetIsWalkable(targetActor, true);
-                Map.DisplayDirty = true;
-
-                Scheduler.RemoveActor(targetActor);
-            }
-
-            PlayerBusyFor(12);
-        }
-
-        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IAreaMap map, IActor player)
-        {
-            ReadyForUserInput = true;
-            return null;
         }
 
         private Direction DirectionOfKey(RLKeyPress keyPress)

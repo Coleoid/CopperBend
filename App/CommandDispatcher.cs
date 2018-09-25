@@ -127,11 +127,60 @@ namespace CopperBend.App
 
         private void Command_ApplyTool(RLKeyPress key)
         {
-            throw new NotImplementedException();
+            Action leave_Apply = () =>
+            {
+                _inMultiKeyCommand = false;
+                MultiKeyCommand = null;
+                Command_Apply_State = Command_Apply_States.Unknown;
+            };
+
+            switch (Command_Apply_State)
+            {
+            case Command_Apply_States.Unknown:
+                throw new Exception("Missed Apply setup somewhere.");
+
+            case Command_Apply_States.Starting:
+                //TODO: pick the wielded tool as default
+                Console.Write("Use hoe in direction (or ? to pick a different tool): ");
+                Console.Out.Flush();
+                Command_Apply_State = Command_Apply_States.Direction_or_ChangeTool;
+                break;
+
+            case Command_Apply_States.Direction_or_ChangeTool:
+                var direction = DirectionOfKey(key);
+                if (direction != Direction.None)
+                {
+                    //TODO: Invoke usage of that tool.
+                    //  Possible?  (Can't hoe rock, may have custom message)
+                    //  Successful?  (Skill/difficulty check)
+                    //  Effects.  If it did nothing, we wouldn't be here.
+                    //  Output.
+                    leave_Apply();
+                }
+                else if (key.Key == RLKey.Escape)
+                {
+                    Console.WriteLine("cancelled.");
+                    leave_Apply();
+                }
+                else if (key.Key == RLKey.Slash && key.Shift)
+                {
+                    //TODO: show inventory
+                    //TODO: if key is usable tool, select it, message
+                }
+                else
+                {
+                    //TODO: some complaint?  What's to be the standard?
+                }
+                break;
+
+            default:
+                throw new Exception("Command_ApplyTool went to a weird place.");
+            }
         }
         private enum Command_Apply_States
         {
             Unknown = 0,
+            Starting,
             Direction_or_ChangeTool,
             Select_new_Tool,
         }

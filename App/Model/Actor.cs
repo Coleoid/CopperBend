@@ -20,6 +20,20 @@ namespace CopperBend.App.Model
             Awareness = 6;
         }
 
+        //  IDrawable
+        public RLColor Color { get; set; }
+        public char Symbol { get; set; }
+        public void MoveTo(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        //  ICoord
+        public int X { get; protected set; }
+        public int Y { get; protected set; }
+
+
         public int Health { get; protected set; }
 
         //  IActor
@@ -37,20 +51,8 @@ namespace CopperBend.App.Model
             Health -= amount;
         }
 
-        //  IDrawable
-        public RLColor Color { get; set; }
-        public char Symbol { get; set; }
-        public void MoveTo(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        //  ICoord
-        public int X { get; protected set; }
-        public int Y { get; protected set; }
-
         public Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; private set; }
+        public IItem WieldedTool { get; internal set; }
 
         public void AddToInventory(IItem topItem)
         {

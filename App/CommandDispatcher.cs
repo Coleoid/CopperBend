@@ -124,7 +124,7 @@ namespace CopperBend.App
             PlayerBusyFor(12);
         }
 
-
+        private IItem _usingTool;
         private void Command_ApplyTool(RLKeyPress key)
         {
             Action leave_Apply = () =>
@@ -140,8 +140,9 @@ namespace CopperBend.App
                 throw new Exception("Missed Apply setup somewhere.");
 
             case Command_Apply_States.Starting:
+                _usingTool = Player.WieldedTool;
                 //TODO: pick the wielded tool as default
-                Console.Write("Use hoe in direction (or ? to pick a different tool): ");
+                Console.Write($"Use {_usingTool.Name} in direction (or ? to pick a different tool): ");
                 Console.Out.Flush();
                 Command_Apply_State = Command_Apply_States.Direction_or_ChangeTool;
                 break;
@@ -165,12 +166,32 @@ namespace CopperBend.App
                 else if (key.Key == RLKey.Slash && key.Shift)
                 {
                     //TODO: show inventory
-                    //TODO: if key is usable tool, select it, message
                 }
                 else
                 {
                     //TODO: some complaint?  What's to be the standard?
                 }
+                break;
+
+            case Command_Apply_States.Select_new_Tool:
+                var selectedIndex = AlphaIndexOfKeyPress(key);
+                if (selectedIndex < 0 || selectedIndex > Player.Inventory.Count())
+                {
+                    Console.Write($"The key [{key.Char}] does not match an inventory item.");
+                }
+                else
+                {
+                    var item = Player.Inventory.ElementAt(selectedIndex);
+                    if (item.IsUsable)
+                    {
+                        _usingTool = item;
+                    }
+                    else
+                    {
+                        Console.Write($"The item [{item.Name}] is not a usable tool.");
+                    }
+                }
+                Console.WriteLine();
                 break;
 
             default:

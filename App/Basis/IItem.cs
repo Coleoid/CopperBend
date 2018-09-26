@@ -6,5 +6,6 @@ namespace CopperBend.App
     {
         string Name { get; }
         int Quantity { get; set; }
+        bool IsUsable { get; }
     }
 }

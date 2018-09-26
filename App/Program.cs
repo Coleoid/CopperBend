@@ -35,7 +35,8 @@ namespace CopperBend.App
             {
                 Name = "hoe",
                 Color = RLColor.Brown,
-                Symbol = '/'
+                Symbol = '/',
+                IsUsable = true,
             };
 
             var rock = new Item(0, 0)

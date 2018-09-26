@@ -79,34 +79,34 @@ namespace CopperBend.App
 
         private void Command_Direction(IActor player, Direction direction)
         {
-            var (newX, newY) = newCoord(player, direction);
+            var coord = newCoord(player, direction);
 
-            IActor targetActor = Map.ActorAtLocation(newX, newY);
+            IActor targetActor = Map.ActorAtCoord(coord);
             if (targetActor == null)
             {
-                Command_DirectionMove(player, newX, newY);
+                Command_DirectionMove(player, coord);
             }
             else
             {
-                Command_DirectionAttack(targetActor, newX, newY);
+                Command_DirectionAttack(targetActor, coord);
             }
         }
 
-        private void Command_DirectionMove(IActor player, int newX, int newY)
+        private void Command_DirectionMove(IActor player, ICoord coord)
         {
             //  If we actually do move in that direction,
             //  we need to redraw, and the player will be busy for a while.
-            if (Map.SetActorPosition(player, newX, newY))
+            if (Map.SetActorCoord(player, coord))
             {
                 Map.DisplayDirty = true;
-                if (player.X != newX && player.Y != newY)
+                if (player.X != coord.X && player.Y != coord.Y)
                     PlayerBusyFor(17);
                 else
                     PlayerBusyFor(12);
             }
         }
 
-        private void Command_DirectionAttack(IActor targetActor, int newX, int newY)
+        private void Command_DirectionAttack(IActor targetActor, ICoord coord)
         {
             //0.1
             targetActor.Damage(2);
@@ -152,10 +152,7 @@ namespace CopperBend.App
                 if (direction != Direction.None)
                 {
                     //TODO: Invoke usage of that tool.
-                    //  Possible?  (Can't hoe rock, may have custom message)
-                    //  Successful?  (Skill/difficulty check)
-                    //  Effects.  If it did nothing, we wouldn't be here.
-                    //  Output.
+                    Command_ApplyAction(direction);
                     leave_Apply();
                 }
                 else if (key.Key == RLKey.Escape)
@@ -198,6 +195,23 @@ namespace CopperBend.App
                 throw new Exception("Command_ApplyTool went to a weird place.");
             }
         }
+
+        private void Command_ApplyAction(Direction direction)
+        {
+            //  Possible?  (Can't hoe rock, may have custom message)
+            //  Successful?  (Skill/difficulty check)
+            //  Effects.  If it did nothing, we wouldn't be here.
+            //  Output.
+            switch (_usingTool.Name)
+            {
+            case "hoe":
+                var targetCoord = newCoord(Player, direction);
+                var tile = Map[targetCoord];
+                break;
+            }
+        }
+
+
         private enum Command_Apply_States
         {
             Unknown = 0,
@@ -349,7 +363,7 @@ namespace CopperBend.App
             return null;
         }
 
-        private (int, int) newCoord(ICoord start, Direction direction)
+        private ICoord newCoord(ICoord start, Direction direction)
         {
             int newX = start.X;
             int newY = start.Y;
@@ -382,7 +396,7 @@ namespace CopperBend.App
                 newX++;
             }
 
-            return (newX, newY);
+            return new Coord(newX, newY);
         }
 
         private Direction DirectionOfKey(RLKeyPress keyPress)

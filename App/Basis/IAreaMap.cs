@@ -13,9 +13,14 @@ namespace CopperBend.App
         List<IActor> Actors { get; set; }
         bool DisplayDirty { get; set; }
 
+        ITile this[ICoord coord] { get; }
+        //ITile this[int x, int y] { get; }
+
         bool SetActorPosition(IActor actor, int x, int y);
+        bool SetActorCoord(IActor player, ICoord coord);
         void UpdatePlayerFieldOfView(IActor player);
         void DrawMap(RLConsole mapConsole);
         IActor ActorAtLocation(int newX, int newY);
+        IActor ActorAtCoord(ICoord coord);
     }
 }

@@ -26,9 +26,14 @@ namespace CopperBend.App
         public List<IActor> Actors { get; set; }
         public bool DisplayDirty { get; set; }
 
-        public ITile this[int x, int y]
+        //public ITile this[int x, int y]
+        //{
+        //    get => Tiles[x, y];
+        //}
+
+        public ITile this[ICoord coord]
         {
-            get => Tiles[x, y];
+            get => Tiles[coord.X, coord.Y];
         }
 
         public bool IsTillable(int x, int y)
@@ -104,6 +109,9 @@ namespace CopperBend.App
             return true;
         }
 
+        public bool SetActorCoord(IActor player, ICoord coord)
+            => SetActorPosition(player, coord.X, coord.Y);
+
         //  Player field of view changes whenever player moves
         //FUTURE: more cases (shifting terrain, smoke cloud, et c.)
         public void UpdatePlayerFieldOfView(IActor player)
@@ -118,7 +126,12 @@ namespace CopperBend.App
 
         public IActor ActorAtLocation(int newX, int newY)
         {
-            return Actors.Where(a => a.X == newX && a.Y == newY).FirstOrDefault();
+            return Actors
+                .Where(a => a.X == newX && a.Y == newY)
+                .FirstOrDefault();
         }
+
+        public IActor ActorAtCoord(ICoord coord)
+            => ActorAtLocation(coord.X, coord.Y);
     }
 }

@@ -48,17 +48,11 @@ namespace CopperBend.App
             }
             else if (key.Key == RLKey.A)
             {
-                _inMultiKeyCommand = true;
-                MultiKeyCommand = Command_ApplyTool;
-                Command_Apply_State = Command_Apply_States.Starting;
-                MultiKeyCommand(key);
+                enter_Apply(key);
             }
             else if (key.Key == RLKey.D)
             {
-                _inMultiKeyCommand = true;
-                MultiKeyCommand = Command_Drop;
-                Command_Drop_State = Command_Drop_States.Starting;
-                MultiKeyCommand(key);
+                enter_Drop(key);
             }
             else if (key.Key == RLKey.H || key.Key == RLKey.Slash && key.Shift)
             {
@@ -76,7 +70,7 @@ namespace CopperBend.App
             //TODO: all the other commands
         }
 
-
+        #region Direction
         private void Command_Direction(IActor player, Direction direction)
         {
             var coord = newCoord(player, direction);
@@ -91,7 +85,6 @@ namespace CopperBend.App
                 Command_DirectionAttack(targetActor, coord);
             }
         }
-
         private void Command_DirectionMove(IActor player, ICoord coord)
         {
             //  If we actually do move in that direction,
@@ -105,7 +98,6 @@ namespace CopperBend.App
                     PlayerBusyFor(12);
             }
         }
-
         private void Command_DirectionAttack(IActor targetActor, ICoord coord)
         {
             //0.1
@@ -123,24 +115,33 @@ namespace CopperBend.App
 
             PlayerBusyFor(12);
         }
+        #endregion
+
+        #region Apply Tool
+        private void enter_Apply(RLKeyPress key)
+        {
+            _inMultiKeyCommand = true;
+            MultiKeyCommand = Command_ApplyTool;
+            Command_Apply_State = Command_Apply_States.Starting;
+            MultiKeyCommand(key);
+        }
+        private void leave_Apply()
+        {
+            _inMultiKeyCommand = false;
+            MultiKeyCommand = null;
+            Command_Apply_State = Command_Apply_States.Unknown;
+        }
 
         private IItem _usingTool;
         private void Command_ApplyTool(RLKeyPress key)
         {
-            Action leave_Apply = () =>
-            {
-                _inMultiKeyCommand = false;
-                MultiKeyCommand = null;
-                Command_Apply_State = Command_Apply_States.Unknown;
-            };
-
             switch (Command_Apply_State)
             {
             case Command_Apply_States.Unknown:
                 throw new Exception("Missed Apply setup somewhere.");
 
             case Command_Apply_States.Starting:
-                //TODO: handle nothing wielded gracefully
+                //TODO: Gracefully handle player wielding nothing or non-tool
                 if (Player.WieldedTool == null)
                 {
                     Console.WriteLine("Not currently wielding a tool...todo.");
@@ -169,11 +170,15 @@ namespace CopperBend.App
                 }
                 else if (key.Key == RLKey.Slash && key.Shift)
                 {
-                    //TODO: show inventory
+                    Command_Inventory();
+                    Console.WriteLine();
+                    Command_Apply_State = Command_Apply_States.Select_new_Tool;
                 }
                 else
                 {
-                    //TODO: some complaint?  What's to be the standard?
+                    //TODO: some 'not a supported choice' complaint?
+                    //What's to be the standard?
+                    //Nothing, for now.  It works well enough.
                 }
                 break;
 
@@ -218,6 +223,7 @@ namespace CopperBend.App
                 {
                     tile.Till();
                     Map.DisplayDirty = true;
+                    PlayerBusyFor(15);
                 }
                 else
                 {
@@ -232,7 +238,6 @@ namespace CopperBend.App
             }
         }
 
-
         private enum Command_Apply_States
         {
             Unknown = 0,
@@ -241,17 +246,26 @@ namespace CopperBend.App
             Select_new_Tool,
         }
         private Command_Apply_States Command_Apply_State;
+        #endregion
 
+        #region Drop
+
+        private void enter_Drop(RLKeyPress key)
+        {
+            _inMultiKeyCommand = true;
+            MultiKeyCommand = Command_Drop;
+            Command_Drop_State = Command_Drop_States.Starting;
+            MultiKeyCommand(key);
+        }
+        private void leave_Drop() 
+        {
+            _inMultiKeyCommand = false;
+            MultiKeyCommand = null;
+            Command_Drop_State = Command_Drop_States.Unknown;
+        }
 
         private void Command_Drop(RLKeyPress key)
         {
-            Action leave_Drop = () =>
-            {
-                _inMultiKeyCommand = false;
-                MultiKeyCommand = null;
-                Command_Drop_State = Command_Drop_States.Unknown;
-            };
-
             switch (Command_Drop_State)
             {
             case Command_Drop_States.Unknown:
@@ -310,6 +324,7 @@ namespace CopperBend.App
             Expecting_Selection,
         }
         private Command_Drop_States Command_Drop_State;
+        #endregion
 
 
         private void Command_Help()
@@ -321,7 +336,6 @@ namespace CopperBend.App
             Console.WriteLine(",) Pick up object");
             Console.WriteLine("d)rop item from inventory");
         }
-
 
         private void Command_Inventory()
         {
@@ -343,7 +357,6 @@ namespace CopperBend.App
                 }
             }
         }
-
 
         private void Command_PickUp()
         {

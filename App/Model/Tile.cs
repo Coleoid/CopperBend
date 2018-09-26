@@ -39,7 +39,6 @@ namespace CopperBend.App.Model
         {
             IsTilled = true;
             SetTerrainType(TerrainType.TilledDirt);
-            repr.Symbol = '~';
         }
 
         private void SetTerrainType(TerrainType newType)

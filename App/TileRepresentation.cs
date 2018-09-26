@@ -63,6 +63,14 @@ namespace CopperBend.App
 
             rep = new TileRepresentation
             {
+                Symbol = '~',
+            };
+            rep.SetForeground(Colors.Floor, Colors.FloorSeen);
+            rep.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            ReprOfTerrain[TerrainType.TilledDirt] = rep;
+
+            rep = new TileRepresentation
+            {
                 Symbol = ',',
             };
             rep.SetForeground(Palette.DbOldBlood, Palette.DbBlood);

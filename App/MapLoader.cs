@@ -12,6 +12,7 @@ namespace CopperBend.App
     {
         Unknown = 0,
         Dirt,
+        TilledDirt,
         StoneWall,
         Door,
         Blight,
@@ -47,11 +48,7 @@ namespace CopperBend.App
                         ? TerrainFrom(row.Substring(x, 1))
                         : TerrainType.Unknown;
 
-                    map.Tiles[x, y] = new Tile(x, y)
-                    {
-                        TerrainType = type,
-                        repr = TileRepresenter.OfTerrain(type),
-                    };
+                    map.Tiles[x, y] = new Tile(x, y, type);
 
                     //TODO:  push down/unify
                     map.SetCellProperties(x,y,

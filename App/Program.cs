@@ -56,6 +56,7 @@ namespace CopperBend.App
             player.AddToInventory(hoe);
             player.AddToInventory(rock);
             player.AddToInventory(seed);
+            player.WieldedTool = hoe;
             return player;
         }
 

@@ -50,7 +50,7 @@ namespace CopperBend.App
             {
                 _inMultiKeyCommand = true;
                 MultiKeyCommand = Command_ApplyTool;
-                Command_Apply_State = Command_Apply_States.Direction_or_ChangeTool;
+                Command_Apply_State = Command_Apply_States.Starting;
                 MultiKeyCommand(key);
             }
             else if (key.Key == RLKey.D)
@@ -140,8 +140,14 @@ namespace CopperBend.App
                 throw new Exception("Missed Apply setup somewhere.");
 
             case Command_Apply_States.Starting:
+                //TODO: handle nothing wielded gracefully
+                if (Player.WieldedTool == null)
+                {
+                    Console.WriteLine("Not currently wielding a tool...todo.");
+                    leave_Apply();
+                    return;
+                }
                 _usingTool = Player.WieldedTool;
-                //TODO: pick the wielded tool as default
                 Console.Write($"Use {_usingTool.Name} in direction (or ? to pick a different tool): ");
                 Console.Out.Flush();
                 Command_Apply_State = Command_Apply_States.Direction_or_ChangeTool;
@@ -151,7 +157,8 @@ namespace CopperBend.App
                 var direction = DirectionOfKey(key);
                 if (direction != Direction.None)
                 {
-                    //TODO: Invoke usage of that tool.
+                    Console.WriteLine(direction.ToString());
+                    Console.Out.Flush();
                     Command_ApplyAction(direction);
                     leave_Apply();
                 }
@@ -207,7 +214,21 @@ namespace CopperBend.App
             case "hoe":
                 var targetCoord = newCoord(Player, direction);
                 var tile = Map[targetCoord];
+                if (tile.IsTillable())
+                {
+                    tile.Till();
+                    Map.DisplayDirty = true;
+                }
+                else
+                {
+                    var cell = Map.GetCell(targetCoord.X, targetCoord.Y);
+                    Console.Out.WriteLine($"Cannot hoe {tile.TerrainType}.");
+                }
+
                 break;
+
+            default:
+                throw new Exception($"Using tool [{_usingTool.Name}] not yet written.");
             }
         }
 

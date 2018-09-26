@@ -1,30 +1,51 @@
-﻿using RLNET;
+﻿using System;
+using RLNET;
 using RogueSharp;
 
 namespace CopperBend.App.Model
 {
-
     public interface ITile : IDrawable, ICoord
     {
+        TerrainType TerrainType { get; }
+
         RLColor ColorBackground { get; }
         bool IsTillable();
+        bool IsTilled { get; }
+        void Till();
     }
 
     public class Tile : ITile
     {
         public bool IsInFOV;
         internal TileRepresentation repr;
-        internal TerrainType TerrainType;
+        public TerrainType TerrainType { get; private set; }
 
-        public Tile(int x, int y)
+        public Tile(int x, int y, TerrainType type)
         {
             X = x;
             Y = y;
+            TerrainType = type;
+            repr = TileRepresenter.OfTerrain(type);
         }
 
         public bool IsTillable()
         {
             return TerrainType == TerrainType.Dirt;
+        }
+
+        public bool IsTilled { get; private set; }
+
+        public void Till()
+        {
+            IsTilled = true;
+            SetTerrainType(TerrainType.TilledDirt);
+            repr.Symbol = '~';
+        }
+
+        private void SetTerrainType(TerrainType newType)
+        {
+            TerrainType = newType;
+            repr = TileRepresenter.OfTerrain(newType);
         }
 
         public RLColor Color
@@ -43,8 +64,7 @@ namespace CopperBend.App.Model
 
         public void MoveTo(int x, int y)
         {
-            X = x;
-            Y = y;
+            throw new Exception("Tiles don't move.  Change my mind.");
         }
 
         public int X { get; private set; }

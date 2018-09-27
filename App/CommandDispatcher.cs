@@ -9,7 +9,10 @@ namespace CopperBend.App
 {
     public class CommandDispatcher
     {
-        private bool _inMultiKeyCommand = false;
+        private bool InMultiKeyCommand
+        {
+            get => MultiKeyCommand != null;
+        }
         private Action<RLKeyPress> MultiKeyCommand = null;
         public bool ReadyForUserInput = true;
 
@@ -34,7 +37,7 @@ namespace CopperBend.App
         public void HandlePlayerCommands()
         {
             var key = InputQueue.Dequeue();
-            if (_inMultiKeyCommand)
+            if (InMultiKeyCommand)
             {
                 //  Drop, throw, wield, etc.
                 MultiKeyCommand(key);
@@ -61,6 +64,10 @@ namespace CopperBend.App
             else if (key.Key == RLKey.I)
             {
                 Command_Inventory();
+            }
+            else if (key.Key == RLKey.W)
+            {
+                enter_Wield(key);
             }
             else if (key.Key == RLKey.Comma)
             {
@@ -120,14 +127,12 @@ namespace CopperBend.App
         #region Apply Tool
         private void enter_Apply(RLKeyPress key)
         {
-            _inMultiKeyCommand = true;
             MultiKeyCommand = Command_ApplyTool;
             Command_Apply_State = Command_Apply_States.Starting;
             MultiKeyCommand(key);
         }
         private void leave_Apply()
         {
-            _inMultiKeyCommand = false;
             MultiKeyCommand = null;
             Command_Apply_State = Command_Apply_States.Unknown;
         }
@@ -252,14 +257,12 @@ namespace CopperBend.App
 
         private void enter_Drop(RLKeyPress key)
         {
-            _inMultiKeyCommand = true;
             MultiKeyCommand = Command_Drop;
             Command_Drop_State = Command_Drop_States.Starting;
             MultiKeyCommand(key);
         }
-        private void leave_Drop() 
+        private void leave_Drop()
         {
-            _inMultiKeyCommand = false;
             MultiKeyCommand = null;
             Command_Drop_State = Command_Drop_States.Unknown;
         }
@@ -300,13 +303,19 @@ namespace CopperBend.App
                         item.MoveTo(Player.X, Player.Y);
                         Map.Items.Add(item);
                         Console.WriteLine(item.Name);
+                        if (Player.WieldedTool == item)
+                        {
+                            Console.WriteLine($"Note:  No longer wielding the {item.Name}.");
+                            Player.WieldedTool = null;
+                        }
+
                         PlayerBusyFor(1);
 
                         leave_Drop();
                     }
                     else
                     {
-                        Console.WriteLine($"No item in slot '{key.Char.Value}'.");
+                        Console.WriteLine($"No item labelled '{key.Char.Value}'.");
                         Console.Write("Drop: ");
                         Console.Out.Flush();
                     }
@@ -326,15 +335,16 @@ namespace CopperBend.App
         private Command_Drop_States Command_Drop_State;
         #endregion
 
-
         private void Command_Help()
         {
             Console.WriteLine("Help:");
-            Console.WriteLine("Arrow keys to move");
+            Console.WriteLine("Arrow or numpad keys to move and attack");
+            Console.WriteLine("a)pply wielded tool");
+            Console.WriteLine("d)rop an item");
+            Console.WriteLine("h)elp (or ?) shows this message");
             Console.WriteLine("i)nventory");
-            Console.WriteLine("h)elp (or ?)");
+            Console.WriteLine("w)ield a tool");
             Console.WriteLine(",) Pick up object");
-            Console.WriteLine("d)rop item from inventory");
         }
 
         private void Command_Inventory()
@@ -358,6 +368,91 @@ namespace CopperBend.App
             }
         }
 
+        #region Wield
+        private void enter_Wield(RLKeyPress key)
+        {
+            MultiKeyCommand = Command_Wield;
+            Command_Wield_State = Command_Wield_States.Starting;
+            MultiKeyCommand(key);
+        }
+        private void leave_Wield()
+        {
+            MultiKeyCommand = null;
+            Command_Wield_State = Command_Wield_States.Unknown;
+        }
+
+        private void Command_Wield(RLKeyPress key)
+        {
+            switch (Command_Wield_State)
+            {
+            case Command_Wield_States.Unknown:
+                throw new Exception("Missed Wield setup somewhere.");
+
+            case Command_Wield_States.Starting:
+                Console.Write("Wield ('?' to show inventory, '.' to empty hands): ");
+                Console.Out.Flush();
+                Command_Wield_State = Command_Wield_States.Expecting_Selection;
+                break;
+
+            case Command_Wield_States.Expecting_Selection:
+                if (key.Key == RLKey.Escape)
+                {
+                    var name = Player.WieldedTool == null
+                        ? "bare hands"
+                        : Player.WieldedTool.Name;
+                    Console.WriteLine($"unchanged, {name}.");
+                    leave_Wield();
+                }
+                else if (key.Key == RLKey.Period)
+                {
+                    Console.WriteLine("bare hands");
+                    Player.WieldedTool = null;
+                    leave_Wield();
+                }
+                else if (key.Key == RLKey.Slash && key.Shift)
+                {
+                    Command_Inventory();
+                    Console.Write("Wield: ");
+                    Console.Out.Flush();
+                }
+                else
+                {
+                    int inventorySlot = AlphaIndexOfKeyPress(key);
+                    if (inventorySlot == -1) break;
+
+                    if (Player.Inventory.Count() > inventorySlot)
+                    {
+                        // we can wield even silly stuff, until it's a problem.
+                        var item = Player.Inventory.ElementAt(inventorySlot);
+
+                        Player.WieldedTool = item;
+                        Console.WriteLine(item.Name);
+                        PlayerBusyFor(4);
+
+                        leave_Wield();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No item in slot '{key.Char.Value}'.");
+                        Console.Write("Wield: ");
+                        Console.Out.Flush();
+                    }
+                }
+                break;
+
+            default:
+                throw new Exception($"Command_Wield not ready for state {Command_Wield_State}.");
+            }
+        }
+        private enum Command_Wield_States
+        {
+            Unknown = 0,
+            Starting,
+            Expecting_Selection,
+        }
+        private Command_Wield_States Command_Wield_State;
+        #endregion
+
         private void Command_PickUp()
         {
             var topItem = Map.Items
@@ -375,7 +470,6 @@ namespace CopperBend.App
             Console.WriteLine($"Picked up {topItem.Name}");
             PlayerBusyFor(2);
         }
-
 
         private int AlphaIndexOfKeyPress(RLKeyPress key)
         {

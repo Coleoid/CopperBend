@@ -57,7 +57,8 @@ namespace CopperBend.App.Model
         public void AddToInventory(IItem topItem)
         {
             //0.1 everything stacks
-            var existingItem = Inventory.FirstOrDefault(i => i.Name == topItem.Name);
+            var existingItem = Inventory
+                .FirstOrDefault(i => i.SameThingAs(topItem));
             if (existingItem == null)
                 InventoryList.Add(topItem);
             else

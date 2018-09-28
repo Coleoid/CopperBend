@@ -46,7 +46,14 @@ namespace CopperBend.App
                 Symbol = '*'
             };
 
-            var seed = new Item(0, 0)
+            var seed = new Seed(0, 0, 1, SeedType.Boomer)
+            {
+                Name = "seed",
+                Color = RLColor.LightGreen,
+                Symbol = '.'
+            };
+
+            var seed_2 = new Seed(0, 0, 2, SeedType.Healer)
             {
                 Name = "seed",
                 Color = RLColor.LightGreen,
@@ -56,7 +63,9 @@ namespace CopperBend.App
             player.AddToInventory(hoe);
             player.AddToInventory(rock);
             player.AddToInventory(seed);
+            player.AddToInventory(seed_2);
             player.WieldedTool = hoe;
+
             return player;
         }
 

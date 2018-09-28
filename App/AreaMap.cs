@@ -38,7 +38,7 @@ namespace CopperBend.App
 
         public bool IsTillable(int x, int y)
         {
-            return Tiles[x, y].IsTillable();
+            return Tiles[x, y].IsTillable;
         }
         public bool IsTillable(Cell cell) => IsTillable(cell.X, cell.Y);
 

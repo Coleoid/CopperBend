@@ -124,10 +124,10 @@ namespace CopperBend.App
         }
         #endregion
 
-        #region Apply Tool
+        #region Apply Item
         private void enter_Apply(RLKeyPress key)
         {
-            MultiKeyCommand = Command_ApplyTool;
+            MultiKeyCommand = Command_ApplyItem;
             Command_Apply_State = Command_Apply_States.Starting;
             MultiKeyCommand(key);
         }
@@ -137,8 +137,8 @@ namespace CopperBend.App
             Command_Apply_State = Command_Apply_States.Unknown;
         }
 
-        private IItem _usingTool;
-        private void Command_ApplyTool(RLKeyPress key)
+        private IItem _usingItem;
+        private void Command_ApplyItem(RLKeyPress key)
         {
             switch (Command_Apply_State)
             {
@@ -153,8 +153,8 @@ namespace CopperBend.App
                     leave_Apply();
                     return;
                 }
-                _usingTool = Player.WieldedTool;
-                Console.Write($"Use {_usingTool.Name} in direction (or ? to pick a different tool): ");
+                _usingItem = Player.WieldedTool;
+                Console.Write($"Use {_usingItem.Name} in direction (or ? to pick a different tool): ");
                 Console.Out.Flush();
                 Command_Apply_State = Command_Apply_States.Direction_or_ChangeTool;
                 break;
@@ -198,7 +198,7 @@ namespace CopperBend.App
                     var item = Player.Inventory.ElementAt(selectedIndex);
                     if (item.IsUsable)
                     {
-                        _usingTool = item;
+                        _usingItem = item;
                     }
                     else
                     {
@@ -209,7 +209,7 @@ namespace CopperBend.App
                 break;
 
             default:
-                throw new Exception("Command_ApplyTool went to a weird place.");
+                throw new Exception($"Command_ApplyItem not ready for state {Command_Apply_State}.");
             }
         }
 
@@ -219,12 +219,12 @@ namespace CopperBend.App
             //  Successful?  (Skill/difficulty check)
             //  Effects.  If it did nothing, we wouldn't be here.
             //  Output.
-            switch (_usingTool.Name)
+            var targetCoord = newCoord(Player, direction);
+            var tile = Map[targetCoord];
+            switch (_usingItem.Name)
             {
             case "hoe":
-                var targetCoord = newCoord(Player, direction);
-                var tile = Map[targetCoord];
-                if (tile.IsTillable())
+                if (tile.IsTillable)
                 {
                     tile.Till();
                     Map.DisplayDirty = true;
@@ -235,11 +235,24 @@ namespace CopperBend.App
                     var cell = Map.GetCell(targetCoord.X, targetCoord.Y);
                     Console.Out.WriteLine($"Cannot hoe {tile.TerrainType}.");
                 }
+                break;
 
+            case "seed":
+                if (tile.IsTilled)
+                {
+                    tile.Till();
+                    Map.DisplayDirty = true;
+                    PlayerBusyFor(15);
+                }
+                else
+                {
+                    var cell = Map.GetCell(targetCoord.X, targetCoord.Y);
+                    Console.Out.WriteLine($"Cannot hoe {tile.TerrainType}.");
+                }
                 break;
 
             default:
-                throw new Exception($"Using tool [{_usingTool.Name}] not yet written.");
+                throw new Exception($"Using tool [{_usingItem.Name}] not yet written.");
             }
         }
 
@@ -349,6 +362,8 @@ namespace CopperBend.App
 
         private void Command_Inventory()
         {
+            var watcher = new ItemWatcher();
+
             Console.WriteLine("Inventory:");
             if (Player.Inventory.Count() == 0)
             {
@@ -359,10 +374,8 @@ namespace CopperBend.App
                 int asciiSlot = 97;
                 foreach (var item in Player.Inventory)
                 {
-                    var text = item.Quantity > 1
-                        ? $"{item.Quantity} {item.Name}s"
-                        : $"a {item.Name}";
-                    Console.WriteLine($"{(char)asciiSlot})  {text}");
+                    var description = watcher.Describe(item);
+                    Console.WriteLine($"{(char)asciiSlot})  {description}");
                     asciiSlot++;
                 }
             }

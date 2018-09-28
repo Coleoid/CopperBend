@@ -19,7 +19,7 @@ namespace CopperBend.App.Model
         public int Y { get; private set; }
 
 
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
         public Item(int x, int y)
         {
@@ -38,5 +38,12 @@ namespace CopperBend.App.Model
 
         public int Quantity { get; set; }
         public bool IsUsable { get; set; }
+
+        public virtual bool SameThingAs(IItem item)
+        {
+            return Name == item.Name
+                && GetType() == item.GetType();
+        }
+
     }
 }

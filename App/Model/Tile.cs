@@ -9,7 +9,7 @@ namespace CopperBend.App.Model
         TerrainType TerrainType { get; }
 
         RLColor ColorBackground { get; }
-        bool IsTillable();
+        bool IsTillable { get; }
         bool IsTilled { get; }
         void Till();
     }
@@ -28,18 +28,26 @@ namespace CopperBend.App.Model
             repr = TileRepresenter.OfTerrain(type);
         }
 
-        public bool IsTillable()
-        {
-            return TerrainType == TerrainType.Dirt;
-        }
+        #region Cultivation
 
-        public bool IsTilled { get; private set; }
+        public bool IsTillable => TerrainType == TerrainType.Dirt;
+
+        public bool IsTilled => TerrainType == TerrainType.TilledDirt;
 
         public void Till()
         {
-            IsTilled = true;
             SetTerrainType(TerrainType.TilledDirt);
         }
+
+        public IItem SownSeed { get; private set; }
+        public void Sow(IItem seed)
+        {
+            Guard.Against(!(seed is Seed));
+
+            SownSeed = seed;
+        }
+
+        #endregion
 
         private void SetTerrainType(TerrainType newType)
         {

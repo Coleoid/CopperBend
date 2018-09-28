@@ -55,6 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Basis\Guard.cs" />
     <Compile Include="Basis\IAreaMap.cs" />
     <Compile Include="Basis\IItem.cs" />
     <Compile Include="Behaviors\StandardAggressor.cs" />
@@ -71,10 +72,12 @@
     <Compile Include="Basis\ITile.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Basis\ScheduleEntry.cs" />
+    <Compile Include="Model\Seed.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Tile.cs" />
     <Compile Include="Scheduler.cs" />
+    <Compile Include="ItemWatcher.cs" />
     <Compile Include="TileRepresentation.cs" />
   </ItemGroup>
   <ItemGroup>

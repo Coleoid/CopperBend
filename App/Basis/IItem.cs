@@ -1,4 +1,5 @@
-﻿using RogueSharp;
+﻿using CopperBend.App.Model;
+using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -7,5 +8,15 @@ namespace CopperBend.App
         string Name { get; }
         int Quantity { get; set; }
         bool IsUsable { get; }
+        //ItemType ItemType { get; }
+
+        bool SameThingAs(IItem item);
+    }
+
+    public enum SeedType
+    {
+        Boomer,
+        Healer,
+        Thornfriend,
     }
 }

@@ -14,7 +14,8 @@ namespace CopperBend.App
         Dirt,
         TilledDirt,
         StoneWall,
-        Door,
+        ClosedDoor,
+        OpenDoor,
         Blight,
     }
 
@@ -32,16 +33,16 @@ namespace CopperBend.App
 
         public IAreaMap MapFromYAML(string mapYaml)
         {
-            var dto = DTOFromYAML(mapYaml);
-            var width = dto.Terrain.Max(t => t.Length);
-            var height = dto.Terrain.Count();
+            var data = DataFromYAML(mapYaml);
+            var width = data.Terrain.Max(t => t.Length);
+            var height = data.Terrain.Count();
             var map = new AreaMap(width, height);
 
-            map.Name = dto.Name;
+            map.Name = data.Name;
 
             for (int y = 0; y < height; y++)
             {
-                string row = dto.Terrain[y];
+                string row = data.Terrain[y];
                 for (int x = 0; x < width; x++)
                 {
                     var type = (x < row.Length)
@@ -50,12 +51,15 @@ namespace CopperBend.App
 
                     map.Tiles[x, y] = new Tile(x, y, type);
 
+                    bool stoneOrClosedDoor = (
+                        type == TerrainType.ClosedDoor
+                     || type == TerrainType.StoneWall );
+
                     //TODO:  push down/unify
-                    map.SetCellProperties(x,y,
-                        type != TerrainType.StoneWall
-                          && type != TerrainType.Door,
-                        type != TerrainType.StoneWall
-                        );
+                    map.SetCellProperties(x, y,
+                        !stoneOrClosedDoor,
+                        !stoneOrClosedDoor
+                    );
                 }
             }
 
@@ -70,7 +74,7 @@ name:  Demo
 legend:
  '.': Dirt
  '#': StoneWall
- '+': Door
+ '+': ClosedDoor
 
 terrain:
  - '################'
@@ -108,22 +112,22 @@ terrain:
         {
             if (symbol == ".") return TerrainType.Dirt;
             if (symbol == "#") return TerrainType.StoneWall;
-            if (symbol == "+") return TerrainType.Door;
+            if (symbol == "+") return TerrainType.ClosedDoor;
             return TerrainType.Unknown;
         }
 
-        public MapDTO DTOFromYAML(string mapYaml)
+        public MapData DataFromYAML(string mapYaml)
         {
             var reader = new StringReader(mapYaml);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(new CamelCaseNamingConvention())
                 .Build();
 
-            return deserializer.Deserialize<MapDTO>(reader);
+            return deserializer.Deserialize<MapData>(reader);
         }
     }
 
-    public class MapDTO
+    public class MapData
     {
         public string Name { get; set; }
         public Dictionary<string, string> Legend { get; set; }

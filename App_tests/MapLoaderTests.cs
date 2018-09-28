@@ -22,7 +22,7 @@ namespace CopperBend.App.tests
         public void YAML_to_DTO()
         {
             var loader = new MapLoader();
-            var dto = loader.DTOFromYAML(RoundRoomYaml);
+            var dto = loader.DataFromYAML(RoundRoomYaml);
 
             Assert.That(dto.Name, Is.EqualTo("The Round Room"));
             Assert.That(dto.Legend.Count(), Is.EqualTo(3));
@@ -49,7 +49,7 @@ namespace CopperBend.App.tests
         [Test]
         public void DTO_to_map()
         {
-            var dto = new MapDTO
+            var dto = new MapData
             {
                 Name = "The Round Room",
                 Terrain = new List<string> { "#" }
@@ -62,7 +62,7 @@ name:  The Round Room
 legend:
  '.': Dirt
  '#': StoneWall
- '+': Door
+ '+': ClosedDoor
 
 terrain:
  - ..####..

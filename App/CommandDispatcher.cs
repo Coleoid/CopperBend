@@ -104,6 +104,19 @@ namespace CopperBend.App
                 else
                     PlayerBusyFor(12);
             }
+            else
+            {
+                ITile tile = Map[coord];
+                if (tile.TerrainType == TerrainType.ClosedDoor)
+                {
+                    tile.OpenDoor();
+                    Map.SetIsWalkable(tile, true);
+                    Map.SetIsTransparent(tile, true);
+                    Map.DisplayDirty = true;
+                    Map.UpdatePlayerFieldOfView(player);
+                    PlayerBusyFor(4);
+                }
+            }
         }
         private void Command_DirectionAttack(IActor targetActor, ICoord coord)
         {

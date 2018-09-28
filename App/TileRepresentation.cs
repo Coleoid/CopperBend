@@ -91,7 +91,15 @@ namespace CopperBend.App
             };
             rep.SetForeground(Colors.Wall, Colors.WallSeen);
             rep.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            ReprOfTerrain[TerrainType.Door] = rep;
+            ReprOfTerrain[TerrainType.ClosedDoor] = rep;
+
+            rep = new TileRepresentation
+            {
+                Symbol = '-',
+            };
+            rep.SetForeground(Colors.Wall, Colors.WallSeen);
+            rep.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            ReprOfTerrain[TerrainType.OpenDoor] = rep;
         }
     }
 }

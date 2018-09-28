@@ -21,8 +21,8 @@ namespace CopperBend.App
 
         public ItemWatcher()
         {
-            //0.1  Upgrade takes random seed, so save can recreate from
-            //that and a list of bools for learned seeds
+            //TODO: Take randomizer seed, so that Save/Load
+            //  just needs that number to recreate the shuffles.
             var rnd = new Random();
             var shuffled = SeedAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
@@ -61,7 +61,7 @@ namespace CopperBend.App
             {
                 return Describe(seed.SeedType);
             }
-            else
+            else  //  potions, wands, scrolls are the genre staples...
             {
                 return "";
             }
@@ -76,7 +76,7 @@ namespace CopperBend.App
             var s = "s";
             if (item.Quantity == 1)
             {
-                //0.2 = checking list of exceptions
+                //WAIT: ('til we have exceptions) check list of exceptions
                 bool vowelSound = Regex.Match(adj, "^[aeiouy]", RegexOptions.IgnoreCase).Success;
                 prefix = vowelSound ? "an" : "a";
                 s = "";

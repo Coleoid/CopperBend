@@ -6,7 +6,7 @@ namespace CopperBend.App
     {
         public static void Against(bool condition, string message = "Condition violated")
         {
-            if (!condition) throw new Exception(message);
+            if (condition) throw new Exception(message);
         }
 
     }

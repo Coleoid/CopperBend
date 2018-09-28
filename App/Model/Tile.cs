@@ -1,19 +1,8 @@
 ﻿using System;
 using RLNET;
-using RogueSharp;
 
 namespace CopperBend.App.Model
 {
-    public interface ITile : IDrawable, ICoord
-    {
-        TerrainType TerrainType { get; }
-
-        RLColor ColorBackground { get; }
-        bool IsTillable { get; }
-        bool IsTilled { get; }
-        void Till();
-    }
-
     public class Tile : ITile
     {
         public bool IsInFOV;
@@ -43,11 +32,16 @@ namespace CopperBend.App.Model
         public void Sow(IItem seed)
         {
             Guard.Against(!(seed is Seed));
-
             SownSeed = seed;
         }
 
         #endregion
+
+        public void OpenDoor()
+        {
+            Guard.Against(TerrainType != TerrainType.ClosedDoor);
+            SetTerrainType(TerrainType.OpenDoor);
+        }
 
         private void SetTerrainType(TerrainType newType)
         {

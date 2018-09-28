@@ -14,7 +14,6 @@ namespace CopperBend.App
         bool DisplayDirty { get; set; }
 
         ITile this[ICoord coord] { get; }
-        //ITile this[int x, int y] { get; }
 
         bool SetActorPosition(IActor actor, int x, int y);
         bool SetActorCoord(IActor player, ICoord coord);

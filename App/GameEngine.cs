@@ -73,26 +73,9 @@ namespace CopperBend.App
                 InputQueue.Enqueue(key);
             }
 
-            while (Dispatcher.ReadyForUserInput && InputQueue.Any())
-            {
-                Dispatcher.HandlePlayerCommands();
-            }
+            Dispatcher.Next();
 
-            //  if the player is on the schedule, work the schedule
-            while (!Dispatcher.ReadyForUserInput)
-            {
-                var nextUp = Scheduler.GetNext();
 
-                if (nextUp == null)
-                    Debugger.Break();
-                //  The scheduled event is called here
-                var newEvent = nextUp.Action(nextUp, Map, Player);
-                //  ...which may immediately schedule another event
-                if (newEvent != null)
-                    Scheduler.Add(newEvent);
-            }
-
-            //FUTURE:  background real-time animation goes in around here
         }
     }
 }

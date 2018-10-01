@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CopperBend.App.Model;
 using RLNET;
@@ -7,6 +8,14 @@ using RogueSharp;
 
 namespace CopperBend.App
 {
+    public enum DispatcherPhase
+    {
+        Unknown = 0,
+        MessagesPending,
+        PlayerReady,
+        Schedule
+    }
+
     public class CommandDispatcher
     {
         private bool InMultiKeyCommand
@@ -15,23 +24,93 @@ namespace CopperBend.App
         }
         private Action<RLKeyPress> MultiKeyCommand = null;
         public bool ReadyForUserInput = true;
-
+        public bool WaitingToFinishMessages = false;
 
         private Queue<RLKeyPress> InputQueue;
         public Actor Player { get; private set; }
         public IAreaMap Map { get; private set; }
         public Scheduler Scheduler { get; private set; }
-
+        public DispatcherPhase Phase { get; private set; }
+        public Queue<string> MessageQueue { get; set; }
         public CommandDispatcher(Queue<RLKeyPress> inputQueue, Scheduler scheduler)
         {
             InputQueue = inputQueue;
             Scheduler = scheduler;
+            MessageQueue = new Queue<string>();
+
+            MessageQueue.Enqueue("I wake up.  Cold--frost on the ground, except where I was lying.");
+            MessageQueue.Enqueue("Everything hurts when I stand up.");
+            MessageQueue.Enqueue("The sky... says it's morning.  A small farmhouse to the east.");
+            MessageQueue.Enqueue("Something wrong with the ground to the west, and the north.");
         }
 
-        internal void Init(IAreaMap map, Actor player)
+        public void Init(IAreaMap map, Actor player)
         {
             Map = map;
             Player = player;
+            Phase = DispatcherPhase.MessagesPending;
+        }
+
+        public void Next()
+        {
+            switch (Phase)
+            {
+            //  When we have more messages to show
+            case DispatcherPhase.MessagesPending:
+                while (WaitingToFinishMessages && InputQueue.Any())
+                {
+                    HandleMessageDisplay();
+                }
+                break;
+
+            //  When the player is ready to act
+            case DispatcherPhase.PlayerReady:
+                while (ReadyForUserInput && InputQueue.Any())
+                {
+                    HandlePlayerCommands();
+                }
+                break;
+
+            case DispatcherPhase.Schedule:
+                var nextUp = Scheduler.GetNext();
+
+                if (nextUp == null)
+                    Debugger.Break();
+                //  The scheduled event is called here
+                var newEvent = nextUp.Action(nextUp, Map, Player);
+                //  ...which may immediately schedule another event
+                if (newEvent != null)
+                    Scheduler.Add(newEvent);
+                break;
+
+            case DispatcherPhase.Unknown:
+                throw new Exception("Dispatcher phase unknown, perhaps Init() was missed.");
+
+            default:
+                throw new Exception($"Dispatcher for phase [{Phase}] not written yet.");
+            }
+
+            //FUTURE:  background real-time animation goes in around here?
+        }
+
+        public void HandleMessageDisplay()
+        {
+            while (InputQueue.Any() && Phase == DispatcherPhase.MessagesPending)
+            {
+                var key = InputQueue.Dequeue();
+
+                
+                //INPROG
+
+                // we could change state to PlayerReady or Schedule, here (rehomed later...)
+                if (!MessageQueue.Any())
+                {
+                    if (ReadyForUserInput)
+                    {
+                        Phase = DispatcherPhase.PlayerReady;
+                    }
+                }
+            }
         }
 
         public void HandlePlayerCommands()
@@ -573,3 +652,4 @@ namespace CopperBend.App
         }
     }
 }
+

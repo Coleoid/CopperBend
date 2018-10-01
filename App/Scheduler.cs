@@ -22,7 +22,7 @@ namespace CopperBend.App
             _schedule = new SortedDictionary<int, List<ScheduleEntry>>();
         }
 
-        // New entry goes in at the current time plus .TicksUntilNextAction
+        //  Entry scheduled at CurrentTick plus .TicksUntilNextAction
         public void Add(ScheduleEntry toAct)
         {
             int actionTick = CurrentTick + toAct.TicksUntilNextAction;
@@ -33,7 +33,7 @@ namespace CopperBend.App
             _schedule[actionTick].Add(toAct);
         }
 
-        //  Returns the entity scheduled to act next, removed from the schedule
+        //  Removes and returns the entity scheduled to act next
         public ScheduleEntry GetNext()
         {
             if (_schedule.Count() == 0) return null;
@@ -50,7 +50,6 @@ namespace CopperBend.App
             return nextDoer;
         }
 
-        // Remove a specific object from the schedule.
         public void Remove(ScheduleEntry scheduleEntry)
         {
             foreach (var busyTick in _schedule)

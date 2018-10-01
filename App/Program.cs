@@ -75,8 +75,8 @@ namespace CopperBend.App
             {
                 Title = "Copper Bend",
                 BitmapFile = "assets\\terminal8x8.png",
-                Width = 60,
-                Height = 40,
+                Width = 80,
+                Height = 80,
                 CharWidth = 8,
                 CharHeight = 8,
                 Scale = 1f,

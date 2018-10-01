@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using CopperBend.App.Model;
 using RLNET;
 
@@ -74,8 +72,6 @@ namespace CopperBend.App
             }
 
             Dispatcher.Next();
-
-
         }
     }
 }

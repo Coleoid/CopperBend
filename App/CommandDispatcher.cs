@@ -32,16 +32,17 @@ namespace CopperBend.App
         public Scheduler Scheduler { get; private set; }
         public DispatcherPhase Phase { get; private set; }
         public Queue<string> MessageQueue { get; set; }
+
         public CommandDispatcher(Queue<RLKeyPress> inputQueue, Scheduler scheduler)
         {
             InputQueue = inputQueue;
             Scheduler = scheduler;
             MessageQueue = new Queue<string>();
 
-            MessageQueue.Enqueue("I wake up.  Cold--frost on the ground, except where I was lying.");
-            MessageQueue.Enqueue("Everything hurts when I stand up.");
-            MessageQueue.Enqueue("The sky... says it's morning.  A small farmhouse to the east.");
-            MessageQueue.Enqueue("Something wrong with the ground to the west, and the north.");
+            Message("I wake up.  Cold--frost on the ground, except where I was lying.");
+            Message("Everything hurts when I stand up.");
+            Message("The sky... says it's morning.  A small farmhouse to the east.");
+            Message("Something wrong with the ground to the west, and the north.");
         }
 
         public void Init(IAreaMap map, Actor player)
@@ -59,7 +60,7 @@ namespace CopperBend.App
             case DispatcherPhase.MessagesPending:
                 while (WaitingToFinishMessages && InputQueue.Any())
                 {
-                    HandleMessageDisplay();
+                    HandlePendingMessages();
                 }
                 break;
 
@@ -93,24 +94,73 @@ namespace CopperBend.App
             //FUTURE:  background real-time animation goes in around here?
         }
 
-        public void HandleMessageDisplay()
+        private int ShownMessages = 0;
+
+        public void Message(string newMessage)
         {
-            while (InputQueue.Any() && Phase == DispatcherPhase.MessagesPending)
+            MessageQueue.Enqueue(newMessage);
+            ShowMessages();
+        }
+
+        public void ShowMessages()
+        {
+            while (!WaitingToFinishMessages && MessageQueue.Any())
             {
-                var key = InputQueue.Dequeue();
-
-                
-                //INPROG
-
-                // we could change state to PlayerReady or Schedule, here (rehomed later...)
-                if (!MessageQueue.Any())
+                var nextMessage = MessageQueue.Dequeue();
+                Console.Out.WriteLine(nextMessage);
+                ShownMessages++;
+                if (ShownMessages >= 3)
                 {
-                    if (ReadyForUserInput)
-                    {
-                        Phase = DispatcherPhase.PlayerReady;
-                    }
+                    Console.Out.WriteLine("-- more --");
+                    WaitingToFinishMessages = true;
+                    Phase = DispatcherPhase.MessagesPending;
                 }
             }
+
+            //if (!MessageQueue.Any())
+            //{
+            //    WaitingToFinishMessages = false;
+            //}
+        }
+
+        public void ClearMessagePanel()
+        {
+            //0.1
+            ShownMessages = 0;
+            WaitingToFinishMessages = false;
+        }
+
+        public void HandlePendingMessages()
+        {
+            //  We have exactly one reason to be here.
+            if (Phase != DispatcherPhase.MessagesPending)
+            {
+                throw new Exception("Shouldn't try to handle pending messages when there are none.");
+                //return;
+            }
+
+            while (WaitingToFinishMessages)
+            {
+                //  Advance to next space keypress, if any
+                RLKeyPress key = null;
+                while (InputQueue.Any() && key?.Key != RLKey.Space)
+                {
+                    key = InputQueue.Dequeue();
+                }
+
+                //  If we run out of keypresses before we find a space,
+                // the rest of the messages remain pending
+                if (key?.Key != RLKey.Space) return;
+
+                //  Otherwise, show more messages
+                ClearMessagePanel();
+                ShowMessages();
+            }
+
+            //  If we reach this point, we cleared all messages
+            Phase = ReadyForUserInput
+                ? DispatcherPhase.PlayerReady
+                : DispatcherPhase.Schedule;
         }
 
         public void HandlePlayerCommands()
@@ -588,11 +638,13 @@ namespace CopperBend.App
         {
             ReadyForUserInput = false;
             Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
+            Phase = DispatcherPhase.Schedule;
         }
 
         private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IAreaMap map, IActor player)
         {
             ReadyForUserInput = true;
+            Phase = DispatcherPhase.PlayerReady;
             return null;
         }
 
@@ -652,4 +704,3 @@ namespace CopperBend.App
         }
     }
 }
-

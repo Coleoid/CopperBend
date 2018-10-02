@@ -25,6 +25,8 @@ namespace CopperBend.App
         //  Entry scheduled at CurrentTick plus .TicksUntilNextAction
         public void Add(ScheduleEntry toAct)
         {
+            if (toAct == null) return;
+
             int actionTick = CurrentTick + toAct.TicksUntilNextAction;
             if (!_schedule.ContainsKey(actionTick))
             {

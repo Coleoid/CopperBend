@@ -6,7 +6,7 @@ namespace CopperBend.App.Behaviors
 {
     public interface IBehavior
     {
-        ScheduleEntry Act(ScheduleEntry entry, IAreaMap map, IActor player);
+        ScheduleEntry Act(ScheduleEntry entry, IGameState state);
     }
 
     public class StandardMoveAndAttack : IBehavior
@@ -14,13 +14,13 @@ namespace CopperBend.App.Behaviors
         private bool IsAlerted = false;
         private int TurnsAlerted = 0;
 
-        public ScheduleEntry Act(ScheduleEntry entry, IAreaMap map, IActor player)
+        public ScheduleEntry Act(ScheduleEntry entry, IGameState state)
         {
             var actor = entry.Actor;
 
-            FieldOfView monsterFov = new FieldOfView(map);
+            FieldOfView monsterFov = new FieldOfView(state.Map);
             monsterFov.ComputeFov(actor.X, actor.Y, actor.Awareness, true);
-            bool isInFOV = monsterFov.IsInFov(player.X, player.Y);
+            bool isInFOV = monsterFov.IsInFov(state.Player.X, state.Player.Y);
             
             if (!IsAlerted)
             {
@@ -37,7 +37,7 @@ namespace CopperBend.App.Behaviors
                 if (isInFOV)
                 {
                     TurnsAlerted = 1;
-                    AttemptMoveAttack(actor, map, player);
+                    AttemptMoveAttack(actor, state.Map, state.Player);
                 }
                 else
                 {

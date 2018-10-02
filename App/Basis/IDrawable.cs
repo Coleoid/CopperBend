@@ -9,5 +9,7 @@ namespace CopperBend.App
         char Symbol { get; }
 
         void MoveTo(int x, int y);
+
+        //NEXT: void MoveTo(ICoord coord);
     }
 }

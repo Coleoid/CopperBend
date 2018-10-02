@@ -6,13 +6,13 @@ namespace CopperBend.App
     {
         public int TicksUntilNextAction { get; private set; }
 
-        public Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Action { get; private set; }
+        public Func<ScheduleEntry, IGameState, ScheduleEntry> Action { get; private set; }
 
         public IActor Actor { get; private set; }
 
         public ScheduleEntry(
             int ticks, 
-            Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> action)
+            Func<ScheduleEntry, IGameState, ScheduleEntry> action)
         {
             TicksUntilNextAction = ticks;
             Action = action;

@@ -8,14 +8,6 @@ using RogueSharp;
 
 namespace CopperBend.App
 {
-    public enum DispatcherPhase
-    {
-        Unknown = 0,
-        MessagesPending,
-        PlayerReady,
-        Schedule
-    }
-
     public class CommandDispatcher
     {
         private bool InMultiKeyCommand
@@ -23,15 +15,14 @@ namespace CopperBend.App
             get => MultiKeyCommand != null;
         }
         private Action<RLKeyPress> MultiKeyCommand = null;
-        public bool ReadyForUserInput = true;
-        public bool WaitingToFinishMessages = false;
+        public bool WaitingAtMorePrompt = false;
 
         private Queue<RLKeyPress> InputQueue;
-        public Actor Player { get; private set; }
+        public IActor Player { get; private set; }
         public IAreaMap Map { get; private set; }
         public Scheduler Scheduler { get; private set; }
-        public DispatcherPhase Phase { get; private set; }
         public Queue<string> MessageQueue { get; set; }
+        public IGameState GameState { get; private set; }
 
         public CommandDispatcher(Queue<RLKeyPress> inputQueue, Scheduler scheduler)
         {
@@ -40,58 +31,16 @@ namespace CopperBend.App
             MessageQueue = new Queue<string>();
         }
 
-        public void Init(IAreaMap map, Actor player)
+        public void Init(IGameState gameState)
         {
-            Map = map;
-            Player = player;
-            Phase = DispatcherPhase.MessagesPending;
+            GameState = gameState;
+            Player = gameState.Player;
+            Map = gameState.Map;
 
             Message("I wake up.  Cold--frost on the ground, except where I was lying.");
             Message("Everything hurts when I stand up.");
             Message("The sky... says it's morning.  A small farmhouse to the east.");
             Message("Something real wrong with the ground to the west, and the north.");
-        }
-
-        public void Next()
-        {
-            switch (Phase)
-            {
-            //  When we have more messages to show
-            case DispatcherPhase.MessagesPending:
-                while (WaitingToFinishMessages && InputQueue.Any())
-                {
-                    HandlePendingMessages();
-                }
-                break;
-
-            //  When the player is ready to act
-            case DispatcherPhase.PlayerReady:
-                while (ReadyForUserInput && InputQueue.Any())
-                {
-                    HandlePlayerCommands();
-                }
-                break;
-
-            case DispatcherPhase.Schedule:
-                var nextUp = Scheduler.GetNext();
-
-                if (nextUp == null)
-                    Debugger.Break();
-                //  The scheduled event is called here
-                var newEvent = nextUp.Action(nextUp, Map, Player);
-                //  ...which may immediately schedule another event
-                if (newEvent != null)
-                    Scheduler.Add(newEvent);
-                break;
-
-            case DispatcherPhase.Unknown:
-                throw new Exception("Dispatcher phase unknown, perhaps Init() was missed.");
-
-            default:
-                throw new Exception($"Dispatcher for phase [{Phase}] not written yet.");
-            }
-
-            //FUTURE:  background real-time animation goes in around here?
         }
 
 
@@ -106,17 +55,19 @@ namespace CopperBend.App
 
         public void ShowMessages()
         {
-            while (!WaitingToFinishMessages && MessageQueue.Any())
+            while (!WaitingAtMorePrompt && MessageQueue.Any())
             {
-                var nextMessage = MessageQueue.Dequeue();
-                Console.Out.WriteLine(nextMessage);
-                ShownMessages++;
                 if (ShownMessages >= 3)
                 {
                     Console.Out.WriteLine("-- more --");
-                    WaitingToFinishMessages = true;
-                    Phase = DispatcherPhase.MessagesPending;
+                    WaitingAtMorePrompt = true;
+                    GameState.Mode = GameMode.MessagesPending;
+                    return;
                 }
+
+                var nextMessage = MessageQueue.Dequeue();
+                Console.Out.WriteLine(nextMessage);
+                ShownMessages++;
             }
         }
 
@@ -124,19 +75,14 @@ namespace CopperBend.App
         {
             //0.1
             ShownMessages = 0;
-            WaitingToFinishMessages = false;
+            WaitingAtMorePrompt = false;
         }
 
         public void HandlePendingMessages()
         {
-            //  We have exactly one reason to be here.
-            if (Phase != DispatcherPhase.MessagesPending)
-            {
-                throw new Exception("Shouldn't try to handle pending messages when there are none.");
-                //return;
-            }
+            if (!WaitingAtMorePrompt) return;
 
-            while (WaitingToFinishMessages)
+            while (WaitingAtMorePrompt)
             {
                 //  Advance to next space keypress, if any
                 RLKeyPress key = null;
@@ -155,14 +101,15 @@ namespace CopperBend.App
             }
 
             //  If we reach this point, we cleared all messages
-            Phase = ReadyForUserInput
-                ? DispatcherPhase.PlayerReady
-                : DispatcherPhase.Schedule;
+            GameState.Mode = IsPlayerScheduled ? 
+                GameMode.Schedule : GameMode.PlayerReady;
         }
         #endregion
 
         public void HandlePlayerCommands()
         {
+            if (!InputQueue.Any()) return;
+
             var key = InputQueue.Dequeue();
             if (InMultiKeyCommand)
             {
@@ -201,7 +148,10 @@ namespace CopperBend.App
                 Command_PickUp();
             }
 
-            //TODO: all the other commands
+            //TODO: c, direction -> close door
+            //TODO: l, direction, direction ... -> look around the map
+            //TODO: l, ?, a-z -> look at inventory item
+            //TODO: ...
         }
 
         #region Direction
@@ -373,7 +323,7 @@ namespace CopperBend.App
                 else
                 {
                     var cell = Map.GetCell(targetCoord.X, targetCoord.Y);
-                    Console.Out.WriteLine($"Cannot hoe {tile.TerrainType}.");
+                    WriteLine($"Cannot hoe {tile.TerrainType}.");
                 }
                 break;
 
@@ -387,7 +337,7 @@ namespace CopperBend.App
                 else
                 {
                     var cell = Map.GetCell(targetCoord.X, targetCoord.Y);
-                    Console.Out.WriteLine($"Cannot hoe {tile.TerrainType}.");
+                    WriteLine($"Cannot hoe {tile.TerrainType}.");
                 }
                 break;
 
@@ -428,22 +378,20 @@ namespace CopperBend.App
                 throw new Exception("Missed Drop setup somewhere.");
 
             case Command_Drop_States.Starting:
-                Console.Write("Drop: ");
-                Console.Out.Flush();
+                Prompt("Drop: ");
                 Command_Drop_State = Command_Drop_States.Expecting_Selection;
                 break;
 
             case Command_Drop_States.Expecting_Selection:
                 if (key.Key == RLKey.Escape)
                 {
-                    Console.WriteLine("nothing.");
+                    WriteLine("nothing.");
                     leave_Drop();
                 }
                 else if (key.Key == RLKey.Slash && key.Shift)
                 {
                     Command_Inventory();
-                    Console.Write("Drop: ");
-                    Console.Out.Flush();
+                    Prompt("Drop: ");
                 }
                 else
                 {
@@ -455,12 +403,7 @@ namespace CopperBend.App
                         IItem item = Player.RemoveFromInventory(inventorySlot);
                         item.MoveTo(Player.X, Player.Y);
                         Map.Items.Add(item);
-                        Console.WriteLine(item.Name);
-                        if (Player.WieldedTool == item)
-                        {
-                            Console.WriteLine($"Note:  No longer wielding the {item.Name}.");
-                            Player.WieldedTool = null;
-                        }
+                        WriteLine(item.Name);
 
                         PlayerBusyFor(1);
 
@@ -468,9 +411,8 @@ namespace CopperBend.App
                     }
                     else
                     {
-                        Console.WriteLine($"No item labelled '{key.Char.Value}'.");
-                        Console.Write("Drop: ");
-                        Console.Out.Flush();
+                        WriteLine($"No item labelled '{key.Char.Value}'.");
+                        Prompt("Drop: ");
                     }
                 }
                 break;
@@ -487,6 +429,17 @@ namespace CopperBend.App
         }
         private Command_Drop_States Command_Drop_State;
         #endregion
+
+        public void WriteLine(string text)
+        {
+            Console.Out.WriteLine(text);
+        }
+
+        public void Prompt(string text)
+        {
+            Console.Out.Write(text);
+            Console.Out.Flush();
+        }
 
         private void Command_Help()
         {
@@ -542,8 +495,7 @@ namespace CopperBend.App
                 throw new Exception("Missed Wield setup somewhere.");
 
             case Command_Wield_States.Starting:
-                Console.Write("Wield ('?' to show inventory, '.' to empty hands): ");
-                Console.Out.Flush();
+                Prompt("Wield ('?' to show inventory, '.' to empty hands): ");
                 Command_Wield_State = Command_Wield_States.Expecting_Selection;
                 break;
 
@@ -553,20 +505,19 @@ namespace CopperBend.App
                     var name = Player.WieldedTool == null
                         ? "bare hands"
                         : Player.WieldedTool.Name;
-                    Console.WriteLine($"unchanged, {name}.");
+                    WriteLine($"unchanged, {name}.");
                     leave_Wield();
                 }
                 else if (key.Key == RLKey.Period)
                 {
-                    Console.WriteLine("bare hands");
-                    Player.WieldedTool = null;
+                    WriteLine("bare hands");
+                    Player.Wield(null);
                     leave_Wield();
                 }
                 else if (key.Key == RLKey.Slash && key.Shift)
                 {
                     Command_Inventory();
-                    Console.Write("Wield: ");
-                    Console.Out.Flush();
+                    Prompt("Wield: ");
                 }
                 else
                 {
@@ -578,7 +529,7 @@ namespace CopperBend.App
                         // we can wield even silly stuff, until it's a problem.
                         var item = Player.Inventory.ElementAt(inventorySlot);
 
-                        Player.WieldedTool = item;
+                        Player.Wield(item);
                         Console.WriteLine(item.Name);
                         PlayerBusyFor(4);
 
@@ -632,17 +583,18 @@ namespace CopperBend.App
             return asciiNum - 97;
         }
 
+        private bool IsPlayerScheduled = false;
         private void PlayerBusyFor(int ticks)
         {
-            ReadyForUserInput = false;
             Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
-            Phase = DispatcherPhase.Schedule;
+            GameState.Mode = GameMode.Schedule;
+            IsPlayerScheduled = true;
         }
 
-        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IAreaMap map, IActor player)
+        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IGameState state)
         {
-            ReadyForUserInput = true;
-            Phase = DispatcherPhase.PlayerReady;
+            state.Mode = GameMode.PlayerReady;
+            IsPlayerScheduled = false;
             return null;
         }
 

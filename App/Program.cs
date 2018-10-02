@@ -9,20 +9,12 @@ namespace CopperBend.App
         static void Main(string[] args)
         {
             var rootConsole = InitRootConsole();
-            var game = new GameEngine(rootConsole);
+            var player = InitPlayer();
+            var game = new GameEngine(rootConsole, player);
 
             var loader = new MapLoader();
             var map = loader.DemoMap();
             game.LoadMap(map);
-
-            var player = InitPlayer();
-
-            game.Player = player;
-            map.Actors.Add(player);
-
-
-            //  currently needed, yet seems like it shouldn't be here.
-            map.UpdatePlayerFieldOfView(player);
 
             game.Run();
         }

@@ -15,6 +15,10 @@ namespace CopperBend.App
         int Health { get; }
         void Damage(int v);
 
-        Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; }
+        Func<ScheduleEntry, IGameState, ScheduleEntry> Strategy { get; }
+        IItem WieldedTool { get; }
+
+        IItem RemoveFromInventory(int inventorySlot);
+        void Wield(IItem item);
     }
 }

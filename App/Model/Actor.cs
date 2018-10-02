@@ -51,7 +51,7 @@ namespace CopperBend.App.Model
             Health -= amount;
         }
 
-        public Func<ScheduleEntry, IAreaMap, IActor, ScheduleEntry> Strategy { get; private set; }
+        public Func<ScheduleEntry, IGameState, ScheduleEntry> Strategy { get; private set; }
         public IItem WieldedTool { get; internal set; }
 
         public void AddToInventory(IItem topItem)
@@ -65,11 +65,23 @@ namespace CopperBend.App.Model
                 existingItem.Quantity += topItem.Quantity;
         }
 
-        internal IItem RemoveFromInventory(int inventorySlot)
+        public IItem RemoveFromInventory(int inventorySlot)
         {
             var item = InventoryList.ElementAt(inventorySlot);
             InventoryList.RemoveAt(inventorySlot);
+
+            if (WieldedTool == item)
+            {
+                Console.Out.WriteLine($"Note:  No longer wielding the {item.Name}.");
+                WieldedTool = null;
+            }
+
             return item;
+        }
+
+        public void Wield(IItem item)
+        {
+            WieldedTool = item;
         }
     }
 }

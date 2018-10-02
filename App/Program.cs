@@ -14,6 +14,7 @@ namespace CopperBend.App
 
             var loader = new MapLoader();
             var map = loader.DemoMap();
+            map.ViewpointActor = player;
             game.LoadMap(map);
 
             game.Run();

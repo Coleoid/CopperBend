@@ -11,6 +11,7 @@ namespace CopperBend.App
         ITile[,] Tiles { get; set; }
         List<IItem> Items { get; set; }
         List<IActor> Actors { get; set; }
+        IActor ViewpointActor { get; set; }
         bool DisplayDirty { get; set; }
 
         ITile this[ICoord coord] { get; }

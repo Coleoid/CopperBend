@@ -24,6 +24,8 @@ namespace CopperBend.App
         public List<IItem> Items { get; set; }
 
         public List<IActor> Actors { get; set; }
+        public IActor ViewpointActor { get; set; }
+
         public bool DisplayDirty { get; set; }
 
 
@@ -70,7 +72,8 @@ namespace CopperBend.App
             var fg = rep.Foreground(isInFOV);
             var bg = rep.Background(isInFOV);
 
-            console.Set(coord.X, coord.Y, fg, bg, rep.Symbol);
+            //console.Set(coord.X, coord.Y, fg, bg, rep.Symbol);
+            RelativeDraw(console, coord, fg, bg, rep.Symbol);
         }
 
         private void Draw(RLConsole console, IDrawable thing)
@@ -82,8 +85,20 @@ namespace CopperBend.App
                 : (IDrawable)Tiles[thing.X, thing.Y];
 
             //TODO: for background, get tile.bg.inFOV
-            console.Set(show.X, show.Y, show.Color, Colors.FloorBackgroundSeen, show.Symbol);
+            //console.Set(show.X, show.Y, show.Color, Colors.FloorBackgroundSeen, show.Symbol);
+            RelativeDraw(console, show, show.Color, Colors.FloorBackgroundSeen, show.Symbol);
         }
+
+        private void RelativeDraw(RLConsole console, ICoord absoluteCoord, RLColor fgColor, RLColor bgColor, char symbol)
+        {
+            var aX = absoluteCoord.X - ViewpointActor.X + Width / 2;
+            var aY = absoluteCoord.Y - ViewpointActor.Y + Height / 2;
+            if (aX >= 0 && aX < Width && aY >= 0 && aY < Height)
+            {
+                console.Set(aX, aY, fgColor, bgColor, symbol);
+            }
+        }
+
 
         // Returns true when target cell is walkable and move succeeds
         public bool SetActorPosition(IActor actor, int x, int y)

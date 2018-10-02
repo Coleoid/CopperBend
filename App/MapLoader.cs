@@ -66,6 +66,55 @@ namespace CopperBend.App
             return map;
         }
 
+
+        internal IAreaMap FarmMap()
+        {
+            string FarmMapYaml = @"---
+name:  Demo
+
+legend:
+ '.': Dirt
+ '#': StoneWall
+ '+': ClosedDoor
+
+terrain:
+ - '##################################'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '#................................#'
+ - '##################################'
+";
+            var map = MapFromYAML(FarmMapYaml);
+
+            var rock = new Item(5, 1)
+            {
+                Name = "rock",
+                Color = Palette.DbOldStone,
+                Symbol = '*',
+            };
+            map.Items.Add(rock);
+
+            var glom = new Actor(4, 1)
+            {
+                Name = "glom",
+                Symbol = 'g',
+                Color = RLColor.Green,
+            };
+            map.Actors.Add(glom);
+
+            return map;
+        }
+
+
         internal IAreaMap DemoMap()
         {
             string DemoMapYaml = @"---

@@ -38,11 +38,6 @@ namespace CopperBend.App
             InputQueue = inputQueue;
             Scheduler = scheduler;
             MessageQueue = new Queue<string>();
-
-            Message("I wake up.  Cold--frost on the ground, except where I was lying.");
-            Message("Everything hurts when I stand up.");
-            Message("The sky... says it's morning.  A small farmhouse to the east.");
-            Message("Something wrong with the ground to the west, and the north.");
         }
 
         public void Init(IAreaMap map, Actor player)
@@ -50,6 +45,11 @@ namespace CopperBend.App
             Map = map;
             Player = player;
             Phase = DispatcherPhase.MessagesPending;
+
+            Message("I wake up.  Cold--frost on the ground, except where I was lying.");
+            Message("Everything hurts when I stand up.");
+            Message("The sky... says it's morning.  A small farmhouse to the east.");
+            Message("Something real wrong with the ground to the west, and the north.");
         }
 
         public void Next()
@@ -94,6 +94,8 @@ namespace CopperBend.App
             //FUTURE:  background real-time animation goes in around here?
         }
 
+
+        #region Messages
         private int ShownMessages = 0;
 
         public void Message(string newMessage)
@@ -116,11 +118,6 @@ namespace CopperBend.App
                     Phase = DispatcherPhase.MessagesPending;
                 }
             }
-
-            //if (!MessageQueue.Any())
-            //{
-            //    WaitingToFinishMessages = false;
-            //}
         }
 
         public void ClearMessagePanel()
@@ -162,6 +159,7 @@ namespace CopperBend.App
                 ? DispatcherPhase.PlayerReady
                 : DispatcherPhase.Schedule;
         }
+        #endregion
 
         public void HandlePlayerCommands()
         {

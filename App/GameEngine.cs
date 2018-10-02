@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using CopperBend.App.Model;
 using RLNET;
 
@@ -33,7 +32,7 @@ namespace CopperBend.App
         public IAreaMap Map { get; private set; }
         public IActor Player { get; private set; }
 
-        public GameEngine(RLRootConsole console, Player player)
+        public GameEngine(RLRootConsole console, Actor player)
         {
             GameConsole = console;
             Player = player;
@@ -69,6 +68,8 @@ namespace CopperBend.App
 
         private void onRender(object sender, UpdateEventArgs e)
         {
+            //FUTURE:  real-time (background) animation around here
+
             //  If the map hasn't changed, why render?
             if (!Map.DisplayDirty) return;
 
@@ -95,24 +96,24 @@ namespace CopperBend.App
 
             ActOnMode();
         }
-        public GameMode Mode { get; set; }
 
+        public GameMode Mode { get; set; }
         private void ActOnMode()
         {
-            //  The game is in one of its modes at a time,
-            //  three of which are normal game play
             switch (Mode)
             {
-            //  When we have more messages to show
+            //FUTURE:  A game menu mode blocking all other action goes here
+            //  Messages waiting for the player will stop anything else
             case GameMode.MessagesPending:
                 Dispatcher.HandlePendingMessages();
                 break;
 
-            //  When the player is ready to act
+            //  Waiting for player actions puts scheduled events on hold
             case GameMode.PlayerReady:
                 Dispatcher.HandlePlayerCommands();
                 break;
 
+            //  When the player has committed to a slow action, everything happens
             case GameMode.Schedule:
                 var nextUp = Scheduler.GetNext();
 
@@ -131,8 +132,6 @@ namespace CopperBend.App
             default:
                 throw new Exception($"Game mode [{Mode}] not written yet.");
             }
-
-            //FUTURE:  background real-time animation goes in around here?
         }
     }
 }

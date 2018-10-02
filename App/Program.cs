@@ -19,9 +19,15 @@ namespace CopperBend.App
             game.Run();
         }
 
-        private static Player InitPlayer()
+        private static Actor InitPlayer()
         {
-            var player = new Player();
+            var player = new Actor(1, 1)
+            {
+                Name = "Our Dude",
+                Symbol = '@',
+                Color = Palette.DbLight,
+                Awareness = 4
+            };
 
             var hoe = new Item(0, 0)
             {
@@ -66,11 +72,11 @@ namespace CopperBend.App
             var consoleSettings = new RLSettings
             {
                 Title = "Copper Bend",
-                BitmapFile = "assets\\terminal8x8.png",
-                Width = 80,
-                Height = 80,
-                CharWidth = 8,
-                CharHeight = 8,
+                BitmapFile = "assets\\terminal12x12_gs_ro.png",
+                Width = 60,
+                Height = 60,
+                CharWidth = 12,
+                CharHeight = 12,
                 Scale = 1f,
                 WindowBorder = RLWindowBorder.Resizable,
                 ResizeType = RLResizeType.ResizeCells,

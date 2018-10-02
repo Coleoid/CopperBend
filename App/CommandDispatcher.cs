@@ -8,7 +8,7 @@ using RogueSharp;
 
 namespace CopperBend.App
 {
-    public class CommandDispatcher
+    public partial class CommandDispatcher
     {
         private bool InMultiKeyCommand
         {
@@ -398,22 +398,25 @@ namespace CopperBend.App
                     int inventorySlot = AlphaIndexOfKeyPress(key);
                     if (inventorySlot == -1) break;
 
-                    if (Player.Inventory.Count() > inventorySlot)
-                    {
-                        IItem item = Player.RemoveFromInventory(inventorySlot);
-                        item.MoveTo(Player.X, Player.Y);
-                        Map.Items.Add(item);
-                        WriteLine(item.Name);
+                    var wieldedItem = Player.WieldedTool;
+                    IItem item = Player.RemoveFromInventory(inventorySlot);
 
-                        PlayerBusyFor(1);
-
-                        leave_Drop();
-                    }
-                    else
+                    if (item == null)
                     {
                         WriteLine($"No item labelled '{key.Char.Value}'.");
                         Prompt("Drop: ");
+                        break;
                     }
+
+                    WriteLine(item.Name);
+                    if (wieldedItem == item)
+                        WriteLine($"Note:  No longer wielding the {item.Name}.");
+
+                    item.MoveTo(Player.X, Player.Y);
+                    Map.Items.Add(item);
+                    PlayerBusyFor(1);
+
+                    leave_Drop();
                 }
                 break;
 
@@ -430,27 +433,16 @@ namespace CopperBend.App
         private Command_Drop_States Command_Drop_State;
         #endregion
 
-        public void WriteLine(string text)
-        {
-            Console.Out.WriteLine(text);
-        }
-
-        public void Prompt(string text)
-        {
-            Console.Out.Write(text);
-            Console.Out.Flush();
-        }
-
         private void Command_Help()
         {
-            Console.WriteLine("Help:");
-            Console.WriteLine("Arrow or numpad keys to move and attack");
-            Console.WriteLine("a)pply wielded tool");
-            Console.WriteLine("d)rop an item");
-            Console.WriteLine("h)elp (or ?) shows this message");
-            Console.WriteLine("i)nventory");
-            Console.WriteLine("w)ield a tool");
-            Console.WriteLine(",) Pick up object");
+            WriteLine("Help:");
+            WriteLine("Arrow or numpad keys to move and attack");
+            WriteLine("a)pply wielded tool");
+            WriteLine("d)rop an item");
+            WriteLine("h)elp (or ?) shows this message");
+            WriteLine("i)nventory");
+            WriteLine("w)ield a tool");
+            WriteLine(",) Pick up object");
         }
 
         private void Command_Inventory()
@@ -575,82 +567,5 @@ namespace CopperBend.App
             PlayerBusyFor(2);
         }
 
-        private int AlphaIndexOfKeyPress(RLKeyPress key)
-        {
-            if (!key.Char.HasValue) return -1;
-            var asciiNum = (int)key.Char.Value;
-            if (asciiNum < 97 || asciiNum > 123) return -1;
-            return asciiNum - 97;
-        }
-
-        private bool IsPlayerScheduled = false;
-        private void PlayerBusyFor(int ticks)
-        {
-            Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
-            GameState.Mode = GameMode.Schedule;
-            IsPlayerScheduled = true;
-        }
-
-        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IGameState state)
-        {
-            state.Mode = GameMode.PlayerReady;
-            IsPlayerScheduled = false;
-            return null;
-        }
-
-        private ICoord newCoord(ICoord start, Direction direction)
-        {
-            int newX = start.X;
-            int newY = start.Y;
-
-            if (direction == Direction.Up
-                || direction == Direction.UpLeft
-                || direction == Direction.UpRight)
-            {
-                newY--;
-            }
-
-            if (direction == Direction.Down
-                || direction == Direction.DownLeft
-                || direction == Direction.DownRight)
-            {
-                newY++;
-            }
-
-            if (direction == Direction.Left
-                || direction == Direction.UpLeft
-                || direction == Direction.DownLeft)
-            {
-                newX--;
-            }
-
-            if (direction == Direction.Right
-                || direction == Direction.UpRight
-                || direction == Direction.DownRight)
-            {
-                newX++;
-            }
-
-            return new Coord(newX, newY);
-        }
-
-        private Direction DirectionOfKey(RLKeyPress keyPress)
-        {
-            return
-                keyPress.Key == RLKey.Up ? Direction.Up :
-                keyPress.Key == RLKey.Down ? Direction.Down :
-                keyPress.Key == RLKey.Left ? Direction.Left :
-                keyPress.Key == RLKey.Right ? Direction.Right :
-
-                keyPress.Key == RLKey.Keypad1 ? Direction.DownLeft :
-                keyPress.Key == RLKey.Keypad2 ? Direction.Down :
-                keyPress.Key == RLKey.Keypad3 ? Direction.DownRight :
-                keyPress.Key == RLKey.Keypad4 ? Direction.Left :
-                keyPress.Key == RLKey.Keypad6 ? Direction.Right :
-                keyPress.Key == RLKey.Keypad7 ? Direction.UpLeft :
-                keyPress.Key == RLKey.Keypad8 ? Direction.Up :
-                keyPress.Key == RLKey.Keypad9 ? Direction.UpRight :
-                Direction.None;
-        }
     }
 }

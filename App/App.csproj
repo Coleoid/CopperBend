@@ -60,6 +60,7 @@
     <Compile Include="Basis\IItem.cs" />
     <Compile Include="Behaviors\StandardAggressor.cs" />
     <Compile Include="CommandDispatcher.cs" />
+    <Compile Include="CommandDispatcher_util.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
@@ -70,7 +71,6 @@
     <Compile Include="MapLoader.cs" />
     <Compile Include="Basis\Palette.cs" />
     <Compile Include="Basis\ITile.cs" />
-    <Compile Include="Model\Player.cs" />
     <Compile Include="Basis\ScheduleEntry.cs" />
     <Compile Include="Model\Seed.cs" />
     <Compile Include="Program.cs" />

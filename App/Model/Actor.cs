@@ -13,11 +13,12 @@ namespace CopperBend.App.Model
         {
             X = x;
             Y = y;
-            InventoryList = new List<IItem>();
             Health = 6;
+            Awareness = 6;
+
+            InventoryList = new List<IItem>();
             _behavior = new StandardMoveAndAttack();
             Strategy = _behavior.Act;
-            Awareness = 6;
         }
 
         //  IDrawable
@@ -34,25 +35,28 @@ namespace CopperBend.App.Model
         public int Y { get; protected set; }
 
 
-        public int Health { get; protected set; }
 
         //  IActor
         public string Name { get; set; }
         public int Awareness { get; set; }
 
-        private List<IItem> InventoryList;
-        public IEnumerable<IItem> Inventory
-        {
-            get => InventoryList;
-        }
-
+        public int Health { get; protected set; }
         public void Damage(int amount)
         {
             Health -= amount;
         }
 
         public Func<ScheduleEntry, IGameState, ScheduleEntry> Strategy { get; private set; }
+
         public IItem WieldedTool { get; internal set; }
+
+        //  Inventory has extra game effects, so I want to be sure I
+        //  don't casually add/remove directly from the list, from outside.
+        private List<IItem> InventoryList;
+        public IEnumerable<IItem> Inventory
+        {
+            get => InventoryList;
+        }
 
         public void AddToInventory(IItem topItem)
         {
@@ -67,14 +71,11 @@ namespace CopperBend.App.Model
 
         public IItem RemoveFromInventory(int inventorySlot)
         {
-            var item = InventoryList.ElementAt(inventorySlot);
-            InventoryList.RemoveAt(inventorySlot);
+            if (inventorySlot >= InventoryList.Count()) return null;
 
-            if (WieldedTool == item)
-            {
-                Console.Out.WriteLine($"Note:  No longer wielding the {item.Name}.");
-                WieldedTool = null;
-            }
+            IItem item = InventoryList.ElementAt(inventorySlot);
+            InventoryList.RemoveAt(inventorySlot);
+            if (WieldedTool == item) WieldedTool = null;
 
             return item;
         }
@@ -82,6 +83,8 @@ namespace CopperBend.App.Model
         public void Wield(IItem item)
         {
             WieldedTool = item;
+            if (item != null && !InventoryList.Any(i => i == item))
+                AddToInventory(item);
         }
     }
 }

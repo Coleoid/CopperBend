@@ -26,10 +26,6 @@ namespace CopperBend.App
         public List<IActor> Actors { get; set; }
         public bool DisplayDirty { get; set; }
 
-        //public ITile this[int x, int y]
-        //{
-        //    get => Tiles[x, y];
-        //}
 
         public ITile this[ICoord coord]
         {
@@ -100,11 +96,7 @@ namespace CopperBend.App
             actor.MoveTo(x, y);
             SetIsWalkable(actor, false);
 
-            // Don't forget to update the field of view if we just repositioned the player
-            //if (actor is Player)
-            //{
-                UpdatePlayerFieldOfView(actor);
-            //}
+            UpdatePlayerFieldOfView(actor);
 
             return true;
         }

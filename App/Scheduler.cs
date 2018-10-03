@@ -21,19 +21,6 @@ namespace CopperBend.App
             _schedule = new SortedDictionary<int, List<ScheduleEntry>>();
         }
 
-        //  Entry scheduled at CurrentTick plus .TicksUntilNextAction
-        public void Add(ScheduleEntry toAct)
-        {
-            if (toAct == null) return;
-
-            int actionTick = CurrentTick + toAct.TicksUntilNextAction;
-            if (!_schedule.ContainsKey(actionTick))
-            {
-                _schedule.Add(actionTick, new List<ScheduleEntry>());
-            }
-            _schedule[actionTick].Add(toAct);
-        }
-
         //  Removes and returns the entity scheduled to act next
         public ScheduleEntry GetNext()
         {
@@ -61,6 +48,19 @@ namespace CopperBend.App
             Add(possibleNewEvent);
         }
 
+        //  Entry scheduled at CurrentTick plus .TicksUntilNextAction
+        public void Add(ScheduleEntry toAct)
+        {
+            if (toAct == null) return;
+
+            int actionTick = CurrentTick + toAct.TicksUntilNextAction;
+            if (!_schedule.ContainsKey(actionTick))
+            {
+                _schedule.Add(actionTick, new List<ScheduleEntry>());
+            }
+            _schedule[actionTick].Add(toAct);
+        }
+
         public void Remove(ScheduleEntry scheduleEntry)
         {
             foreach (var busyTick in _schedule)
@@ -78,13 +78,11 @@ namespace CopperBend.App
             }
         }
 
-        internal void RemoveActor(IActor targetActor)
+        public void RemoveActor(IActor targetActor)
         {
             foreach (var busyTick in _schedule)
             {
-                var entries = busyTick.Value.Where(e => e.Actor == targetActor).ToList();
-                foreach (var entry in entries)
-                    busyTick.Value.Remove(entry);
+                busyTick.Value.RemoveAll(e => e.Actor == targetActor);
             }
         }
     }

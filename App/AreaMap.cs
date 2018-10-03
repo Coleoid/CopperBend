@@ -72,7 +72,6 @@ namespace CopperBend.App
             var fg = rep.Foreground(isInFOV);
             var bg = rep.Background(isInFOV);
 
-            //console.Set(coord.X, coord.Y, fg, bg, rep.Symbol);
             RelativeDraw(console, coord, fg, bg, rep.Symbol);
         }
 
@@ -85,15 +84,14 @@ namespace CopperBend.App
                 : (IDrawable)Tiles[thing.X, thing.Y];
 
             //TODO: for background, get tile.bg.inFOV
-            //console.Set(show.X, show.Y, show.Color, Colors.FloorBackgroundSeen, show.Symbol);
             RelativeDraw(console, show, show.Color, Colors.FloorBackgroundSeen, show.Symbol);
         }
 
         private void RelativeDraw(RLConsole console, ICoord absoluteCoord, RLColor fgColor, RLColor bgColor, char symbol)
         {
-            var aX = absoluteCoord.X - ViewpointActor.X + Width / 2;
-            var aY = absoluteCoord.Y - ViewpointActor.Y + Height / 2;
-            if (aX >= 0 && aX < Width && aY >= 0 && aY < Height)
+            var aX = absoluteCoord.X - ViewpointActor.X + console.Width / 2;
+            var aY = absoluteCoord.Y - ViewpointActor.Y + console.Height / 2;
+            if (aX >= 0 && aX < console.Width && aY >= 0 && aY < console.Height)
             {
                 console.Set(aX, aY, fgColor, bgColor, symbol);
             }

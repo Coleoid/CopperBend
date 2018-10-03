@@ -21,7 +21,6 @@ namespace CopperBend.App
             Console.Out.Flush();
         }
 
-
         private int AlphaIndexOfKeyPress(RLKeyPress key)
         {
             if (!key.Char.HasValue) return -1;

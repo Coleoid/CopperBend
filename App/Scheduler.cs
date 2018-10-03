@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace CopperBend.App
@@ -50,6 +49,16 @@ namespace CopperBend.App
             var nextDoer = tickAgenda.Value.FirstOrDefault();
             if (nextDoer != null) Remove(nextDoer);
             return nextDoer;
+        }
+
+        public void DoNext(IGameState state)
+        {
+            var nextUp = GetNext();
+            //if (nextUp == null) Debugger.Break();
+
+            //  An action can return a new event to be scheduled
+            var possibleNewEvent = nextUp.Action(nextUp, state);
+            Add(possibleNewEvent);
         }
 
         public void Remove(ScheduleEntry scheduleEntry)

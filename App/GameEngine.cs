@@ -115,15 +115,7 @@ namespace CopperBend.App
 
             //  When the player has committed to a slow action, everything happens
             case GameMode.Schedule:
-                var nextUp = Scheduler.GetNext();
-
-                if (nextUp == null)
-                    Debugger.Break();
-                //  The scheduled event is called here
-                var newEvent = nextUp.Action(nextUp, this);
-                //  ...which may immediately schedule another event
-                if (newEvent != null)
-                    Scheduler.Add(newEvent);
+                Scheduler.DoNext(this);
                 break;
 
             case GameMode.Unknown:

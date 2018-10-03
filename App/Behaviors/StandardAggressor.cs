@@ -75,6 +75,7 @@ namespace CopperBend.App.Behaviors
             if (pathList.Any())
             {
                 var cell = pathList.First();
+                bool isDiag = actor.X != cell.X && actor.Y != cell.Y;
                 if (!map.SetActorPosition(actor, cell.X, cell.Y))
                 {
                     if (target.X == cell.X && target.Y == cell.Y)
@@ -87,7 +88,7 @@ namespace CopperBend.App.Behaviors
                 }
                 else
                 {
-                    bool isDiag = actor.X != cell.X && actor.Y != cell.Y;
+                    map.DisplayDirty = true;
                     return isDiag ? 17 : 12;
                 }
             }

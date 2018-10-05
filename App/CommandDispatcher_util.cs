@@ -1,14 +1,11 @@
 ﻿using RLNET;
 using RogueSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CopperBend.App.Model;
 
 namespace CopperBend.App
 {
-    public partial class CommandDispatcher
+    public partial class CommandDispatcher : IControlPanel
     {
         public void WriteLine(string text)
         {
@@ -30,7 +27,7 @@ namespace CopperBend.App
         }
 
         private bool IsPlayerScheduled = false;
-        private void PlayerBusyFor(int ticks)
+        public void PlayerBusyFor(int ticks)
         {
             Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
             GameState.Mode = GameMode.Schedule;

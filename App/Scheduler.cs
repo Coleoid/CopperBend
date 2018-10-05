@@ -21,7 +21,8 @@ namespace CopperBend.App
             _schedule = new SortedDictionary<int, List<ScheduleEntry>>();
         }
 
-        //  Removes and returns the entity scheduled to act next
+        //  Removes and returns the next thing to happen
+        //  Ordered by tick of occurrence, then FIFO per tick
         public ScheduleEntry GetNext()
         {
             if (_schedule.Count() == 0) return null;
@@ -33,9 +34,9 @@ namespace CopperBend.App
                 tickAgenda = _schedule.First();
             }
 
-            var nextDoer = tickAgenda.Value.FirstOrDefault();
-            if (nextDoer != null) Remove(nextDoer);
-            return nextDoer;
+            var nextEntry = tickAgenda.Value.FirstOrDefault();
+            if (nextEntry != null) Remove(nextEntry);
+            return nextEntry;
         }
 
         public void DoNext(IGameState state)

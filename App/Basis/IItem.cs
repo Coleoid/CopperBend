@@ -11,7 +11,11 @@ namespace CopperBend.App
         //ItemType ItemType { get; }
 
         bool SameThingAs(IItem item);
+        void ApplyTo(ITile tile, IAreaMap map, IControlPanel controls);
     }
+
+    public interface ISeed : IItem
+    { }
 
     public enum SeedType
     {

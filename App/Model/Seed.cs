@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace CopperBend.App.Model
+﻿namespace CopperBend.App.Model
 {
-
-    public class Seed : Item
+    public class Seed : Item, ISeed
     {
         public SeedType SeedType;
 
@@ -25,6 +20,31 @@ namespace CopperBend.App.Model
             : base(x, y, quantity, true)
         {
             SeedType = type;
+        }
+
+        public override void ApplyTo(ITile tile, IAreaMap map, IControlPanel controls)
+        {
+            if (!tile.IsTilled)
+            {
+                string qualifier = tile.IsTillable ? "untilled " : "";
+                controls.WriteLine($"Cannot sow {qualifier}{tile.TerrainType}.");
+                return;
+            }
+
+            if (tile.IsSown)
+            {
+                controls.WriteLine("Already sown.");
+                return;
+            }
+
+            if (--Quantity == 0)
+            {
+                //remove from inventory
+            }
+
+            tile.Sow(this);
+            map.DisplayDirty = true;
+            controls.PlayerBusyFor(15);
         }
     }
 }

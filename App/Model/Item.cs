@@ -45,5 +45,16 @@ namespace CopperBend.App.Model
                 && GetType() == item.GetType();
         }
 
+        public virtual void ApplyTo(ITile tile, IAreaMap map, IControlPanel controls)
+        {
+            controls.WriteLine($"Can't use a {Name} on {tile.TerrainType}.");
+        }
+    }
+
+    public interface IControlPanel
+    {
+        void WriteLine(string text);
+        void Prompt(string text);
+        void PlayerBusyFor(int ticks);
     }
 }

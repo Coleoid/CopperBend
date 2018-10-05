@@ -17,9 +17,10 @@ namespace CopperBend.App
     public enum GameMode
     {
         Unknown = 0,
+        MenuOpen,
         MessagesPending,
         PlayerReady,
-        Schedule
+        Schedule,
     }
 
     public class GameEngine : IGameState
@@ -102,13 +103,17 @@ namespace CopperBend.App
         {
             switch (Mode)
             {
-            //FUTURE:  A game menu mode blocking all other action goes here
-            //  Messages waiting for the player will stop anything else
+            //  A game menu will block even pending messages 
+            case GameMode.MenuOpen:
+                HandleMenus();
+                break;
+
+            //  Messages waiting for the player block player input and scheduled events
             case GameMode.MessagesPending:
                 Dispatcher.HandlePendingMessages();
                 break;
 
-            //  Waiting for player actions puts scheduled events on hold
+            //  Waiting for player actions blocks Scheduler
             case GameMode.PlayerReady:
                 Dispatcher.HandlePlayerCommands();
                 break;
@@ -124,6 +129,14 @@ namespace CopperBend.App
             default:
                 throw new Exception($"Game mode [{Mode}] not written yet.");
             }
+        }
+
+        private void HandleMenus()
+        {
+            //TODO:  All these:
+            //  Start new game
+            //  Load game
+            //  Save and Quit
         }
     }
 }

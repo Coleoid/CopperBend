@@ -23,15 +23,16 @@ namespace CopperBend.App.Model
 
         public bool IsTilled => TerrainType == TerrainType.TilledDirt;
 
+        public bool IsSown => SownSeed != null;
+
         public void Till()
         {
             SetTerrainType(TerrainType.TilledDirt);
         }
 
-        public IItem SownSeed { get; private set; }
-        public void Sow(IItem seed)
+        public ISeed SownSeed { get; private set; }
+        public void Sow(ISeed seed)
         {
-            Guard.Against(!(seed is Seed));
             SownSeed = seed;
         }
 

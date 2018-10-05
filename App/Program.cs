@@ -30,7 +30,7 @@ namespace CopperBend.App
                 Awareness = 4
             };
 
-            var hoe = new Item(0, 0)
+            var hoe = new Hoe(0, 0)
             {
                 Name = "hoe",
                 Color = RLColor.Brown,

@@ -10,7 +10,10 @@ namespace CopperBend.App
         RLColor ColorBackground { get; }
         bool IsTillable { get; }
         bool IsTilled { get; }
+        bool IsSown { get; }
         void Till();
+        void Sow(ISeed seed);
+
         void OpenDoor();
     }
 }

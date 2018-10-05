@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using CopperBend.App.Model;
 using RLNET;
 using RogueSharp;
 
@@ -59,14 +57,14 @@ namespace CopperBend.App
             {
                 if (ShownMessages >= 3)
                 {
-                    Console.Out.WriteLine("-- more --");
+                    WriteLine("-- more --");
                     WaitingAtMorePrompt = true;
                     GameState.Mode = GameMode.MessagesPending;
                     return;
                 }
 
                 var nextMessage = MessageQueue.Dequeue();
-                Console.Out.WriteLine(nextMessage);
+                WriteLine(nextMessage);
                 ShownMessages++;
             }
         }
@@ -253,9 +251,11 @@ namespace CopperBend.App
                 var direction = DirectionOfKey(key);
                 if (direction != Direction.None)
                 {
+                    var targetCoord = newCoord(Player, direction);
                     Console.WriteLine(direction.ToString());
                     Console.Out.Flush();
-                    Command_ApplyAction(direction);
+
+                    _usingItem.ApplyTo(Map[targetCoord], Map, this);
                     leave_Apply();
                 }
                 else if (key.Key == RLKey.Escape)
@@ -300,49 +300,6 @@ namespace CopperBend.App
 
             default:
                 throw new Exception($"Command_ApplyItem not ready for state {Command_Apply_State}.");
-            }
-        }
-
-        private void Command_ApplyAction(Direction direction)
-        {
-            //  Possible?  (Can't hoe rock, may have custom message)
-            //  Successful?  (Skill/difficulty check)
-            //  Effects.  If it did nothing, we wouldn't be here.
-            //  Output.
-            var targetCoord = newCoord(Player, direction);
-            var tile = Map[targetCoord];
-            switch (_usingItem.Name)
-            {
-            case "hoe":
-                if (tile.IsTillable)
-                {
-                    tile.Till();
-                    Map.DisplayDirty = true;
-                    PlayerBusyFor(15);
-                }
-                else
-                {
-                    var cell = Map.GetCell(targetCoord.X, targetCoord.Y);
-                    WriteLine($"Cannot hoe {tile.TerrainType}.");
-                }
-                break;
-
-            case "seed":
-                if (tile.IsTilled)
-                {
-                    tile.Till();
-                    Map.DisplayDirty = true;
-                    PlayerBusyFor(15);
-                }
-                else
-                {
-                    var cell = Map.GetCell(targetCoord.X, targetCoord.Y);
-                    WriteLine($"Cannot hoe {tile.TerrainType}.");
-                }
-                break;
-
-            default:
-                throw new Exception($"Using tool [{_usingItem.Name}] not yet written.");
             }
         }
 

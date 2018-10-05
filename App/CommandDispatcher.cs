@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CopperBend.App.Basis;
 using RLNET;
 using RogueSharp;
 
@@ -255,7 +256,7 @@ namespace CopperBend.App
                     Console.WriteLine(direction.ToString());
                     Console.Out.Flush();
 
-                    _usingItem.ApplyTo(Map[targetCoord], Map, this);
+                    _usingItem.ApplyTo(Map[targetCoord], this);
                     leave_Apply();
                 }
                 else if (key.Key == RLKey.Escape)

@@ -1,28 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using CopperBend.App.Basis;
 using CopperBend.App.Model;
 using RLNET;
 
 namespace CopperBend.App
 {
-    //  State of the game, not _quite_ globals...
-    public interface IGameState
-    {
-        IAreaMap Map { get; }
-        IActor Player { get; }
-        GameMode Mode { get; set; }
-    }
-
-    public enum GameMode
-    {
-        Unknown = 0,
-        MenuOpen,
-        MessagesPending,
-        PlayerReady,
-        Schedule,
-    }
-
     public class GameEngine : IGameState
     {
         private readonly RLRootConsole GameConsole;

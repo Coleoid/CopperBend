@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CopperBend.App.Basis;
 using RogueSharp;
 
 namespace CopperBend.App
@@ -15,7 +16,7 @@ namespace CopperBend.App
         int Health { get; }
         void Damage(int v);
 
-        Func<ScheduleEntry, IGameState, ScheduleEntry> Strategy { get; }
+        Func<ScheduleEntry, IControlPanel, ScheduleEntry> Strategy { get; }
         IItem WieldedTool { get; }
 
         IItem RemoveFromInventory(int inventorySlot);

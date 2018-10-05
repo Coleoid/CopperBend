@@ -1,7 +1,7 @@
 ﻿using RLNET;
 using RogueSharp;
 using System;
-using CopperBend.App.Model;
+using CopperBend.App.Basis;
 
 namespace CopperBend.App
 {
@@ -34,9 +34,9 @@ namespace CopperBend.App
             IsPlayerScheduled = true;
         }
 
-        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IGameState state)
+        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IControlPanel controls)
         {
-            state.Mode = GameMode.PlayerReady;
+            controls.SwitchGameToMode(GameMode.PlayerReady);
             IsPlayerScheduled = false;
             return null;
         }
@@ -94,6 +94,21 @@ namespace CopperBend.App
                 keyPress.Key == RLKey.Keypad8 ? Direction.Up :
                 keyPress.Key == RLKey.Keypad9 ? Direction.UpRight :
                 Direction.None;
+        }
+
+        public void AddToSchedule(ScheduleEntry entry)
+        {
+            Scheduler.Add(entry);
+        }
+
+        public void SetMapDirty()
+        {
+            Map.DisplayDirty = true;
+        }
+
+        public void SwitchGameToMode(GameMode mode)
+        {
+            GameState.Mode = mode;
         }
     }
 }

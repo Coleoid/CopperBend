@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CopperBend.App.Basis;
 using CopperBend.App.Behaviors;
 using RLNET;
 
@@ -46,7 +47,7 @@ namespace CopperBend.App.Model
             Health -= amount;
         }
 
-        public Func<ScheduleEntry, IGameState, ScheduleEntry> Strategy { get; private set; }
+        public Func<ScheduleEntry, IControlPanel, ScheduleEntry> Strategy { get; private set; }
 
         public IItem WieldedTool { get; internal set; }
 

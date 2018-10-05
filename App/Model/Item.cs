@@ -1,4 +1,5 @@
-﻿using RLNET;
+﻿using CopperBend.App.Basis;
+using RLNET;
 using RogueSharp;
 
 namespace CopperBend.App.Model
@@ -45,16 +46,9 @@ namespace CopperBend.App.Model
                 && GetType() == item.GetType();
         }
 
-        public virtual void ApplyTo(ITile tile, IAreaMap map, IControlPanel controls)
+        public virtual void ApplyTo(ITile tile, IControlPanel controls)
         {
             controls.WriteLine($"Can't use a {Name} on {tile.TerrainType}.");
         }
-    }
-
-    public interface IControlPanel
-    {
-        void WriteLine(string text);
-        void Prompt(string text);
-        void PlayerBusyFor(int ticks);
     }
 }

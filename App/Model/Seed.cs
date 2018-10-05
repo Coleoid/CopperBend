@@ -1,4 +1,6 @@
-﻿namespace CopperBend.App.Model
+﻿using CopperBend.App.Basis;
+
+namespace CopperBend.App.Model
 {
     public class Seed : Item, ISeed
     {
@@ -22,7 +24,7 @@
             SeedType = type;
         }
 
-        public override void ApplyTo(ITile tile, IAreaMap map, IControlPanel controls)
+        public override void ApplyTo(ITile tile, IControlPanel controls)
         {
             if (!tile.IsTilled)
             {
@@ -33,7 +35,7 @@
 
             if (tile.IsSown)
             {
-                controls.WriteLine("Already sown.");
+                controls.WriteLine("Already sown with a seed.");
                 return;
             }
 
@@ -43,8 +45,16 @@
             }
 
             tile.Sow(this);
-            map.DisplayDirty = true;
+            controls.AddToSchedule(new ScheduleEntry(100, SeedGrows));
+            controls.SetMapDirty();
             controls.PlayerBusyFor(15);
+        }
+
+        private int growthRound = 0;
+        private ScheduleEntry SeedGrows(ScheduleEntry entry, IControlPanel controls)
+        {
+            controls.WriteLine($"The seed is growing... Round {growthRound}");
+            return new ScheduleEntry(100, SeedGrows);
         }
     }
 }

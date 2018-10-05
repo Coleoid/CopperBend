@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CopperBend.App.Basis;
+using System;
 
 namespace CopperBend.App
 {
@@ -6,13 +7,13 @@ namespace CopperBend.App
     {
         public int TicksUntilNextAction { get; private set; }
 
-        public Func<ScheduleEntry, IGameState, ScheduleEntry> Action { get; private set; }
+        public Func<ScheduleEntry, IControlPanel, ScheduleEntry> Action { get; private set; }
 
         public IActor Actor { get; private set; }
 
         public ScheduleEntry(
             int ticks, 
-            Func<ScheduleEntry, IGameState, ScheduleEntry> action)
+            Func<ScheduleEntry, IControlPanel, ScheduleEntry> action)
         {
             TicksUntilNextAction = ticks;
             Action = action;

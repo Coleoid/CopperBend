@@ -1,4 +1,6 @@
-﻿namespace CopperBend.App.Model
+﻿using CopperBend.App.Basis;
+
+namespace CopperBend.App.Model
 {
     public class Hoe : Item
     {
@@ -9,7 +11,7 @@
         {
         }
 
-        public override void ApplyTo(ITile tile, IAreaMap map, IControlPanel controls)
+        public override void ApplyTo(ITile tile, IControlPanel controls)
         {
             if (tile.IsTillable)
             {
@@ -20,7 +22,7 @@
                 }
 
                 tile.Till();
-                map.DisplayDirty = true;
+                controls.SetMapDirty();
                 controls.PlayerBusyFor(15);
             }
             else

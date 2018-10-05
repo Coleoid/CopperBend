@@ -1,12 +1,13 @@
 ﻿using System;
 using RogueSharp;
 using System.Linq;
+using CopperBend.App.Basis;
 
 namespace CopperBend.App.Behaviors
 {
     public interface IBehavior
     {
-        ScheduleEntry Act(ScheduleEntry entry, IGameState state);
+        ScheduleEntry Act(ScheduleEntry entry, IControlPanel controls);
     }
 
     public class StandardMoveAndAttack : IBehavior
@@ -14,7 +15,7 @@ namespace CopperBend.App.Behaviors
         private bool IsAlerted = false;
         private int TurnsAlerted = 0;
 
-        public ScheduleEntry Act(ScheduleEntry entry, IGameState state)
+        public ScheduleEntry Act(ScheduleEntry entry, IControlPanel controls)
         {
             var actor = entry.Actor;
 

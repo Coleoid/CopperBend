@@ -1,4 +1,5 @@
-﻿using CopperBend.App.Model;
+﻿using CopperBend.App.Basis;
+using CopperBend.App.Model;
 using RogueSharp;
 
 namespace CopperBend.App
@@ -11,7 +12,7 @@ namespace CopperBend.App
         //ItemType ItemType { get; }
 
         bool SameThingAs(IItem item);
-        void ApplyTo(ITile tile, IAreaMap map, IControlPanel controls);
+        void ApplyTo(ITile tile, IControlPanel controls);
     }
 
     public interface ISeed : IItem

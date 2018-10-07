@@ -8,14 +8,7 @@ namespace CopperBend.App
     {
         private readonly SortedDictionary<int, List<ScheduleEntry>> _schedule;
 
-        public int CurrentTick
-        {
-            get
-            {
-                if (_schedule.Count() == 0) return 0;
-                return _schedule.First().Key;
-            }
-        }
+        public int CurrentTick { get; private set; } = 0;
 
         public Scheduler()
         {
@@ -34,19 +27,20 @@ namespace CopperBend.App
                 _schedule.Remove(tickAgenda.Key);
                 tickAgenda = _schedule.First();
             }
+            CurrentTick = tickAgenda.Key;
 
             var nextEntry = tickAgenda.Value.FirstOrDefault();
             if (nextEntry != null) Remove(nextEntry);
             return nextEntry;
         }
 
-        public void DoNext(IGameState state)
+        public void DoNext(IControlPanel controls)
         {
             var nextUp = GetNext();
             //if (nextUp == null) Debugger.Break();
 
             //  An action can return a new event to be scheduled
-            var possibleNewEvent = nextUp.Action(nextUp, state);
+            var possibleNewEvent = nextUp.Action(nextUp, controls);
             Add(possibleNewEvent);
         }
 

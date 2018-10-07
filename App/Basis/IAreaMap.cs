@@ -20,7 +20,7 @@ namespace CopperBend.App
         bool SetActorCoord(IActor player, ICoord coord);
         void UpdatePlayerFieldOfView(IActor player);
         void DrawMap(RLConsole mapConsole);
-        IActor ActorAtLocation(int newX, int newY);
-        IActor ActorAtCoord(ICoord coord);
+        IActor GetActorAtPosition(int newX, int newY);
+        IActor GetActorAtCoord(ICoord coord);
     }
 }

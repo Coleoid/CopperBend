@@ -2,6 +2,7 @@
 using RogueSharp;
 using System;
 using CopperBend.App.Basis;
+using System.Collections.Generic;
 
 namespace CopperBend.App
 {
@@ -27,6 +28,9 @@ namespace CopperBend.App
         }
 
         private bool IsPlayerScheduled = false;
+
+        public ICoord PlayerCoords => Player;
+
         public void PlayerBusyFor(int ticks)
         {
             Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
@@ -110,5 +114,53 @@ namespace CopperBend.App
         {
             GameState.Mode = mode;
         }
+
+        public bool IsPlayerInFOV(IActor actor)
+        {
+            //FINISH: one FOV and one Pathfinder per map
+            FieldOfView fov = new FieldOfView(Map);
+            fov.ComputeFov(actor.X, actor.Y, actor.Awareness, true);
+            return fov.IsInFov(Player.X, Player.Y);
+        }
+
+        public void AttackPlayer()
+        {
+            //0.0
+            Player.Damage(2);
+            WriteLine("the thingy hit you for 2 points!");
+            if (Player.Health < 1)
+            {
+                WriteLine("You die...");
+                //TODO: die
+            }
+        }
+
+        public List<ICoord> GetPathTo(ICoord start, ICoord target)
+        {
+            Map.SetIsWalkable(start, true);
+            Map.SetIsWalkable(target, true);
+
+            PathFinder pathFinder = new PathFinder(Map, 1.0, Math.Sqrt(2));
+
+            var pathList = pathFinder.ShortestPathList(start, target);
+
+            Map.SetIsWalkable(start, false);
+            Map.SetIsWalkable(target, false);
+
+            return pathList;
+        }
+
+        public bool MoveActorTo(IActor actor, ICoord step)
+        {
+            return Map.SetActorPosition(actor, step.X, step.Y);
+        }
+
+        public void RemoveFromInventory(IItem item)
+        {
+            Player.RemoveFromInventory(item);
+            if (_usingItem == item)
+                _usingItem = null;
+        }
+
     }
 }

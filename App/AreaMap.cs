@@ -58,7 +58,7 @@ namespace CopperBend.App
                 Draw(mapConsole, actor);
             }
 
-            //MAY: DrawCell draws actor, else the top item, else
+            //FUTURE: Instead, DrawCell draws actor, else the top item, else
             // the empty tile representation
         }
 
@@ -108,14 +108,13 @@ namespace CopperBend.App
             SetIsWalkable(actor, true);
             actor.MoveTo(x, y);
             SetIsWalkable(actor, false);
-
-            UpdatePlayerFieldOfView(actor);
+            DisplayDirty = true;
 
             return true;
         }
 
-        public bool SetActorCoord(IActor player, ICoord coord)
-            => SetActorPosition(player, coord.X, coord.Y);
+        public bool SetActorCoord(IActor actor, ICoord coord)
+            => SetActorPosition(actor, coord.X, coord.Y);
 
         //  Player field of view changes whenever player moves
         //FUTURE: more cases (shifting terrain, smoke cloud, et c.)
@@ -129,14 +128,13 @@ namespace CopperBend.App
             }
         }
 
-        public IActor ActorAtLocation(int newX, int newY)
+        public IActor GetActorAtPosition(int x, int y)
         {
             return Actors
-                .Where(a => a.X == newX && a.Y == newY)
+                .Where(a => a.X == x && a.Y == y)
                 .FirstOrDefault();
         }
-
-        public IActor ActorAtCoord(ICoord coord)
-            => ActorAtLocation(coord.X, coord.Y);
+        public IActor GetActorAtCoord(ICoord coord)
+            => GetActorAtPosition(coord.X, coord.Y);
     }
 }

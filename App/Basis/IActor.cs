@@ -20,6 +20,7 @@ namespace CopperBend.App
         IItem WieldedTool { get; }
 
         IItem RemoveFromInventory(int inventorySlot);
+        IItem RemoveFromInventory(IItem item);
         void Wield(IItem item);
     }
 }

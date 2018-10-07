@@ -103,7 +103,7 @@ namespace CopperBend.App
 
             //  When the player has committed to a slow action, everything happens
             case GameMode.Schedule:
-                Scheduler.DoNext(this);
+                Scheduler.DoNext(Dispatcher);
                 break;
 
             case GameMode.Unknown:

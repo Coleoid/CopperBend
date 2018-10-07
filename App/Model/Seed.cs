@@ -39,12 +39,14 @@ namespace CopperBend.App.Model
                 return;
             }
 
+            var sownSeed = new Seed(tile.X, tile.Y, 1, this.SeedType);
+            tile.Sow(sownSeed);
+
             if (--Quantity == 0)
             {
-                //remove from inventory
+                controls.RemoveFromInventory(this);
             }
 
-            tile.Sow(this);
             controls.AddToSchedule(new ScheduleEntry(100, SeedGrows));
             controls.SetMapDirty();
             controls.PlayerBusyFor(15);
@@ -53,7 +55,7 @@ namespace CopperBend.App.Model
         private int growthRound = 0;
         private ScheduleEntry SeedGrows(ScheduleEntry entry, IControlPanel controls)
         {
-            controls.WriteLine($"The seed is growing... Round {growthRound}");
+            controls.WriteLine($"The seed is growing... Round {growthRound++}");
             return new ScheduleEntry(100, SeedGrows);
         }
     }

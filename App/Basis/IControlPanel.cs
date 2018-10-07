@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CopperBend.App.Model;
+using RogueSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,10 +23,17 @@ namespace CopperBend.App.Basis
         void Prompt(string text);
         void PlayerBusyFor(int ticks);
 
-        // perhaps enough to get rid of IGameState?
+        // keep accumulating miscellaneous methods until structure becomes clear
         void AddToSchedule(ScheduleEntry entry);
+        bool IsPlayerInFOV(IActor actor);
         void SetMapDirty();
         void SwitchGameToMode(GameMode mode);
+        List<ICoord> GetPathTo(ICoord start, ICoord target);
+        ICoord PlayerCoords { get; }
+
+        void AttackPlayer();
+        bool MoveActorTo(IActor actor, ICoord step);
+        void RemoveFromInventory(IItem item);
     }
 
     //  State of the game, not _quite_ globals...

@@ -81,6 +81,17 @@ namespace CopperBend.App.Model
             return item;
         }
 
+        public IItem RemoveFromInventory(IItem item)
+        {
+            if (!InventoryList.Contains(item)) return null;
+
+            InventoryList.Remove(item);
+            if (WieldedTool == item)
+                WieldedTool = null;
+
+            return item;
+        }
+
         public void Wield(IItem item)
         {
             WieldedTool = item;

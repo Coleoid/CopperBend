@@ -9,19 +9,20 @@ namespace CopperBend.App
 {
     public partial class CommandDispatcher
     {
-        private bool InMultiKeyCommand
-        {
-            get => MultiKeyCommand != null;
-        }
-        private Action<RLKeyPress> MultiKeyCommand = null;
+        private Queue<RLKeyPress> InputQueue;
+        public Queue<string> MessageQueue { get; set; }
         public bool WaitingAtMorePrompt = false;
 
-        private Queue<RLKeyPress> InputQueue;
         public IActor Player { get; private set; }
         public IAreaMap Map { get; private set; }
         public Scheduler Scheduler { get; private set; }
-        public Queue<string> MessageQueue { get; set; }
         public IGameState GameState { get; private set; }
+
+        private Action<RLKeyPress> NextStep = null;
+        private bool InMultiStepCommand
+        {
+            get => NextStep != null;
+        }
 
         public CommandDispatcher(Queue<RLKeyPress> inputQueue, Scheduler scheduler)
         {
@@ -41,7 +42,6 @@ namespace CopperBend.App
             Message("The sky... says it's morning.  A small farmhouse to the east.");
             Message("Something real wrong with the ground to the west, and the north.");
         }
-
 
         #region Messages
         private int ShownMessages = 0;
@@ -108,12 +108,11 @@ namespace CopperBend.App
         public void HandlePlayerCommands()
         {
             if (!InputQueue.Any()) return;
-
             var key = InputQueue.Dequeue();
-            if (InMultiKeyCommand)
+
+            if (InMultiStepCommand)  //  Drop, throw, wield, etc.
             {
-                //  Drop, throw, wield, etc.
-                MultiKeyCommand(key);
+                NextStep(key);
                 return;
             }
 
@@ -124,11 +123,11 @@ namespace CopperBend.App
             }
             else if (key.Key == RLKey.A)
             {
-                enter_Apply(key);
+                Apply_Prompt(key);
             }
             else if (key.Key == RLKey.D)
             {
-                enter_Drop(key);
+                Drop_Prompt(key);
             }
             else if (key.Key == RLKey.H || key.Key == RLKey.Slash && key.Shift)
             {
@@ -140,7 +139,7 @@ namespace CopperBend.App
             }
             else if (key.Key == RLKey.W)
             {
-                enter_Wield(key);
+                Wield_Prompt(key);
             }
             else if (key.Key == RLKey.Comma)
             {
@@ -158,7 +157,7 @@ namespace CopperBend.App
         {
             var coord = newCoord(player, direction);
 
-            IActor targetActor = Map.ActorAtCoord(coord);
+            IActor targetActor = Map.GetActorAtCoord(coord);
             if (targetActor == null)
             {
                 Command_DirectionMove(player, coord);
@@ -174,6 +173,7 @@ namespace CopperBend.App
             //  we need to redraw, and the player will be busy for a while.
             if (Map.SetActorCoord(player, coord))
             {
+                Map.UpdatePlayerFieldOfView(player);
                 Map.DisplayDirty = true;
                 if (player.X != coord.X && player.Y != coord.Y)
                     PlayerBusyFor(17);
@@ -214,181 +214,132 @@ namespace CopperBend.App
         #endregion
 
         #region Apply Item
-        private void enter_Apply(RLKeyPress key)
+        private void Apply_Prompt(RLKeyPress key)
         {
-            MultiKeyCommand = Command_ApplyItem;
-            Command_Apply_State = Command_Apply_States.Starting;
-            MultiKeyCommand(key);
+            if (_usingItem == null) _usingItem = Player.WieldedTool;
+            if (_usingItem == null)
+            {
+                Apply_Prompt_Choose(null);
+                return;
+            }
+
+            Prompt($"Enter direction to apply {_usingItem.Name} (or ? to pick a different item): ");
+            NextStep = Apply_in_Direction;
         }
-        private void leave_Apply()
+
+        private void Apply_Prompt_Choose(RLKeyPress key)
         {
-            MultiKeyCommand = null;
-            Command_Apply_State = Command_Apply_States.Unknown;
+            Command_Inventory();
+            Prompt("Pick an item to apply: ");
+            NextStep = Apply_Choose_item;
         }
 
         private IItem _usingItem;
-        private void Command_ApplyItem(RLKeyPress key)
+        private void Apply_in_Direction(RLKeyPress key)
         {
-            switch (Command_Apply_State)
+            if (key.Key == RLKey.Escape)
             {
-            case Command_Apply_States.Unknown:
-                throw new Exception("Missed Apply setup somewhere.");
+                WriteLine("cancelled.");
+                NextStep = null;
+                return;
+            }
 
-            case Command_Apply_States.Starting:
-                //TODO: Gracefully handle player wielding nothing or non-tool
-                if (Player.WieldedTool == null)
-                {
-                    Console.WriteLine("Not currently wielding a tool...todo.");
-                    leave_Apply();
-                    return;
-                }
-                _usingItem = Player.WieldedTool;
-                Console.Write($"Use {_usingItem.Name} in direction (or ? to pick a different tool): ");
-                Console.Out.Flush();
-                Command_Apply_State = Command_Apply_States.Direction_or_ChangeTool;
-                break;
+            if (key.Key == RLKey.Slash && key.Shift)
+            {
+                Apply_Prompt_Choose(null);
+                return;
+            }
 
-            case Command_Apply_States.Direction_or_ChangeTool:
-                var direction = DirectionOfKey(key);
-                if (direction != Direction.None)
-                {
-                    var targetCoord = newCoord(Player, direction);
-                    Console.WriteLine(direction.ToString());
-                    Console.Out.Flush();
+            var direction = DirectionOfKey(key);
+            if (direction != Direction.None)
+            {
+                var targetCoord = newCoord(Player, direction);
+                WriteLine(direction.ToString());
 
-                    _usingItem.ApplyTo(Map[targetCoord], this);
-                    leave_Apply();
-                }
-                else if (key.Key == RLKey.Escape)
-                {
-                    Console.WriteLine("cancelled.");
-                    leave_Apply();
-                }
-                else if (key.Key == RLKey.Slash && key.Shift)
-                {
-                    Command_Inventory();
-                    Console.WriteLine();
-                    Command_Apply_State = Command_Apply_States.Select_new_Tool;
-                }
-                else
-                {
-                    //TODO: some 'not a supported choice' complaint?
-                    //What's to be the standard?
-                    //Nothing, for now.  It works well enough.
-                }
-                break;
-
-            case Command_Apply_States.Select_new_Tool:
-                var selectedIndex = AlphaIndexOfKeyPress(key);
-                if (selectedIndex < 0 || selectedIndex > Player.Inventory.Count())
-                {
-                    Console.Write($"The key [{key.Char}] does not match an inventory item.");
-                }
-                else
-                {
-                    var item = Player.Inventory.ElementAt(selectedIndex);
-                    if (item.IsUsable)
-                    {
-                        _usingItem = item;
-                    }
-                    else
-                    {
-                        Console.Write($"The item [{item.Name}] is not a usable tool.");
-                    }
-                }
-                Console.WriteLine();
-                break;
-
-            default:
-                throw new Exception($"Command_ApplyItem not ready for state {Command_Apply_State}.");
+                _usingItem.ApplyTo(Map[targetCoord], this);  // the magic
+                NextStep = null;
             }
         }
 
-        private enum Command_Apply_States
+        private void Apply_Choose_item(RLKeyPress key)
         {
-            Unknown = 0,
-            Starting,
-            Direction_or_ChangeTool,
-            Select_new_Tool,
+            if (key.Key == RLKey.Escape)
+            {
+                Console.WriteLine("cancelled.");
+                NextStep = null;
+                return;
+            }
+
+            var selectedIndex = AlphaIndexOfKeyPress(key);
+            if (selectedIndex < 0 || selectedIndex > Player.Inventory.Count())
+            {
+                WriteLine($"The key [{key.Char}] does not match an inventory item.  Pick another.");
+                return;
+            }
+
+            var item = Player.Inventory.ElementAt(selectedIndex);
+            if (!item.IsUsable)
+            {
+                WriteLine($"The [{item.Name}] is not a usable item.  Pick another.");
+                return;
+            }
+
+            _usingItem = item;
+            WriteLine($"Using {item.Name} in what direction: ");
+            NextStep = Apply_in_Direction;
         }
-        private Command_Apply_States Command_Apply_State;
         #endregion
 
         #region Drop
 
-        private void enter_Drop(RLKeyPress key)
+        private void Drop_Prompt(RLKeyPress key)
         {
-            MultiKeyCommand = Command_Drop;
-            Command_Drop_State = Command_Drop_States.Starting;
-            MultiKeyCommand(key);
-        }
-        private void leave_Drop()
-        {
-            MultiKeyCommand = null;
-            Command_Drop_State = Command_Drop_States.Unknown;
+            Prompt("Drop (inventory letter or ? to show inventory): ");
+            NextStep = Drop_Main;
+
         }
 
-        private void Command_Drop(RLKeyPress key)
+        private void Drop_Main(RLKeyPress key)
         {
-            switch (Command_Drop_State)
+            //  Bail out
+            if (key.Key == RLKey.Escape)
             {
-            case Command_Drop_States.Unknown:
-                throw new Exception("Missed Drop setup somewhere.");
-
-            case Command_Drop_States.Starting:
-                Prompt("Drop: ");
-                Command_Drop_State = Command_Drop_States.Expecting_Selection;
-                break;
-
-            case Command_Drop_States.Expecting_Selection:
-                if (key.Key == RLKey.Escape)
-                {
-                    WriteLine("nothing.");
-                    leave_Drop();
-                }
-                else if (key.Key == RLKey.Slash && key.Shift)
-                {
-                    Command_Inventory();
-                    Prompt("Drop: ");
-                }
-                else
-                {
-                    int inventorySlot = AlphaIndexOfKeyPress(key);
-                    if (inventorySlot == -1) break;
-
-                    var wieldedItem = Player.WieldedTool;
-                    IItem item = Player.RemoveFromInventory(inventorySlot);
-
-                    if (item == null)
-                    {
-                        WriteLine($"No item labelled '{key.Char.Value}'.");
-                        Prompt("Drop: ");
-                        break;
-                    }
-
-                    WriteLine(item.Name);
-                    if (wieldedItem == item)
-                        WriteLine($"Note:  No longer wielding the {item.Name}.");
-
-                    item.MoveTo(Player.X, Player.Y);
-                    Map.Items.Add(item);
-                    PlayerBusyFor(1);
-
-                    leave_Drop();
-                }
-                break;
-
-            default:
-                throw new Exception("Command_Drop went to a weird place.");
+                WriteLine("nothing.");
+                NextStep = null;
+                return;
             }
+
+            //  Show inventory, re-prompt, wait for selection
+            if (key.Key == RLKey.Slash && key.Shift)
+            {
+                Command_Inventory();
+                Drop_Prompt(null);
+                return;
+            }
+
+            int inventorySlot = AlphaIndexOfKeyPress(key);
+            if (inventorySlot == -1) return;
+
+            var wieldedItem = Player.WieldedTool;
+            IItem item = Player.RemoveFromInventory(inventorySlot);
+
+            if (item == null)
+            {
+                WriteLine($"No item labelled '{key.Char.Value}'.");
+                Drop_Prompt(null);
+                return;
+            }
+
+            WriteLine(item.Name);
+            if (wieldedItem == item)
+                WriteLine($"Note:  No longer wielding the {item.Name}.");
+
+            item.MoveTo(Player.X, Player.Y);
+            Map.Items.Add(item);
+            PlayerBusyFor(1);
+
+            NextStep = null;
         }
-        private enum Command_Drop_States
-        {
-            Unknown = 0,
-            Starting,
-            Expecting_Selection,
-        }
-        private Command_Drop_States Command_Drop_State;
         #endregion
 
         private void Command_Help()
@@ -425,86 +376,60 @@ namespace CopperBend.App
         }
 
         #region Wield
-        private void enter_Wield(RLKeyPress key)
+        private void Wield_Prompt(RLKeyPress key)
         {
-            MultiKeyCommand = Command_Wield;
-            Command_Wield_State = Command_Wield_States.Starting;
-            MultiKeyCommand(key);
-        }
-        private void leave_Wield()
-        {
-            MultiKeyCommand = null;
-            Command_Wield_State = Command_Wield_States.Unknown;
+            Prompt("Wield ('?' to show inventory, '.' to empty hands): ");
+            NextStep = Wield_Choose;
         }
 
-        private void Command_Wield(RLKeyPress key)
+        private void Wield_Choose(RLKeyPress key)
         {
-            switch (Command_Wield_State)
+            //  Escape:  Bail out unchanged
+            if (key.Key == RLKey.Escape)
             {
-            case Command_Wield_States.Unknown:
-                throw new Exception("Missed Wield setup somewhere.");
-
-            case Command_Wield_States.Starting:
-                Prompt("Wield ('?' to show inventory, '.' to empty hands): ");
-                Command_Wield_State = Command_Wield_States.Expecting_Selection;
-                break;
-
-            case Command_Wield_States.Expecting_Selection:
-                if (key.Key == RLKey.Escape)
-                {
-                    var name = Player.WieldedTool == null
-                        ? "bare hands"
-                        : Player.WieldedTool.Name;
-                    WriteLine($"unchanged, {name}.");
-                    leave_Wield();
-                }
-                else if (key.Key == RLKey.Period)
-                {
-                    WriteLine("bare hands");
-                    Player.Wield(null);
-                    leave_Wield();
-                }
-                else if (key.Key == RLKey.Slash && key.Shift)
-                {
-                    Command_Inventory();
-                    Prompt("Wield: ");
-                }
-                else
-                {
-                    int inventorySlot = AlphaIndexOfKeyPress(key);
-                    if (inventorySlot == -1) break;
-
-                    if (Player.Inventory.Count() > inventorySlot)
-                    {
-                        // we can wield even silly stuff, until it's a problem.
-                        var item = Player.Inventory.ElementAt(inventorySlot);
-
-                        Player.Wield(item);
-                        Console.WriteLine(item.Name);
-                        PlayerBusyFor(4);
-
-                        leave_Wield();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"No item in slot '{key.Char.Value}'.");
-                        Console.Write("Wield: ");
-                        Console.Out.Flush();
-                    }
-                }
-                break;
-
-            default:
-                throw new Exception($"Command_Wield not ready for state {Command_Wield_State}.");
+                var name = Player.WieldedTool == null
+                    ? "bare hands"
+                    : Player.WieldedTool.Name;
+                WriteLine($"unchanged, {name}.");
+                NextStep = null;
+                return;
             }
+
+            //  Period:  Wield empty hands, done
+            if (key.Key == RLKey.Period)
+            {
+                WriteLine("bare hands");
+                Player.Wield(null);
+                NextStep = null;
+                return;
+            }
+
+            //  Question mark:  Show inventory, reprompt
+            if (key.Key == RLKey.Slash && key.Shift)
+            {
+                Command_Inventory();
+                Wield_Prompt(null);
+                return;
+            }
+
+            //  If not a good inventory choice, warn and reprompt
+            int inventorySlot = AlphaIndexOfKeyPress(key);
+            if (inventorySlot == -1) return;
+            if (inventorySlot >= Player.Inventory.Count())
+            {
+                WriteLine($"nothing in slot '{key.Char.Value}'.");
+                Wield_Prompt(null);
+                return;
+            }
+
+            // we can wield even silly stuff, until it's a problem.
+            var item = Player.Inventory.ElementAt(inventorySlot);
+
+            Player.Wield(item);
+            WriteLine(item.Name);
+            PlayerBusyFor(4);
+            NextStep = null;
         }
-        private enum Command_Wield_States
-        {
-            Unknown = 0,
-            Starting,
-            Expecting_Selection,
-        }
-        private Command_Wield_States Command_Wield_State;
         #endregion
 
         private void Command_PickUp()

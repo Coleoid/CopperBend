@@ -1,5 +1,4 @@
 ﻿using System;
-using RogueSharp;
 using System.Linq;
 using CopperBend.App.Basis;
 
@@ -18,11 +17,8 @@ namespace CopperBend.App.Behaviors
         public ScheduleEntry Act(ScheduleEntry entry, IControlPanel controls)
         {
             var actor = entry.Actor;
+            bool isInFOV = controls.IsPlayerInFOV(actor);
 
-            FieldOfView monsterFov = new FieldOfView(state.Map);
-            monsterFov.ComputeFov(actor.X, actor.Y, actor.Awareness, true);
-            bool isInFOV = monsterFov.IsInFov(state.Player.X, state.Player.Y);
-            
             if (!IsAlerted)
             {
                 if (isInFOV)
@@ -38,7 +34,7 @@ namespace CopperBend.App.Behaviors
                 if (isInFOV)
                 {
                     TurnsAlerted = 1;
-                    AttemptMoveAttack(actor, state.Map, state.Player);
+                    var ticks = AttemptMoveAttack(actor, controls);
                 }
                 else
                 {
@@ -56,60 +52,34 @@ namespace CopperBend.App.Behaviors
             return entry;
         }
 
-        private static int AttemptMoveAttack(IActor actor, IAreaMap map, IActor target)
+        private static int AttemptMoveAttack(IActor actor, IControlPanel controls)
         {
-            // Pathfinder needs the origin and target Cells walkable
-            map.SetIsWalkable(actor, true);
-            map.SetIsWalkable(target, true);
+            var target = controls.PlayerCoords;
+            var pathList = controls.GetPathTo(actor, target);
 
-            PathFinder pathFinder = new PathFinder(map, 1.0, Math.Sqrt(2));
-
-            var pathList = pathFinder.ShortestPathList(
-                map.GetCell(actor.X, actor.Y),
-                map.GetCell(target.X, target.Y));
-
-            map.SetIsWalkable(actor, false);
-            map.SetIsWalkable(target, false);
-
-
-            // Take the step.  If blocked by our target, attack.
-            if (pathList.Any())
+            // player in FOV, but not reachable
+            if (!pathList.Any())
             {
-                var cell = pathList.First();
-                bool isDiag = actor.X != cell.X && actor.Y != cell.Y;
-                if (!map.SetActorPosition(actor, cell.X, cell.Y))
-                {
-                    if (target.X == cell.X && target.Y == cell.Y)
-                    {
-                        AttackPlayer(target);
-                        return 12;
-                    }
-
-                    return 6;
-                }
-                else
-                {
-                    map.DisplayDirty = true;
-                    return isDiag ? 17 : 12;
-                }
-            }
-            else
-            {
-                // player in FOV, but not reachable
                 Console.WriteLine($"{actor.Name} waits...");
                 return 6;
             }
-        }
 
-        private static void AttackPlayer(IActor player)
-        {
-            player.Damage(2);
-            Console.WriteLine("the thingy hit you for 2 points!");
-            if (player.Health < 1)
+            // Take the step.  The only reason to fail right now is being blocked by the player.
+            var step = pathList.First();
+            bool isDiag = actor.X != step.X && actor.Y != step.Y;
+            if (controls.MoveActorTo(actor, step))
             {
-                Console.WriteLine("You die...");
-                //TODO: die
+                controls.SetMapDirty();
+                return isDiag ? 17 : 12;
             }
+
+            if (target.X == step.X && target.Y == step.Y)
+            {
+                controls.AttackPlayer();
+                return 12;
+            }
+
+            throw new Exception("Why am I here?");
         }
     }
 }

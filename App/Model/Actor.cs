@@ -41,7 +41,7 @@ namespace CopperBend.App.Model
         public string Name { get; set; }
         public int Awareness { get; set; }
 
-        public int Health { get; protected set; }
+        public int Health { get; set; }
         public void Damage(int amount)
         {
             Health -= amount;

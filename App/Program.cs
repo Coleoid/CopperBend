@@ -27,7 +27,8 @@ namespace CopperBend.App
                 Name = "Our Dude",
                 Symbol = '@',
                 Color = Palette.DbLight,
-                Awareness = 4
+                Awareness = 4,
+                Health = 23012398
             };
 
             var hoe = new Hoe(0, 0)

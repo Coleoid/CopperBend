@@ -11,44 +11,35 @@ namespace CopperBend.App.Behaviors
 
     public class StandardMoveAndAttack : IBehavior
     {
-        private bool IsAlerted = false;
-        private int TurnsAlerted = 0;
+        private const int ChaseTurnsLimit = 15;
+        private int TurnsTargetOutOfFOV = ChaseTurnsLimit + 1;
+        private bool IsAlerted => TurnsTargetOutOfFOV < ChaseTurnsLimit;
 
         public ScheduleEntry Act(ScheduleEntry entry, IControlPanel controls)
         {
             var actor = entry.Actor;
             bool isInFOV = controls.CanActorSeeTarget(actor, controls.PlayerCoords);
 
-            if (!IsAlerted)
+            if (isInFOV)
             {
-                if (isInFOV)
-                {
-                    Console.WriteLine($"{actor.Name} notices you.");
-                    TurnsAlerted = 1;
-                    IsAlerted = true;
-                }
+                if (!IsAlerted) controls.WriteLine($"The {actor.Name} spots me.");
+
+                TurnsTargetOutOfFOV = 0;
             }
 
-            if (IsAlerted)
-            {
-                if (isInFOV)
-                {
-                    TurnsAlerted = 1;
-                    var ticks = AttemptMoveAttack(actor, controls);
-                }
-                else
-                {
-                    //0.1:  upgrade = pursue existing path
-                    TurnsAlerted++;
-                }
+            var ticks = AttemptMoveAttack(actor, controls);  //  the magic
 
-                // Lose alert if the player is out of FOV for 15 turns. 
-                IsAlerted = TurnsAlerted <= 15;
-            }
+            //  Fall asleep if chased for 15 turns w/no glimpse
+            TurnsTargetOutOfFOV++;
+            Func<ScheduleEntry, IControlPanel, ScheduleEntry> action = Act;
+            if (!IsAlerted) action = Sleep;
 
-            //TODO:  next move delayed depending on action taken
-            // entry.TicksUntilNextAction = isDiagMove ? 17 : 12;
+            return new ScheduleEntry(ticks, action);
+        }
 
+        public ScheduleEntry Sleep(ScheduleEntry entry, IControlPanel controls)
+        {
+            //next should have some sensory checks
             return entry;
         }
 
@@ -60,7 +51,7 @@ namespace CopperBend.App.Behaviors
             // player in FOV, but not reachable
             if (!pathList.Any())
             {
-                Console.WriteLine($"{actor.Name} waits...");
+                Console.WriteLine($"The {actor.Name} waits for an opening...");
                 return 6;
             }
 
@@ -76,7 +67,7 @@ namespace CopperBend.App.Behaviors
             if (target.X == step.X && target.Y == step.Y)
             {
                 controls.AttackPlayer();
-                return 12;
+                return 30;
             }
 
             throw new Exception("Why am I here?");

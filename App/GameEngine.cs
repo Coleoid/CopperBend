@@ -11,8 +11,11 @@ namespace CopperBend.App
         private readonly RLRootConsole GameConsole;
         private readonly Scheduler Scheduler;
         private readonly Queue<RLKeyPress> InputQueue;
+        private readonly Messenger Messenger;
 
         public CommandDispatcher Dispatcher { get; }
+
+
         public IAreaMap Map { get; private set; }
         public IActor Player { get; private set; }
 
@@ -24,6 +27,7 @@ namespace CopperBend.App
             InputQueue = new Queue<RLKeyPress>();
             Scheduler = new Scheduler();
             Dispatcher = new CommandDispatcher(InputQueue, Scheduler);
+            Messenger = new Messenger(Dispatcher);
         }
 
         public void LoadMap(IAreaMap map)
@@ -81,7 +85,7 @@ namespace CopperBend.App
             ActOnMode();
         }
 
-        public GameMode Mode { get; set; }
+        public GameMode Mode { get; set; } = GameMode.PlayerReady;
         private void ActOnMode()
         {
             switch (Mode)
@@ -93,7 +97,7 @@ namespace CopperBend.App
 
             //  Messages waiting for the player block player input and scheduled events
             case GameMode.MessagesPending:
-                Dispatcher.HandlePendingMessages();
+                Messenger.HandlePendingMessages();
                 break;
 
             //  Waiting for player actions blocks Scheduler
@@ -101,7 +105,7 @@ namespace CopperBend.App
                 Dispatcher.HandlePlayerCommands();
                 break;
 
-            //  When the player has committed to a slow action, everything happens
+            //  When the player has committed to a slow action, time passes
             case GameMode.Schedule:
                 Scheduler.DoNext(Dispatcher);
                 break;

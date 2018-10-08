@@ -10,11 +10,9 @@ namespace CopperBend.App
     public partial class CommandDispatcher
     {
         private Queue<RLKeyPress> InputQueue;
-        public Queue<string> MessageQueue { get; set; }
-        public bool WaitingAtMorePrompt = false;
 
-        public IActor Player { get; private set; }
-        public IAreaMap Map { get; private set; }
+        public IActor Player { get => GameState.Player; }
+        public IAreaMap Map { get => GameState.Map; }
         public Scheduler Scheduler { get; private set; }
         public IGameState GameState { get; private set; }
 
@@ -28,87 +26,23 @@ namespace CopperBend.App
         {
             InputQueue = inputQueue;
             Scheduler = scheduler;
-            MessageQueue = new Queue<string>();
         }
 
         public void Init(IGameState gameState)
         {
             GameState = gameState;
-            Player = gameState.Player;
-            Map = gameState.Map;
 
-            Message("I wake up.  Cold--frost on the ground, except where I was lying.");
-            Message("Everything hurts when I stand up.");
-            Message("The sky... says it's morning.  A small farmhouse to the east.");
-            Message("Something real wrong with the ground to the west, and the north.");
+            //Message("I wake up.  Cold--frost on the ground, except where I was lying.");
+            //Message("Everything hurts when I stand up.");
+            //Message("The sky... says it's morning.  A small farmhouse to the east.");
+            //Message("Something real wrong with the ground to the west, and the north.");
         }
 
-        #region Messages
-        private int ShownMessages = 0;
-
-        public void Message(string newMessage)
-        {
-            MessageQueue.Enqueue(newMessage);
-            ShowMessages();
-        }
-
-        public void ShowMessages()
-        {
-            while (!WaitingAtMorePrompt && MessageQueue.Any())
-            {
-                if (ShownMessages >= 3)
-                {
-                    WriteLine("-- more --");
-                    WaitingAtMorePrompt = true;
-                    GameState.Mode = GameMode.MessagesPending;
-                    return;
-                }
-
-                var nextMessage = MessageQueue.Dequeue();
-                WriteLine(nextMessage);
-                ShownMessages++;
-            }
-        }
-
-        public void ClearMessagePanel()
-        {
-            //0.1
-            ShownMessages = 0;
-            WaitingAtMorePrompt = false;
-        }
-
-        public void HandlePendingMessages()
-        {
-            if (!WaitingAtMorePrompt) return;
-
-            while (WaitingAtMorePrompt)
-            {
-                //  Advance to next space keypress, if any
-                RLKeyPress key = null;
-                while (InputQueue.Any() && key?.Key != RLKey.Space)
-                {
-                    key = InputQueue.Dequeue();
-                }
-
-                //  If we run out of keypresses before we find a space,
-                // the rest of the messages remain pending
-                if (key?.Key != RLKey.Space) return;
-
-                //  Otherwise, show more messages
-                ClearMessagePanel();
-                ShowMessages();
-            }
-
-            //  If we reach this point, we cleared all messages
-            GameState.Mode = IsPlayerScheduled ? 
-                GameMode.Schedule : GameMode.PlayerReady;
-        }
-        #endregion
 
         public void HandlePlayerCommands()
         {
-            if (!InputQueue.Any()) return;
-            var key = InputQueue.Dequeue();
+            var key = GetNextKeyPress();
+            if (key == null) return;
 
             if (InMultiStepCommand)  //  Drop, throw, wield, etc.
             {

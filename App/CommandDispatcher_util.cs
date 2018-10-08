@@ -3,6 +3,7 @@ using RogueSharp;
 using System;
 using CopperBend.App.Basis;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CopperBend.App
 {
@@ -40,7 +41,7 @@ namespace CopperBend.App
 
         private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IControlPanel controls)
         {
-            controls.SwitchGameToMode(GameMode.PlayerReady);
+            GameState.Mode = GameMode.PlayerReady;
             IsPlayerScheduled = false;
             return null;
         }
@@ -115,12 +116,12 @@ namespace CopperBend.App
             GameState.Mode = mode;
         }
 
-        public bool IsPlayerInFOV(IActor actor)
+        public bool CanActorSeeTarget(IActor actor, ICoord target)
         {
             //FINISH: one FOV and one Pathfinder per map
             FieldOfView fov = new FieldOfView(Map);
             fov.ComputeFov(actor.X, actor.Y, actor.Awareness, true);
-            return fov.IsInFov(Player.X, Player.Y);
+            return fov.IsInFov(target.X, target.Y);
         }
 
         public void AttackPlayer()
@@ -162,5 +163,20 @@ namespace CopperBend.App
                 _usingItem = null;
         }
 
+        public RLKeyPress GetNextKeyPress()
+        {
+            return InputQueue.Any() ? InputQueue.Dequeue() : null;
+        }
+
+        public void MessagePanelFull()
+        {
+            GameState.Mode = GameMode.MessagesPending;
+        }
+
+        public void AllMessagesSent()
+        {
+            GameState.Mode = IsPlayerScheduled ?
+                GameMode.Schedule : GameMode.PlayerReady;
+        }
     }
 }

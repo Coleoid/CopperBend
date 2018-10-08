@@ -17,7 +17,7 @@ namespace CopperBend.App.Behaviors
         public ScheduleEntry Act(ScheduleEntry entry, IControlPanel controls)
         {
             var actor = entry.Actor;
-            bool isInFOV = controls.IsPlayerInFOV(actor);
+            bool isInFOV = controls.CanActorSeeTarget(actor, controls.PlayerCoords);
 
             if (!IsAlerted)
             {

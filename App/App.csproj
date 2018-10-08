@@ -63,6 +63,7 @@
     <Compile Include="CommandDispatcher.cs" />
     <Compile Include="CommandDispatcher_util.cs" />
     <Compile Include="GameEngine.cs" />
+    <Compile Include="Messenger.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
     <Compile Include="Basis\Direction.cs" />

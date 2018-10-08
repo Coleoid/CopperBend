@@ -9,3 +9,4 @@ obj
 /deploy/*.exe
 /deploy/assets/*.*
 **/packages/**/*.*
+App/App.csproj.user

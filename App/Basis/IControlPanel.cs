@@ -27,6 +27,10 @@ namespace CopperBend.App.Basis
         void WriteLine(string text);
         void Prompt(string text);
 
+        void PutItemOnMap(IItem fruit);
+        void RemovePlantAt(ICoord coord);
+        void HealPlayer(int amount);
+
         //  This form may turn out well--specialist informs about its state
         void MessagePanelFull();
         void AllMessagesSent();

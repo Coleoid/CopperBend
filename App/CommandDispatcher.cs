@@ -131,7 +131,7 @@ namespace CopperBend.App
         private void Command_DirectionAttack(IActor targetActor, ICoord coord)
         {
             //0.1
-            targetActor.Damage(2);
+            targetActor.AdjustHealth(2);
             Console.WriteLine("You hit the thingy for 2 points!");
             if (targetActor.Health < 1)
             {

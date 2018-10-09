@@ -19,7 +19,6 @@ namespace CopperBend.App.Model
 
             InventoryList = new List<IItem>();
             _behavior = new StandardMoveAndAttack();
-            //NextAction = _behavior.NextAction;
         }
 
         //  IDrawable
@@ -36,13 +35,12 @@ namespace CopperBend.App.Model
         public int Y { get; protected set; }
 
 
-
         //  IActor
         public string Name { get; set; }
         public int Awareness { get; set; }
 
         public int Health { get; set; }
-        public void Damage(int amount)
+        public void AdjustHealth(int amount)
         {
             Health -= amount;
         }

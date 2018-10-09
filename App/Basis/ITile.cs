@@ -15,5 +15,6 @@ namespace CopperBend.App
         void Sow(ISeed seed);
 
         void OpenDoor();
+        void RemovePlant();
     }
 }

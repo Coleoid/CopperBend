@@ -127,7 +127,7 @@ namespace CopperBend.App
         public void AttackPlayer()
         {
             //0.0
-            Player.Damage(2);
+            Player.AdjustHealth(-2);
             WriteLine("the thingy hit you for 2 points!");
             if (Player.Health < 1)
             {
@@ -177,6 +177,21 @@ namespace CopperBend.App
         {
             GameState.Mode = IsPlayerScheduled ?
                 GameMode.Schedule : GameMode.PlayerReady;
+        }
+
+        public void HealPlayer(int amount)
+        {
+            Player.AdjustHealth(amount);
+        }
+
+        public void PutItemOnMap(IItem item)
+        {
+            Map.Items.Add(item);
+        }
+
+        public void RemovePlantAt(ICoord coord)
+        {
+            Map.Tiles[coord.X, coord.Y].RemovePlant();
         }
     }
 }

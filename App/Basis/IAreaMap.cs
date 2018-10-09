@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using RLNET;
 using RogueSharp;
-using CopperBend.App.Model;
 
 namespace CopperBend.App
 {
-     public interface IAreaMap : IMap
+    public interface IAreaMap : IMap
     {
         string Name { get; set; }
         ITile[,] Tiles { get; set; }

@@ -14,7 +14,7 @@ namespace CopperBend.App
         void AddToInventory(IItem topItem);
 
         int Health { get; }
-        void Damage(int v);
+        void AdjustHealth(int v);
 
         Func<ScheduleEntry, IControlPanel, ScheduleEntry> NextAction { get; }
         IItem WieldedTool { get; }

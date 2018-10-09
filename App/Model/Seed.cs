@@ -1,4 +1,6 @@
-﻿using CopperBend.App.Basis;
+﻿using System;
+using CopperBend.App.Basis;
+using RogueSharp;
 
 namespace CopperBend.App.Model
 {
@@ -6,7 +8,10 @@ namespace CopperBend.App.Model
     {
         public SeedType SeedType;
 
-        public override string Name { get => "seed"; }
+        public override string Name
+        {
+            get => "seed";
+        }
 
         public override bool SameThingAs(IItem item)
         {
@@ -53,10 +58,35 @@ namespace CopperBend.App.Model
         }
 
         private int growthRound = 0;
+
         private ScheduleEntry SeedGrows(ScheduleEntry entry, IControlPanel controls)
         {
             controls.WriteLine($"The seed is growing... Round {growthRound++}");
-            return new ScheduleEntry(100, SeedGrows);
+            if (growthRound > 9)
+                return new ScheduleEntry(10, SeedMatures);
+            else
+                return new ScheduleEntry(100, SeedGrows);
+        }
+
+        protected virtual ScheduleEntry SeedMatures(ScheduleEntry entry, IControlPanel controls)
+        {
+            throw new Exception("Override or come up with a default implementation");
+        }
+    }
+
+    public class HealerSeed : Seed
+    {
+        public HealerSeed(int x, int y, int quantity, SeedType type) 
+            : base(x, y, quantity, type)
+        {}
+
+        protected override ScheduleEntry SeedMatures(ScheduleEntry entry, IControlPanel controls)
+        {
+            //for now, insta-auto-harvest
+            IItem fruit = new Item(this.X, this.Y, 1, true);
+            controls.PutItemOnMap(fruit);
+            controls.RemovePlantAt(this);
+            return null;
         }
     }
 }

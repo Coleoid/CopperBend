@@ -69,6 +69,11 @@ namespace CopperBend.App.Model
             throw new Exception("Tiles don't move.  Change my mind.");
         }
 
+        public void RemovePlant()
+        {
+            SownSeed = null;
+        }
+
         public int X { get; private set; }
         public int Y { get; private set; }
     }

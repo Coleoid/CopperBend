@@ -23,7 +23,7 @@ namespace CopperBend.App
         public ScheduleEntry(int ticks, IActor actor)
         {
             TicksUntilNextAction = ticks;
-            Action = actor.Strategy;
+            Action = actor.NextAction;
             Actor = actor;
         }
     }

@@ -16,7 +16,7 @@ namespace CopperBend.App
         int Health { get; }
         void Damage(int v);
 
-        Func<ScheduleEntry, IControlPanel, ScheduleEntry> Strategy { get; }
+        Func<ScheduleEntry, IControlPanel, ScheduleEntry> NextAction { get; }
         IItem WieldedTool { get; }
 
         IItem RemoveFromInventory(int inventorySlot);

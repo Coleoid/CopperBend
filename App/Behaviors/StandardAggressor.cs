@@ -6,7 +6,7 @@ namespace CopperBend.App.Behaviors
 {
     public interface IBehavior
     {
-        ScheduleEntry Act(ScheduleEntry entry, IControlPanel controls);
+        ScheduleEntry NextAction(ScheduleEntry entry, IControlPanel controls);
     }
 
     public class StandardMoveAndAttack : IBehavior
@@ -15,7 +15,7 @@ namespace CopperBend.App.Behaviors
         private int TurnsTargetOutOfFOV = ChaseTurnsLimit + 1;
         private bool IsAlerted => TurnsTargetOutOfFOV < ChaseTurnsLimit;
 
-        public ScheduleEntry Act(ScheduleEntry entry, IControlPanel controls)
+        public ScheduleEntry NextAction(ScheduleEntry entry, IControlPanel controls)
         {
             var actor = entry.Actor;
             bool isInFOV = controls.CanActorSeeTarget(actor, controls.PlayerCoords);
@@ -31,7 +31,7 @@ namespace CopperBend.App.Behaviors
 
             //  Fall asleep if chased for 15 turns w/no glimpse
             TurnsTargetOutOfFOV++;
-            Func<ScheduleEntry, IControlPanel, ScheduleEntry> action = Act;
+            Func<ScheduleEntry, IControlPanel, ScheduleEntry> action = NextAction;
             if (!IsAlerted) action = Sleep;
 
             return new ScheduleEntry(ticks, action);
@@ -39,7 +39,7 @@ namespace CopperBend.App.Behaviors
 
         public ScheduleEntry Sleep(ScheduleEntry entry, IControlPanel controls)
         {
-            //next should have some sensory checks
+            //TODO: add some sensory checks--currently more of a coma.
             return entry;
         }
 

@@ -19,7 +19,7 @@ namespace CopperBend.App.Model
 
             InventoryList = new List<IItem>();
             _behavior = new StandardMoveAndAttack();
-            Strategy = _behavior.Act;
+            //NextAction = _behavior.NextAction;
         }
 
         //  IDrawable
@@ -47,7 +47,8 @@ namespace CopperBend.App.Model
             Health -= amount;
         }
 
-        public Func<ScheduleEntry, IControlPanel, ScheduleEntry> Strategy { get; private set; }
+        public Func<ScheduleEntry, IControlPanel, ScheduleEntry>
+            NextAction => _behavior.NextAction;
 
         public IItem WieldedTool { get; internal set; }
 

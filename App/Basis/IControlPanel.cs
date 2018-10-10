@@ -1,4 +1,5 @@
-﻿using RLNET;
+﻿using CopperBend.App.Model;
+using RLNET;
 using RogueSharp;
 using System.Collections.Generic;
 
@@ -11,10 +12,13 @@ namespace CopperBend.App
     public interface IControlPanel
     {
         void PlayerBusyFor(int ticks);
-        void RemoveFromInventory(IItem item);
         ICoord PlayerCoords { get; }
 
         void AttackPlayer();
+
+        void RemoveFromInventory(IItem item);
+        void GiveToPlayer(IItem item);
+
         bool MoveActorTo(IActor actor, ICoord step);
         bool CanActorSeeTarget(IActor actor, ICoord target);
         List<ICoord> GetPathTo(ICoord start, ICoord target);

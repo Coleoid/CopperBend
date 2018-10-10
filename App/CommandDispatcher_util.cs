@@ -162,6 +162,11 @@ namespace CopperBend.App
                 _usingItem = null;
         }
 
+        public void GiveToPlayer(IItem item)
+        {
+            Player.AddToInventory(item);
+        }
+
         public RLKeyPress GetNextKeyPress()
         {
             return InputQueue.Any() ? InputQueue.Dequeue() : null;

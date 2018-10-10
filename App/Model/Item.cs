@@ -1,5 +1,4 @@
-﻿using System;
-using RLNET;
+﻿using RLNET;
 using RogueSharp;
 
 namespace CopperBend.App.Model
@@ -40,6 +39,10 @@ namespace CopperBend.App.Model
         public int Quantity { get; set; }
         public bool IsUsable { get; set; }
 
+        public virtual bool IsConsumable => false;
+
+        public virtual string ConsumeVerb => "eat";
+
         public virtual bool SameThingAs(IItem item)
         {
             return Name == item.Name
@@ -50,30 +53,13 @@ namespace CopperBend.App.Model
         {
             controls.WriteLine($"Can't use a {Name} on {tile.TerrainType}.");
         }
-    }
 
-    public class Fruit : Item
-    {
-        private readonly SeedType SeedType;
-
-        public Fruit(int x, int y, int quantity, SeedType seedType)
-            : base(x, y, quantity, true)
+        public virtual void Consumed(IControlPanel controls)
         {
-            SeedType = seedType;
-        }
-
-        // this will go into a Consume method once that command is up.
-        public virtual void ApplyTo(ITile tile, IControlPanel controls)
-        {
-            switch (SeedType)
+            if (--Quantity < 1)
             {
-            case SeedType.Healer:
-                controls.HealPlayer(4);
-                break;
-
-            default:
-                throw new Exception($"Don't have eating written for fruit of {SeedType}.");
+                controls.RemoveFromInventory(this);
             }
-    }
+        }
     }
 }

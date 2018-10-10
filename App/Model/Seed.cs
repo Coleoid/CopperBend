@@ -80,8 +80,8 @@ namespace CopperBend.App.Model
 
         protected override ScheduleEntry SeedMatures(ScheduleEntry entry, IControlPanel controls)
         {
-            //for now, insta-auto-harvest
-            IItem fruit = new Item(this.X, this.Y, 1, true);
+            //for now, insta-auto-harvest.  Two fruit drop to the ground.
+            IItem fruit = new Fruit(this.X, this.Y, 2, SeedType);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this);
             return null;

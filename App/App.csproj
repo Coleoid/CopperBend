@@ -69,6 +69,7 @@
     <Compile Include="Basis\Direction.cs" />
     <Compile Include="Basis\IActor.cs" />
     <Compile Include="Basis\IDrawable.cs" />
+    <Compile Include="Model\Fruit.cs" />
     <Compile Include="Model\Hoe.cs" />
     <Compile Include="Model\Item.cs" />
     <Compile Include="MapLoader.cs" />

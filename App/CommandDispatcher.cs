@@ -58,6 +58,10 @@ namespace CopperBend.App
             {
                 Apply_Prompt(key);
             }
+            else if (key.Key == RLKey.C)
+            {
+                Consume_Prompt(key);
+            }
             else if (key.Key == RLKey.D)
             {
                 Drop_Prompt(key);
@@ -220,6 +224,48 @@ namespace CopperBend.App
             _usingItem = item;
             WriteLine($"Using {item.Name} in what direction: ");
             NextStep = Apply_in_Direction;
+        }
+        #endregion
+
+        #region Consume
+        private void Consume_Prompt(RLKeyPress key)
+        {
+            Prompt("Consume (inventory letter or ? to show inventory): ");
+            NextStep = Consume_Main;
+        }
+
+        private void Consume_Main(RLKeyPress key)
+        {
+            //  Bail out
+            if (key.Key == RLKey.Escape)
+            {
+                WriteLine("nothing.");
+                NextStep = null;
+                return;
+            }
+
+            //  Show inventory, re-prompt, wait for selection
+            if (key.Key == RLKey.Slash && key.Shift)
+            {
+                Command_Inventory();
+                Consume_Prompt(null);
+                return;
+            }
+
+            int inventorySlot = AlphaIndexOfKeyPress(key);
+            if (inventorySlot == -1) return;
+
+            var item = Player.Inventory.ElementAt(inventorySlot);
+            if (!item.IsConsumable)
+            {
+                WriteLine($"I can't {item.ConsumeVerb} a {item.Name}.");
+                Consume_Prompt(null);
+                return;
+            }
+
+            item.Consumed((IControlPanel)this);
+
+            NextStep = null;
         }
         #endregion
 

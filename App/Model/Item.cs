@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Data;
-using CopperBend.App.Basis;
 using RLNET;
 using RogueSharp;
 

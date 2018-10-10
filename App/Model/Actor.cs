@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CopperBend.App.Basis;
 using CopperBend.App.Behaviors;
 using RLNET;
 
@@ -58,15 +57,15 @@ namespace CopperBend.App.Model
             get => InventoryList;
         }
 
-        public void AddToInventory(IItem topItem)
+        public void AddToInventory(IItem item)
         {
             //0.1 everything stacks
             var existingItem = Inventory
-                .FirstOrDefault(i => i.SameThingAs(topItem));
+                .FirstOrDefault(i => i.SameThingAs(item));
             if (existingItem == null)
-                InventoryList.Add(topItem);
+                InventoryList.Add(item);
             else
-                existingItem.Quantity += topItem.Quantity;
+                existingItem.Quantity += item.Quantity;
         }
 
         public IItem RemoveFromInventory(int inventorySlot)

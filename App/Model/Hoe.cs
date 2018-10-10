@@ -1,6 +1,4 @@
-﻿using CopperBend.App.Basis;
-
-namespace CopperBend.App.Model
+﻿namespace CopperBend.App.Model
 {
     public class Hoe : Item
     {

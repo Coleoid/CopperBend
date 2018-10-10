@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CopperBend.App.Basis;
 using RogueSharp;
 
 namespace CopperBend.App
@@ -9,18 +8,17 @@ namespace CopperBend.App
     {
         string Name { get; set; }
         int Awareness { get; set; }
+        int Health { get; }
+        void AdjustHealth(int amount);
+
+        IItem WieldedTool { get; }
+        void Wield(IItem item);
 
         IEnumerable<IItem> Inventory { get; }
-        void AddToInventory(IItem topItem);
-
-        int Health { get; }
-        void AdjustHealth(int v);
-
-        Func<ScheduleEntry, IControlPanel, ScheduleEntry> NextAction { get; }
-        IItem WieldedTool { get; }
-
+        void AddToInventory(IItem item);
         IItem RemoveFromInventory(int inventorySlot);
         IItem RemoveFromInventory(IItem item);
-        void Wield(IItem item);
+
+        Func<ScheduleEntry, IControlPanel, ScheduleEntry> NextAction { get; }
     }
 }

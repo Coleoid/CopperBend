@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using CopperBend.App.Basis;
 
 namespace CopperBend.App.Behaviors
 {

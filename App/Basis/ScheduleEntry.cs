@@ -1,5 +1,4 @@
-﻿using CopperBend.App.Basis;
-using System;
+﻿using System;
 
 namespace CopperBend.App
 {

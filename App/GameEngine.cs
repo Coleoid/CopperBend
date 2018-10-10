@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CopperBend.App.Basis;
 using CopperBend.App.Model;
 using RLNET;
 

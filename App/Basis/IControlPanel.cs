@@ -6,7 +6,7 @@ using System.Collections.Generic;
 //  with nothing coherent shaken out yet.  In other places
 //  I'm passing important domain bits as arguments.
 
-namespace CopperBend.App.Basis
+namespace CopperBend.App
 {
     public interface IControlPanel
     {
@@ -27,7 +27,7 @@ namespace CopperBend.App.Basis
         void WriteLine(string text);
         void Prompt(string text);
 
-        void PutItemOnMap(IItem fruit);
+        void PutItemOnMap(IItem item);
         void RemovePlantAt(ICoord coord);
         void HealPlayer(int amount);
 

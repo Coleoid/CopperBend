@@ -1,6 +1,4 @@
 ﻿using System;
-using CopperBend.App.Basis;
-using RogueSharp;
 
 namespace CopperBend.App.Model
 {

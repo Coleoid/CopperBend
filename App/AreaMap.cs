@@ -6,7 +6,6 @@ using RogueSharp;
 
 namespace CopperBend.App
 {
-
     public class AreaMap : Map, IAreaMap
     {
         public AreaMap(int xWidth, int yHeight)
@@ -15,6 +14,8 @@ namespace CopperBend.App
             Tiles = new ITile[xWidth, yHeight];
             Actors = new List<IActor>();
             Items = new List<IItem>();
+            FirstSightMessages = new List<string>();
+            LocationMessages = new Dictionary<(int, int), List<string>>();
             DisplayDirty = true;
         }
 
@@ -118,9 +119,9 @@ namespace CopperBend.App
 
         //  Player field of view changes whenever player moves
         //FUTURE: more cases (shifting terrain, smoke cloud, et c.)
-        public void UpdatePlayerFieldOfView(IActor player)
+        public void UpdatePlayerFieldOfView(IActor actor)
         {
-            var fovCells = ComputeFov(player.X, player.Y, player.Awareness, true);
+            var fovCells = ComputeFov(actor.X, actor.Y, actor.Awareness, true);
 
             foreach (Cell cell in fovCells)
             {
@@ -136,5 +137,8 @@ namespace CopperBend.App
         }
         public IActor GetActorAtCoord(ICoord coord)
             => GetActorAtPosition(coord.X, coord.Y);
+
+        public List<string> FirstSightMessages { get; set; }
+        public Dictionary<(int, int), List<string>> LocationMessages { get; private set; }
     }
 }

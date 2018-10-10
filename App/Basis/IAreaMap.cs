@@ -21,5 +21,7 @@ namespace CopperBend.App
         void DrawMap(RLConsole mapConsole);
         IActor GetActorAtPosition(int newX, int newY);
         IActor GetActorAtCoord(ICoord coord);
+        List<string> FirstSightMessages { get; set; }
+        Dictionary<(int, int), List<string>> LocationMessages { get; }
     }
 }

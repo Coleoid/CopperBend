@@ -154,6 +154,13 @@ terrain:
             };
             map.Actors.Add(glom);
 
+            map.FirstSightMessages.Add("I wake up.  Cold--frost on the ground, except where I was lying.");
+            map.FirstSightMessages.Add("Everything hurts when I stand up.");
+            map.FirstSightMessages.Add("The sky... says it's morning.  A small farmhouse to the east.");
+            map.FirstSightMessages.Add("Something real wrong with the ground to the west, and the north.");
+
+            map.LocationMessages[(1,6)] = new List<string> { "a shiversome feeling..." };
+
             return map;
         }
 

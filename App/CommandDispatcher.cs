@@ -30,11 +30,6 @@ namespace CopperBend.App
         public void Init(IGameState gameState)
         {
             GameState = gameState;
-
-            //Message("I wake up.  Cold--frost on the ground, except where I was lying.");
-            //Message("Everything hurts when I stand up.");
-            //Message("The sky... says it's morning.  A small farmhouse to the east.");
-            //Message("Something real wrong with the ground to the west, and the north.");
         }
 
 

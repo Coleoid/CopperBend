@@ -53,8 +53,20 @@ namespace CopperBend.App
             GameConsole.Run();
         }
 
+        private bool MapLoaded = false;
+
         private void onRender(object sender, UpdateEventArgs e)
         {
+            //larval form of map.FirstLoaded event
+            if (!MapLoaded)
+            {
+                MapLoaded = true;
+                foreach (var text in Map.FirstSightMessages)
+                {
+                    Messenger.Message(text);
+                }
+            }
+
             //FUTURE:  real-time (background) animation around here
 
             //  If the map hasn't changed, why render?

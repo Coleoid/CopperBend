@@ -57,16 +57,15 @@ namespace CopperBend.App.Model
 
         private int growthRound = 0;
 
-        private ScheduleEntry SeedGrows(ScheduleEntry entry, IControlPanel controls)
+        private void SeedGrows(IControlPanel controls, ScheduleEntry entry)
         {
             controls.WriteLine($"The seed is growing... Round {growthRound++}");
-            if (growthRound > 9)
-                return new ScheduleEntry(10, SeedMatures);
-            else
-                return new ScheduleEntry(100, SeedGrows);
+            controls.AddToSchedule( growthRound > 9 ? 
+                  new ScheduleEntry(10, SeedMatures)
+                : new ScheduleEntry(100, SeedGrows));
         }
 
-        protected virtual ScheduleEntry SeedMatures(ScheduleEntry entry, IControlPanel controls)
+        protected virtual void SeedMatures(IControlPanel controls, ScheduleEntry entry)
         {
             throw new Exception("Override or come up with a default implementation");
         }
@@ -78,13 +77,12 @@ namespace CopperBend.App.Model
             : base(x, y, quantity, type)
         {}
 
-        protected override ScheduleEntry SeedMatures(ScheduleEntry entry, IControlPanel controls)
+        protected override void SeedMatures(IControlPanel controls, ScheduleEntry entry)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground.
             IItem fruit = new Fruit(this.X, this.Y, 2, SeedType);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this);
-            return null;
         }
     }
 }

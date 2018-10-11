@@ -19,6 +19,6 @@ namespace CopperBend.App
         IItem RemoveFromInventory(int inventorySlot);
         IItem RemoveFromInventory(IItem item);
 
-        Func<ScheduleEntry, IControlPanel, ScheduleEntry> NextAction { get; }
+        Action<IControlPanel, ScheduleEntry> NextAction { get; }
     }
 }

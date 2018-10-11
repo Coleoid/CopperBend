@@ -36,11 +36,7 @@ namespace CopperBend.App
         public void DoNext(IControlPanel controls)
         {
             var nextUp = GetNext();
-            //if (nextUp == null) Debugger.Break();
-
-            //  An action can return a new event to be scheduled
-            var possibleNewEvent = nextUp.Action(nextUp, controls);
-            Add(possibleNewEvent);
+            nextUp.Action(controls, nextUp);
         }
 
         //  Entry scheduled at CurrentTick plus .TicksUntilNextAction

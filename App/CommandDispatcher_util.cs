@@ -38,11 +38,10 @@ namespace CopperBend.App
             IsPlayerScheduled = true;
         }
 
-        private ScheduleEntry PlayerReadyForInput(ScheduleEntry entry, IControlPanel controls)
+        private void PlayerReadyForInput(IControlPanel controls, ScheduleEntry entry)
         {
             GameState.Mode = GameMode.PlayerReady;
             IsPlayerScheduled = false;
-            return null;
         }
 
         private ICoord newCoord(ICoord start, Direction direction)

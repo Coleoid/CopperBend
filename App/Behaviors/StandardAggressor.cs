@@ -5,7 +5,7 @@ namespace CopperBend.App.Behaviors
 {
     public interface IBehavior
     {
-        ScheduleEntry NextAction(ScheduleEntry entry, IControlPanel controls);
+        void NextAction(IControlPanel controls, ScheduleEntry entry);
     }
 
     public class StandardMoveAndAttack : IBehavior
@@ -14,7 +14,7 @@ namespace CopperBend.App.Behaviors
         private int TurnsTargetOutOfFOV = ChaseTurnsLimit + 1;
         private bool IsAlerted => TurnsTargetOutOfFOV < ChaseTurnsLimit;
 
-        public ScheduleEntry NextAction(ScheduleEntry entry, IControlPanel controls)
+        public void NextAction(IControlPanel controls, ScheduleEntry entry)
         {
             var actor = entry.Actor;
             bool isInFOV = controls.CanActorSeeTarget(actor, controls.PlayerCoords);
@@ -30,16 +30,16 @@ namespace CopperBend.App.Behaviors
 
             //  Fall asleep if chased for 15 turns w/no glimpse
             TurnsTargetOutOfFOV++;
-            Func<ScheduleEntry, IControlPanel, ScheduleEntry> action = NextAction;
+            Action<IControlPanel, ScheduleEntry> action = NextAction;
             if (!IsAlerted) action = Sleep;
 
-            return new ScheduleEntry(ticks, action);
+            controls.AddToSchedule(new ScheduleEntry(ticks, action, actor));
         }
 
-        public ScheduleEntry Sleep(ScheduleEntry entry, IControlPanel controls)
+        public void Sleep(IControlPanel controls, ScheduleEntry entry)
         {
-            //TODO: add some sensory checks--currently more of a coma.
-            return entry;
+            //TODO: add some sensory checks--currently more of a coma than a nap.
+            controls.AddToSchedule(entry);
         }
 
         private static int AttemptMoveAttack(IActor actor, IControlPanel controls)

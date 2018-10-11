@@ -34,7 +34,7 @@ namespace CopperBend.App
             Map = map;
             foreach (var actor in map.Actors)
             {
-                Scheduler.Add(new ScheduleEntry(12, actor));
+                Scheduler.Add(new ScheduleEntry(12, null, actor));
             }
 
             map.Actors.Add(Player);

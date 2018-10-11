@@ -44,8 +44,7 @@ namespace CopperBend.App.Model
             Health -= amount;
         }
 
-        public Func<ScheduleEntry, IControlPanel, ScheduleEntry>
-            NextAction => _behavior.NextAction;
+        public Action<IControlPanel, ScheduleEntry> NextAction => _behavior.NextAction;
 
         public IItem WieldedTool { get; internal set; }
 

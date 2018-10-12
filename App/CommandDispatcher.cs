@@ -49,10 +49,6 @@ namespace CopperBend.App
             {
                 Command_Direction(Player, direction);
             }
-            else if (key.Key == RLKey.A)
-            {
-                Apply_Prompt(key);
-            }
             else if (key.Key == RLKey.C)
             {
                 Consume_Prompt(key);
@@ -69,6 +65,10 @@ namespace CopperBend.App
             {
                 Command_Inventory();
             }
+            else if (key.Key == RLKey.U)
+            {
+                Use_Prompt(key);
+            }
             else if (key.Key == RLKey.W)
             {
                 Wield_Prompt(key);
@@ -78,9 +78,9 @@ namespace CopperBend.App
                 Command_PickUp();
             }
 
-            //TODO: c, direction -> close door
-            //TODO: l, direction, direction ... -> look around the map
-            //TODO: l, ?, a-z -> look at inventory item
+            //TODO: close door
+            //TODO: [l, direction, direction, ...] -> look around the map
+            //TODO: [l, ?, a-z] -> look at inventory item
             //TODO: ...
         }
 
@@ -129,96 +129,22 @@ namespace CopperBend.App
         private void Command_DirectionAttack(IActor targetActor, ICoord coord)
         {
             //0.1
-            targetActor.AdjustHealth(2);
-            Console.WriteLine("You hit the thingy for 2 points!");
+            int damage = 2;
+            targetActor.AdjustHealth(-damage);
+            Console.WriteLine($"I hit the {targetActor.Name} for {damage}.");
             if (targetActor.Health < 1)
             {
-                Console.WriteLine($"Blargh...  The {targetActor.Name} dies.");
+                Console.WriteLine($"The {targetActor.Name} dies.");
                 Map.Actors.Remove(targetActor);
                 Map.SetIsWalkable(targetActor, true);
                 Map.DisplayDirty = true;
+
+                //TODO: drop items, body
 
                 Scheduler.RemoveActor(targetActor);
             }
 
             PlayerBusyFor(12);
-        }
-        #endregion
-
-        #region Apply Item
-        private void Apply_Prompt(RLKeyPress key)
-        {
-            if (_usingItem == null) _usingItem = Player.WieldedTool;
-            if (_usingItem == null)
-            {
-                Apply_Prompt_Choose(null);
-                return;
-            }
-
-            Prompt($"Enter direction to apply {_usingItem.Name} (or ? to pick a different item): ");
-            NextStep = Apply_in_Direction;
-        }
-
-        private void Apply_Prompt_Choose(RLKeyPress key)
-        {
-            Command_Inventory();
-            Prompt("Pick an item to apply: ");
-            NextStep = Apply_Choose_item;
-        }
-
-        private IItem _usingItem;
-        private void Apply_in_Direction(RLKeyPress key)
-        {
-            if (key.Key == RLKey.Escape)
-            {
-                WriteLine("cancelled.");
-                NextStep = null;
-                return;
-            }
-
-            if (key.Key == RLKey.Slash && key.Shift)
-            {
-                Apply_Prompt_Choose(null);
-                return;
-            }
-
-            var direction = DirectionOfKey(key);
-            if (direction != Direction.None)
-            {
-                var targetCoord = newCoord(Player, direction);
-                WriteLine(direction.ToString());
-
-                _usingItem.ApplyTo(Map[targetCoord], this);  // the magic
-                NextStep = null;
-            }
-        }
-
-        private void Apply_Choose_item(RLKeyPress key)
-        {
-            if (key.Key == RLKey.Escape)
-            {
-                Console.WriteLine("cancelled.");
-                NextStep = null;
-                return;
-            }
-
-            var selectedIndex = AlphaIndexOfKeyPress(key);
-            if (selectedIndex < 0 || selectedIndex > Player.Inventory.Count())
-            {
-                WriteLine($"The key [{key.Char}] does not match an inventory item.  Pick another.");
-                return;
-            }
-
-            var item = Player.Inventory.ElementAt(selectedIndex);
-            if (!item.IsUsable)
-            {
-                WriteLine($"The [{item.Name}] is not a usable item.  Pick another.");
-                return;
-            }
-
-            _usingItem = item;
-            WriteLine($"Using {item.Name} in what direction: ");
-            NextStep = Apply_in_Direction;
         }
         #endregion
 
@@ -348,6 +274,89 @@ namespace CopperBend.App
                 }
             }
         }
+
+        #region Use Item
+        private void Use_Prompt(RLKeyPress key)
+        {
+            if (_usingItem == null) _usingItem = Player.WieldedTool;
+            if (_usingItem == null)
+            {
+                Use_Prompt_Choose(null);
+                return;
+            }
+
+            Prompt($"Direction key to use {_usingItem.Name}, or pick another item with a-z or ?: ");
+            NextStep = Use_in_Direction;
+        }
+
+        private void Use_Prompt_Choose(RLKeyPress key)
+        {
+            Command_Inventory();
+            Prompt("Pick an item to use: ");
+            NextStep = Use_Choose_item;
+        }
+
+        private IItem _usingItem;
+        private void Use_in_Direction(RLKeyPress key)
+        {
+            if (key.Key == RLKey.Escape)
+            {
+                WriteLine("cancelled.");
+                NextStep = null;
+                return;
+            }
+
+            if (key.Key == RLKey.Slash && key.Shift)
+            {
+                Use_Prompt_Choose(null);
+                return;
+            }
+
+            if (key.Char >= 'a' && key.Char <= 'z')
+            {
+                Use_Choose_item(key);
+                return;
+            }
+
+            var direction = DirectionOfKey(key);
+            if (direction != Direction.None)
+            {
+                var targetCoord = newCoord(Player, direction);
+                WriteLine(direction.ToString());
+
+                _usingItem.ApplyTo(Map[targetCoord], this);  // the magic
+                NextStep = null;
+            }
+        }
+
+        private void Use_Choose_item(RLKeyPress key)
+        {
+            if (key.Key == RLKey.Escape)
+            {
+                Console.WriteLine("cancelled.");
+                NextStep = null;
+                return;
+            }
+
+            var selectedIndex = AlphaIndexOfKeyPress(key);
+            if (selectedIndex < 0 || selectedIndex > Player.Inventory.Count())
+            {
+                WriteLine($"The key [{key.Char}] does not match an inventory item.  Pick another.");
+                return;
+            }
+
+            var item = Player.Inventory.ElementAt(selectedIndex);
+            if (!item.IsUsable)
+            {
+                WriteLine($"The [{item.Name}] is not a usable item.  Pick another.");
+                return;
+            }
+
+            _usingItem = item;
+            WriteLine($"Using {item.Name} in what direction: ");
+            NextStep = Use_in_Direction;
+        }
+        #endregion
 
         #region Wield
         private void Wield_Prompt(RLKeyPress key)

@@ -41,7 +41,7 @@ namespace CopperBend.App.Model
         public int Health { get; set; }
         public void AdjustHealth(int amount)
         {
-            Health -= amount;
+            Health += amount;
         }
 
         public Action<IControlPanel, ScheduleEntry> NextAction => _behavior.NextAction;

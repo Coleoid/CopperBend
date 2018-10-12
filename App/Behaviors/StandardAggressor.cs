@@ -65,7 +65,7 @@ namespace CopperBend.App.Behaviors
 
             if (target.X == step.X && target.Y == step.Y)
             {
-                controls.AttackPlayer();
+                controls.AttackPlayer(actor);
                 return 30;
             }
 

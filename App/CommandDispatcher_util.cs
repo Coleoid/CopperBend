@@ -122,16 +122,21 @@ namespace CopperBend.App
             return fov.IsInFov(target.X, target.Y);
         }
 
-        public void AttackPlayer()
+        public void AttackPlayer(IActor actor)
         {
             //0.0
-            Player.AdjustHealth(-2);
-            WriteLine("the thingy hit you for 2 points!");
-            if (Player.Health < 1)
-            {
-                WriteLine("You die...");
-                //TODO: die
-            }
+            int damage = 2;
+            WriteLine($"The {actor.Name} hit me for {damage}.");
+            Player.AdjustHealth(-damage);
+
+            if (damage > 0)
+                WriteLine($"Ow.  Down to {Player.Health}.");
+        }
+
+        public void HealPlayer(int amount)
+        {
+            Player.AdjustHealth(amount);
+            WriteLine($"So nice.  Up to {Player.Health}.");
         }
 
         public List<ICoord> GetPathTo(ICoord start, ICoord target)
@@ -180,11 +185,6 @@ namespace CopperBend.App
         {
             GameState.Mode = IsPlayerScheduled ?
                 GameMode.Schedule : GameMode.PlayerReady;
-        }
-
-        public void HealPlayer(int amount)
-        {
-            Player.AdjustHealth(amount);
         }
 
         public void PutItemOnMap(IItem item)

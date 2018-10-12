@@ -1,4 +1,5 @@
 ﻿using System;
+using RLNET;
 
 namespace CopperBend.App.Model
 {
@@ -10,6 +11,8 @@ namespace CopperBend.App.Model
             : base(x, y, quantity, true)
         {
             SeedType = seedType;
+            Symbol = '%';
+            Color = RLColor.LightRed;
         }
 
         //  This may grow into enough difference to justify subclassing

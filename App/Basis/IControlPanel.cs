@@ -14,7 +14,8 @@ namespace CopperBend.App
         void PlayerBusyFor(int ticks);
         ICoord PlayerCoords { get; }
 
-        void AttackPlayer();
+        void AttackPlayer(IActor actor);
+        void HealPlayer(int amount);
 
         void RemoveFromInventory(IItem item);
         void GiveToPlayer(IItem item);
@@ -33,7 +34,6 @@ namespace CopperBend.App
 
         void PutItemOnMap(IItem item);
         void RemovePlantAt(ICoord coord);
-        void HealPlayer(int amount);
 
         //  This form may turn out well--specialist informs about its state
         void MessagePanelFull();

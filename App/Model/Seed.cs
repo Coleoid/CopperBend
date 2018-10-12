@@ -42,7 +42,8 @@ namespace CopperBend.App.Model
                 return;
             }
 
-            var sownSeed = new Seed(tile.X, tile.Y, 1, this.SeedType);
+            //PROBLEM:  Splitting stacks in a base class, creating a new subclass instance...
+            var sownSeed = new HealerSeed(tile.X, tile.Y, 1);
             tile.Sow(sownSeed);
 
             if (--Quantity == 0)
@@ -50,7 +51,7 @@ namespace CopperBend.App.Model
                 controls.RemoveFromInventory(this);
             }
 
-            controls.AddToSchedule(new ScheduleEntry(100, SeedGrows));
+            controls.AddToSchedule(new ScheduleEntry(100, sownSeed.SeedGrows));
             controls.SetMapDirty();
             controls.PlayerBusyFor(15);
         }
@@ -60,7 +61,7 @@ namespace CopperBend.App.Model
         private void SeedGrows(IControlPanel controls, ScheduleEntry entry)
         {
             controls.WriteLine($"The seed is growing... Round {growthRound++}");
-            controls.AddToSchedule( growthRound > 9 ? 
+            controls.AddToSchedule( growthRound > 2 ? 
                   new ScheduleEntry(10, SeedMatures)
                 : new ScheduleEntry(100, SeedGrows));
         }
@@ -73,16 +74,17 @@ namespace CopperBend.App.Model
 
     public class HealerSeed : Seed
     {
-        public HealerSeed(int x, int y, int quantity, SeedType type) 
-            : base(x, y, quantity, type)
+        public HealerSeed(int x, int y, int quantity) 
+            : base(x, y, quantity, SeedType.Healer)
         {}
 
         protected override void SeedMatures(IControlPanel controls, ScheduleEntry entry)
         {
-            //for now, insta-auto-harvest.  Two fruit drop to the ground.
-            IItem fruit = new Fruit(this.X, this.Y, 2, SeedType);
+            //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
+            IItem fruit = new Fruit(this.X, this.Y, 2, SeedType.Healer);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this);
+            controls.SetMapDirty();
         }
     }
 }

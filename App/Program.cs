@@ -28,7 +28,7 @@ namespace CopperBend.App
                 Symbol = '@',
                 Color = Palette.DbLight,
                 Awareness = 4,
-                Health = 23012398
+                Health = 23
             };
 
             var hoe = new Hoe(0, 0)
@@ -53,7 +53,7 @@ namespace CopperBend.App
                 Symbol = '.'
             };
 
-            var seed_2 = new Seed(0, 0, 2, SeedType.Healer)
+            var seed_2 = new HealerSeed(0, 0, 2)
             {
                 Name = "seed",
                 Color = RLColor.LightGreen,

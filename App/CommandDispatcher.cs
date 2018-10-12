@@ -103,7 +103,17 @@ namespace CopperBend.App
         {
             //  If we actually do move in that direction,
             //  we need to redraw, and the player will be busy for a while.
-            if (Map.SetActorCoord(player, coord))
+            ITile tile = Map[coord];
+            if (tile.TerrainType == TerrainType.ClosedDoor)
+            {
+                Map.OpenDoor(tile);
+                PlayerBusyFor(4);
+            }
+            else if (Map.HasEventAtCoords(tile))
+            {
+                Map.RunEvent(player, tile);
+            }
+            else if (Map.SetActorCoord(player, coord))
             {
                 Map.UpdatePlayerFieldOfView(player);
                 Map.DisplayDirty = true;
@@ -114,18 +124,10 @@ namespace CopperBend.App
             }
             else
             {
-                ITile tile = Map[coord];
-                if (tile.TerrainType == TerrainType.ClosedDoor)
-                {
-                    tile.OpenDoor();
-                    Map.SetIsWalkable(tile, true);
-                    Map.SetIsTransparent(tile, true);
-                    Map.DisplayDirty = true;
-                    Map.UpdatePlayerFieldOfView(player);
-                    PlayerBusyFor(4);
-                }
+                WriteLine($"I can't walk through {tile.TerrainType}.");
             }
         }
+
         private void Command_DirectionAttack(IActor targetActor, ICoord coord)
         {
             //0.1

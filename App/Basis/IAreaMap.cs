@@ -23,5 +23,8 @@ namespace CopperBend.App
         IActor GetActorAtCoord(ICoord coord);
         List<string> FirstSightMessages { get; set; }
         Dictionary<(int, int), List<string>> LocationMessages { get; }
+        void OpenDoor(ITile tile);
+        bool HasEventAtCoords(ICoord coord);
+        void RunEvent(IActor player, ITile tile);
     }
 }

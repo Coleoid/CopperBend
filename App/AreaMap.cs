@@ -138,6 +138,25 @@ namespace CopperBend.App
         public IActor GetActorAtCoord(ICoord coord)
             => GetActorAtPosition(coord.X, coord.Y);
 
+        public void OpenDoor(ITile tile)
+        {
+            tile.OpenDoor();
+            SetIsWalkable(tile, true);
+            SetIsTransparent(tile, true);
+            DisplayDirty = true;
+            UpdatePlayerFieldOfView(ViewpointActor);
+        }
+
+        public bool HasEventAtCoords(ICoord coord)
+        {
+            return false;
+        }
+
+        public void RunEvent(IActor player, ITile tile)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public List<string> FirstSightMessages { get; set; }
         public Dictionary<(int, int), List<string>> LocationMessages { get; private set; }
     }

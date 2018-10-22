@@ -8,6 +8,7 @@ namespace CopperBend.App
     {
         string Name { get; set; }
         ITile[,] Tiles { get; set; }
+        Dictionary<string, TileType> TileTypes { get; set; }
         List<IItem> Items { get; set; }
         List<IActor> Actors { get; set; }
         IActor ViewpointActor { get; set; }
@@ -25,6 +26,6 @@ namespace CopperBend.App
         Dictionary<(int, int), List<string>> LocationMessages { get; }
         void OpenDoor(ITile tile);
         bool HasEventAtCoords(ICoord coord);
-        void RunEvent(IActor player, ITile tile);
+        void RunEvent(IActor player, ITile tile, IControlPanel controls);
     }
 }

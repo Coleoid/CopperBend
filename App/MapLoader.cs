@@ -5,22 +5,166 @@ using System.Linq;
 using RLNET;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using System;
 
 namespace CopperBend.App
 {
-    public enum TerrainType  //0.1
+    //  Expected to mature into a classic flyweight with no mutable state,
+    //  with one per form of terrain/tile.  Eventually purely data-driven,
+    //  for now I'm building these guys in code.
+    public class TileType
     {
-        Unknown = 0,
-        Dirt,
-        TilledDirt,
-        StoneWall,
-        ClosedDoor,
-        OpenDoor,
-        Blight,
+        public string Name { get; set; }
+        public char Symbol { get; set; }
+        public bool IsWalkable { get; set; }
+        public bool IsTransparent { get; set; }
+        public bool IsTillable { get; internal set; }
+
+        internal void SetForeground(RLColor colorUnseen, RLColor colorSeen)
+        {
+            _fgUnseen = colorUnseen;
+            _fgSeen = colorSeen;
+        }
+        public RLColor Foreground(bool isInFOV) => isInFOV ? _fgSeen : _fgUnseen;
+        private RLColor _fgSeen;
+        private RLColor _fgUnseen;
+
+        internal void SetBackground(RLColor colorUnseen, RLColor colorSeen)
+        {
+            _bgUnseen = colorUnseen;
+            _bgSeen = colorSeen;
+        }
+        public RLColor Background(bool isInFOV) => isInFOV ? _bgSeen : _bgUnseen;
+        private RLColor _bgSeen;
+        private RLColor _bgUnseen;
     }
+
 
     public class MapLoader
     {
+        Dictionary<string, TileType> TileTypes;
+
+        public MapLoader()
+        {
+            InitTileTypes();
+        }
+
+        public void InitTileTypes()
+        {
+            TileTypes = new Dictionary<string, TileType>();
+
+            var type = new TileType
+            {
+                Name = "Unknown",
+                Symbol = '?',
+                IsWalkable = true,
+                IsTransparent = true,
+            };
+            type.SetForeground(Palette.DbBlood, Palette.DbBlood);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["Unknown"] = type;
+
+            type = new TileType
+            {
+                Name = "Dirt",
+                Symbol = '.',
+                IsWalkable = true,
+                IsTransparent = true,
+            };
+            type.SetForeground(Colors.Floor, Colors.FloorSeen);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["Dirt"] = type;
+
+            type = new TileType
+            {
+                Name = "TilledDirt",
+                Symbol = '~',
+                IsWalkable = true,
+                IsTransparent = true,
+            };
+            type.SetForeground(Colors.Floor, Colors.FloorSeen);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["TilledDirt"] = type;
+
+            type = new TileType
+            {
+                Name = "Blight",
+                Symbol = ',',
+                IsWalkable = true,
+                IsTransparent = true,
+            };
+            type.SetForeground(Palette.DbOldBlood, Palette.DbBlood);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["Blight"] = type;
+
+            type = new TileType
+            {
+                Name = "StoneWall",
+                Symbol = '#',
+                IsWalkable = false,
+                IsTransparent = false,
+            };
+            type.SetForeground(Colors.Wall, Colors.WallSeen);
+            type.SetBackground(Colors.WallBackground, Colors.WallBackgroundSeen);
+            TileTypes["StoneWall"] = type;
+
+            type = new TileType
+            {
+                Name = "ClosedDoor",
+                Symbol = '+',
+                IsWalkable = false,
+                IsTransparent = false,
+            };
+            type.SetForeground(Colors.Wall, Colors.WallSeen);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["ClosedDoor"] = type;
+
+            type = new TileType
+            {
+                Name = "OpenDoor",
+                Symbol = '-',
+                IsWalkable = true,
+                IsTransparent = true,
+            };
+            type.SetForeground(Colors.Wall, Colors.WallSeen);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["OpenDoor"] = type;
+
+            type = new TileType
+            {
+                Name = "WoodenFence",
+                Symbol = 'X',
+                IsWalkable = false,
+                IsTransparent = false,
+            };
+            type.SetForeground(Colors.Wall, Colors.WallSeen);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["WoodenFence"] = type;
+
+            type = new TileType
+            {
+                Name = "Wall",
+                Symbol = '=',
+                IsWalkable = false,
+                IsTransparent = false,
+            };
+            type.SetForeground(Colors.Wall, Colors.WallSeen);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["Wall"] = type;
+
+            type = new TileType
+            {
+                Name = "Gate",
+                Symbol = '%',
+                IsWalkable = false,
+                IsTransparent = false,
+            };
+            type.SetForeground(Colors.Wall, Colors.WallSeen);
+            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
+            TileTypes["Gate"] = type;
+        }
+
+
         public IAreaMap LoadMap(string mapName)
         {
             return MapFromFile(mapName);
@@ -45,21 +189,17 @@ namespace CopperBend.App
                 string row = data.Terrain[y];
                 for (int x = 0; x < width; x++)
                 {
-                    var type = (x < row.Length)
-                        ? TerrainFrom(row.Substring(x, 1))
-                        : TerrainType.Unknown;
+                    var symbol = (x < row.Length)
+                        ? row.Substring(x, 1)
+                        : "???";
+                    var name = data.Legend[symbol];
 
+                    var type = TerrainFrom(name);
                     map.Tiles[x, y] = new Tile(x, y, type);
 
-                    bool stoneOrClosedDoor = (
-                        type == TerrainType.ClosedDoor
-                     || type == TerrainType.StoneWall );
 
                     //TODO:  push down/unify
-                    map.SetCellProperties(x, y,
-                        !stoneOrClosedDoor,
-                        !stoneOrClosedDoor
-                    );
+                    map.SetCellProperties(x, y, type.IsTransparent, type.IsWalkable);
                 }
             }
 
@@ -74,43 +214,88 @@ name:  Demo
 
 legend:
  '.': Dirt
- '#': StoneWall
+ '#': WoodenFence
  '+': ClosedDoor
+ 'x': TilledDirt
+ '=': Wall
+ '|': Gate
+ '-': Gate
 
 terrain:
- - '##################################'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '#................................#'
- - '##################################'
+#   0    5    1    5    2    5    3    5    4 
+ - '#########################################'  # 0
+ - '#.......................................#'
+ - '#...........................xxxxxxxxxx..#'
+ - '#.xxxxxxxxxxxxxx......====..xxxxxxxxxx..#'
+ - '#.xxxxxxxxxxxxxx......=..=..xxxxxxxxxx..#'
+ - '#.xxxxxxxxxxxxxx......=++=..xxxxxxxxxx..#'  # 5
+ - '#.xxxxxxxxxxxxxx............xxxxxxxxxx..#'
+ - '#.xxxxxxxxxxxxxx............xxxxxxxxxx..#'
+ - '#.xxxxxxxxxxxxxx........................#'
+ - '#.xxxxxxxxxxxxxx............========....#'
+ - '#.xxxxxxxxxxxxxx............=......=....#'  # 10
+ - '#.xxxxxxxxxxxxxx............=......=....#'
+ - '#.xxxxxxxxxxxxxx............=......=....#'
+ - '#.xxxxxxxxxxxxxx............=......=....#'
+ - '#.xxxxxxxxxxxxxx............+......=....#'
+ - '|...........................=......=....#'  # 5
+ - '|...........................=......=....#'
+ - '+...........................========....#'
+ - '#.xxxxxxxxxxxxxx........................#'
+ - '#.xxxxxxxxxxxxxx......==................#'
+ - '#.xxxxxxxxxxxxxx......==................#'  # 20
+ - '#.xxxxxxxxxxxxxx..........#+##########..#'
+ - '#.xxxxxxxxxxxxxx..........#..........#..#'
+ - '#.xxxxxxxxxxxxxx..........#..........#..#'
+ - '#.xxxxxxxxxxxxxx..........#..........#..#'
+ - '#.xxxxxxxxxxxxxx..#---#...#....#+#####..#'  # 5
+ - '#.xxxxxxxxxxxxxx..#...|...+....#.....#..#'
+ - '#.xxxxxxxxxxxxxx..#...#...############..#'
+ - '#.xxxxxxxxxxxxxx..#...#.................#'
+ - '#.................#####.................#'
+ - '#.......................................#'  # 30
+ - '#########################################'
 ";
             var map = MapFromYAML(FarmMapYaml);
 
-            var rock = new Item(5, 1)
-            {
-                Name = "rock",
-                Color = Palette.DbOldStone,
-                Symbol = '*',
-            };
-            map.Items.Add(rock);
+            string BlightOverlayYaml = @"---
+name:  Blight Overlay
 
-            var glom = new Actor(4, 1)
-            {
-                Name = "glom",
-                Symbol = 'g',
-                Color = RLColor.Green,
-            };
-            map.Actors.Add(glom);
+legend:
+ '.': Empty
+ 'o': Blight
 
+terrain:
+ - '..oooo'
+ - '...oooo'
+ - '....ooo'
+ - '.ooooooo'
+ - 'ooooooooooo...oo'
+ - '.oooooooooooooooo'
+ - '.oooooooooooooo'
+ - 'ooooooooooooooo'
+ - 'oooooooooooooo'
+ - '.oooooooooo.oo'
+ - '.oooooooooo.oo'
+ - '.oooooooooo'
+ - '.oooooooooooo'
+ - '.oooooooooooo'
+ - '.oooo oooooo'
+ - '..o........o'
+ - '..oo......oo'
+ - '..oo......o'
+ - '...o......ooo'
+ - '...o.......ooo'
+ - '...ooo'
+ - '...ooo....o'
+ - '...oooo..oo'
+ - '....oooooo'
+ - '.....ooooo'
+ - '.......ooo'
+ - '.......o'
+";
+
+            map.TileTypes = TileTypes;
             return map;
         }
 
@@ -164,12 +349,10 @@ terrain:
             return map;
         }
 
-        public TerrainType TerrainFrom(string symbol)
+        public TileType TerrainFrom(string name)
         {
-            if (symbol == ".") return TerrainType.Dirt;
-            if (symbol == "#") return TerrainType.StoneWall;
-            if (symbol == "+") return TerrainType.ClosedDoor;
-            return TerrainType.Unknown;
+            var foundType = TileTypes.ContainsKey(name) ? name : "Unknown";
+            return TileTypes[foundType];
         }
 
         public MapData DataFromYAML(string mapYaml)

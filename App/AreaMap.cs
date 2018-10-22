@@ -22,6 +22,8 @@ namespace CopperBend.App
         public string Name { get; set; }
         public ITile[,] Tiles { get; set; }
 
+        public Dictionary<string, TileType> TileTypes { get; set; }
+
         public List<IItem> Items { get; set; }
 
         public List<IActor> Actors { get; set; }
@@ -68,12 +70,12 @@ namespace CopperBend.App
             if (!IsExplored(coord)) return;  // unknown is undrawn
             var isInFOV = IsInFov(coord);
 
-            var tile = Tiles[coord.X, coord.Y];
-            var rep = ((Tile) tile).repr;  //TODO: FIXME: HACK: bleh.
-            var fg = rep.Foreground(isInFOV);
-            var bg = rep.Background(isInFOV);
+            var type = Tiles[coord.X, coord.Y].TileType;
+            
+            var fg = type.Foreground(isInFOV);
+            var bg = type.Background(isInFOV);
 
-            RelativeDraw(console, coord, fg, bg, rep.Symbol);
+            RelativeDraw(console, coord, fg, bg, type.Symbol);
         }
 
         private void Draw(RLConsole console, IDrawable thing)
@@ -140,21 +142,25 @@ namespace CopperBend.App
 
         public void OpenDoor(ITile tile)
         {
-            tile.OpenDoor();
-            SetIsWalkable(tile, true);
+            Guard.Against(tile.TileType.Name != "ClosedDoor");
+            tile.SetTileType(TileTypes["OpenDoor"]);
             SetIsTransparent(tile, true);
+            SetIsWalkable(tile, true);
             DisplayDirty = true;
             UpdatePlayerFieldOfView(ViewpointActor);
         }
 
         public bool HasEventAtCoords(ICoord coord)
         {
-            return false;
+            return LocationMessages.ContainsKey((coord.X, coord.Y));
         }
 
-        public void RunEvent(IActor player, ITile tile)
+        public void RunEvent(IActor player, ITile tile, IControlPanel controls)
         {
-            throw new System.NotImplementedException();
+            var locn = (tile.X, tile.Y);
+            var message = LocationMessages[locn];
+            foreach (var line in message)
+                controls.WriteLine(line);
         }
 
         public List<string> FirstSightMessages { get; set; }

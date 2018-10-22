@@ -104,14 +104,14 @@ namespace CopperBend.App
             //  If we actually do move in that direction,
             //  we need to redraw, and the player will be busy for a while.
             ITile tile = Map[coord];
-            if (tile.TerrainType == TerrainType.ClosedDoor)
+            if (tile.TileType.Name == "ClosedDoor")
             {
                 Map.OpenDoor(tile);
                 PlayerBusyFor(4);
             }
             else if (Map.HasEventAtCoords(tile))
             {
-                Map.RunEvent(player, tile);
+                Map.RunEvent(player, tile, this);
             }
             else if (Map.SetActorCoord(player, coord))
             {
@@ -124,7 +124,7 @@ namespace CopperBend.App
             }
             else
             {
-                WriteLine($"I can't walk through {tile.TerrainType}.");
+                WriteLine($"I can't walk through {tile.TileType.Name}.");
             }
         }
 

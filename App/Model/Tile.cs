@@ -6,28 +6,27 @@ namespace CopperBend.App.Model
     public class Tile : ITile
     {
         public bool IsInFOV;
-        internal TileRepresentation repr;
-        public TerrainType TerrainType { get; private set; }
+        public TileType TileType { get; private set; }
 
-        public Tile(int x, int y, TerrainType type)
+        public Tile(int x, int y, TileType type)
         {
             X = x;
             Y = y;
-            TerrainType = type;
-            repr = TileRepresenter.OfTerrain(type);
+            TileType = type;
         }
 
         #region Cultivation
 
-        public bool IsTillable => TerrainType == TerrainType.Dirt;
+        public bool IsTillable => TileType.IsTillable;
 
-        public bool IsTilled => TerrainType == TerrainType.TilledDirt;
+        public bool IsTilled { get; set; }
 
         public bool IsSown => SownSeed != null;
 
         public void Till()
         {
-            SetTerrainType(TerrainType.TilledDirt);
+            Guard.Against(!IsTillable);
+            IsTilled = true;
         }
 
         public ISeed SownSeed { get; private set; }
@@ -38,30 +37,23 @@ namespace CopperBend.App.Model
 
         #endregion
 
-        public void OpenDoor()
+        public void SetTileType(TileType newType)
         {
-            Guard.Against(TerrainType != TerrainType.ClosedDoor);
-            SetTerrainType(TerrainType.OpenDoor);
-        }
-
-        private void SetTerrainType(TerrainType newType)
-        {
-            TerrainType = newType;
-            repr = TileRepresenter.OfTerrain(newType);
+            TileType = newType;
         }
 
         public RLColor Color
         {
-            get => repr.Foreground(IsInFOV);
+            get => TileType.Foreground(IsInFOV);
         }
         public RLColor ColorBackground
         {
-            get => repr.Background(IsInFOV);
+            get => TileType.Background(IsInFOV);
         }
 
         public char Symbol
         {
-            get => repr.Symbol;
+            get => TileType.Symbol;
         }
 
         public void MoveTo(int x, int y)

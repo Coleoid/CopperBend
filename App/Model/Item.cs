@@ -51,7 +51,7 @@ namespace CopperBend.App.Model
 
         public virtual void ApplyTo(ITile tile, IControlPanel controls)
         {
-            controls.WriteLine($"Can't use a {Name} on {tile.TerrainType}.");
+            controls.WriteLine($"Can't use a {Name} on {tile.TileType}.");
         }
 
         public virtual void Consumed(IControlPanel controls)

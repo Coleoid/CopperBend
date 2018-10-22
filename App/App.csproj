@@ -82,7 +82,6 @@
     <Compile Include="Model\Tile.cs" />
     <Compile Include="Scheduler.cs" />
     <Compile Include="ItemWatcher.cs" />
-    <Compile Include="TileRepresentation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

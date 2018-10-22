@@ -25,7 +25,7 @@
             }
             else
             {
-                controls.WriteLine($"Cannot hoe {tile.TerrainType}.");
+                controls.WriteLine($"Cannot hoe {tile.TileType}.");
             }
         }
     }

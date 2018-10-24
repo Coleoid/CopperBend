@@ -210,7 +210,7 @@ namespace CopperBend.App
         internal IAreaMap FarmMap()
         {
             string FarmMapYaml = @"---
-name:  Demo
+name:  Farm
 
 legend:
  '.': Dirt
@@ -255,46 +255,41 @@ terrain:
  - '#.................#####.................#'
  - '#.......................................#'  # 30
  - '#########################################'
+
+blight:
+  one:
+    location: 0,0
+    terrain:
+    - '..1221'
+    - '...1211'
+    - '....121'
+    - '.1112211'
+    - '11122221111...11'
+    - '.1111232221111111'
+    - '.11113332221111'
+    - '111111333221111'
+    - '11111333221111'
+    - '.1111333111.11'
+    - '.1133221111.11'
+    - '.1123232111'
+    - '.112111331111'
+    - '.112111122111'
+    - '.1111 111111'
+    - '..1........1'
+    - '..11......11'
+    - '..11......1'
+    - '...1......111'
+    - '...1.......111'
+    - '...111'
+    - '...111....1'
+    - '...1111..11'
+    - '....111111'
+    - '.....11111'
+    - '.......111'
+    - '.......1'
 ";
+
             var map = MapFromYAML(FarmMapYaml);
-
-            string BlightOverlayYaml = @"---
-name:  Blight Overlay
-
-legend:
- '.': Empty
- 'o': Blight
-
-terrain:
- - '..oooo'
- - '...oooo'
- - '....ooo'
- - '.ooooooo'
- - 'ooooooooooo...oo'
- - '.oooooooooooooooo'
- - '.oooooooooooooo'
- - 'ooooooooooooooo'
- - 'oooooooooooooo'
- - '.oooooooooo.oo'
- - '.oooooooooo.oo'
- - '.oooooooooo'
- - '.oooooooooooo'
- - '.oooooooooooo'
- - '.oooo oooooo'
- - '..o........o'
- - '..oo......oo'
- - '..oo......o'
- - '...o......ooo'
- - '...o.......ooo'
- - '...ooo'
- - '...ooo....o'
- - '...oooo..oo'
- - '....oooooo'
- - '.....ooooo'
- - '.......ooo'
- - '.......o'
-";
-
             map.TileTypes = TileTypes;
             return map;
         }

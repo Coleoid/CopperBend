@@ -6,6 +6,7 @@ using RLNET;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System;
+using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -180,9 +181,14 @@ namespace CopperBend.App
             var data = DataFromYAML(mapYaml);
             var width = data.Terrain.Max(t => t.Length);
             var height = data.Terrain.Count();
-            var map = new AreaMap(width, height);
 
+            var map = new AreaMap(width, height);
             map.Name = data.Name;
+
+            foreach (var overlay in data.Blight)
+            {
+                
+            }
 
             for (int y = 0; y < height; y++)
             {
@@ -257,41 +263,57 @@ terrain:
  - '#########################################'
 
 blight:
-  one:
+  - name: one
     location: 0,0
     terrain:
-    - '..1221'
-    - '...1211'
-    - '....121'
-    - '.1112211'
-    - '11122221111...11'
-    - '.1111232221111111'
-    - '.11113332221111'
-    - '111111333221111'
-    - '11111333221111'
-    - '.1111333111.11'
-    - '.1133221111.11'
-    - '.1123232111'
-    - '.112111331111'
-    - '.112111122111'
-    - '.1111 111111'
-    - '..1........1'
-    - '..11......11'
-    - '..11......1'
-    - '...1......111'
-    - '...1.......111'
-    - '...111'
-    - '...111....1'
-    - '...1111..11'
-    - '....111111'
-    - '.....11111'
-    - '.......111'
-    - '.......1'
+      - '..1221'
+      - '...1211'
+      - '....121'
+      - '.1112211'
+      - '11122221111...11'
+      - '.1111232221111111'
+      - '.11113332221111'
+      - '111111333221111'
+      - '11111333221111'
+      - '.1111333111.11'
+      - '.1133221111.11'
+      - '.1123232111'
+      - '.112111331111'
+      - '.112111122111'
+      - '.1111 111111'
+      - '..1........1'
+      - '..11......11'
+      - '..11......1'
+      - '...1......111'
+      - '...1.......111'
+      - '...111'
+      - '...111....1'
+      - '...1111..11'
+      - '....111111'
+      - '.....11111'
+      - '.......111'
+      - '.......1'
 ";
 
             var map = MapFromYAML(FarmMapYaml);
             map.TileTypes = TileTypes;
             return map;
+        }
+
+        public TileType TerrainFrom(string name)
+        {
+            var foundType = TileTypes.ContainsKey(name) ? name : "Unknown";
+            return TileTypes[foundType];
+        }
+
+        public MapData DataFromYAML(string mapYaml)
+        {
+            var reader = new StringReader(mapYaml);
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
+
+            return deserializer.Deserialize<MapData>(reader);
         }
 
 
@@ -339,25 +361,9 @@ terrain:
             map.FirstSightMessages.Add("The sky... says it's morning.  A small farmhouse to the east.");
             map.FirstSightMessages.Add("Something real wrong with the ground to the west, and the north.");
 
-            map.LocationMessages[(1,6)] = new List<string> { "a shiversome feeling..." };
+            map.LocationMessages[(1, 6)] = new List<string> { "a shiversome feeling..." };
 
             return map;
-        }
-
-        public TileType TerrainFrom(string name)
-        {
-            var foundType = TileTypes.ContainsKey(name) ? name : "Unknown";
-            return TileTypes[foundType];
-        }
-
-        public MapData DataFromYAML(string mapYaml)
-        {
-            var reader = new StringReader(mapYaml);
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
-                .Build();
-
-            return deserializer.Deserialize<MapData>(reader);
         }
     }
 
@@ -365,6 +371,14 @@ terrain:
     {
         public string Name { get; set; }
         public Dictionary<string, string> Legend { get; set; }
+        public List<string> Terrain { get; set; }
+        public List<BlightOverlayData> Blight { get; set; }
+    }
+
+    public class BlightOverlayData
+    {
+        public string Name { get; set; }
+        public string Location { get; set; }
         public List<string> Terrain { get; set; }
     }
 }

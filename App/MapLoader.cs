@@ -180,6 +180,8 @@ namespace CopperBend.App
                 Name = data.Name
             };
 
+            var tilledType = TileTypes["TilledDirt"];  // larva
+
             for (int y = 0; y < height; y++)
             {
                 string row = data.Terrain[y];
@@ -192,6 +194,7 @@ namespace CopperBend.App
 
                     var type = TerrainFrom(name);
                     Tile tile = new Tile(x, y, type);
+                    if (type == tilledType) tile.Till();
                     map.Tiles[x, y] = tile;
 
                     //TODO:  push down/unify

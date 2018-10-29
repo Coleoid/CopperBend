@@ -53,7 +53,7 @@ namespace CopperBend.App
                 Symbol = '*'
             };
 
-            var seed = new Seed(At(0, 0), 1, SeedType.Boomer)
+            var seed = new Seed(At(0, 0), 1, PlantType.Boomer)
             {
                 Name = "seed",
                 ColorForeground = RLColor.LightGreen,

@@ -6,12 +6,12 @@ namespace CopperBend.App.Model
 {
     public class Fruit : Item
     {
-        private readonly SeedType SeedType;
+        public PlantType PlantType;
 
-        public Fruit(Coord coord, int quantity, SeedType seedType)
+        public Fruit(Coord coord, int quantity, PlantType olantType)
             : base(coord, quantity, true)
         {
-            SeedType = seedType;
+            PlantType = olantType;
             Symbol = '%';
             ColorForeground = RLColor.LightRed;
         }
@@ -21,17 +21,17 @@ namespace CopperBend.App.Model
         {
             base.Consumed(controls);
 
-            switch (SeedType)
+            switch (PlantType)
             {
-            case SeedType.Healer:
+            case PlantType.Healer:
                 controls.HealPlayer(4);
-                controls.GiveToPlayer(new Seed(new Coord(0, 0), 2, SeedType.Healer));
+                controls.GiveToPlayer(new Seed(new Coord(0, 0), 2, PlantType.Healer));
                 //update knowledge
                 //messages
                 break;
 
             default:
-                throw new Exception($"Don't have eating written for fruit of {SeedType}.");
+                throw new Exception($"Don't have eating written for fruit of {PlantType}.");
             }
         }
 

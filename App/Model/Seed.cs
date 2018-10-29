@@ -5,7 +5,7 @@ namespace CopperBend.App.Model
 {
     public class Seed : Item, ISeed
     {
-        public SeedType SeedType;
+        public PlantType SeedType;
 
         public override string Name
         {
@@ -22,7 +22,7 @@ namespace CopperBend.App.Model
             return false;
         }
 
-        public Seed(Coord coord, int quantity, SeedType type)
+        public Seed(Coord coord, int quantity, PlantType type)
             : base(coord, quantity, true)
         {
             SeedType = type;
@@ -76,13 +76,13 @@ namespace CopperBend.App.Model
     public class HealerSeed : Seed
     {
         public HealerSeed(Coord coord, int quantity) 
-            : base(coord, quantity, SeedType.Healer)
+            : base(coord, quantity, PlantType.Healer)
         {}
 
         protected override void SeedMatures(IControlPanel controls, ScheduleEntry entry)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Coord, 2, SeedType.Healer);
+            IItem fruit = new Fruit(this.Coord, 2, PlantType.Healer);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this.Coord);
             controls.SetMapDirty();

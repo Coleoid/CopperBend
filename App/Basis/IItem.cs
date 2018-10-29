@@ -22,7 +22,7 @@ namespace CopperBend.App
     public interface ISeed : IItem
     { }
 
-    public enum SeedType
+    public enum PlantType
     {
         Boomer,
         Healer,

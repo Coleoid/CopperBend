@@ -22,9 +22,9 @@ namespace CopperBend.App
             "Smooth",
         };
 
-        public Dictionary<SeedType, string> SeedDescriptionFrom;
-        public Dictionary<string, SeedType> SeedTypeFrom;
-        public Dictionary<SeedType, bool> SeedLearned;
+        public Dictionary<PlantType, string> SeedDescriptionFrom;
+        public Dictionary<string, PlantType> SeedTypeFrom;
+        public Dictionary<PlantType, bool> SeedLearned;
 
         private void ScrambleSeeds()
         {
@@ -34,20 +34,20 @@ namespace CopperBend.App
             var shuffled = SeedAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
 
-            SeedTypeFrom = new Dictionary<string, SeedType>();
-            SeedDescriptionFrom = new Dictionary<SeedType, string>();
-            SeedLearned = new Dictionary<SeedType, bool>();
+            SeedTypeFrom = new Dictionary<string, PlantType>();
+            SeedDescriptionFrom = new Dictionary<PlantType, string>();
+            SeedLearned = new Dictionary<PlantType, bool>();
 
             //  I am broot
-            SeedTypeFrom[shuffled[0]] = SeedType.Boomer;
-            SeedTypeFrom[shuffled[1]] = SeedType.Healer;
-            SeedTypeFrom[shuffled[2]] = SeedType.Thornfriend;
-            SeedDescriptionFrom[SeedType.Boomer] = shuffled[0];
-            SeedDescriptionFrom[SeedType.Healer] = shuffled[1];
-            SeedDescriptionFrom[SeedType.Thornfriend] = shuffled[2];
-            SeedLearned[SeedType.Boomer] = false;
-            SeedLearned[SeedType.Healer] = false;
-            SeedLearned[SeedType.Thornfriend] = false;
+            SeedTypeFrom[shuffled[0]] = PlantType.Boomer;
+            SeedTypeFrom[shuffled[1]] = PlantType.Healer;
+            SeedTypeFrom[shuffled[2]] = PlantType.Thornfriend;
+            SeedDescriptionFrom[PlantType.Boomer] = shuffled[0];
+            SeedDescriptionFrom[PlantType.Healer] = shuffled[1];
+            SeedDescriptionFrom[PlantType.Thornfriend] = shuffled[2];
+            SeedLearned[PlantType.Boomer] = false;
+            SeedLearned[PlantType.Healer] = false;
+            SeedLearned[PlantType.Thornfriend] = false;
         }
         #endregion
 
@@ -59,9 +59,9 @@ namespace CopperBend.App
             "Smooth",
         };
 
-        public Dictionary<SeedType, string> FruitDescriptionFrom;
-        public Dictionary<string, SeedType> FruitTypeFrom;
-        public Dictionary<SeedType, bool> FruitLearned;
+        public Dictionary<PlantType, string> FruitDescriptionFrom;
+        public Dictionary<string, PlantType> FruitTypeFrom;
+        public Dictionary<PlantType, bool> FruitLearned;
 
         private void ScrambleFruit()
         {
@@ -71,29 +71,34 @@ namespace CopperBend.App
             var shuffled = FruitAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
 
-            SeedTypeFrom = new Dictionary<string, SeedType>();
-            FruitDescriptionFrom = new Dictionary<SeedType, string>();
-            FruitLearned = new Dictionary<SeedType, bool>();
+            SeedTypeFrom = new Dictionary<string, PlantType>();
+            FruitDescriptionFrom = new Dictionary<PlantType, string>();
+            FruitLearned = new Dictionary<PlantType, bool>();
 
             //  I am broot
-            FruitTypeFrom[shuffled[0]] = SeedType.Boomer;
-            FruitTypeFrom[shuffled[1]] = SeedType.Healer;
-            FruitTypeFrom[shuffled[2]] = SeedType.Thornfriend;
-            FruitDescriptionFrom[SeedType.Boomer] = shuffled[0];
-            FruitDescriptionFrom[SeedType.Healer] = shuffled[1];
-            FruitDescriptionFrom[SeedType.Thornfriend] = shuffled[2];
-            FruitLearned[SeedType.Boomer] = false;
-            FruitLearned[SeedType.Healer] = false;
-            FruitLearned[SeedType.Thornfriend] = false;
+            FruitTypeFrom[shuffled[0]] = PlantType.Boomer;
+            FruitTypeFrom[shuffled[1]] = PlantType.Healer;
+            FruitTypeFrom[shuffled[2]] = PlantType.Thornfriend;
+            FruitDescriptionFrom[PlantType.Boomer] = shuffled[0];
+            FruitDescriptionFrom[PlantType.Healer] = shuffled[1];
+            FruitDescriptionFrom[PlantType.Thornfriend] = shuffled[2];
+            FruitLearned[PlantType.Boomer] = false;
+            FruitLearned[PlantType.Healer] = false;
+            FruitLearned[PlantType.Thornfriend] = false;
         }
         #endregion
 
-        public void Learn(SeedType type)
+        public void Learn(Seed seed)
         {
-            SeedLearned[type] = true;
+            SeedLearned[seed.SeedType] = true;
         }
 
-        public string Describe(SeedType type)
+        public void Learn(Fruit fruit)
+        {
+            FruitLearned[fruit.PlantType] = true;
+        }
+
+        public string Describe(PlantType type)
         {
             return SeedLearned[type]
                 ? type.ToString()

@@ -5,7 +5,7 @@ namespace CopperBend.App.Model
 {
     public class Seed : Item, ISeed
     {
-        public PlantType SeedType;
+        public PlantType PlantType;
 
         public override string Name
         {
@@ -16,7 +16,7 @@ namespace CopperBend.App.Model
         {
             if (item is Seed seed)
             {
-                return SeedType == seed.SeedType;
+                return PlantType == seed.PlantType;
             }
 
             return false;
@@ -25,7 +25,7 @@ namespace CopperBend.App.Model
         public Seed(Coord coord, int quantity, PlantType type)
             : base(coord, quantity, true)
         {
-            SeedType = type;
+            PlantType = type;
         }
 
         public override void ApplyTo(ITile tile, IControlPanel controls)

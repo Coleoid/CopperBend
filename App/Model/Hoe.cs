@@ -21,7 +21,7 @@ namespace CopperBend.App.Model
                     return;
                 }
 
-                tile.Till();
+                controls.Till(tile);
                 controls.SetMapDirty();
                 controls.PlayerBusyFor(15);
             }

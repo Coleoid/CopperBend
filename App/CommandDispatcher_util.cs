@@ -1,4 +1,5 @@
-﻿using RLNET;
+﻿using CopperBend.App.Model;
+using RLNET;
 using RogueSharp;
 using System;
 using System.Collections.Generic;
@@ -195,6 +196,17 @@ namespace CopperBend.App
         public void RemovePlantAt(Coord coord)
         {
             Map.Tiles[coord.X, coord.Y].RemovePlant();
+        }
+
+        public void Till(ITile tile)
+        {
+            tile.Till();
+            tile.SetTileType(Map.TileTypes["TilledDirt"]);
+        }
+
+        public void Learn(Fruit fruit)
+        {
+            watcher.Learn(fruit);
         }
     }
 }

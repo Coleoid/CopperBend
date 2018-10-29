@@ -14,6 +14,7 @@ namespace CopperBend.App
         public IAreaMap Map { get => GameState.Map; }
         public Scheduler Scheduler { get; private set; }
         public IGameState GameState { get; private set; }
+        private PartialDescriber watcher;
 
         private Action<RLKeyPress> NextStep = null;
         private bool InMultiStepCommand
@@ -25,6 +26,7 @@ namespace CopperBend.App
         {
             InputQueue = inputQueue;
             Scheduler = scheduler;
+            watcher = new PartialDescriber();
         }
 
         public void Init(IGameState gameState)
@@ -259,8 +261,6 @@ namespace CopperBend.App
 
         private void Command_Inventory()
         {
-            var watcher = new PartialDescriber();
-
             Console.WriteLine("Inventory:");
             if (Player.Inventory.Count() == 0)
             {

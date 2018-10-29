@@ -14,6 +14,7 @@ namespace CopperBend.App.Model
             PlantType = olantType;
             Symbol = '%';
             ColorForeground = RLColor.LightRed;
+            Name = "fruit";
         }
 
         //  This may grow into enough difference to justify subclassing
@@ -26,8 +27,7 @@ namespace CopperBend.App.Model
             case PlantType.Healer:
                 controls.HealPlayer(4);
                 controls.GiveToPlayer(new Seed(new Coord(0, 0), 2, PlantType.Healer));
-                //update knowledge
-                //messages
+                controls.Learn(this);
                 break;
 
             default:

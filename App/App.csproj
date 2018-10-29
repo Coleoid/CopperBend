@@ -77,11 +77,11 @@
     <Compile Include="Basis\ITile.cs" />
     <Compile Include="Basis\ScheduleEntry.cs" />
     <Compile Include="Model\Seed.cs" />
+    <Compile Include="PartialDescriber.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Tile.cs" />
     <Compile Include="Scheduler.cs" />
-    <Compile Include="ItemWatcher.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

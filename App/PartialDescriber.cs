@@ -71,7 +71,7 @@ namespace CopperBend.App
             var shuffled = FruitAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
 
-            SeedTypeFrom = new Dictionary<string, PlantType>();
+            FruitTypeFrom = new Dictionary<string, PlantType>();
             FruitDescriptionFrom = new Dictionary<PlantType, string>();
             FruitLearned = new Dictionary<PlantType, bool>();
 
@@ -90,31 +90,12 @@ namespace CopperBend.App
 
         public void Learn(Seed seed)
         {
-            SeedLearned[seed.SeedType] = true;
+            SeedLearned[seed.PlantType] = true;
         }
 
         public void Learn(Fruit fruit)
         {
             FruitLearned[fruit.PlantType] = true;
-        }
-
-        public string Describe(PlantType type)
-        {
-            return SeedLearned[type]
-                ? type.ToString()
-                : SeedDescriptionFrom[type];
-        }
-
-        public string AdjectiveFor(IItem item)
-        {
-            if (item is Seed seed)
-            {
-                return Describe(seed.SeedType);
-            }
-            else  //  potions, wands, scrolls are the genre staples...
-            {
-                return "";
-            }
         }
 
         public string Describe(IItem item)
@@ -134,5 +115,26 @@ namespace CopperBend.App
 
             return $"{prefix} {adj}{item.Name}{s}";
         }
+
+        public string AdjectiveFor(IItem item)
+        {
+            if (item is Seed seed)
+            {
+                return AdjectiveFor(seed);
+            }
+            else  //  potions, wands, scrolls are the genre staples...
+            {
+                return "";
+            }
+        }
+
+        public string AdjectiveFor(Seed seed)
+        {
+            var type = seed.PlantType;
+            return SeedLearned[type]
+                ? type.ToString()
+                : SeedDescriptionFrom[type];
+        }
+
     }
 }

@@ -83,6 +83,8 @@ namespace CopperBend.App
                 Symbol = '~',
                 IsWalkable = true,
                 IsTransparent = true,
+                IsTillable = true,
+                
             };
             type.SetForeground(Palette.DbWood, Palette.DbBrightWood);
             type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
@@ -223,6 +225,7 @@ namespace CopperBend.App
                 }
             }
 
+            map.TileTypes = TileTypes;
             return map;
         }
 
@@ -309,7 +312,6 @@ blight:
 ";
 
             var map = MapFromYAML(FarmMapYaml);
-            map.TileTypes = TileTypes;
             return map;
         }
 

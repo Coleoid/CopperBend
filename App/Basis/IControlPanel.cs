@@ -26,6 +26,7 @@ namespace CopperBend.App
 
         // keep accumulating miscellaneous methods until structure becomes clear
         void AddToSchedule(ScheduleEntry entry);
+        void Learn(Fruit fruit);
         void SetMapDirty();
 
         RLKeyPress GetNextKeyPress();
@@ -34,6 +35,7 @@ namespace CopperBend.App
 
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Coord coord);
+        void Till(ITile tile);
 
         //  This form may turn out well--specialist informs about its state
         void MessagePanelFull();

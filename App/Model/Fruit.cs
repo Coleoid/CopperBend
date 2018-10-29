@@ -1,5 +1,6 @@
 ﻿using System;
 using RLNET;
+using RogueSharp;
 
 namespace CopperBend.App.Model
 {
@@ -7,12 +8,12 @@ namespace CopperBend.App.Model
     {
         private readonly SeedType SeedType;
 
-        public Fruit(int x, int y, int quantity, SeedType seedType)
-            : base(x, y, quantity, true)
+        public Fruit(Coord coord, int quantity, SeedType seedType)
+            : base(coord, quantity, true)
         {
             SeedType = seedType;
             Symbol = '%';
-            Color = RLColor.LightRed;
+            ColorForeground = RLColor.LightRed;
         }
 
         //  This may grow into enough difference to justify subclassing
@@ -24,7 +25,7 @@ namespace CopperBend.App.Model
             {
             case SeedType.Healer:
                 controls.HealPlayer(4);
-                controls.GiveToPlayer(new Seed(0, 0, 2, SeedType.Healer));
+                controls.GiveToPlayer(new Seed(new Coord(0, 0), 2, SeedType.Healer));
                 //update knowledge
                 //messages
                 break;

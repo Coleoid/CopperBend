@@ -87,7 +87,7 @@ namespace CopperBend.App
         #region Direction
         private void Command_Direction(IActor player, Direction direction)
         {
-            var coord = newCoord(player, direction);
+            var coord = CoordInDirection(player.Coord, direction);
 
             IActor targetActor = Map.GetActorAtCoord(coord);
             if (targetActor == null)
@@ -99,7 +99,8 @@ namespace CopperBend.App
                 Command_DirectionAttack(targetActor, coord);
             }
         }
-        private void Command_DirectionMove(IActor player, ICoord coord)
+
+        private void Command_DirectionMove(IActor player, Coord coord)
         {
             //  If we actually do move in that direction,
             //  we need to redraw, and the player will be busy for a while.
@@ -109,15 +110,15 @@ namespace CopperBend.App
                 Map.OpenDoor(tile);
                 PlayerBusyFor(4);
             }
-            else if (Map.HasEventAtCoords(tile))
+            else if (Map.HasEventAtCoords(tile.Coord))
             {
                 Map.RunEvent(player, tile, this);
             }
-            else if (Map.SetActorCoord(player, coord))
+            else if (Map.MoveActor(player, coord))
             {
                 Map.UpdatePlayerFieldOfView(player);
                 Map.DisplayDirty = true;
-                if (player.X != coord.X && player.Y != coord.Y)
+                if (player.Coord.X != coord.X && player.Coord.Y != coord.Y)
                     PlayerBusyFor(17);
                 else
                     PlayerBusyFor(12);
@@ -128,7 +129,7 @@ namespace CopperBend.App
             }
         }
 
-        private void Command_DirectionAttack(IActor targetActor, ICoord coord)
+        private void Command_DirectionAttack(IActor targetActor, Coord coord)
         {
             //0.1
             int damage = 2;
@@ -138,7 +139,7 @@ namespace CopperBend.App
             {
                 Console.WriteLine($"The {targetActor.Name} dies.");
                 Map.Actors.Remove(targetActor);
-                Map.SetIsWalkable(targetActor, true);
+                Map.SetIsWalkable(targetActor.Coord, true);
                 Map.DisplayDirty = true;
 
                 //TODO: drop items, body
@@ -236,7 +237,7 @@ namespace CopperBend.App
             if (wieldedItem == item)
                 WriteLine($"Note:  No longer wielding the {item.Name}.");
 
-            item.MoveTo(Player.X, Player.Y);
+            item.MoveTo(Player.Coord);
             Map.Items.Add(item);
             PlayerBusyFor(1);
 
@@ -258,7 +259,7 @@ namespace CopperBend.App
 
         private void Command_Inventory()
         {
-            var watcher = new ItemWatcher();
+            var watcher = new PartialDescriber();
 
             Console.WriteLine("Inventory:");
             if (Player.Inventory.Count() == 0)
@@ -323,7 +324,7 @@ namespace CopperBend.App
             var direction = DirectionOfKey(key);
             if (direction != Direction.None)
             {
-                var targetCoord = newCoord(Player, direction);
+                var targetCoord = CoordInDirection(Player.Coord, direction);
                 WriteLine(direction.ToString());
 
                 _usingItem.ApplyTo(Map[targetCoord], this);  // the magic
@@ -420,7 +421,7 @@ namespace CopperBend.App
         private void Command_PickUp()
         {
             var topItem = Map.Items
-                .Where(i => i.X == Player.X && i.Y == Player.Y)
+                .Where(i => i.Coord.Equals(Player.Coord))
                 .LastOrDefault();
 
             if (topItem == null)

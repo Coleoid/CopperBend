@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using CopperBend.App.Behaviors;
 using RLNET;
+using RogueSharp;
 
 namespace CopperBend.App.Model
 {
     public class Actor : IActor
     {
         private IBehavior _behavior;
-        public Actor(int x, int y)
+        public Actor(Coord coord)
         {
-            X = x;
-            Y = y;
+            Coord = coord;
             Health = 6;
             Awareness = 6;
 
@@ -21,17 +21,14 @@ namespace CopperBend.App.Model
         }
 
         //  IDrawable
-        public RLColor Color { get; set; }
+        public RLColor ColorForeground { get; set; }
         public char Symbol { get; set; }
-        public void MoveTo(int x, int y)
+        public void MoveTo(Coord coord)
         {
-            X = x;
-            Y = y;
+            Coord = coord;
         }
 
-        //  ICoord
-        public int X { get; protected set; }
-        public int Y { get; protected set; }
+        public Coord Coord { get; protected set; }
 
 
         //  IActor

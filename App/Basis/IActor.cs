@@ -4,13 +4,14 @@ using RogueSharp;
 
 namespace CopperBend.App
 {
-    public interface IActor : IDrawable, ICoord
+    public interface IActor : IDrawable
     {
+        Coord Coord { get; }
         string Name { get; set; }
         int Awareness { get; set; }
         int Health { get; }
         void AdjustHealth(int amount);
-
+        void MoveTo(Coord coord);
         IItem WieldedTool { get; }
         void Wield(IItem item);
 

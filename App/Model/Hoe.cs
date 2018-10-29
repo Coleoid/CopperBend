@@ -1,11 +1,13 @@
-﻿namespace CopperBend.App.Model
+﻿using RogueSharp;
+
+namespace CopperBend.App.Model
 {
     public class Hoe : Item
     {
         public override string Name { get => "Hoe"; }
 
-        public Hoe(int x, int y)
-            : base(x, y, 1, true)
+        public Hoe(Coord coord)
+            : base(coord, 1, true)
         {
         }
 
@@ -25,7 +27,7 @@
             }
             else
             {
-                controls.WriteLine($"Cannot hoe {tile.TileType}.");
+                controls.WriteLine($"Cannot hoe {tile.TileType.Name}.");
             }
         }
     }

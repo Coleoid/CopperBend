@@ -1,15 +1,10 @@
 ﻿using RLNET;
-using RogueSharp;
 
 namespace CopperBend.App
 {
-    public interface IDrawable : ICoord
+    public interface IDrawable
     {
-        RLColor Color { get; }
+        RLColor ColorForeground { get; }
         char Symbol { get; }
-
-        void MoveTo(int x, int y);
-
-        //NEXT: void MoveTo(ICoord coord);
     }
 }

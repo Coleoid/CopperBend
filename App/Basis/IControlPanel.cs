@@ -12,7 +12,7 @@ namespace CopperBend.App
     public interface IControlPanel
     {
         void PlayerBusyFor(int ticks);
-        ICoord PlayerCoords { get; }
+        Coord PlayerCoords { get; }
 
         void AttackPlayer(IActor actor);
         void HealPlayer(int amount);
@@ -20,9 +20,9 @@ namespace CopperBend.App
         void RemoveFromInventory(IItem item);
         void GiveToPlayer(IItem item);
 
-        bool MoveActorTo(IActor actor, ICoord step);
-        bool CanActorSeeTarget(IActor actor, ICoord target);
-        List<ICoord> GetPathTo(ICoord start, ICoord target);
+        bool MoveActorTo(IActor actor, Coord step);
+        bool CanActorSeeTarget(IActor actor, Coord target);
+        List<Coord> GetPathTo(Coord start, Coord target);
 
         // keep accumulating miscellaneous methods until structure becomes clear
         void AddToSchedule(ScheduleEntry entry);
@@ -33,7 +33,7 @@ namespace CopperBend.App
         void Prompt(string text);
 
         void PutItemOnMap(IItem item);
-        void RemovePlantAt(ICoord coord);
+        void RemovePlantAt(Coord coord);
 
         //  This form may turn out well--specialist informs about its state
         void MessagePanelFull();

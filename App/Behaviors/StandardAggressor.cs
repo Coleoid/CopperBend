@@ -45,7 +45,7 @@ namespace CopperBend.App.Behaviors
         private static int AttemptMoveAttack(IActor actor, IControlPanel controls)
         {
             var target = controls.PlayerCoords;
-            var pathList = controls.GetPathTo(actor, target);
+            var pathList = controls.GetPathTo(actor.Coord, target);
 
             // player in FOV, but not reachable
             if (!pathList.Any())
@@ -56,7 +56,7 @@ namespace CopperBend.App.Behaviors
 
             // Take the step.  The only reason to fail right now is being blocked by the player.
             var step = pathList.First();
-            bool isDiag = actor.X != step.X && actor.Y != step.Y;
+            bool isDiag = actor.Coord.X != step.X && actor.Coord.Y != step.Y;
             if (controls.MoveActorTo(actor, step))
             {
                 controls.SetMapDirty();

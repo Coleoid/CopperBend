@@ -1,6 +1,6 @@
 ﻿using CopperBend.App.Model;
 using RLNET;
-
+using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -22,43 +22,48 @@ namespace CopperBend.App
             game.Run();
         }
 
+        private static Coord At(int x, int y)
+        {
+            return new Coord(x, y);
+        }
+
         private static Actor InitPlayer()
         {
-            var player = new Actor(1, 1)
+            var player = new Actor(At(18, 21))
             {
                 Name = "Our Dude",
                 Symbol = '@',
-                Color = Palette.DbLight,
-                Awareness = 4,
+                ColorForeground = Palette.DbLight,
+                Awareness = 8,
                 Health = 23
             };
 
-            var hoe = new Hoe(0, 0)
+            var hoe = new Hoe(At(0, 0))
             {
                 Name = "hoe",
-                Color = RLColor.Brown,
+                ColorForeground = RLColor.Brown,
                 Symbol = '/',
                 IsUsable = true,
             };
 
-            var rock = new Item(0, 0)
+            var rock = new Item(At(0, 0))
             {
                 Name = "rock",
-                Color = RLColor.Gray,
+                ColorForeground = RLColor.Gray,
                 Symbol = '*'
             };
 
-            var seed = new Seed(0, 0, 1, SeedType.Boomer)
+            var seed = new Seed(At(0, 0), 1, SeedType.Boomer)
             {
                 Name = "seed",
-                Color = RLColor.LightGreen,
+                ColorForeground = RLColor.LightGreen,
                 Symbol = '.'
             };
 
-            var seed_2 = new HealerSeed(0, 0, 2)
+            var seed_2 = new HealerSeed(At(0, 0), 2)
             {
                 Name = "seed",
-                Color = RLColor.LightGreen,
+                ColorForeground = RLColor.LightGreen,
                 Symbol = '.'
             };
 

@@ -1,19 +1,41 @@
 ﻿using System;
 using RLNET;
+using RogueSharp;
 
 namespace CopperBend.App.Model
 {
     public class Tile : ITile
     {
-        public bool IsInFOV;
-        public TileType TileType { get; private set; }
-
         public Tile(int x, int y, TileType type)
         {
-            X = x;
-            Y = y;
+            Coord = new Coord(x, y);
             TileType = type;
         }
+
+        public Coord Coord { get; }
+
+        public TileType TileType { get; private set; }
+        public char Symbol => TileType.Symbol;
+        public void SetTileType(TileType newType)
+        {
+            TileType = newType;
+        }
+
+        public RLColor ColorForeground => TileType.Foreground(IsInFOV);
+        public RLColor ColorBackground
+        {
+            get
+            {
+                RLColor mauve = new RLColor(.878f, .69f, 1f);
+                RLColor bg = TileType.Background(IsInFOV);
+                bg = RLColor.Blend(mauve, bg, BlightLevel / 7f);
+                return bg;
+            }
+        }
+
+
+        public bool IsInFOV { get; set; }
+        public int BlightLevel { get; set; }
 
         #region Cultivation
 
@@ -35,38 +57,11 @@ namespace CopperBend.App.Model
             SownSeed = seed;
         }
 
-        #endregion
-
-        public void SetTileType(TileType newType)
-        {
-            TileType = newType;
-        }
-
-        public RLColor Color
-        {
-            get => TileType.Foreground(IsInFOV);
-        }
-        public RLColor ColorBackground
-        {
-            get => TileType.Background(IsInFOV);
-        }
-
-        public char Symbol
-        {
-            get => TileType.Symbol;
-        }
-
-        public void MoveTo(int x, int y)
-        {
-            throw new Exception("Tiles don't move.  Change my mind.");
-        }
-
         public void RemovePlant()
         {
             SownSeed = null;
         }
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        #endregion
     }
 }

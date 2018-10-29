@@ -29,7 +29,7 @@ namespace CopperBend.App
 
         private bool IsPlayerScheduled = false;
 
-        public ICoord PlayerCoords => Player;
+        public Coord PlayerCoords => Player.Coord;
 
         public void PlayerBusyFor(int ticks)
         {
@@ -44,7 +44,7 @@ namespace CopperBend.App
             IsPlayerScheduled = false;
         }
 
-        private ICoord newCoord(ICoord start, Direction direction)
+        private Coord CoordInDirection(Coord start, Direction direction)
         {
             int newX = start.X;
             int newY = start.Y;
@@ -114,11 +114,11 @@ namespace CopperBend.App
             GameState.Mode = mode;
         }
 
-        public bool CanActorSeeTarget(IActor actor, ICoord target)
+        public bool CanActorSeeTarget(IActor actor, Coord target)
         {
             //FINISH: one FOV and one Pathfinder per map
             FieldOfView fov = new FieldOfView(Map);
-            fov.ComputeFov(actor.X, actor.Y, actor.Awareness, true);
+            fov.ComputeFov(actor.Coord.X, actor.Coord.Y, actor.Awareness, true);
             return fov.IsInFov(target.X, target.Y);
         }
 
@@ -139,7 +139,7 @@ namespace CopperBend.App
             WriteLine($"So nice.  Up to {Player.Health}.");
         }
 
-        public List<ICoord> GetPathTo(ICoord start, ICoord target)
+        public List<Coord> GetPathTo(Coord start, Coord target)
         {
             Map.SetIsWalkable(start, true);
             Map.SetIsWalkable(target, true);
@@ -154,9 +154,9 @@ namespace CopperBend.App
             return pathList;
         }
 
-        public bool MoveActorTo(IActor actor, ICoord step)
+        public bool MoveActorTo(IActor actor, Coord step)
         {
-            return Map.SetActorPosition(actor, step.X, step.Y);
+            return Map.MoveActor(actor, step);
         }
 
         public void RemoveFromInventory(IItem item)
@@ -192,7 +192,7 @@ namespace CopperBend.App
             Map.Items.Add(item);
         }
 
-        public void RemovePlantAt(ICoord coord)
+        public void RemovePlantAt(Coord coord)
         {
             Map.Tiles[coord.X, coord.Y].RemovePlant();
         }

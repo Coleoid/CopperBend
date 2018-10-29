@@ -2,10 +2,12 @@
 
 namespace CopperBend.App
 {
-    public interface IItem : IDrawable, ICoord
+    public interface IItem : IDrawable
     {
         string Name { get; }
         int Quantity { get; set; }
+        Coord Coord { get; }
+        void MoveTo(Coord coord);
 
         bool IsUsable { get; }
         void ApplyTo(ITile tile, IControlPanel controls);

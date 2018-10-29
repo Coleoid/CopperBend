@@ -5,7 +5,7 @@ using System.Linq;
 using RLNET;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using System;
+using System.Text.RegularExpressions;
 using RogueSharp;
 
 namespace CopperBend.App
@@ -71,6 +71,7 @@ namespace CopperBend.App
                 Symbol = '.',
                 IsWalkable = true,
                 IsTransparent = true,
+                IsTillable = true,
             };
             type.SetForeground(Colors.Floor, Colors.FloorSeen);
             type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
@@ -83,20 +84,10 @@ namespace CopperBend.App
                 IsWalkable = true,
                 IsTransparent = true,
             };
-            type.SetForeground(Colors.Floor, Colors.FloorSeen);
+            type.SetForeground(Palette.DbWood, Palette.DbBrightWood);
             type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
             TileTypes["TilledDirt"] = type;
 
-            type = new TileType
-            {
-                Name = "Blight",
-                Symbol = ',',
-                IsWalkable = true,
-                IsTransparent = true,
-            };
-            type.SetForeground(Palette.DbOldBlood, Palette.DbBlood);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["Blight"] = type;
 
             type = new TileType
             {
@@ -138,7 +129,7 @@ namespace CopperBend.App
                 IsWalkable = false,
                 IsTransparent = false,
             };
-            type.SetForeground(Colors.Wall, Colors.WallSeen);
+            type.SetForeground(Palette.DbWood, Palette.DbBrightWood);
             type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
             TileTypes["WoodenFence"] = type;
 
@@ -182,13 +173,10 @@ namespace CopperBend.App
             var width = data.Terrain.Max(t => t.Length);
             var height = data.Terrain.Count();
 
-            var map = new AreaMap(width, height);
-            map.Name = data.Name;
-
-            foreach (var overlay in data.Blight)
+            var map = new AreaMap(width, height)
             {
-                
-            }
+                Name = data.Name
+            };
 
             for (int y = 0; y < height; y++)
             {
@@ -201,17 +189,42 @@ namespace CopperBend.App
                     var name = data.Legend[symbol];
 
                     var type = TerrainFrom(name);
-                    map.Tiles[x, y] = new Tile(x, y, type);
-
+                    Tile tile = new Tile(x, y, type);
+                    map.Tiles[x, y] = tile;
 
                     //TODO:  push down/unify
-                    map.SetCellProperties(x, y, type.IsTransparent, type.IsWalkable);
+                    
+                    map.SetIsTransparent(tile.Coord, type.IsTransparent);
+                    map.SetIsWalkable(tile.Coord, type.IsWalkable);
+                }
+            }
+
+            foreach (var overlay in data.Blight)
+            {
+                var nums = Regex.Split(overlay.Location, ",");
+                int x_off = int.Parse(nums[0]);
+                int y_off = int.Parse(nums[1]);
+                var w = overlay.Terrain.Max(t => t.Length);
+                var h = overlay.Terrain.Count();
+                for (int y = 0; y < h; y++)
+                {
+                    string row = overlay.Terrain[y];
+                    for (int x = 0; x < w; x++)
+                    {
+                        var symbol = (x < row.Length)
+                            ? row.Substring(x, 1)
+                            : ".";
+
+                        bool isD = symbol.CompareTo("0") > -1 && symbol.CompareTo("9") < 1;
+                        int level = isD? int.Parse(symbol) : 0;
+
+                        map.Tiles[x + x_off, y + y_off].BlightLevel = level;
+                    }
                 }
             }
 
             return map;
         }
-
 
         internal IAreaMap FarmMap()
         {
@@ -264,7 +277,7 @@ terrain:
 
 blight:
   - name: one
-    location: 0,0
+    location: 1,0
     terrain:
       - '..1221'
       - '...1211'
@@ -340,19 +353,19 @@ terrain:
 ";
             var map = MapFromYAML(DemoMapYaml);
 
-            var rock = new Item(5, 1)
+            var rock = new Item(new Coord(5, 1))
             {
                 Name = "rock",
-                Color = Palette.DbOldStone,
+                ColorForeground = Palette.DbOldStone,
                 Symbol = '*',
             };
             map.Items.Add(rock);
 
-            var glom = new Actor(4, 1)
+            var glom = new Actor(new Coord(4, 1))
             {
                 Name = "glom",
                 Symbol = 'g',
-                Color = RLColor.Green,
+                ColorForeground = RLColor.Green,
             };
             map.Actors.Add(glom);
 
@@ -361,7 +374,7 @@ terrain:
             map.FirstSightMessages.Add("The sky... says it's morning.  A small farmhouse to the east.");
             map.FirstSightMessages.Add("Something real wrong with the ground to the west, and the north.");
 
-            map.LocationMessages[(1, 6)] = new List<string> { "a shiversome feeling..." };
+            map.LocationMessages[new Coord(1, 6)] = new List<string> { "a shiversome feeling..." };
 
             return map;
         }

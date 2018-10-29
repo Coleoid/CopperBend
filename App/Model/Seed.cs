@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RogueSharp;
+using System;
 
 namespace CopperBend.App.Model
 {
@@ -21,8 +22,8 @@ namespace CopperBend.App.Model
             return false;
         }
 
-        public Seed(int x, int y, int quantity, SeedType type)
-            : base(x, y, quantity, true)
+        public Seed(Coord coord, int quantity, SeedType type)
+            : base(coord, quantity, true)
         {
             SeedType = type;
         }
@@ -43,7 +44,7 @@ namespace CopperBend.App.Model
             }
 
             //PROBLEM:  Splitting stacks in a base class, creating a new subclass instance...
-            var sownSeed = new HealerSeed(tile.X, tile.Y, 1);
+            var sownSeed = new HealerSeed(tile.Coord, 1);
             tile.Sow(sownSeed);
 
             if (--Quantity == 0)
@@ -74,16 +75,16 @@ namespace CopperBend.App.Model
 
     public class HealerSeed : Seed
     {
-        public HealerSeed(int x, int y, int quantity) 
-            : base(x, y, quantity, SeedType.Healer)
+        public HealerSeed(Coord coord, int quantity) 
+            : base(coord, quantity, SeedType.Healer)
         {}
 
         protected override void SeedMatures(IControlPanel controls, ScheduleEntry entry)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.X, this.Y, 2, SeedType.Healer);
+            IItem fruit = new Fruit(this.Coord, 2, SeedType.Healer);
             controls.PutItemOnMap(fruit);
-            controls.RemovePlantAt(this);
+            controls.RemovePlantAt(this.Coord);
             controls.SetMapDirty();
         }
     }

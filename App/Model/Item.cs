@@ -3,37 +3,35 @@ using RogueSharp;
 
 namespace CopperBend.App.Model
 {
-    public class Item : IItem, IDrawable, ICoord
+    public class Item : IItem, IDrawable
     {
         //  IDrawable
-        public RLColor Color { get; set; }
+        public Coord Coord { get; protected set; }
+        public RLColor ColorForeground { get; set; }
         public char Symbol { get; set; }
         public void MoveTo(int x, int y)
         {
-            X = x;
-            Y = y;
+            Coord = new Coord(x, y);
         }
-
-        //  ICoord
-        public int X { get; private set; }
-        public int Y { get; private set; }
-
 
         public virtual string Name { get; set; }
 
-        public Item(int x, int y)
+        public Item(Coord coord)
         {
-            X = x;
-            Y = y;
+            Coord = coord;
             Quantity = 1;
         }
 
-        public Item(int x, int y, int quantity, bool isUsable)
+        public Item(Coord coord, int quantity, bool isUsable)
         {
-            X = x;
-            Y = y;
+            Coord = coord;
             Quantity = quantity;
             IsUsable = isUsable;
+        }
+
+        public void MoveTo(Coord coord)
+        {
+            Coord = coord;
         }
 
         public int Quantity { get; set; }

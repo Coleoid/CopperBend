@@ -234,7 +234,85 @@ namespace CopperBend.App
 
         internal IAreaMap FarmMap()
         {
-            string FarmMapYaml = @"---
+            var map = MapFromYAML(FarmMapYaml);
+            return map;
+        }
+
+        internal IAreaMap FarmhouseMap()
+        {
+            var map = MapFromYAML(FarmhouseMapYaml);
+            return map;
+        }
+
+        public TileType TerrainFrom(string name)
+        {
+            var foundType = TileTypes.ContainsKey(name) ? name : "Unknown";
+            return TileTypes[foundType];
+        }
+
+        public MapData DataFromYAML(string mapYaml)
+        {
+            var reader = new StringReader(mapYaml);
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
+
+            return deserializer.Deserialize<MapData>(reader);
+        }
+
+
+        internal IAreaMap DemoMap()
+        {
+            string DemoMapYaml = @"---
+name:  Demo
+
+legend:
+ '.': Dirt
+ '#': StoneWall
+ '+': ClosedDoor
+
+terrain:
+ - '################'
+ - '#..............#'
+ - '#..####..####..#'
+ - '#.##..##.#..##.#'
+ - '#.#....+.####..#'
+ - '#.##..##.#..##.#'
+ - '#..####..####..#'
+ - '#..............#'
+ - '################'
+";
+            var map = MapFromYAML(DemoMapYaml);
+
+            var rock = new Item(new Coord(5, 1))
+            {
+                Name = "rock",
+                ColorForeground = Palette.DbOldStone,
+                Symbol = '*',
+            };
+            map.Items.Add(rock);
+
+            var glom = new Actor(new Coord(4, 1))
+            {
+                Name = "glom",
+                Symbol = 'g',
+                ColorForeground = RLColor.Green,
+            };
+            map.Actors.Add(glom);
+
+            map.FirstSightMessages.Add("I wake up.  Cold--frost on the ground, except where I was lying.");
+            map.FirstSightMessages.Add("Everything hurts when I stand up.");
+            map.FirstSightMessages.Add("The sky... says it's morning.  A small farmhouse to the east.");
+            map.FirstSightMessages.Add("Something real wrong with the ground to the west, and the north.");
+
+            map.LocationMessages[new Coord(1, 6)] = new List<string> { "a shiversome feeling..." };
+
+            return map;
+        }
+
+
+        #region Farm and farmhouse map text
+        private string FarmMapYaml = @"---
 name:  Farm
 
 legend:
@@ -314,75 +392,33 @@ blight:
       - '.......1'
 ";
 
-            var map = MapFromYAML(FarmMapYaml);
-            return map;
-        }
 
-        public TileType TerrainFrom(string name)
-        {
-            var foundType = TileTypes.ContainsKey(name) ? name : "Unknown";
-            return TileTypes[foundType];
-        }
-
-        public MapData DataFromYAML(string mapYaml)
-        {
-            var reader = new StringReader(mapYaml);
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
-                .Build();
-
-            return deserializer.Deserialize<MapData>(reader);
-        }
-
-
-        internal IAreaMap DemoMap()
-        {
-            string DemoMapYaml = @"---
-name:  Demo
+        private string FarmhouseMapYaml = @"---
+name:  Farmhouse
 
 legend:
  '.': Dirt
- '#': StoneWall
  '+': ClosedDoor
+ '-': OpenDoor
+ '=': Wall
 
 terrain:
- - '################'
- - '#..............#'
- - '#..####..####..#'
- - '#.##..##.#..##.#'
- - '#.#....+.####..#'
- - '#.##..##.#..##.#'
- - '#..####..####..#'
- - '#..............#'
- - '################'
+#   0    5    1    5    2    5    3    5    4 
+ - '========================'  # 0
+ - '=......................='
+ - '=......................='
+ - '=......................='
+ - '=......................='
+ - '=......................='
+ - '-......................='
+ - '=......................='
+ - '=......................='
+ - '=......................='
+ - '=......................='
+ - '========================'
 ";
-            var map = MapFromYAML(DemoMapYaml);
+        #endregion
 
-            var rock = new Item(new Coord(5, 1))
-            {
-                Name = "rock",
-                ColorForeground = Palette.DbOldStone,
-                Symbol = '*',
-            };
-            map.Items.Add(rock);
-
-            var glom = new Actor(new Coord(4, 1))
-            {
-                Name = "glom",
-                Symbol = 'g',
-                ColorForeground = RLColor.Green,
-            };
-            map.Actors.Add(glom);
-
-            map.FirstSightMessages.Add("I wake up.  Cold--frost on the ground, except where I was lying.");
-            map.FirstSightMessages.Add("Everything hurts when I stand up.");
-            map.FirstSightMessages.Add("The sky... says it's morning.  A small farmhouse to the east.");
-            map.FirstSightMessages.Add("Something real wrong with the ground to the west, and the north.");
-
-            map.LocationMessages[new Coord(1, 6)] = new List<string> { "a shiversome feeling..." };
-
-            return map;
-        }
     }
 
     public class MapData

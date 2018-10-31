@@ -18,9 +18,9 @@ namespace CopperBend.App.Model
         }
 
         //  This may grow into enough difference to justify subclassing
-        public virtual void Consume(IControlPanel controls)
+        public override void Consume(IControlPanel controls)
         {
-            base.Consumed(controls);
+            base.Consume(controls);
 
             switch (PlantType)
             {

@@ -189,7 +189,7 @@ namespace CopperBend.App
                 return;
             }
 
-            item.Consumed((IControlPanel)this);
+            item.Consume((IControlPanel)this);
 
             NextStep = null;
         }

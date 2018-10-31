@@ -52,7 +52,7 @@ namespace CopperBend.App.Model
             controls.WriteLine($"Can't use a {Name} on {tile.TileType}.");
         }
 
-        public virtual void Consumed(IControlPanel controls)
+        public virtual void Consume(IControlPanel controls)
         {
             if (--Quantity < 1)
             {

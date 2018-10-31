@@ -33,7 +33,7 @@ namespace CopperBend.App.Model
             if (!tile.IsTilled)
             {
                 string qualifier = tile.IsTillable ? "untilled " : "";
-                controls.WriteLine($"Cannot sow {qualifier}{tile.TileType}.");
+                controls.WriteLine($"Cannot sow {qualifier}{tile.TileType.Name}.");
                 return;
             }
 

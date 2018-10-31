@@ -44,7 +44,7 @@ namespace CopperBend.App.Model
             }
 
             //PROBLEM:  Splitting stacks in a base class, creating a new subclass instance...
-            var sownSeed = new HealerSeed(tile.Coord, 1);
+            var sownSeed = new HealerSeed(tile.Coord, 1);  // bug
             tile.Sow(sownSeed);
 
             if (--Quantity == 0)

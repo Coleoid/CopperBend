@@ -9,6 +9,8 @@ namespace CopperBend.App.Model
         public Coord Coord { get; protected set; }
         public RLColor ColorForeground { get; set; }
         public char Symbol { get; set; }
+        public string Adjective { get; set; } = string.Empty;
+
         public void MoveTo(int x, int y)
         {
             Coord = new Coord(x, y);

@@ -213,7 +213,7 @@ namespace CopperBend.App
 
         public void Learn(Fruit fruit)
         {
-            watcher.Learn(fruit);
+            describer.Learn(fruit);
         }
     }
 }

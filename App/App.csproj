@@ -77,7 +77,7 @@
     <Compile Include="Basis\ITile.cs" />
     <Compile Include="Basis\ScheduleEntry.cs" />
     <Compile Include="Model\Seed.cs" />
-    <Compile Include="PartialDescriber.cs" />
+    <Compile Include="Describer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Tile.cs" />

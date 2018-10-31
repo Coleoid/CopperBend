@@ -15,8 +15,9 @@ namespace CopperBend.App.tests
             var map = loader.LoadMap("test:block");
 
             Assert.That(map, Is.Not.Null);
-            Assert.That(map.Tiles[0,0].TileType.Name, Is.EqualTo("StoneWall"));
+            Assert.That(map.Tiles[0, 0].TileType.Name, Is.EqualTo("StoneWall"));
         }
+
 
         [Test]
         public void YAML_to_DTO()

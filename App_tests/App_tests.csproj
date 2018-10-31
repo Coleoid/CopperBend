@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoordinateTests.cs" />
+    <Compile Include="DescriberTests.cs" />
     <Compile Include="MapLoaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

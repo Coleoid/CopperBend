@@ -14,7 +14,7 @@ namespace CopperBend.App
         public IAreaMap Map { get => GameState.Map; }
         public Scheduler Scheduler { get; private set; }
         public IGameState GameState { get; private set; }
-        private PartialDescriber watcher;
+        private Describer describer;
 
         private Action<RLKeyPress> NextStep = null;
         private bool InMultiStepCommand
@@ -26,7 +26,7 @@ namespace CopperBend.App
         {
             InputQueue = inputQueue;
             Scheduler = scheduler;
-            watcher = new PartialDescriber();
+            describer = new Describer();
         }
 
         public void Init(IGameState gameState)
@@ -271,7 +271,7 @@ namespace CopperBend.App
                 int asciiSlot = 97;
                 foreach (var item in Player.Inventory)
                 {
-                    var description = watcher.Describe(item);
+                    var description = describer.Describe(item, DescMods.Quantity);
                     Console.WriteLine($"{(char)asciiSlot})  {description}");
                     asciiSlot++;
                 }

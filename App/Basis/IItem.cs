@@ -14,6 +14,8 @@ namespace CopperBend.App
 
         bool IsConsumable { get; }
         string ConsumeVerb { get; }
+        string Adjective { get; set; }
+
         void Consume(IControlPanel controls);
 
         bool SameThingAs(IItem item);

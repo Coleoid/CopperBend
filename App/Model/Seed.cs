@@ -28,7 +28,7 @@ namespace CopperBend.App.Model
             PlantType = type;
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls)
+        public override void ApplyTo(ITile tile, IControlPanel controls, Direction direction)
         {
             if (!tile.IsTilled)
             {
@@ -39,7 +39,7 @@ namespace CopperBend.App.Model
 
             if (tile.IsSown)
             {
-                controls.WriteLine("Already sown with a seed.");
+                controls.WriteLine($"The ground to my {direction} is already sown with a seed.");
                 return;
             }
 

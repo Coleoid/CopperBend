@@ -141,9 +141,21 @@ namespace CopperBend.App
 
         public void RunEvent(IActor player, ITile tile, IControlPanel controls)
         {
-            var message = LocationMessages[tile.Coord];
-            foreach (var line in message)
-                controls.WriteLine(line);
+            if (LocationMessages.ContainsKey(tile.Coord))
+            {
+                var message = LocationMessages[tile.Coord];
+                foreach (var line in message)
+                    controls.WriteLine(line);
+
+                LocationMessages.Remove(tile.Coord);
+            }
+
+            var farmhouseDoor = new Coord(27, 13);
+            if (tile.Coord.Equals(farmhouseDoor))
+            {
+                //controls.GoToMap(farmhouseMap);
+                controls.GoToFarmhouse();
+            }
         }
 
         public List<string> FirstSightMessages { get; set; }

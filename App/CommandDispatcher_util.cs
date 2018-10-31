@@ -110,6 +110,13 @@ namespace CopperBend.App
             Map.DisplayDirty = true;
         }
 
+        public void GoToFarmhouse()
+        {
+            //Map = farmhouseMap;
+            //MapLoader.
+        }
+
+
         public void SwitchGameToMode(GameMode mode)
         {
             GameState.Mode = mode;

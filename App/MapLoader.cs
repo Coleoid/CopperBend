@@ -312,7 +312,7 @@ terrain:
 
 
         #region Farm and farmhouse map text
-        private string FarmMapYaml = @"---
+        private readonly string FarmMapYaml = @"---
 name:  Farm
 
 legend:
@@ -393,7 +393,7 @@ blight:
 ";
 
 
-        private string FarmhouseMapYaml = @"---
+        private readonly string FarmhouseMapYaml = @"---
 name:  Farmhouse
 
 legend:

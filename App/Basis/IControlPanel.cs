@@ -28,6 +28,7 @@ namespace CopperBend.App
         void AddToSchedule(ScheduleEntry entry);
         void Learn(Fruit fruit);
         void SetMapDirty();
+        void GoToFarmhouse();
 
         RLKeyPress GetNextKeyPress();
         void WriteLine(string text);

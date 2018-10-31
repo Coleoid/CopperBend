@@ -288,7 +288,7 @@ namespace CopperBend.App
                 return;
             }
 
-            Prompt($"Direction key to use {_usingItem.Name}, or pick another item with a-z or ?: ");
+            Prompt($"Pick direction to use {_usingItem.Name}, or pick another item with a-z or ?: ");
             NextStep = Use_in_Direction;
         }
 
@@ -327,7 +327,7 @@ namespace CopperBend.App
                 var targetCoord = CoordInDirection(Player.Coord, direction);
                 WriteLine(direction.ToString());
 
-                _usingItem.ApplyTo(Map[targetCoord], this);  // the magic
+                _usingItem.ApplyTo(Map[targetCoord], this, direction);  // the magic
                 NextStep = null;
             }
         }

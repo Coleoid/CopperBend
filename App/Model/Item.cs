@@ -47,9 +47,9 @@ namespace CopperBend.App.Model
                 && GetType() == item.GetType();
         }
 
-        public virtual void ApplyTo(ITile tile, IControlPanel controls)
+        public virtual void ApplyTo(ITile tile, IControlPanel controls, Direction direction)
         {
-            controls.WriteLine($"Can't use a {Name} on {tile.TileType}.");
+            controls.WriteLine($"Can't use a {Name} on {tile.TileType} to my {direction}.");
         }
 
         public virtual void Consume(IControlPanel controls)

@@ -112,6 +112,7 @@ namespace CopperBend.App
 
         public void GoToFarmhouse()
         {
+            //MapLoader
             //Map = farmhouseMap;
             //MapLoader.
         }

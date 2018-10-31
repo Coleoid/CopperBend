@@ -12,13 +12,7 @@ namespace CopperBend.App
             var player = InitPlayer();
             var game = new GameEngine(rootConsole, player);
 
-            var loader = new MapLoader();
-            // var map = loader.DemoMap();
-            var map = loader.FarmMap();
-
-            map.ViewpointActor = player;
-            game.LoadMap(map);
-
+            game.StartNewGame();
             game.Run();
         }
 

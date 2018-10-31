@@ -7,13 +7,12 @@ namespace CopperBend.App
 {
     public class GameEngine : IGameState
     {
-        private readonly RLRootConsole GameConsole;
-        private readonly Scheduler Scheduler;
-        private readonly Queue<RLKeyPress> InputQueue;
-        private readonly Messenger Messenger;
-
-        public CommandDispatcher Dispatcher { get; }
-
+        private RLRootConsole GameConsole;
+        private Queue<RLKeyPress> InputQueue;
+        private Scheduler Scheduler;
+        private CommandDispatcher Dispatcher;
+        private Messenger Messenger;
+        private MapLoader MapLoader;
 
         public IAreaMap Map { get; private set; }
         public IActor Player { get; private set; }
@@ -22,11 +21,30 @@ namespace CopperBend.App
         {
             GameConsole = console;
             Player = player;
+        }
 
+        public void StartNewGame()
+        {
             InputQueue = new Queue<RLKeyPress>();
             Scheduler = new Scheduler();
             Dispatcher = new CommandDispatcher(InputQueue, Scheduler);
             Messenger = new Messenger(Dispatcher);
+            MapLoader = new MapLoader();
+            Mode = GameMode.PlayerReady;
+        }
+
+        public void LoadMap(string mapName)
+        {
+            IAreaMap map;
+            if (mapName == "Farm")
+                map = MapLoader.FarmMap();
+            else if (mapName == "Farmhouse")
+                map = MapLoader.FarmhouseMap();
+            else
+                map = MapLoader.DemoMap();
+
+            map.ViewpointActor = Player;
+            LoadMap(map);
         }
 
         public void LoadMap(IAreaMap map)
@@ -96,7 +114,7 @@ namespace CopperBend.App
             ActOnMode();
         }
 
-        public GameMode Mode { get; set; } = GameMode.PlayerReady;
+        public GameMode Mode { get; set; }
         private void ActOnMode()
         {
             switch (Mode)

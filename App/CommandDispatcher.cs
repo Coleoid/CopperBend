@@ -271,7 +271,7 @@ namespace CopperBend.App
                 int asciiSlot = 97;
                 foreach (var item in Player.Inventory)
                 {
-                    var description = describer.Describe(item, DescMods.Quantity);
+                    var description = describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);
                     Console.WriteLine($"{(char)asciiSlot})  {description}");
                     asciiSlot++;
                 }
@@ -435,6 +435,5 @@ namespace CopperBend.App
             Console.WriteLine($"Picked up {topItem.Name}");
             PlayerBusyFor(2);
         }
-
     }
 }

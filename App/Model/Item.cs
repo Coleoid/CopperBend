@@ -6,34 +6,34 @@ namespace CopperBend.App.Model
     public class Item : IItem, IDrawable
     {
         //  IDrawable
-        public Coord Coord { get; protected set; }
+        public Point Point { get; protected set; }
         public RLColor ColorForeground { get; set; }
         public char Symbol { get; set; }
         public string Adjective { get; set; } = string.Empty;
 
         public void MoveTo(int x, int y)
         {
-            Coord = new Coord(x, y);
+            Point = new Point(x, y);
         }
 
         public virtual string Name { get; set; }
 
-        public Item(Coord coord)
+        public Item(Point point)
         {
-            Coord = coord;
+            Point = point;
             Quantity = 1;
         }
 
-        public Item(Coord coord, int quantity, bool isUsable)
+        public Item(Point point, int quantity, bool isUsable)
         {
-            Coord = coord;
+            Point = point;
             Quantity = quantity;
             IsUsable = isUsable;
         }
 
-        public void MoveTo(Coord coord)
+        public void MoveTo(Point point)
         {
-            Coord = coord;
+            Point = point;
         }
 
         public int Quantity { get; set; }

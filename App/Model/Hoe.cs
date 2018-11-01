@@ -6,8 +6,8 @@ namespace CopperBend.App.Model
     {
         public override string Name { get => "Hoe"; }
 
-        public Hoe(Coord coord)
-            : base(coord, 1, true)
+        public Hoe(Point point)
+            : base(point, 1, true)
         {
         }
 

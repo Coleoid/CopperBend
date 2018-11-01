@@ -8,11 +8,11 @@ namespace CopperBend.App.Model
     {
         public Tile(int x, int y, TileType type)
         {
-            Coord = new Coord(x, y);
+            Point = new Point(x, y);
             TileType = type;
         }
 
-        public Coord Coord { get; }
+        public Point Point { get; }
 
         public TileType TileType { get; private set; }
         public char Symbol => TileType.Symbol;

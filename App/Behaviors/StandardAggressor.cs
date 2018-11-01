@@ -17,7 +17,7 @@ namespace CopperBend.App.Behaviors
         public void NextAction(IControlPanel controls, ScheduleEntry entry)
         {
             var actor = entry.Actor;
-            bool isInFOV = controls.CanActorSeeTarget(actor, controls.PlayerCoords);
+            bool isInFOV = controls.CanActorSeeTarget(actor, controls.PlayerPoint);
 
             if (isInFOV)
             {
@@ -44,8 +44,8 @@ namespace CopperBend.App.Behaviors
 
         private static int AttemptMoveAttack(IActor actor, IControlPanel controls)
         {
-            var target = controls.PlayerCoords;
-            var pathList = controls.GetPathTo(actor.Coord, target);
+            var target = controls.PlayerPoint;
+            var pathList = controls.GetPathTo(actor.Point, target);
 
             // player in FOV, but not reachable
             if (!pathList.Any())
@@ -56,7 +56,7 @@ namespace CopperBend.App.Behaviors
 
             // Take the step.  The only reason to fail right now is being blocked by the player.
             var step = pathList.First();
-            bool isDiag = actor.Coord.X != step.X && actor.Coord.Y != step.Y;
+            bool isDiag = actor.Point.X != step.X && actor.Point.Y != step.Y;
             if (controls.MoveActorTo(actor, step))
             {
                 controls.SetMapDirty();

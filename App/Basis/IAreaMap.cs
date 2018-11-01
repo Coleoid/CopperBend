@@ -14,16 +14,16 @@ namespace CopperBend.App
         IActor ViewpointActor { get; set; }
         bool DisplayDirty { get; set; }
 
-        ITile this[RogueSharp.Coord coord] { get; }
+        ITile this[RogueSharp.Point point] { get; }
 
-        bool MoveActor(IActor actor, Coord coord);
+        bool MoveActor(IActor actor, Point point);
         void UpdatePlayerFieldOfView(IActor player);
         void DrawMap(RLConsole mapConsole);
-        IActor GetActorAtCoord(Coord coord);
+        IActor GetActorAtPoint(Point point);
         List<string> FirstSightMessages { get; set; }
-        Dictionary<Coord, List<string>> LocationMessages { get; }
+        Dictionary<Point, List<string>> LocationMessages { get; }
         void OpenDoor(ITile tile);
-        bool HasEventAtCoords(Coord coord);
+        bool HasEventAtPoint(Point point);
         void RunEvent(IActor player, ITile tile, IControlPanel controls);
     }
 }

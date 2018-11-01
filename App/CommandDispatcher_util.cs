@@ -30,7 +30,7 @@ namespace CopperBend.App
 
         private bool IsPlayerScheduled = false;
 
-        public Coord PlayerCoords => Player.Coord;
+        public Point PlayerPoint => Player.Point;
 
         public void PlayerBusyFor(int ticks)
         {
@@ -45,7 +45,7 @@ namespace CopperBend.App
             IsPlayerScheduled = false;
         }
 
-        private Coord CoordInDirection(Coord start, Direction direction)
+        private Point PointInDirection(Point start, Direction direction)
         {
             int newX = start.X;
             int newY = start.Y;
@@ -78,7 +78,7 @@ namespace CopperBend.App
                 newX++;
             }
 
-            return new Coord(newX, newY);
+            return new Point(newX, newY);
         }
 
         private Direction DirectionOfKey(RLKeyPress keyPress)
@@ -112,9 +112,7 @@ namespace CopperBend.App
 
         public void GoToFarmhouse()
         {
-            //MapLoader
-            //Map = farmhouseMap;
-            //MapLoader.
+            //GameState.LoadMap("Farmhouse");
         }
 
 
@@ -123,11 +121,11 @@ namespace CopperBend.App
             GameState.Mode = mode;
         }
 
-        public bool CanActorSeeTarget(IActor actor, Coord target)
+        public bool CanActorSeeTarget(IActor actor, Point target)
         {
             //FINISH: one FOV and one Pathfinder per map
             FieldOfView fov = new FieldOfView(Map);
-            fov.ComputeFov(actor.Coord.X, actor.Coord.Y, actor.Awareness, true);
+            fov.ComputeFov(actor.Point.X, actor.Point.Y, actor.Awareness, true);
             return fov.IsInFov(target.X, target.Y);
         }
 
@@ -148,7 +146,7 @@ namespace CopperBend.App
             WriteLine($"So nice.  Up to {Player.Health}.");
         }
 
-        public List<Coord> GetPathTo(Coord start, Coord target)
+        public List<Point> GetPathTo(Point start, Point target)
         {
             Map.SetIsWalkable(start, true);
             Map.SetIsWalkable(target, true);
@@ -163,7 +161,7 @@ namespace CopperBend.App
             return pathList;
         }
 
-        public bool MoveActorTo(IActor actor, Coord step)
+        public bool MoveActorTo(IActor actor, Point step)
         {
             return Map.MoveActor(actor, step);
         }
@@ -201,9 +199,9 @@ namespace CopperBend.App
             Map.Items.Add(item);
         }
 
-        public void RemovePlantAt(Coord coord)
+        public void RemovePlantAt(Point point)
         {
-            Map.Tiles[coord.X, coord.Y].RemovePlant();
+            Map.Tiles[point.X, point.Y].RemovePlant();
         }
 
         public void Till(ITile tile)

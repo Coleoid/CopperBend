@@ -16,9 +16,9 @@ namespace CopperBend.App
             game.Run();
         }
 
-        private static Coord At(int x, int y)
+        private static Point At(int x, int y)
         {
-            return new Coord(x, y);
+            return new Point(x, y);
         }
 
         private static Actor InitPlayer()

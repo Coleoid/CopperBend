@@ -14,7 +14,7 @@ namespace CopperBend.App
             Actors = new List<IActor>();
             Items = new List<IItem>();
             FirstSightMessages = new List<string>();
-            LocationMessages = new Dictionary<Coord, List<string>>();
+            LocationMessages = new Dictionary<Point, List<string>>();
             DisplayDirty = true;
         }
 
@@ -27,11 +27,11 @@ namespace CopperBend.App
         public IActor ViewpointActor { get; set; }
         public Dictionary<string, TileType> TileTypes { get; set; }
 
-        public ITile this[Coord coord] => Tiles[coord.X, coord.Y];
+        public ITile this[Point point] => Tiles[point.X, point.Y];
 
-        public bool IsTillable(Coord coord) => this[coord].IsTillable;
+        public bool IsTillable(Point point) => this[point].IsTillable;
         public bool IsTillable(int x, int y) => Tiles[x, y].IsTillable;
-        public bool IsTillable(Cell cell) => this[cell.Coord].IsTillable;
+        public bool IsTillable(Cell cell) => this[cell.Point].IsTillable;
 
         public bool DisplayDirty { get; set; }
         public void DrawMap(RLConsole mapConsole)
@@ -39,23 +39,23 @@ namespace CopperBend.App
             mapConsole.Clear();
             foreach (Cell cell in GetAllCells())
             {
-                DrawCoord(mapConsole, cell.Coord);
+                DrawPoint(mapConsole, cell.Point);
             }
         }
 
-        private void DrawCoord(RLConsole console, Coord coord)
+        private void DrawPoint(RLConsole console, Point point)
         {
-            if (!IsExplored(coord)) return;  // unknown is unshown
-            var tile = this[coord];
+            if (!IsExplored(point)) return;  // unknown is unshown
+            var tile = this[point];
 
-            tile.IsInFOV = IsInFov(coord);
+            tile.IsInFOV = IsInFov(point);
             var bgColor = tile.ColorBackground;
             var fgColor = tile.ColorForeground;
             var symbol = tile.Symbol;
 
             if (tile.IsInFOV)  //  If we can see this tile, we can see actors or items on it
             {
-                var actor = Actors.Where(a => a.Coord.Equals(coord)).SingleOrDefault();
+                var actor = Actors.Where(a => a.Point.Equals(point)).SingleOrDefault();
                 if (actor != null)
                 {
                     fgColor = actor.ColorForeground;
@@ -63,7 +63,7 @@ namespace CopperBend.App
                 }
                 else
                 {
-                    var topItem = Items.Where(i => i.Coord.Equals(coord)).FirstOrDefault();
+                    var topItem = Items.Where(i => i.Point.Equals(point)).FirstOrDefault();
                     if (topItem != null)
                     {
                         fgColor = topItem.ColorForeground;
@@ -72,13 +72,13 @@ namespace CopperBend.App
                 }
             }
 
-            RelativeDraw(console, coord, fgColor, bgColor, symbol);
+            RelativeDraw(console, point, fgColor, bgColor, symbol);
         }
 
-        private void RelativeDraw(RLConsole console, Coord absoluteCoord, RLColor fgColor, RLColor bgColor, char symbol)
+        private void RelativeDraw(RLConsole console, Point absolutePoint, RLColor fgColor, RLColor bgColor, char symbol)
         {
-            var aX = absoluteCoord.X - ViewpointActor.Coord.X + console.Width / 2;
-            var aY = absoluteCoord.Y - ViewpointActor.Coord.Y + console.Height / 2;
+            var aX = absolutePoint.X - ViewpointActor.Point.X + console.Width / 2;
+            var aY = absolutePoint.Y - ViewpointActor.Point.Y + console.Height / 2;
             if (aX >= 0 && aX < console.Width && aY >= 0 && aY < console.Height)
             {
                 console.Set(aX, aY, fgColor, bgColor, symbol);
@@ -87,15 +87,15 @@ namespace CopperBend.App
 
 
         // Returns true when target cell is walkable and move succeeds
-        public bool MoveActor(IActor actor, Coord targetCoord)
+        public bool MoveActor(IActor actor, Point targetPoint)
         {
             // Only allow actor movement if the cell is walkable
-            if (!GetCell(targetCoord).IsWalkable) return false;
+            if (!GetCell(targetPoint).IsWalkable) return false;
 
-            var startCoord = actor.Coord;
-            SetIsWalkable(startCoord, true);
-            actor.MoveTo(targetCoord);
-            SetIsWalkable(targetCoord, false);
+            var startPoint = actor.Point;
+            SetIsWalkable(startPoint, true);
+            actor.MoveTo(targetPoint);
+            SetIsWalkable(targetPoint, false);
             DisplayDirty = true;
 
             return true;
@@ -105,18 +105,18 @@ namespace CopperBend.App
         //FUTURE: more cases (shifting terrain, smoke cloud, et c.)
         public void UpdatePlayerFieldOfView(IActor actor)
         {
-            var fovCells = ComputeFov(actor.Coord.X, actor.Coord.Y, actor.Awareness, true);
+            var fovCells = ComputeFov(actor.Point.X, actor.Point.Y, actor.Awareness, true);
 
             foreach (Cell cell in fovCells)
             {
-                SetIsExplored(cell.Coord, true);
+                SetIsExplored(cell.Point, true);
             }
         }
 
-        public IActor GetActorAtCoord(Coord coord)
+        public IActor GetActorAtPoint(Point point)
         {
             return Actors
-                .Where(a => a.Coord.Equals(coord))
+                .Where(a => a.Point.Equals(point))
                 .FirstOrDefault();
         }
 
@@ -124,34 +124,34 @@ namespace CopperBend.App
         {
             Guard.Against(tile.TileType.Name != "ClosedDoor");
             tile.SetTileType(TileTypes["OpenDoor"]);
-            SetIsTransparent(tile.Coord, true);
-            SetIsWalkable(tile.Coord, true);
+            SetIsTransparent(tile.Point, true);
+            SetIsWalkable(tile.Point, true);
             DisplayDirty = true;
             UpdatePlayerFieldOfView(ViewpointActor);
         }
 
-        public bool HasEventAtCoords(Coord coord)
+        public bool HasEventAtPoint(Point point)
         {
-            var farmhouseDoor = new Coord(27, 13);
-            if (coord.Equals(farmhouseDoor))
+            var farmhouseDoor = new Point(27, 13);
+            if (point.Equals(farmhouseDoor))
                 return true;
 
-            return LocationMessages.ContainsKey(coord);
+            return LocationMessages.ContainsKey(point);
         }
 
         public void RunEvent(IActor player, ITile tile, IControlPanel controls)
         {
-            if (LocationMessages.ContainsKey(tile.Coord))
+            if (LocationMessages.ContainsKey(tile.Point))
             {
-                var message = LocationMessages[tile.Coord];
+                var message = LocationMessages[tile.Point];
                 foreach (var line in message)
                     controls.WriteLine(line);
 
-                LocationMessages.Remove(tile.Coord);
+                LocationMessages.Remove(tile.Point);
             }
 
-            var farmhouseDoor = new Coord(27, 13);
-            if (tile.Coord.Equals(farmhouseDoor))
+            var farmhouseDoor = new Point(27, 13);
+            if (tile.Point.Equals(farmhouseDoor))
             {
                 //controls.GoToMap(farmhouseMap);
                 controls.GoToFarmhouse();
@@ -159,6 +159,6 @@ namespace CopperBend.App
         }
 
         public List<string> FirstSightMessages { get; set; }
-        public Dictionary<Coord, List<string>> LocationMessages { get; private set; }
+        public Dictionary<Point, List<string>> LocationMessages { get; private set; }
     }
 }

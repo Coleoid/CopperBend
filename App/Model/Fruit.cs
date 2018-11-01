@@ -8,8 +8,8 @@ namespace CopperBend.App.Model
     {
         public PlantType PlantType;
 
-        public Fruit(Coord coord, int quantity, PlantType olantType)
-            : base(coord, quantity, true)
+        public Fruit(Point point, int quantity, PlantType olantType)
+            : base(point, quantity, true)
         {
             PlantType = olantType;
             Symbol = '%';
@@ -26,7 +26,7 @@ namespace CopperBend.App.Model
             {
             case PlantType.Healer:
                 controls.HealPlayer(4);
-                controls.GiveToPlayer(new Seed(new Coord(0, 0), 2, PlantType.Healer));
+                controls.GiveToPlayer(new Seed(new Point(0, 0), 2, PlantType.Healer));
                 controls.Learn(this);
                 break;
 

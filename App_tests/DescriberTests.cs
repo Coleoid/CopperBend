@@ -15,7 +15,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Point(0, 0), quantity, false)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -32,7 +32,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Point(0, 0), quantity, false)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -50,7 +50,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Point(0, 0), quantity, false)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -67,7 +67,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Point(0, 0), quantity, false)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -84,7 +84,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Point(0, 0), quantity, false)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -101,7 +101,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Point(0, 0), quantity, false)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -118,7 +118,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Point(0, 0), quantity, false)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -132,7 +132,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer(87);
 
-            var item = new Seed(new Coord(0, 0), 1, PlantType.Healer);
+            var item = new Seed(new Point(0, 0), 1, PlantType.Healer);
 
             var desc = describer.Describe(item);
             Assert.That(desc, Is.EqualTo("rough seed"));
@@ -148,7 +148,7 @@ namespace CopperBend.App.tests
         {
             var describer = new Describer(87);
 
-            var item = new Fruit(new Coord(0, 0), 1, PlantType.Healer);
+            var item = new Fruit(new Point(0, 0), 1, PlantType.Healer);
 
             var desc = describer.Describe(item);
             Assert.That(desc, Is.EqualTo("star-shaped fruit"));

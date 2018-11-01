@@ -22,8 +22,8 @@ namespace CopperBend.App.Model
             return false;
         }
 
-        public Seed(Coord coord, int quantity, PlantType type)
-            : base(coord, quantity, true)
+        public Seed(Point point, int quantity, PlantType type)
+            : base(point, quantity, true)
         {
             PlantType = type;
         }
@@ -44,7 +44,7 @@ namespace CopperBend.App.Model
             }
 
             //PROBLEM:  Splitting stacks in a base class, creating a new subclass instance...
-            var sownSeed = new HealerSeed(tile.Coord, 1);  // bug
+            var sownSeed = new HealerSeed(tile.Point, 1);  // bug
             tile.Sow(sownSeed);
 
             if (--Quantity == 0)
@@ -75,16 +75,16 @@ namespace CopperBend.App.Model
 
     public class HealerSeed : Seed
     {
-        public HealerSeed(Coord coord, int quantity) 
-            : base(coord, quantity, PlantType.Healer)
+        public HealerSeed(Point point, int quantity) 
+            : base(point, quantity, PlantType.Healer)
         {}
 
         protected override void SeedMatures(IControlPanel controls, ScheduleEntry entry)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Coord, 2, PlantType.Healer);
+            IItem fruit = new Fruit(this.Point, 2, PlantType.Healer);
             controls.PutItemOnMap(fruit);
-            controls.RemovePlantAt(this.Coord);
+            controls.RemovePlantAt(this.Point);
             controls.SetMapDirty();
         }
     }

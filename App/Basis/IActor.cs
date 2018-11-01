@@ -6,12 +6,12 @@ namespace CopperBend.App
 {
     public interface IActor : IDrawable
     {
-        Coord Coord { get; }
+        Point Point { get; }
         string Name { get; set; }
         int Awareness { get; set; }
         int Health { get; }
         void AdjustHealth(int amount);
-        void MoveTo(Coord coord);
+        void MoveTo(Point point);
         IItem WieldedTool { get; }
         void Wield(IItem item);
 

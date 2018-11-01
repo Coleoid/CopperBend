@@ -10,9 +10,9 @@ namespace CopperBend.App.Model
     public class Actor : IActor
     {
         private IBehavior _behavior;
-        public Actor(Coord coord)
+        public Actor(Point point)
         {
-            Coord = coord;
+            Point = point;
             Health = 6;
             Awareness = 6;
 
@@ -23,12 +23,12 @@ namespace CopperBend.App.Model
         //  IDrawable
         public RLColor ColorForeground { get; set; }
         public char Symbol { get; set; }
-        public void MoveTo(Coord coord)
+        public void MoveTo(Point point)
         {
-            Coord = coord;
+            Point = point;
         }
 
-        public Coord Coord { get; protected set; }
+        public Point Point { get; protected set; }
 
 
         //  IActor

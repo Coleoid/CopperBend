@@ -199,8 +199,8 @@ namespace CopperBend.App
 
                     //TODO:  push down/unify
                     
-                    map.SetIsTransparent(tile.Coord, type.IsTransparent);
-                    map.SetIsWalkable(tile.Coord, type.IsWalkable);
+                    map.SetIsTransparent(tile.Point, type.IsTransparent);
+                    map.SetIsWalkable(tile.Point, type.IsWalkable);
                 }
             }
 
@@ -284,7 +284,7 @@ terrain:
 ";
             var map = MapFromYAML(DemoMapYaml);
 
-            var rock = new Item(new Coord(5, 1))
+            var rock = new Item(new Point(5, 1))
             {
                 Name = "rock",
                 ColorForeground = Palette.DbOldStone,
@@ -292,7 +292,7 @@ terrain:
             };
             map.Items.Add(rock);
 
-            var glom = new Actor(new Coord(4, 1))
+            var glom = new Actor(new Point(4, 1))
             {
                 Name = "glom",
                 Symbol = 'g',
@@ -305,7 +305,7 @@ terrain:
             map.FirstSightMessages.Add("The sky... says it's morning.  A small farmhouse to the east.");
             map.FirstSightMessages.Add("Something real wrong with the ground to the west, and the north.");
 
-            map.LocationMessages[new Coord(1, 6)] = new List<string> { "a shiversome feeling..." };
+            map.LocationMessages[new Point(1, 6)] = new List<string> { "a shiversome feeling..." };
 
             return map;
         }

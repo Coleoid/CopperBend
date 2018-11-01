@@ -6,8 +6,8 @@ namespace CopperBend.App
     {
         string Name { get; }
         int Quantity { get; set; }
-        Coord Coord { get; }
-        void MoveTo(Coord coord);
+        Point Point { get; }
+        void MoveTo(Point point);
 
         bool IsUsable { get; }
         void ApplyTo(ITile tile, IControlPanel controls, Direction direction);

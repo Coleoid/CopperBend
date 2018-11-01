@@ -89,38 +89,38 @@ namespace CopperBend.App
         #region Direction
         private void Command_Direction(IActor player, Direction direction)
         {
-            var coord = CoordInDirection(player.Coord, direction);
+            var point = PointInDirection(player.Point, direction);
 
-            IActor targetActor = Map.GetActorAtCoord(coord);
+            IActor targetActor = Map.GetActorAtPoint(point);
             if (targetActor == null)
             {
-                Command_DirectionMove(player, coord);
+                Command_DirectionMove(player, point);
             }
             else
             {
-                Command_DirectionAttack(targetActor, coord);
+                Command_DirectionAttack(targetActor, point);
             }
         }
 
-        private void Command_DirectionMove(IActor player, Coord coord)
+        private void Command_DirectionMove(IActor player, Point point)
         {
             //  If we actually do move in that direction,
             //  we need to redraw, and the player will be busy for a while.
-            ITile tile = Map[coord];
+            ITile tile = Map[point];
             if (tile.TileType.Name == "ClosedDoor")
             {
                 Map.OpenDoor(tile);
                 PlayerBusyFor(4);
             }
-            else if (Map.HasEventAtCoords(tile.Coord))
+            else if (Map.HasEventAtPoint(tile.Point))
             {
                 Map.RunEvent(player, tile, this);
             }
-            else if (Map.MoveActor(player, coord))
+            else if (Map.MoveActor(player, point))
             {
                 Map.UpdatePlayerFieldOfView(player);
                 Map.DisplayDirty = true;
-                if (player.Coord.X != coord.X && player.Coord.Y != coord.Y)
+                if (player.Point.X != point.X && player.Point.Y != point.Y)
                     PlayerBusyFor(17);
                 else
                     PlayerBusyFor(12);
@@ -131,7 +131,7 @@ namespace CopperBend.App
             }
         }
 
-        private void Command_DirectionAttack(IActor targetActor, Coord coord)
+        private void Command_DirectionAttack(IActor targetActor, Point point)
         {
             //0.1
             int damage = 2;
@@ -141,7 +141,7 @@ namespace CopperBend.App
             {
                 Console.WriteLine($"The {targetActor.Name} dies.");
                 Map.Actors.Remove(targetActor);
-                Map.SetIsWalkable(targetActor.Coord, true);
+                Map.SetIsWalkable(targetActor.Point, true);
                 Map.DisplayDirty = true;
 
                 //TODO: drop items, body
@@ -184,7 +184,7 @@ namespace CopperBend.App
             var item = Player.Inventory.ElementAt(inventorySlot);
             if (!item.IsConsumable)
             {
-                WriteLine($"I can't {item.ConsumeVerb} a {item.Name}.");
+                WriteLine($"I can't {item.ConsumeVerb} {describer.Describe(item, DescMods.IndefiniteArticle)}.");
                 Consume_Prompt(null);
                 return;
             }
@@ -239,7 +239,7 @@ namespace CopperBend.App
             if (wieldedItem == item)
                 WriteLine($"Note:  No longer wielding the {item.Name}.");
 
-            item.MoveTo(Player.Coord);
+            item.MoveTo(Player.Point);
             Map.Items.Add(item);
             PlayerBusyFor(1);
 
@@ -324,10 +324,10 @@ namespace CopperBend.App
             var direction = DirectionOfKey(key);
             if (direction != Direction.None)
             {
-                var targetCoord = CoordInDirection(Player.Coord, direction);
+                var targetPoint = PointInDirection(Player.Point, direction);
                 WriteLine(direction.ToString());
 
-                _usingItem.ApplyTo(Map[targetCoord], this, direction);  // the magic
+                _usingItem.ApplyTo(Map[targetPoint], this, direction);  // the magic
                 NextStep = null;
             }
         }
@@ -421,7 +421,7 @@ namespace CopperBend.App
         private void Command_PickUp()
         {
             var topItem = Map.Items
-                .Where(i => i.Coord.Equals(Player.Coord))
+                .Where(i => i.Point.Equals(Player.Point))
                 .LastOrDefault();
 
             if (topItem == null)

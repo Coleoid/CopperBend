@@ -5,7 +5,7 @@ namespace CopperBend.App
 {
     public interface ITile : IDrawable
     {
-        Coord Coord { get; }
+        Point Point { get; }
         TileType TileType { get; }
         void SetTileType(TileType tileType);
         //  Doesn't go in IDrawable, only tiles have backgrounds

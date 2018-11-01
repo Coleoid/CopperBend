@@ -5,29 +5,29 @@ using System.Collections.Generic;
 namespace CopperBend.App.tests
 {
     [TestFixture]
-    public class CoordinateTests
+    public class PointinateTests
     {
-        //  Earlier, I had Coord as a class.  
-        //  Neither of these tests passed, reducing the usefulness of Coord.
+        //  Earlier, I had Point as a class.  
+        //  Neither of these tests passed, reducing the usefulness of Point.
 
         [Test]
         public void Comparing_coords_works_with_coords_as_structs()
         {
-            Coord a = new Coord(1, 2);
-            Coord b = new Coord(1, 2);
-            Coord c = new Coord(3, 4);
+            Point a = new Point(1, 2);
+            Point b = new Point(1, 2);
+            Point c = new Point(3, 4);
 
             Assert.That(a, Is.EqualTo(b));
             Assert.That(a, Is.Not.EqualTo(c));
         }
 
         [Test]
-        public void Coords_as_Keys_work_through_interface()
+        public void Point_as_Keys_work_through_interface()
         {
-            Coord a = new Coord(1, 2);
-            Coord b = new Coord(1, 2);
+            Point a = new Point(1, 2);
+            Point b = new Point(1, 2);
 
-            var dict = new Dictionary<Coord, string>
+            var dict = new Dictionary<Point, string>
             {
                 [a] = "at A"
             };

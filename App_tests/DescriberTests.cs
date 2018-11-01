@@ -1,6 +1,6 @@
 ﻿using CopperBend.App.Model;
+using CopperBend.MapUtil;
 using NUnit.Framework;
-using RogueSharp;
 
 namespace CopperBend.App.tests
 {

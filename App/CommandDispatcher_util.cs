@@ -1,6 +1,6 @@
 ﻿using CopperBend.App.Model;
+using CopperBend.MapUtil;
 using RLNET;
-using RogueSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,9 @@ namespace CopperBend.App
 {
     public partial class CommandDispatcher : IControlPanel
     {
+        private const int lowercase_a = 97;
+        private const int lowercase_z = 123;
+
         public void WriteLine(string text)
         {
             Console.Out.WriteLine(text);
@@ -24,8 +27,8 @@ namespace CopperBend.App
         {
             if (!key.Char.HasValue) return -1;
             var asciiNum = (int)key.Char.Value;
-            if (asciiNum < 97 || asciiNum > 123) return -1;
-            return asciiNum - 97;
+            if (asciiNum < lowercase_a || asciiNum > lowercase_z) return -1;
+            return asciiNum - lowercase_a;
         }
 
         private bool IsPlayerScheduled = false;

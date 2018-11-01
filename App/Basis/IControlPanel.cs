@@ -1,6 +1,6 @@
 ﻿using CopperBend.App.Model;
+using CopperBend.MapUtil;
 using RLNET;
-using RogueSharp;
 using System.Collections.Generic;
 
 //  Here I have some mechanisms to communicate and control,

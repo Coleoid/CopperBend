@@ -1,5 +1,5 @@
-﻿using NUnit.Framework;
-using RogueSharp;
+﻿using CopperBend.MapUtil;
+using NUnit.Framework;
 using System.Collections.Generic;
 
 namespace CopperBend.App.tests

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using RogueSharp;
+using CopperBend.MapUtil;
 
 namespace CopperBend.App
 {

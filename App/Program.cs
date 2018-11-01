@@ -1,6 +1,6 @@
 ﻿using CopperBend.App.Model;
+using CopperBend.MapUtil;
 using RLNET;
-using RogueSharp;
 
 namespace CopperBend.App
 {

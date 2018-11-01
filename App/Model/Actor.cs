@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using CopperBend.App.Behaviors;
+using CopperBend.MapUtil;
 using RLNET;
-using RogueSharp;
 
 namespace CopperBend.App.Model
 {

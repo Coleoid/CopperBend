@@ -1,4 +1,4 @@
-﻿using RogueSharp;
+﻿using CopperBend.MapUtil;
 using System;
 
 namespace CopperBend.App.Model

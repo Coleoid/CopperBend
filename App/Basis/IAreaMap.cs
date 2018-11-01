@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using CopperBend.MapUtil;
 using RLNET;
-using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -14,7 +14,7 @@ namespace CopperBend.App
         IActor ViewpointActor { get; set; }
         bool DisplayDirty { get; set; }
 
-        ITile this[RogueSharp.Point point] { get; }
+        ITile this[Point point] { get; }
 
         bool MoveActor(IActor actor, Point point);
         void UpdatePlayerFieldOfView(IActor player);

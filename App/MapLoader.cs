@@ -6,7 +6,7 @@ using RLNET;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Text.RegularExpressions;
-using RogueSharp;
+using CopperBend.MapUtil;
 
 namespace CopperBend.App
 {

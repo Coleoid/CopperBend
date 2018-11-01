@@ -39,9 +39,6 @@
     <Reference Include="RLNET, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RLNET.1.0.6\lib\RLNET.dll</HintPath>
     </Reference>
-    <Reference Include="RogueSharp">
-      <HintPath>..\..\RogueSharp\RogueSharp\bin\Debug\net40\RogueSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -59,10 +56,12 @@
     <Compile Include="Basis\IAreaMap.cs" />
     <Compile Include="Basis\IControlPanel.cs" />
     <Compile Include="Basis\IItem.cs" />
+    <Compile Include="Basis\IMap.cs" />
     <Compile Include="Behaviors\StandardAggressor.cs" />
     <Compile Include="CommandDispatcher.cs" />
     <Compile Include="CommandDispatcher_util.cs" />
     <Compile Include="GameEngine.cs" />
+    <Compile Include="Map.cs" />
     <Compile Include="Messenger.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
@@ -86,6 +85,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MapUtil\MapUtil.csproj">
+      <Project>{3a143e5e-741e-407f-ab1a-770cc35910dc}</Project>
+      <Name>MapUtil</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

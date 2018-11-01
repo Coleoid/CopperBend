@@ -1,5 +1,5 @@
-﻿using RLNET;
-using RogueSharp;
+﻿using CopperBend.MapUtil;
+using RLNET;
 
 namespace CopperBend.App
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CopperBend.MapUtil;
 using RLNET;
-using RogueSharp;
 
 namespace CopperBend.App
 {
@@ -268,7 +268,7 @@ namespace CopperBend.App
             }
             else
             {
-                int asciiSlot = 97;
+                int asciiSlot = lowercase_a;
                 foreach (var item in Player.Inventory)
                 {
                     var description = describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);

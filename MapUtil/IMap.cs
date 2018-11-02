@@ -1,5 +1,4 @@
-﻿using CopperBend.MapUtil;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -7,15 +6,8 @@ namespace CopperBend.MapUtil
 {
     public interface IMap
     {
-        int Width
-        {
-            get;
-        }
-
-        int Height
-        {
-            get;
-        }
+        int Width { get; }
+        int Height { get; }
 
         void Initialize(int width, int height);
 
@@ -71,40 +63,26 @@ namespace CopperBend.MapUtil
         ReadOnlyCollection<Cell> AppendFov(int xOrigin, int yOrigin, int radius, bool lightWalls);
 
         IEnumerable<Cell> GetAllCells();
+        IEnumerable<Point> GetAllPoints();
 
         IEnumerable<Cell> GetCellsAlongLine(int xOrigin, int yOrigin, int xDestination, int yDestination);
 
-        IEnumerable<Cell> GetCellsInCircle(int xCenter, int yCenter, int radius);
-
-        IEnumerable<Cell> GetCellsInDiamond(int xCenter, int yCenter, int distance);
-
-        IEnumerable<Cell> GetCellsInSquare(int xCenter, int yCenter, int distance);
-        IEnumerable<Point> GetCoordsInSquare(int xCenter, int yCenter, int distance);
-
-        IEnumerable<Cell> GetBorderCellsInCircle(int xCenter, int yCenter, int radius);
+        IEnumerable<Point> GetPointsInSquare(int xCenter, int yCenter, int distance);
 
         IEnumerable<Cell> GetBorderCellsInDiamond(int xCenter, int yCenter, int distance);
 
         IEnumerable<Cell> GetBorderCellsInSquare(int xCenter, int yCenter, int distance);
 
-        IEnumerable<Cell> GetCellsInRows(params int[] rowNumbers);
+        string ToString(bool useFov);
 
-        IEnumerable<Cell> GetCellsInColumns(params int[] columnNumbers);
-
+        Cell GetCell(int index);
         Cell GetCell(int x, int y);
         Cell GetCell(Point point);
 
-        string ToString(bool useFov);
+        int GetIndex(int x, int y);
+        int GetIndex(Point cell);
 
-        MapState Save();
-
-        void Restore(MapState state);
-
-        Cell CellFor(int index);
-
-        int IndexFor(int x, int y);
-
-        int IndexFor(Point cell);
+        Point GetPoint(int index);
     }
 
     public class MapState
@@ -152,5 +130,4 @@ namespace CopperBend.MapUtil
             get; set;
         }
     }
-
 }

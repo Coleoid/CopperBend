@@ -7,14 +7,6 @@ namespace CopperBend.MapUtil
     public class FieldOfView
     {
         private readonly IMap _map;
-        //_map.IndexFor(x, y)
-        // _map.GetBorderCellsInSquare
-        //_map.GetCellsAlongLine
-        //_map.GetCoordsInSquare(
-        //_map.CellFor(
-        //_map.IsTransparent(
-
-
         private readonly HashSet<int> _inFov;
 
         public FieldOfView(IMap map)
@@ -27,16 +19,6 @@ namespace CopperBend.MapUtil
         {
             _map = map;
             _inFov = inFov;
-        }
-
-        public FieldOfView Clone()
-        {
-            var inFovCopy = new HashSet<int>();
-            foreach (int i in _inFov)
-            {
-                inFovCopy.Add(i);
-            }
-            return new FieldOfView(_map, inFovCopy);
         }
 
         public ReadOnlyCollection<Cell> ComputeFov(int xOrigin, int yOrigin, int radius, bool lightWalls)
@@ -58,13 +40,13 @@ namespace CopperBend.MapUtil
 
                     if (cell.IsTransparent)
                     {
-                        _inFov.Add(_map.IndexFor(cell.Point));
+                        _inFov.Add(_map.GetIndex(cell.Point));
                     }
                     else
                     {
                         if (lightWalls)
                         {
-                            _inFov.Add(_map.IndexFor(cell.Point));
+                            _inFov.Add(_map.GetIndex(cell.Point));
                         }
                         break;
                     }
@@ -75,7 +57,7 @@ namespace CopperBend.MapUtil
             {
                 // Post processing step created based on the algorithm at this website:
                 // https://sites.google.com/site/jicenospam/visibilitydetermination
-                foreach (Point coord in _map.GetCoordsInSquare(xOrigin, yOrigin, radius))
+                foreach (Point coord in _map.GetPointsInSquare(xOrigin, yOrigin, radius))
                 {
                     if (coord.X > xOrigin)
                     {
@@ -105,15 +87,15 @@ namespace CopperBend.MapUtil
             return CellsInFov();
         }
 
-        public bool IsInFov(int x, int y) => _inFov.Contains(_map.IndexFor(x, y));
-        public bool IsInFov(Point point) => _inFov.Contains(_map.IndexFor(point));
+        public bool IsInFov(int x, int y) => _inFov.Contains(_map.GetIndex(x, y));
+        public bool IsInFov(Point point) => _inFov.Contains(_map.GetIndex(point));
 
         private ReadOnlyCollection<Cell> CellsInFov()
         {
             var cells = new List<Cell>();
             foreach (int index in _inFov)
             {
-                cells.Add(_map.CellFor(index));
+                cells.Add(_map.GetCell(index));
             }
             return new ReadOnlyCollection<Cell>(cells);
         }
@@ -161,7 +143,7 @@ namespace CopperBend.MapUtil
                 if ((_map.IsTransparent(x1, y1) && IsInFov(x1, y1)) || (_map.IsTransparent(x2, y2) && IsInFov(x2, y2))
                      || (_map.IsTransparent(x2, y1) && IsInFov(x2, y1)))
                 {
-                    _inFov.Add(_map.IndexFor(x, y));
+                    _inFov.Add(_map.GetIndex(x, y));
                 }
             }
         }

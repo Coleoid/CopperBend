@@ -56,7 +56,6 @@
     <Compile Include="Basis\IAreaMap.cs" />
     <Compile Include="Basis\IControlPanel.cs" />
     <Compile Include="Basis\IItem.cs" />
-    <Compile Include="Basis\IMap.cs" />
     <Compile Include="Behaviors\StandardAggressor.cs" />
     <Compile Include="CommandDispatcher.cs" />
     <Compile Include="CommandDispatcher_util.cs" />

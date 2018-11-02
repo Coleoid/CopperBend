@@ -2,6 +2,7 @@
 using System.Linq;
 using RLNET;
 using CopperBend.MapUtil;
+using System;
 
 namespace CopperBend.App
 {
@@ -37,13 +38,16 @@ namespace CopperBend.App
         public void DrawMap(RLConsole mapConsole)
         {
             mapConsole.Clear();
-            foreach (Cell cell in GetAllCells())
+            for (var y = 0; y < Height; y++)
             {
-                DrawPoint(mapConsole, cell.Point);
+                for (var x = 0; x < Width; x++)
+                {
+                    DrawLocation(mapConsole, new Point(x, y));
+                }
             }
         }
 
-        private void DrawPoint(RLConsole console, Point point)
+        private void DrawLocation(RLConsole console, Point point)
         {
             if (!IsExplored(point)) return;  // unknown is unshown
             var tile = this[point];

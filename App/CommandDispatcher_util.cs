@@ -128,8 +128,8 @@ namespace CopperBend.App
         {
             //FINISH: one FOV and one Pathfinder per map
             FieldOfView fov = new FieldOfView(Map);
-            fov.ComputeFov(actor.Point.X, actor.Point.Y, actor.Awareness, true);
-            return fov.IsInFov(target.X, target.Y);
+            fov.ComputeFov(actor.Point, actor.Awareness, true);
+            return fov.IsInFov(target);
         }
 
         public void AttackPlayer(IActor actor)

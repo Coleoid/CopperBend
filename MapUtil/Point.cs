@@ -72,6 +72,12 @@ namespace CopperBend.MapUtil
             return value;
         }
 
+        public double DistanceTo(Point point)
+        {
+            var span = this - point;
+            return Math.Sqrt(span.X * span.X + span.Y * span.Y);
+        }
+
         #endregion
     }
 }

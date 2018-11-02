@@ -30,6 +30,7 @@ namespace CopperBend.App
             Dispatcher = new CommandDispatcher(InputQueue, Scheduler);
             Messenger = new Messenger(Dispatcher);
             MapLoader = new MapLoader();
+            LoadMap("Farm");
             Mode = GameMode.PlayerReady;
         }
 

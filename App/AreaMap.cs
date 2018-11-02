@@ -109,7 +109,7 @@ namespace CopperBend.App
         //FUTURE: more cases (shifting terrain, smoke cloud, et c.)
         public void UpdatePlayerFieldOfView(IActor actor)
         {
-            var fovCells = ComputeFov(actor.Point.X, actor.Point.Y, actor.Awareness, true);
+            var fovCells = ComputeFov(actor.Point, actor.Awareness, true);
 
             foreach (Cell cell in fovCells)
             {

@@ -1,4 +1,5 @@
-﻿using CopperBend.MapUtil;
+﻿using System;
+using CopperBend.MapUtil;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -33,6 +34,18 @@ namespace CopperBend.App.tests
             };
 
             Assert.That(dict[b], Is.EqualTo("at A"));
+        }
+
+        [Test]
+        public void DistanceTo()
+        {
+            Point origin = new Point(0, 0);
+            Point target = new Point(1, 1);
+
+            var distance = origin.DistanceTo(target);
+
+            var s2 = Math.Sqrt(2);
+            Assert.That(distance, Is.EqualTo(s2));
         }
     }
 }

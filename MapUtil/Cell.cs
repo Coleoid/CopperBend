@@ -57,7 +57,7 @@ namespace CopperBend.MapUtil
         public bool Equals(Cell other)
         {
             if (other == null) return false;
-            if (this == other) return true;
+            if (ReferenceEquals(this, other)) return true;
 
             return Point.Equals(other.Point)
                && IsTransparent == other.IsTransparent

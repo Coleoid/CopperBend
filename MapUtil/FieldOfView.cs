@@ -21,22 +21,20 @@ namespace CopperBend.MapUtil
             _inFov = inFov;
         }
 
-        public ReadOnlyCollection<Cell> ComputeFov(int xOrigin, int yOrigin, int radius, bool lightWalls)
+        public ReadOnlyCollection<Cell> ComputeFov(Point origin, int radius, bool lightWalls)
         {
             ClearFov();
-            return AppendFov(xOrigin, yOrigin, radius, lightWalls);
+            return AppendFov(origin, radius, lightWalls);
         }
 
-        public ReadOnlyCollection<Cell> AppendFov(int xOrigin, int yOrigin, int radius, bool lightWalls)
+        public ReadOnlyCollection<Cell> AppendFov(Point origin, int radius, bool lightWalls)
         {
-            foreach (Cell borderCell in _map.GetBorderCellsInSquare(xOrigin, yOrigin, radius))
+            foreach (Cell borderCell in _map.GetBorderCellsInSquare(origin, radius))
             {
-                foreach (Cell cell in _map.GetCellsAlongLine(xOrigin, yOrigin, borderCell.Point.X, borderCell.Point.Y))
+                foreach (Cell cell in _map.GetCellsAlongLine(origin, borderCell.Point))
                 {
-                    var xDist = cell.Point.X - xOrigin;
-                    var yDist = cell.Point.Y - yOrigin;
-                    var dist = Math.Sqrt(xDist * xDist + yDist * yDist);
-                    if (dist - .5 > radius) break;
+                    var distance = origin.DistanceTo(cell.Point);
+                    if (distance - .5 > radius) break;
 
                     if (cell.IsTransparent)
                     {
@@ -57,28 +55,28 @@ namespace CopperBend.MapUtil
             {
                 // Post processing step created based on the algorithm at this website:
                 // https://sites.google.com/site/jicenospam/visibilitydetermination
-                foreach (Point coord in _map.GetPointsInSquare(xOrigin, yOrigin, radius))
+                foreach (Point coord in _map.GetPointsInSquare(origin, radius))
                 {
-                    if (coord.X > xOrigin)
+                    if (coord.X > origin.X)
                     {
-                        if (coord.Y > yOrigin)
+                        if (coord.Y > origin.Y)
                         {
-                            PostProcessFovQuadrant(coord.X, coord.Y, Quadrant.SE);
+                            PostProcessFovQuadrant(coord, Quadrant.SE);
                         }
-                        else if (coord.Y < yOrigin)
+                        else if (coord.Y < origin.Y)
                         {
-                            PostProcessFovQuadrant(coord.X, coord.Y, Quadrant.NE);
+                            PostProcessFovQuadrant(coord, Quadrant.NE);
                         }
                     }
-                    else if (coord.X < xOrigin)
+                    else if (coord.X < origin.X)
                     {
-                        if (coord.Y > yOrigin)
+                        if (coord.Y > origin.Y)
                         {
-                            PostProcessFovQuadrant(coord.X, coord.Y, Quadrant.SW);
+                            PostProcessFovQuadrant(coord, Quadrant.SW);
                         }
-                        else if (coord.Y < yOrigin)
+                        else if (coord.Y < origin.Y)
                         {
-                            PostProcessFovQuadrant(coord.X, coord.Y, Quadrant.NW);
+                            PostProcessFovQuadrant(coord, Quadrant.NW);
                         }
                     }
                 }
@@ -105,45 +103,46 @@ namespace CopperBend.MapUtil
             _inFov.Clear();
         }
 
-        private void PostProcessFovQuadrant(int x, int y, Quadrant quadrant)
+        private void PostProcessFovQuadrant(Point point, Quadrant quadrant)
         {
-            int x1 = x;
-            int y1 = y;
-            int x2 = x;
-            int y2 = y;
+            int x1 = point.X;
+            int y1 = point.Y;
+            int x2 = point.X;
+            int y2 = point.Y;
             switch (quadrant)
             {
             case Quadrant.NE:
                 {
-                    y1 = y + 1;
-                    x2 = x - 1;
+                    y1 = point.Y + 1;
+                    x2 = point.X - 1;
                     break;
                 }
             case Quadrant.SE:
                 {
-                    y1 = y - 1;
-                    x2 = x - 1;
+                    y1 = point.Y - 1;
+                    x2 = point.X - 1;
                     break;
                 }
             case Quadrant.SW:
                 {
-                    y1 = y - 1;
-                    x2 = x + 1;
+                    y1 = point.Y - 1;
+                    x2 = point.X + 1;
                     break;
                 }
             case Quadrant.NW:
                 {
-                    y1 = y + 1;
-                    x2 = x + 1;
+                    y1 = point.Y + 1;
+                    x2 = point.X + 1;
                     break;
                 }
             }
-            if (!IsInFov(x, y) && !_map.IsTransparent(x, y))
+            if (!IsInFov(point) && !_map.IsTransparent(point))
             {
-                if ((_map.IsTransparent(x1, y1) && IsInFov(x1, y1)) || (_map.IsTransparent(x2, y2) && IsInFov(x2, y2))
-                     || (_map.IsTransparent(x2, y1) && IsInFov(x2, y1)))
+                if ((_map.IsTransparent(x1, y1) && IsInFov(x1, y1)) ||
+                    (_map.IsTransparent(x2, y2) && IsInFov(x2, y2)) || 
+                    (_map.IsTransparent(x2, y1) && IsInFov(x2, y1)))
                 {
-                    _inFov.Add(_map.GetIndex(x, y));
+                    _inFov.Add(_map.GetIndex(point));
                 }
             }
         }

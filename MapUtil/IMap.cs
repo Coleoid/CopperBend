@@ -12,14 +12,15 @@ namespace CopperBend.MapUtil
         void Initialize(int width, int height);
 
         bool IsTransparent(int x, int y);
-
-        bool IsWalkable(int x, int y);
-
-        bool IsExplored(int x, int y);
-
-        void SetIsWalkable(Point point, bool isWalkable);
-        void SetIsExplored(Point point, bool isExplored);
+        bool IsTransparent(Point point);
         void SetIsTransparent(Point point, bool isTransparent);
+
+        bool IsWalkable(Point point);
+        void SetIsWalkable(Point point, bool isWalkable);
+
+        bool IsExplored(Point point);
+        void SetIsExplored(Point point, bool isExplored);
+
         bool IsWithinMap(Point point);
 
         /// <summary> Sets whole Map to be transparent and walkable </summary>
@@ -33,7 +34,7 @@ namespace CopperBend.MapUtil
         /// <summary>
         /// Copies the Cell properties of a smaller source Map into this destination Map at the specified location
         /// </summary>
-        void Copy(IMap sourceMap, int left, int top);
+        void Copy(IMap sourceMap, Point offset);
 
         /// <summary>
         /// Performs a field-of-view calculation with the specified parameters.
@@ -45,7 +46,7 @@ namespace CopperBend.MapUtil
         /// <param name="radius">The number of Cells in which the field-of-view extends from the origin Cell. Think of this as the intensity of the light source.</param>
         /// <param name="lightWalls">True if walls should be included in the field-of-view when they are within the radius of the light source. False excludes walls even when they are within range.</param>
         /// <returns>List of Cells representing what is observable in the Map based on the specified parameters</returns>
-        ReadOnlyCollection<Cell> ComputeFov(int xOrigin, int yOrigin, int radius, bool lightWalls);
+        ReadOnlyCollection<Cell> ComputeFov(Point origin, int radius, bool lightWalls);
 
         /// <summary>
         /// Performs a field-of-view calculation with the specified parameters and appends it any existing field-of-view calculations.
@@ -60,18 +61,18 @@ namespace CopperBend.MapUtil
         /// <param name="radius">The number of Cells in which the field-of-view extends from the origin Cell. Think of this as the intensity of the light source.</param>
         /// <param name="lightWalls">True if walls should be included in the field-of-view when they are within the radius of the light source. False excludes walls even when they are within range.</param>
         /// <returns>List of Cells representing what is observable in the Map based on the specified parameters</returns>
-        ReadOnlyCollection<Cell> AppendFov(int xOrigin, int yOrigin, int radius, bool lightWalls);
+        ReadOnlyCollection<Cell> AppendFov(Point origin, int radius, bool lightWalls);
 
         IEnumerable<Cell> GetAllCells();
         IEnumerable<Point> GetAllPoints();
 
-        IEnumerable<Cell> GetCellsAlongLine(int xOrigin, int yOrigin, int xDestination, int yDestination);
+        IEnumerable<Cell> GetCellsAlongLine(Point origin, Point destination);
 
-        IEnumerable<Point> GetPointsInSquare(int xCenter, int yCenter, int distance);
+        IEnumerable<Point> GetPointsInSquare(Point center, int distance);
 
-        IEnumerable<Cell> GetBorderCellsInDiamond(int xCenter, int yCenter, int distance);
+        IEnumerable<Cell> GetBorderCellsInDiamond(Point center, int distance);
 
-        IEnumerable<Cell> GetBorderCellsInSquare(int xCenter, int yCenter, int distance);
+        IEnumerable<Cell> GetBorderCellsInSquare(Point center, int distance);
 
         string ToString(bool useFov);
 
@@ -115,15 +116,9 @@ namespace CopperBend.MapUtil
             Explored = 8
         }
 
-        public int Width
-        {
-            get; set;
-        }
+        public int Width { get; set; }
 
-        public int Height
-        {
-            get; set;
-        }
+        public int Height { get; set; }
 
         public CellProperties[] Cells
         {

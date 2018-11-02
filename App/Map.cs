@@ -51,14 +51,12 @@ namespace CopperBend.MapUtil
             _isTransparent[point.X, point.Y] = isTransparent;
         }
 
-        public bool IsWalkable(int x, int y) => _isWalkable[x, y];
         public bool IsWalkable(Point point) => _isWalkable[point.X, point.Y];
         public void SetIsWalkable(Point point, bool isWalkable)
         {
             _isWalkable[point.X, point.Y] = isWalkable;
         }
 
-        public bool IsExplored(int x, int y) => _isExplored[x, y];
         public bool IsExplored(Point point) => _isExplored[point.X, point.Y];
         public void SetIsExplored(Point point, bool isExplored)
         {
@@ -93,21 +91,20 @@ namespace CopperBend.MapUtil
             SetIsExplored(point, cell.IsExplored);
         }
 
-        public void Copy(IMap sourceMap, int left, int top)
+        public void Copy(IMap sourceMap, Point offset)
         {
-            Point offset = new Point(left, top);
             if (sourceMap == null)
             {
                 throw new ArgumentNullException("sourceMap", "Source map cannot be null");
             }
 
-            if (sourceMap.Width + left > Width)
+            if (sourceMap.Width + offset.X > Width)
             {
                 throw new ArgumentException(
                     "Source map 'width' + 'left' cannot be larger than the destination map width");
             }
 
-            if (sourceMap.Height + top > Height)
+            if (sourceMap.Height + offset.Y > Height)
             {
                 throw new ArgumentException(
                     "Source map 'height' + 'top' cannot be larger than the destination map height");
@@ -119,14 +116,14 @@ namespace CopperBend.MapUtil
             }
         }
 
-        public ReadOnlyCollection<Cell> ComputeFov(int xOrigin, int yOrigin, int radius, bool lightWalls)
+        public ReadOnlyCollection<Cell> ComputeFov(Point origin, int radius, bool lightWalls)
         {
-            return _fieldOfView.ComputeFov(xOrigin, yOrigin, radius, lightWalls);
+            return _fieldOfView.ComputeFov(origin, radius, lightWalls);
         }
 
-        public ReadOnlyCollection<Cell> AppendFov(int xOrigin, int yOrigin, int radius, bool lightWalls)
+        public ReadOnlyCollection<Cell> AppendFov(Point origin, int radius, bool lightWalls)
         {
-            return _fieldOfView.AppendFov(xOrigin, yOrigin, radius, lightWalls);
+            return _fieldOfView.AppendFov(origin, radius, lightWalls);
         }
 
         public IEnumerable<Cell> GetAllCells()
@@ -151,43 +148,6 @@ namespace CopperBend.MapUtil
             }
         }
 
-        public IEnumerable<Cell> GetCellsAlongLine(int xOrigin, int yOrigin, int xDestination, int yDestination)
-        {
-            xOrigin = ClampX(xOrigin);
-            yOrigin = ClampY(yOrigin);
-            xDestination = ClampX(xDestination);
-            yDestination = ClampY(yDestination);
-
-            int dx = Math.Abs(xDestination - xOrigin);
-            int dy = Math.Abs(yDestination - yOrigin);
-
-            int sx = xOrigin < xDestination ? 1 : -1;
-            int sy = yOrigin < yDestination ? 1 : -1;
-            int err = dx - dy;
-
-            while (true)
-            {
-                yield return GetCell(xOrigin, yOrigin);
-                if (xOrigin == xDestination && yOrigin == yDestination)
-                {
-                    break;
-                }
-
-                int e2 = 2 * err;
-                if (e2 > -dy)
-                {
-                    err = err - dy;
-                    xOrigin = xOrigin + sx;
-                }
-
-                if (e2 < dx)
-                {
-                    err = err + dx;
-                    yOrigin = yOrigin + sy;
-                }
-            }
-        }
-
         private int ClampX(int x)
         {
             return (x < 0) ? 0 : (x > Width - 1) ? Width - 1 : x;
@@ -198,13 +158,56 @@ namespace CopperBend.MapUtil
             return (y < 0) ? 0 : (y > Height - 1) ? Height - 1 : y;
         }
 
-
-        public IEnumerable<Point> GetPointsInSquare(int xCenter, int yCenter, int distance)
+        private Point NearestPointInsideMapTo(Point source)
         {
-            int xMin = Math.Max(0, xCenter - distance);
-            int xMax = Math.Min(Width - 1, xCenter + distance);
-            int yMin = Math.Max(0, yCenter - distance);
-            int yMax = Math.Min(Height - 1, yCenter + distance);
+            return new Point(ClampX(source.X), ClampY(source.Y));
+        }
+
+
+        public IEnumerable<Cell> GetCellsAlongLine(Point origin, Point destination)
+        {
+            origin = NearestPointInsideMapTo(origin);
+            destination = NearestPointInsideMapTo(destination);  // larva
+
+            var span = destination - origin;
+            int dx = Math.Abs(span.X);
+            int dy = Math.Abs(span.Y);
+            int err = dx - dy;
+
+            int sx = origin.X < destination.X ? 1 : -1;
+            int sy = origin.Y < destination.Y ? 1 : -1;
+
+            int nextX = origin.X;
+            int nextY = origin.Y;
+            while (true)
+            {
+                yield return GetCell(nextX, nextY);
+                if (origin == destination)
+                {
+                    break;
+                }
+                int e2 = 2 * err;
+                if (e2 > -dy)
+                {
+                    err = err - dy;
+                    nextX += sx;
+                }
+
+                if (e2 < dx)
+                {
+                    err = err + dx;
+                    nextY += sy;
+                }
+            }
+        }
+
+
+        public IEnumerable<Point> GetPointsInSquare(Point center, int distance)
+        {
+            int xMin = Math.Max(0, center.X - distance);
+            int xMax = Math.Min(Width - 1, center.X + distance);
+            int yMin = Math.Max(0, center.Y - distance);
+            int yMax = Math.Min(Height - 1, center.Y + distance);
 
             for (int y = yMin; y <= yMax; y++)
             {
@@ -215,47 +218,47 @@ namespace CopperBend.MapUtil
             }
         }
 
-        public IEnumerable<Cell> GetBorderCellsInDiamond(int xCenter, int yCenter, int distance)
+        public IEnumerable<Cell> GetBorderCellsInDiamond(Point center, int distance)
         {
             var discovered = new HashSet<int>();
+            //center = NearestPointInsideMapTo(center);
+            int xMin = Math.Max(0, center.X - distance);
+            int xMax = Math.Min(Width - 1, center.X + distance);
+            int yMin = Math.Max(0, center.Y - distance);
+            int yMax = Math.Min(Height - 1, center.Y + distance);
 
-            int xMin = Math.Max(0, xCenter - distance);
-            int xMax = Math.Min(Width - 1, xCenter + distance);
-            int yMin = Math.Max(0, yCenter - distance);
-            int yMax = Math.Min(Height - 1, yCenter + distance);
-
-            Cell centerCell = GetCell(xCenter, yCenter);
-            if (AddToHashSet(discovered, xCenter, yMin, centerCell, out Cell cell))
+            Cell centerCell = GetCell(center);
+            if (AddToHashSet(discovered, center.X, yMin, centerCell, out Cell cell))
             {
                 yield return cell;
             }
 
-            if (AddToHashSet(discovered, xCenter, yMax, centerCell, out cell))
+            if (AddToHashSet(discovered, center.X, yMax, centerCell, out cell))
             {
                 yield return cell;
             }
 
             for (int i = 1; i <= distance; i++)
             {
-                if (AddToHashSet(discovered, Math.Max(xMin, xCenter - i), Math.Min(yMax, yCenter + distance - i),
+                if (AddToHashSet(discovered, Math.Max(xMin, center.X - i), Math.Min(yMax, center.Y + distance - i),
                     centerCell, out cell))
                 {
                     yield return cell;
                 }
 
-                if (AddToHashSet(discovered, Math.Max(xMin, xCenter - i), Math.Max(yMin, yCenter - distance + i),
+                if (AddToHashSet(discovered, Math.Max(xMin, center.X - i), Math.Max(yMin, center.Y - distance + i),
                     centerCell, out cell))
                 {
                     yield return cell;
                 }
 
-                if (AddToHashSet(discovered, Math.Min(xMax, xCenter + i), Math.Min(yMax, yCenter + distance - i),
+                if (AddToHashSet(discovered, Math.Min(xMax, center.X + i), Math.Min(yMax, center.Y + distance - i),
                     centerCell, out cell))
                 {
                     yield return cell;
                 }
 
-                if (AddToHashSet(discovered, Math.Min(xMax, xCenter + i), Math.Max(yMin, yCenter - distance + i),
+                if (AddToHashSet(discovered, Math.Min(xMax, center.X + i), Math.Max(yMin, center.Y - distance + i),
                     centerCell, out cell))
                 {
                     yield return cell;
@@ -263,12 +266,12 @@ namespace CopperBend.MapUtil
             }
         }
 
-        public IEnumerable<Cell> GetBorderCellsInSquare(int xCenter, int yCenter, int distance)
+        public IEnumerable<Cell> GetBorderCellsInSquare(Point center, int distance)
         {
-            int xMin = Math.Max(0, xCenter - distance);
-            int xMax = Math.Min(Width - 1, xCenter + distance);
-            int yMin = Math.Max(0, yCenter - distance);
-            int yMax = Math.Min(Height - 1, yCenter + distance);
+            int xMin = Math.Max(0, center.X - distance);
+            int xMax = Math.Min(Width - 1, center.X + distance);
+            int yMin = Math.Max(0, center.Y - distance);
+            int yMax = Math.Min(Height - 1, center.Y + distance);
             List<Cell> borderCells = new List<Cell>();
 
             for (int x = xMin; x <= xMax; x++)
@@ -283,7 +286,7 @@ namespace CopperBend.MapUtil
                 borderCells.Add(GetCell(xMax, y));
             }
 
-            Cell centerCell = GetCell(xCenter, yCenter);
+            Cell centerCell = GetCell(center.X, center.Y);
             borderCells.Remove(centerCell);
 
             return borderCells;

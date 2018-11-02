@@ -19,7 +19,7 @@ namespace CopperBend.MapUtil
                 if (cell.IsWalkable)
                 {
                     int v = IndexFor(cell.Point);
-                    foreach (Cell neighbor in _map.GetBorderCellsInDiamond(cell.Point.X, cell.Point.Y, 1))
+                    foreach (Cell neighbor in _map.GetBorderCellsInDiamond(cell.Point, 1))
                     {
                         if (neighbor.IsWalkable)
                         {
@@ -42,7 +42,7 @@ namespace CopperBend.MapUtil
                 if (cell.IsWalkable)
                 {
                     int v = IndexFor(cell.Point);
-                    foreach (Cell neighbor in _map.GetBorderCellsInSquare(cell.Point.X, cell.Point.Y, 1))
+                    foreach (Cell neighbor in _map.GetBorderCellsInSquare(cell.Point, 1))
                     {
                         if (neighbor.IsWalkable)
                         {
@@ -88,7 +88,7 @@ namespace CopperBend.MapUtil
                 foreach (var (coord, cost) in neighborCoords)
                 {
                     if (!map.IsWithinMap(coord)) continue;
-                    if (!map.IsWalkable(coord.X, coord.Y)) continue;
+                    if (!map.IsWalkable(coord)) continue;
 
                     int neighborIndex = IndexFor(coord);
                     _graph.AddEdge(new DirectedEdge(cellIndex, neighborIndex, cost));

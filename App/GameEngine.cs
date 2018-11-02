@@ -30,6 +30,7 @@ namespace CopperBend.App
             Dispatcher = new CommandDispatcher(InputQueue, Scheduler);
             Messenger = new Messenger(Dispatcher);
             MapLoader = new MapLoader();
+
             LoadMap("Farm");
             Mode = GameMode.PlayerReady;
         }
@@ -44,20 +45,31 @@ namespace CopperBend.App
             else
                 map = MapLoader.DemoMap();
 
-            map.ViewpointActor = Player;
             LoadMap(map);
         }
 
         public void LoadMap(IAreaMap map)
         {
+            UnloadCurrentMap();
+
             Map = map;
             foreach (var actor in map.Actors)
             {
                 Scheduler.Add(new ScheduleEntry(12, null, actor));
             }
 
+            map.ViewpointActor = Player;
             map.Actors.Add(Player);
             map.UpdatePlayerFieldOfView(Player);
+        }
+
+        public void UnloadCurrentMap()
+        {
+            //later persist map changes off
+            //later I want to leave some (all?) things scheduled,
+            //so plants keep growing, et c...
+            Scheduler.Clear();
+            Messenger.ClearMessagePanel();
         }
 
         public void Run()

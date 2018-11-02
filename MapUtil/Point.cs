@@ -65,13 +65,6 @@ namespace CopperBend.MapUtil
             return (float)Math.Sqrt(v1 * v1 + v2 * v2);
         }
 
-        public static Point Negate(Point value)
-        {
-            value.X = -value.X;
-            value.Y = -value.Y;
-            return value;
-        }
-
         public double DistanceTo(Point point)
         {
             var span = this - point;

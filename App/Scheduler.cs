@@ -76,5 +76,10 @@ namespace CopperBend.App
                 busyTick.Value.RemoveAll(e => e.Actor == targetActor);
             }
         }
+
+        public void Clear()
+        {
+            _schedule.Clear();
+        }
     }
 }

@@ -101,13 +101,13 @@ namespace CopperBend.MapUtil
             if (sourceMap.Width + offset.X > Width)
             {
                 throw new ArgumentException(
-                    "Source map 'width' + 'left' cannot be larger than the destination map width");
+                    "Source map width + left offset cannot be larger than the destination map width");
             }
 
             if (sourceMap.Height + offset.Y > Height)
             {
                 throw new ArgumentException(
-                    "Source map 'height' + 'top' cannot be larger than the destination map height");
+                    "Source map height + top offset cannot be larger than the destination map height");
             }
 
             foreach (Cell cell in sourceMap.GetAllCells())

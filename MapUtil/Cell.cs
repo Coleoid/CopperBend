@@ -4,7 +4,7 @@ namespace CopperBend.MapUtil
 {
     public struct Cell : IEquatable<Cell>
     {
-        /// <summary> Where on the map we're describing </summary>
+        /// <summary> The map location we're describing </summary>
         public Point Point { get; private set; }
 
         /// <summary> Will a Field of View pass through this location? </summary>

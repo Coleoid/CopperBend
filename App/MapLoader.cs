@@ -232,16 +232,20 @@ namespace CopperBend.App
             return map;
         }
 
+        private IAreaMap _farmMap = null;
         internal IAreaMap FarmMap()
         {
-            var map = MapFromYAML(FarmMapYaml);
-            return map;
+            if (_farmMap == null)
+                _farmMap = MapFromYAML(FarmMapYaml);
+            return _farmMap;
         }
 
+        private IAreaMap _farmhouseMap = null;
         internal IAreaMap FarmhouseMap()
         {
-            var map = MapFromYAML(FarmhouseMapYaml);
-            return map;
+            if (_farmhouseMap == null)
+                _farmhouseMap = MapFromYAML(FarmhouseMapYaml);
+            return _farmhouseMap;
         }
 
         public TileType TerrainFrom(string name)

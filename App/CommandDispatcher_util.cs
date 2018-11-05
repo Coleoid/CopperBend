@@ -27,7 +27,7 @@ namespace CopperBend.App
         {
             if (!key.Char.HasValue) return -1;
             var asciiNum = (int)key.Char.Value;
-            if (asciiNum < lowercase_a || asciiNum > lowercase_z) return -1;
+            if (asciiNum < lowercase_a || lowercase_z < asciiNum) return -1;
             return asciiNum - lowercase_a;
         }
 
@@ -113,17 +113,6 @@ namespace CopperBend.App
             Map.DisplayDirty = true;
         }
 
-        public void GoToFarmhouse()
-        {
-            //GameState.LoadMap("Farmhouse");
-        }
-
-
-        public void SwitchGameToMode(GameMode mode)
-        {
-            GameState.Mode = mode;
-        }
-
         public bool CanActorSeeTarget(IActor actor, Point target)
         {
             //FINISH: one FOV and one Pathfinder per map
@@ -134,7 +123,7 @@ namespace CopperBend.App
 
         public void AttackPlayer(IActor actor)
         {
-            //0.0
+            //0.1
             int damage = 2;
             WriteLine($"The {actor.Name} hit me for {damage}.");
             Player.AdjustHealth(-damage);
@@ -217,5 +206,8 @@ namespace CopperBend.App
         {
             describer.Learn(fruit);
         }
+
+        //  Pure plumbing -- this manifold should eliminate much other plumbing
+        public void QueueCommand(GameCommand command) => GameState.QueueCommand(command);
     }
 }

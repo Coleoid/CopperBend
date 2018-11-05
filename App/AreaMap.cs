@@ -154,11 +154,11 @@ namespace CopperBend.App
                 LocationMessages.Remove(tile.Point);
             }
 
+            //0.1
             var farmhouseDoor = new Point(27, 13);
             if (tile.Point.Equals(farmhouseDoor))
             {
-                //controls.GoToMap(farmhouseMap);
-                controls.GoToFarmhouse();
+                controls.QueueCommand(GameCommand.GoToFarmhouse);
             }
         }
 

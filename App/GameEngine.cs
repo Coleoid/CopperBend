@@ -9,6 +9,7 @@ namespace CopperBend.App
     {
         private RLRootConsole GameConsole;
         private Queue<RLKeyPress> InputQueue;
+        private Queue<GameCommand> CommandQueue;
         private Scheduler Scheduler;
         private CommandDispatcher Dispatcher;
         private Messenger Messenger;
@@ -21,6 +22,7 @@ namespace CopperBend.App
         {
             GameConsole = console;
             Player = player;
+            CommandQueue = new Queue<GameCommand>();
         }
 
         public void StartNewGame()
@@ -35,7 +37,7 @@ namespace CopperBend.App
             Mode = GameMode.PlayerReady;
         }
 
-        public void LoadMap(string mapName)
+        private void LoadMap(string mapName)
         {
             IAreaMap map;
             if (mapName == "Farm")
@@ -111,20 +113,57 @@ namespace CopperBend.App
 
         private void onUpdate(object sender, UpdateEventArgs e)
         {
+            ReadInput();
+
+            WorkCommandQueue();
+
+            ActOnMode();
+        }
+
+        private void ReadInput()
+        {
             //  For now, only checking the keyboard for input
             RLKeyPress key = GameConsole.Keyboard.GetKeyPress();
             if (key != null)
             {
                 if (key.Alt && key.Key == RLKey.F4)
                 {
-                    GameConsole.Close();
+                    CommandQueue.Enqueue(GameCommand.Quit);
                     return;
                 }
 
                 InputQueue.Enqueue(key);
             }
+        }
 
-            ActOnMode();
+        private void WorkCommandQueue()
+        {
+            while (CommandQueue.Count > 0)
+            {
+                var command = CommandQueue.Dequeue();
+                switch (command)
+                {
+                case GameCommand.Quit:
+                    QuitGame();
+                    break;
+
+                case GameCommand.GoToFarmhouse:
+                    LoadMap("Farmhouse");
+                    break;
+
+                case GameCommand.Unset:
+                    throw new Exception("Command unset--preparation missed.");
+
+                default:
+                    throw new Exception($"Haven't coded case [{command}] yet.");
+                }
+            }
+        }
+
+        private void QuitGame()
+        {
+            //0.1, later verify, offer save
+            GameConsole.Close();
         }
 
         public GameMode Mode { get; set; }
@@ -166,6 +205,11 @@ namespace CopperBend.App
             //  Start new game
             //  Load game
             //  Save and Quit
+        }
+
+        public void QueueCommand(GameCommand command)
+        {
+            CommandQueue.Enqueue(command);
         }
     }
 }

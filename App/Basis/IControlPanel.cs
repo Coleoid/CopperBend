@@ -28,7 +28,6 @@ namespace CopperBend.App
         void AddToSchedule(ScheduleEntry entry);
         void Learn(Fruit fruit);
         void SetMapDirty();
-        void GoToFarmhouse();
 
         RLKeyPress GetNextKeyPress();
         void WriteLine(string text);
@@ -41,6 +40,8 @@ namespace CopperBend.App
         //  This form may turn out well--specialist informs about its state
         void MessagePanelFull();
         void AllMessagesSent();
+
+        void QueueCommand(GameCommand command);
     }
 
     //  State of the game, not _quite_ globals...
@@ -49,6 +50,7 @@ namespace CopperBend.App
         IAreaMap Map { get; }
         IActor Player { get; }
         GameMode Mode { get; set; }
+        void QueueCommand(GameCommand command);
     }
 
     public enum GameMode
@@ -58,5 +60,12 @@ namespace CopperBend.App
         MessagesPending,
         PlayerReady,
         Schedule,
+    }
+
+    public enum GameCommand
+    {
+        Unset = 0,
+        Quit,
+        GoToFarmhouse,  //0.1
     }
 }

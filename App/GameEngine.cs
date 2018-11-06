@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CopperBend.App.Model;
+using CopperBend.MapUtil;
 using RLNET;
 
 namespace CopperBend.App
@@ -149,6 +150,7 @@ namespace CopperBend.App
 
                 case GameCommand.GoToFarmhouse:
                     LoadMap("Farmhouse");
+                    Player.MoveTo(new Point(2, 2));
                     break;
 
                 case GameCommand.Unset:

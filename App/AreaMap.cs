@@ -16,6 +16,7 @@ namespace CopperBend.App
             Items = new List<IItem>();
             FirstSightMessages = new List<string>();
             LocationMessages = new Dictionary<Point, List<string>>();
+            LocationEventEntries = new Dictionary<Point, List<CommandEntry>>();
             DisplayDirty = true;
         }
 
@@ -136,11 +137,12 @@ namespace CopperBend.App
 
         public bool HasEventAtPoint(Point point)
         {
-            var farmhouseDoor = new Point(28, 14);
-            if (point.Equals(farmhouseDoor))
-                return true;
+            //var farmhouseDoor = new Point(28, 14);
+            //if (point.Equals(farmhouseDoor))
+            //    return true;
 
-            return LocationMessages.ContainsKey(point);
+            return LocationMessages.ContainsKey(point)
+                || LocationEventEntries.ContainsKey(point);
         }
 
         public void RunEvent(IActor player, ITile tile, IControlPanel controls)
@@ -154,15 +156,34 @@ namespace CopperBend.App
                 LocationMessages.Remove(tile.Point);
             }
 
-            //0.1
-            var farmhouseDoor = new Point(28, 14);
-            if (tile.Point.Equals(farmhouseDoor))
+            ////0.1
+            //var farmhouseDoor = new Point(28, 14);
+            //if (tile.Point.Equals(farmhouseDoor))
+            //{
+            //    controls.QueueCommand(GameCommand.GoToFarmhouse);
+            //}
+
+            //0.2
+            if (LocationEventEntries.ContainsKey(tile.Point))
             {
-                controls.QueueCommand(GameCommand.GoToFarmhouse);
+                var entries = LocationEventEntries[tile.Point];
+                foreach (var entry in entries)
+                {
+                    controls.QueueCommand(entry.Command);
+                }
             }
+
+        }
+
+        public struct CommandEntry
+        {
+            public GameCommand Command { get; private set; }
+            public Action<IControlPanel> DoAction { get; private set; }
+
         }
 
         public List<string> FirstSightMessages { get; set; }
         public Dictionary<Point, List<string>> LocationMessages { get; private set; }
+        public Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; private set; }
     }
 }

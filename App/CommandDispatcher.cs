@@ -112,7 +112,7 @@ namespace CopperBend.App
                 Map.OpenDoor(tile);
                 PlayerBusyFor(4);
             }
-            else if (Map.HasEventAtPoint(tile.Point))
+            else if (Map.HasEventAtPoint(tile.Point))  //  larva
             {
                 Map.RunEvent(player, tile, this);
             }

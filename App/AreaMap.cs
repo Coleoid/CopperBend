@@ -136,7 +136,7 @@ namespace CopperBend.App
 
         public bool HasEventAtPoint(Point point)
         {
-            var farmhouseDoor = new Point(27, 13);
+            var farmhouseDoor = new Point(28, 14);
             if (point.Equals(farmhouseDoor))
                 return true;
 
@@ -155,7 +155,7 @@ namespace CopperBend.App
             }
 
             //0.1
-            var farmhouseDoor = new Point(27, 13);
+            var farmhouseDoor = new Point(28, 14);
             if (tile.Point.Equals(farmhouseDoor))
             {
                 controls.QueueCommand(GameCommand.GoToFarmhouse);

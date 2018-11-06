@@ -204,7 +204,7 @@ namespace CopperBend.App
                 }
             }
 
-            foreach (var overlay in data.Blight)
+            foreach (var overlay in data.Blight ?? new List<BlightOverlayData>())
             {
                 var nums = Regex.Split(overlay.Location, ",");
                 int x_off = int.Parse(nums[0]);

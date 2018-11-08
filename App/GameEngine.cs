@@ -35,7 +35,6 @@ namespace CopperBend.App
             MapLoader = new MapLoader();
 
             LoadMap("Farm");
-            Map.AddEventAtLocation(new Point(28, 14));
             Mode = GameMode.PlayerReady;
         }
 
@@ -50,6 +49,8 @@ namespace CopperBend.App
                 map = MapLoader.DemoMap();
 
             LoadMap(map);
+            Player.MoveTo(Map.PlayerStartsAt);
+            Map.UpdatePlayerFieldOfView(Player);
         }
 
         public void LoadMap(IAreaMap map)
@@ -64,10 +65,6 @@ namespace CopperBend.App
 
             map.ViewpointActor = Player;
             map.Actors.Add(Player);
-
-            // !!! This is where I need to adjust the player's XY to the new map'sS
-
-            map.UpdatePlayerFieldOfView(Player);
         }
 
         public void UnloadCurrentMap()

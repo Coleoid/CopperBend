@@ -23,7 +23,7 @@ namespace CopperBend.App
 
         private static Actor InitPlayer()
         {
-            var player = new Actor(At(18, 21))
+            var player = new Actor(At(0, 0))
             {
                 Name = "Our Dude",
                 Symbol = '@',

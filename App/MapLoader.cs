@@ -236,7 +236,12 @@ namespace CopperBend.App
         internal IAreaMap FarmMap()
         {
             if (_farmMap == null)
+            {
                 _farmMap = MapFromYAML(FarmMapYaml);
+                _farmMap.AddEventAtLocation(new Point(28, 14));
+                _farmMap.PlayerStartsAt = new Point(18, 21);
+            }
+
             return _farmMap;
         }
 
@@ -244,7 +249,11 @@ namespace CopperBend.App
         internal IAreaMap FarmhouseMap()
         {
             if (_farmhouseMap == null)
+            {
                 _farmhouseMap = MapFromYAML(FarmhouseMapYaml);
+                _farmhouseMap.PlayerStartsAt = new Point(2, 7);
+            }
+
             return _farmhouseMap;
         }
 

@@ -153,10 +153,6 @@ namespace CopperBend.App
 
         public bool HasEventAtPoint(Point point)
         {
-            //var farmhouseDoor = new Point(28, 14);
-            //if (point.Equals(farmhouseDoor))
-            //    return true;
-
             return LocationMessages.ContainsKey(point)
                 || LocationEventEntries.ContainsKey(point);
         }
@@ -172,13 +168,6 @@ namespace CopperBend.App
                 LocationMessages.Remove(tile.Point);
             }
 
-            ////0.1
-            //var farmhouseDoor = new Point(28, 14);
-            //if (tile.Point.Equals(farmhouseDoor))
-            //{
-            //    controls.QueueCommand(GameCommand.GoToFarmhouse);
-            //}
-
             //0.2
             if (LocationEventEntries.ContainsKey(tile.Point))
             {
@@ -189,6 +178,7 @@ namespace CopperBend.App
                 }
             }
 
+            //0.3 may unify those collections and loops, may restructure flow
         }
 
         public void AddEventAtLocation(Point point)
@@ -201,5 +191,7 @@ namespace CopperBend.App
             var list = LocationEventEntries[point];
             list.Add(new CommandEntry(GameCommand.GoToFarmhouse, null));
         }
+
+         public Point PlayerStartsAt { get; set; }
     }
 }

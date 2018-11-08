@@ -22,6 +22,8 @@ namespace CopperBend.App
         IActor GetActorAtPoint(Point point);
         List<string> FirstSightMessages { get; set; }
         Dictionary<Point, List<string>> LocationMessages { get; }
+        Point PlayerStartsAt { get; set; }
+
         void OpenDoor(ITile tile);
         bool HasEventAtPoint(Point point);
         void RunEvent(IActor player, ITile tile, IControlPanel controls);

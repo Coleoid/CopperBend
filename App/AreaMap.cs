@@ -6,6 +6,18 @@ using System;
 
 namespace CopperBend.App
 {
+    public struct CommandEntry
+    {
+        public CommandEntry(GameCommand command, Action<IControlPanel> doAction)
+        {
+            Command = command;
+            DoAction = doAction;
+        }
+
+        public readonly GameCommand Command;
+        public readonly Action<IControlPanel> DoAction;
+    }
+
     public class AreaMap : Map, IAreaMap
     {
         public AreaMap(int xWidth, int yHeight)
@@ -19,6 +31,10 @@ namespace CopperBend.App
             LocationEventEntries = new Dictionary<Point, List<CommandEntry>>();
             DisplayDirty = true;
         }
+
+        public List<string> FirstSightMessages { get; set; }
+        public Dictionary<Point, List<string>> LocationMessages { get; private set; }
+        public Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; private set; }
 
         public string Name { get; set; }
         public ITile[,] Tiles { get; set; }
@@ -175,15 +191,15 @@ namespace CopperBend.App
 
         }
 
-        public struct CommandEntry
+        public void AddEventAtLocation(Point point)
         {
-            public GameCommand Command { get; private set; }
-            public Action<IControlPanel> DoAction { get; private set; }
+            if (!LocationEventEntries.ContainsKey(point))
+            {
+                LocationEventEntries[point] = new List<CommandEntry>();
+            }
 
+            var list = LocationEventEntries[point];
+            list.Add(new CommandEntry(GameCommand.GoToFarmhouse, null));
         }
-
-        public List<string> FirstSightMessages { get; set; }
-        public Dictionary<Point, List<string>> LocationMessages { get; private set; }
-        public Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; private set; }
     }
 }

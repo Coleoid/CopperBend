@@ -163,12 +163,15 @@ namespace CopperBend.MapUtil
             return new Point(ClampX(source.X), ClampY(source.Y));
         }
 
+        private bool IsOutsideMap(int x, int y)
+        {
+            return x < 0 || y < 0
+                || x >= Width
+                || y >= Height;
+        }
 
         public IEnumerable<Cell> GetCellsAlongLine(Point origin, Point destination)
         {
-            origin = NearestPointInsideMapTo(origin);
-            destination = NearestPointInsideMapTo(destination);  // larva
-
             var span = destination - origin;
             int dx = Math.Abs(span.X);
             int dy = Math.Abs(span.Y);
@@ -179,13 +182,13 @@ namespace CopperBend.MapUtil
 
             int nextX = origin.X;
             int nextY = origin.Y;
-            while (true)
+            if (!IsOutsideMap(nextX, nextY))
             {
                 yield return GetCell(nextX, nextY);
-                if (origin == destination)
-                {
-                    break;
-                }
+            }
+
+            while (true)
+            {
                 int e2 = 2 * err;
                 if (e2 > -dy)
                 {
@@ -198,6 +201,11 @@ namespace CopperBend.MapUtil
                     err = err + dx;
                     nextY += sy;
                 }
+
+                if (IsOutsideMap(nextX, nextY)) continue;
+                yield return GetCell(nextX, nextY);
+
+                if (destination.X == nextX && destination.Y == nextY) break;
             }
         }
 

@@ -25,5 +25,6 @@ namespace CopperBend.App
         void OpenDoor(ITile tile);
         bool HasEventAtPoint(Point point);
         void RunEvent(IActor player, ITile tile, IControlPanel controls);
+        void AddEventAtLocation(Point point);
     }
 }

@@ -110,17 +110,17 @@ namespace CopperBend.App
             SeedLearned[fruit.PlantType] = true;
         }
 
-        public string Describe(IItem item, DescMods mods = DescMods.None)
+        public string Describe(string name, DescMods mods = DescMods.None, int quantity = 1, string adj = "")
         {
             string art = string.Empty;
 
             if (mods.HasFlag(DescMods.Quantity))
-                art = item.Quantity.ToString();
+                art = quantity.ToString();
 
-            var adj = mods.HasFlag(DescMods.NoAdjective)? "" : AdjectiveFor(item);
+            adj = mods.HasFlag(DescMods.NoAdjective) ? "" : adj;
             if (adj.Length > 0) adj = adj + " ";
 
-            var s = (item.Quantity == 1) ? "" : "s";
+            var s = (quantity == 1) ? "" : "s";
 
 
             if (mods.HasFlag(DescMods.DefiniteArticle))
@@ -129,7 +129,7 @@ namespace CopperBend.App
             }
             else if (mods.HasFlag(DescMods.IndefiniteArticle))
             {
-                if (item.Quantity == 1)
+                if (quantity == 1)
                 {
                     bool vowelSound = Regex.Match(adj, "^[aeiouy]", RegexOptions.IgnoreCase).Success;
                     art = vowelSound ? "an" : "a";
@@ -143,7 +143,7 @@ namespace CopperBend.App
 
             if (art.Length > 0) art = art + " ";
 
-            var description = $"{art}{adj}{item.Name}{s}";
+            var description = $"{art}{adj}{name}{s}";
             if (mods.HasFlag(DescMods.LeadingCapital))
             {
                 description = description.Substring(0, 1).ToUpper()
@@ -167,6 +167,12 @@ namespace CopperBend.App
             {
                 return item.Adjective;
             }
+
+        }
+
+        public string Describe(IItem item, DescMods mods = DescMods.None)
+        {
+            return Describe(item.Name, mods, item.Quantity, AdjectiveFor(item));
         }
 
         //TODO:  Fix the smell of these two methods.

@@ -127,7 +127,8 @@ namespace CopperBend.App
             }
             else
             {
-                WriteLine($"I can't walk through {tile.TileType.Name}.");
+                WriteLine($"I can't walk through {describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle)}.");
+                EmptyInputQueue();
             }
         }
 

@@ -7,6 +7,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Text.RegularExpressions;
 using CopperBend.MapUtil;
+using System;
 
 namespace CopperBend.App
 {
@@ -36,8 +37,8 @@ namespace CopperBend.App
             _bgSeen = colorSeen;
         }
         public RLColor Background(bool isInFOV) => isInFOV ? _bgSeen : _bgUnseen;
-        private RLColor _bgSeen;
-        private RLColor _bgUnseen;
+        private RLColor _bgSeen = Colors.FloorBackgroundSeen;
+        private RLColor _bgUnseen = Colors.FloorBackground;
     }
 
 
@@ -62,24 +63,22 @@ namespace CopperBend.App
                 IsTransparent = true,
             };
             type.SetForeground(Palette.DbBlood, Palette.DbBlood);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["Unknown"] = type;
+            StoreTileType(type);
 
             type = new TileType
             {
-                Name = "Dirt",
+                Name = "dirt",
                 Symbol = '.',
                 IsWalkable = true,
                 IsTransparent = true,
                 IsTillable = true,
             };
             type.SetForeground(Colors.Floor, Colors.FloorSeen);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["Dirt"] = type;
+            StoreTileType(type);
 
             type = new TileType
             {
-                Name = "TilledDirt",
+                Name = "tilled dirt",
                 Symbol = '~',
                 IsWalkable = true,
                 IsTransparent = true,
@@ -87,75 +86,118 @@ namespace CopperBend.App
                 
             };
             type.SetForeground(Palette.DbWood, Palette.DbBrightWood);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["TilledDirt"] = type;
+            StoreTileType(type);
 
 
             type = new TileType
             {
-                Name = "StoneWall",
+                Name = "stone wall",
                 Symbol = '#',
                 IsWalkable = false,
                 IsTransparent = false,
             };
             type.SetForeground(Colors.Wall, Colors.WallSeen);
             type.SetBackground(Colors.WallBackground, Colors.WallBackgroundSeen);
-            TileTypes["StoneWall"] = type;
+            StoreTileType(type);
 
             type = new TileType
             {
-                Name = "ClosedDoor",
+                Name = "closed door",
                 Symbol = '+',
                 IsWalkable = false,
                 IsTransparent = false,
             };
             type.SetForeground(Colors.Wall, Colors.WallSeen);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["ClosedDoor"] = type;
+            StoreTileType(type);
 
             type = new TileType
             {
-                Name = "OpenDoor",
+                Name = "open door",
                 Symbol = '-',
                 IsWalkable = true,
                 IsTransparent = true,
             };
             type.SetForeground(Colors.Wall, Colors.WallSeen);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["OpenDoor"] = type;
+            StoreTileType(type);
 
             type = new TileType
             {
-                Name = "WoodenFence",
+                Name = "wooden fence",
                 Symbol = 'X',
                 IsWalkable = false,
                 IsTransparent = false,
             };
             type.SetForeground(Palette.DbWood, Palette.DbBrightWood);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["WoodenFence"] = type;
+            StoreTileType(type);
 
             type = new TileType
             {
-                Name = "Wall",
+                Name = "wall",
                 Symbol = '=',
                 IsWalkable = false,
                 IsTransparent = false,
             };
             type.SetForeground(Colors.Wall, Colors.WallSeen);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["Wall"] = type;
+            StoreTileType(type);
 
             type = new TileType
             {
-                Name = "Gate",
+                Name = "gate",
                 Symbol = '%',
                 IsWalkable = false,
-                IsTransparent = false,
+                IsTransparent = true,
             };
             type.SetForeground(Colors.Wall, Colors.WallSeen);
-            type.SetBackground(Colors.FloorBackground, Colors.FloorBackgroundSeen);
-            TileTypes["Gate"] = type;
+            StoreTileType(type);
+
+            type = new TileType
+            {
+                Name = "grass",
+                Symbol = ',',
+                IsWalkable = true,
+                IsTransparent = true,
+                IsTillable = true,
+            };
+            type.SetForeground(Palette.DbVegetation, Palette.DbGrass);
+            StoreTileType(type);
+
+            type = new TileType
+            {
+                Name = "tall weeds",
+                Symbol = 'w',
+                IsWalkable = true,
+                IsTransparent = true,
+            };
+            type.SetForeground(Palette.DbVegetation, Palette.DbGrass);
+            StoreTileType(type);
+
+            type = new TileType
+            {
+                Name = "table",
+                Symbol = 'T',
+                IsWalkable = false,
+                IsTransparent = true,
+            };
+            type.SetForeground(Palette.DbWood, Palette.DbBrightWood);
+            StoreTileType(type);
+
+            type = new TileType
+            {
+                Name = "stairs",
+                Symbol = '>',
+                IsWalkable = true,
+                IsTransparent = true,
+            };
+            type.SetForeground(Palette.Alternate, Palette.AlternateLighter);
+            StoreTileType(type);
+        }
+
+        public void StoreTileType(TileType type)
+        {
+            if (TileTypes.ContainsKey(type.Name))
+                throw new Exception($"Already have type {type.Name} stored.");
+
+            TileTypes[type.Name] = type;
         }
 
 
@@ -180,7 +222,7 @@ namespace CopperBend.App
                 Name = data.Name
             };
 
-            var tilledType = TileTypes["TilledDirt"];  // larva
+            var tilledType = TileTypes["tilled dirt"];  // larva
 
             for (int y = 0; y < height; y++)
             {
@@ -280,9 +322,9 @@ namespace CopperBend.App
 name:  Demo
 
 legend:
- '.': Dirt
- '#': StoneWall
- '+': ClosedDoor
+ '.': dirt
+ '#': stone wall
+ '+': closed door
 
 terrain:
  - '################'
@@ -329,52 +371,56 @@ terrain:
 name:  Farm
 
 legend:
- '.': Dirt
- '#': WoodenFence
- '+': ClosedDoor
- 'x': TilledDirt
- '=': Wall
- '|': Gate
- '-': Gate
+ '.': dirt
+ '#': wooden fence
+ '+': closed door
+ 'x': tilled dirt
+ '=': wall
+ '|': gate
+ '-': gate
+ ',': grass
+ 'w': tall weeds
+ 'T': table
+ '>': stairs
 
 terrain:
 #   0    5    1    5    2    5    3    5    4 
- - '#########################################'  # 0
- - '#.......................................#'
- - '#...........................xxxxxxxxxx..#'
- - '#.xx...xxx...xxx......====..xxxxxxxxxx..#'
- - '#...xxxxxxxxxxx.......=..=..xxxxxxxxxx..#'
- - '#.x....x..xxxxx.......=++=..xxxxxxxxxx..#'  # 5
- - '#.xxxxxxxx...xxx............xxxxxxxxxx..#'
- - '#.xxxxx.xxx.xx.x............xxxxxxxxxx..#'
- - '#.xx....xxx..xxx........................#'
- - '#.xxxxx.xxxx.xxx............========....#'
- - '#.xx..xxxxxxxx.x............=......=....#'  # 10
- - '#.xxxxxxxx...x.x............=......=....#'
- - '#.xx....xx..xxxx............=......=....#'
- - '#.xxxxxxxxxxxx..............=......=....#'
- - '#.xxx..xx....xxx............+......=....#'
- - '|...........................=......=....#'  # 5
- - '|...........................=......=....#'
- - '+...........................========....#'
- - '#.xxxxxxxxxxxxxx........................#'
- - '#.xxxxxxxxxxxxxx......==................#'
- - '#.xxxxxxxxxxxxxx......==................#'  # 20
- - '#.xxxxxxxxxxxxxx..........#+##########..#'
- - '#.xxxxxxxxxxxxxx..........#..........#..#'
- - '#.xxxxxxxxxxxxxx..........#..........#..#'
- - '#.xxxxxxxxxxxxxx..........#..........#..#'
- - '#.xxxxxxxxxxxxxx..#---#...#....#+#####..#'  # 5
- - '#.xxxxxxxxxxxxxx..#...|...+....#.....#..#'
- - '#.xxxxxxxxxxxxxx..#...#...############..#'
- - '#.xxxxxxxxxxxxxx..#...#.................#'
- - '#.................#####.................#'
- - '#.......................................#'  # 30
- - '#########################################'
+ - ',,,,,#########################################'  # 0
+ - ',,,,,#,,,....,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#'
+ - ',,,,,#,,,,...,,,,,,,,,,,,,,,,,,,,x.x.xxx..x,,#'
+ - ',,,,,#.xx...xxx...xxx.,,,,.====,,x..xx.xxx.,,#'
+ - ',,,,,#...xxx.xx.x.xx..,,,,.=..=,,xxxx.x..xx,,#'
+ - ',,,,,#.x....x..xxxxx...,,,,=++=,,x.x.xxxx.x,,#'  # 5
+ - ',,,,,#.xxx.xxxx...xxx.,,,,,,..,,,..xxx..xxx,,#'
+ - ',,,,,#.xx.xx.xxx.xx.x.,,......,,,x.x.x.x.xx,,#'
+ - ',,,,,#.xx....xxx..xxx.....,,,,,,,,,,,,,,,,,,,#'
+ - ',,,,,#.xxxxx.x.xx.xxx.,,,,,,,,,,,==========,,#'
+ - ',,,,,#.xx..xxx.xxxx.x.,,,,,,,,,,,=.+.=....=,,#'  # 10
+ - ',,,,,#.xxxxx.xx...x.x.,,,,,,,,,,,=.=.+....=,,#'
+ - ',,,,,#.xx....xx..xxxx.,,,,,,,,,,,===.======,,#'
+ - ',,,,,#.xx.xxx..xxxx...,,,,.......=.......>=,,#'
+ - ',,,,,#.xxx..xx....xxx.,..........+........=,,#'
+ - '.....|......................,,,,.=..TT...T=,,#'  # 5
+ - '.....|.....................,,,,,.=.....TTT=,,#'
+ - '.....+................,,,...,,,,.==========,,#'
+ - ',,,,,#.xxx..xxxxx.xxx.,,,,..,,..,,,,,,,,,,,,,#'
+ - ',,,,,#.xx.xxx..xxxx.x......==..,,,,,,,,,,,,,,#'
+ - ',,,,,#.xxx...xxx..xxx.,,,,.==....,,,,,,,,,,,,#'  # 20
+ - ',,,,,#...xx...xx.xxxx.,,,,,,,,,#+##########,,#'
+ - ',,,,,#.xx...xxxxxx.xx.,,,,,,,,,#..........#,,#'
+ - ',,,,,#.x.xxx..xxxx..x.,,,,,,,,,#..........#,,#'
+ - ',,,,,#.xxx..x..xxxx...,,,ww,,,,#..........#,,#'
+ - ',,,,,#.x..xxx.xxxx.xx.,#---#,,,#..........#,,#'  # 5
+ - ',,,,,#...xx..xxx..xxx.,#,,,|,..+....#+#####,,#'
+ - ',,,,,#.xxx..xxx.xxx.x.,#,,,#w,,#....#.....#,,#'
+ - ',,,,,#.xxxxxx.xx..xx..,#,,,#w,,#,,,,#.....#,,#'
+ - ',,,,,#................,#####ww,############,,#'
+ - ',,,,,#,,,,,,,,,,,,,,,,,,,,wwww,,,,,,,,,,,,,,,#'  # 30
+ - ',,,,,#########################################'
 
 blight:
   - name: one
-    location: 1,0
+    location: 6,0
     terrain:
       - '..1221'
       - '...1211'

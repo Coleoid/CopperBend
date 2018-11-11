@@ -28,7 +28,7 @@ namespace CopperBend.App
                 Name = "Our Dude",
                 Symbol = '@',
                 ColorForeground = Palette.DbLight,
-                Awareness = 8,
+                Awareness = 222,
                 Health = 23
             };
 

@@ -175,6 +175,12 @@ namespace CopperBend.App
             return InputQueue.Any() ? InputQueue.Dequeue() : null;
         }
 
+        public void EmptyInputQueue()
+        {
+            while (InputQueue.Any())
+                InputQueue.Dequeue();
+        }
+
         public void MessagePanelFull()
         {
             GameState.Mode = GameMode.MessagesPending;

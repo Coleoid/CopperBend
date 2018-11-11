@@ -78,6 +78,7 @@ namespace CopperBend.App
 
         public void Run()
         {
+            //later these will be untrue, with load game and create new game
             if (Player == null) throw new Exception("Must have Player before starting engine.");
             if (Map == null) throw new Exception("Must have Map before starting engine.");
 
@@ -186,6 +187,7 @@ namespace CopperBend.App
 
             //  Waiting for player actions blocks Scheduler
             case GameMode.PlayerReady:
+                Messenger.ClearMessagePanel();
                 Dispatcher.HandlePlayerCommands();
                 break;
 

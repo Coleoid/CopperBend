@@ -119,22 +119,17 @@ namespace CopperBend.App
             else
             {
                 if (Map.HasEventAtPoint(tile.Point))
-                {
                     Map.RunEvent(player, tile, this);
-                    //  ?:  some events should continue with the normal flow,
-                    //  some interrupt it entirely.
-                }
-                else if (Map.MoveActor(player, point))
-                {
-                    //  If we actually do move in that direction,
-                    //  we need to redraw, and the player will be busy for a while.
-                    Map.UpdatePlayerFieldOfView(player);
-                    Map.DisplayDirty = true;
-                    if (player.Point.X != point.X && player.Point.Y != point.Y)
-                        PlayerBusyFor(17);
-                    else
-                        PlayerBusyFor(12);
-                }
+
+                if (!Map.MoveActor(player, point))
+                    throw new Exception($"Somehow failed to move onto {point}, a walkable tile.");
+
+                Map.UpdatePlayerFieldOfView(player);
+                Map.DisplayDirty = true;
+                if (player.Point.X != point.X && player.Point.Y != point.Y)
+                    PlayerBusyFor(17);
+                else
+                    PlayerBusyFor(12);
             }
         }
 

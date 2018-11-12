@@ -104,31 +104,37 @@ namespace CopperBend.App
 
         private void Command_DirectionMove(IActor player, Point point)
         {
-            //  If we actually do move in that direction,
-            //  we need to redraw, and the player will be busy for a while.
             ITile tile = Map[point];
             if (tile.TileType.Name == "ClosedDoor")
             {
                 Map.OpenDoor(tile);
                 PlayerBusyFor(4);
             }
-            else if (Map.HasEventAtPoint(tile.Point))  //  larva
+            else if (!Map.IsWalkable(point))
             {
-                Map.RunEvent(player, tile, this);
-            }
-            else if (Map.MoveActor(player, point))
-            {
-                Map.UpdatePlayerFieldOfView(player);
-                Map.DisplayDirty = true;
-                if (player.Point.X != point.X && player.Point.Y != point.Y)
-                    PlayerBusyFor(17);
-                else
-                    PlayerBusyFor(12);
+                var np = describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
+                WriteLine($"I can't walk through {np}.");
+                EmptyInputQueue();
             }
             else
             {
-                WriteLine($"I can't walk through {describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle)}.");
-                EmptyInputQueue();
+                if (Map.HasEventAtPoint(tile.Point))
+                {
+                    Map.RunEvent(player, tile, this);
+                    //  ?:  some events should continue with the normal flow,
+                    //  some interrupt it entirely.
+                }
+                else if (Map.MoveActor(player, point))
+                {
+                    //  If we actually do move in that direction,
+                    //  we need to redraw, and the player will be busy for a while.
+                    Map.UpdatePlayerFieldOfView(player);
+                    Map.DisplayDirty = true;
+                    if (player.Point.X != point.X && player.Point.Y != point.Y)
+                        PlayerBusyFor(17);
+                    else
+                        PlayerBusyFor(12);
+                }
             }
         }
 

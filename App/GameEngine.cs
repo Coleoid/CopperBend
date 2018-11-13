@@ -8,7 +8,11 @@ namespace CopperBend.App
 {
     public class GameEngine : IGameState
     {
-        private RLRootConsole GameConsole;
+        private RLRootConsole RootConsole;
+        private RLConsole MapConsole;
+        private int MapWidth = 60;
+        private int MapHeight = 60;
+
         private Queue<RLKeyPress> InputQueue;
         private Queue<GameCommand> CommandQueue;
         private Scheduler Scheduler;
@@ -21,7 +25,8 @@ namespace CopperBend.App
 
         public GameEngine(RLRootConsole console, Actor player)
         {
-            GameConsole = console;
+            RootConsole = console;
+            MapConsole = new RLConsole(MapWidth, MapHeight);
             Player = player;
             CommandQueue = new Queue<GameCommand>();
         }
@@ -84,9 +89,9 @@ namespace CopperBend.App
 
             Dispatcher.Init(this);
 
-            GameConsole.Update += onUpdate;
-            GameConsole.Render += onRender;
-            GameConsole.Run();
+            RootConsole.Update += onUpdate;
+            RootConsole.Render += onRender;
+            RootConsole.Run();
         }
 
         private bool MapLoaded = false;
@@ -108,15 +113,12 @@ namespace CopperBend.App
             //  If the map hasn't changed, why render?
             if (!Map.DisplayDirty) return;
 
-            GameConsole.Clear();
-            Map.DrawMap(GameConsole);
-            GameConsole.Draw();
+            RootConsole.Clear();
+            Map.DrawMap(MapConsole);
+            RLConsole.Blit(MapConsole, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
             Map.DisplayDirty = false;
 
-
-            RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
-            RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
-            RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
+            RootConsole.Draw();
         }
 
         private void onUpdate(object sender, UpdateEventArgs e)
@@ -131,7 +133,7 @@ namespace CopperBend.App
         private void ReadInput()
         {
             //  For now, only checking the keyboard for input
-            RLKeyPress key = GameConsole.Keyboard.GetKeyPress();
+            RLKeyPress key = RootConsole.Keyboard.GetKeyPress();
             if (key != null)
             {
                 if (key.Alt && key.Key == RLKey.F4)
@@ -172,7 +174,7 @@ namespace CopperBend.App
         private void QuitGame()
         {
             //0.1, later verify, offer save
-            GameConsole.Close();
+            RootConsole.Close();
         }
 
         public GameMode Mode { get; set; }

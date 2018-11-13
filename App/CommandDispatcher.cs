@@ -107,7 +107,7 @@ namespace CopperBend.App
             //  If we actually do move in that direction,
             //  we need to redraw, and the player will be busy for a while.
             ITile tile = Map[point];
-            if (tile.TileType.Name == "ClosedDoor")
+            if (tile.TileType.Name == "closed door")
             {
                 Map.OpenDoor(tile);
                 PlayerBusyFor(4);

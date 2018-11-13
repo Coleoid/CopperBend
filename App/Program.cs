@@ -16,9 +16,22 @@ namespace CopperBend.App
             game.Run();
         }
 
-        private static Point At(int x, int y)
+        private static RLRootConsole InitRootConsole()
         {
-            return new Point(x, y);
+            var consoleSettings = new RLSettings
+            {
+                Title = "Copper Bend",
+                BitmapFile = "assets\\terminal12x12_gs_ro.png",
+                Width = 80,
+                Height = 80,
+                CharWidth = 12,
+                CharHeight = 12,
+                Scale = 1f,
+                WindowBorder = RLWindowBorder.Resizable,
+                ResizeType = RLResizeType.ResizeCells,
+            };
+
+            return new RLRootConsole(consoleSettings);
         }
 
         private static Actor InitPlayer()
@@ -70,22 +83,9 @@ namespace CopperBend.App
             return player;
         }
 
-        private static RLRootConsole InitRootConsole()
+        private static Point At(int x, int y)
         {
-            var consoleSettings = new RLSettings
-            {
-                Title = "Copper Bend",
-                BitmapFile = "assets\\terminal12x12_gs_ro.png",
-                Width = 60,
-                Height = 60,
-                CharWidth = 12,
-                CharHeight = 12,
-                Scale = 1f,
-                WindowBorder = RLWindowBorder.Resizable,
-                ResizeType = RLResizeType.ResizeCells,
-            };
-
-            return new RLRootConsole(consoleSettings);
+            return new Point(x, y);
         }
     }
 }

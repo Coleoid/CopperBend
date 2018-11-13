@@ -112,6 +112,11 @@ namespace CopperBend.App
             Map.DrawMap(GameConsole);
             GameConsole.Draw();
             Map.DisplayDirty = false;
+
+
+            RLConsole.Blit(_mapConsole, 0, 0, _mapWidth, _mapHeight, _rootConsole, 0, _inventoryHeight);
+            RLConsole.Blit(_statConsole, 0, 0, _statWidth, _statHeight, _rootConsole, _mapWidth, 0);
+            RLConsole.Blit(_messageConsole, 0, 0, _messageWidth, _messageHeight, _rootConsole, 0, _screenHeight - _messageHeight);
         }
 
         private void onUpdate(object sender, UpdateEventArgs e)

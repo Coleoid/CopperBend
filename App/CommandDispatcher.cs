@@ -104,31 +104,32 @@ namespace CopperBend.App
 
         private void Command_DirectionMove(IActor player, Point point)
         {
-            //  If we actually do move in that direction,
-            //  we need to redraw, and the player will be busy for a while.
             ITile tile = Map[point];
             if (tile.TileType.Name == "closed door")
             {
                 Map.OpenDoor(tile);
                 PlayerBusyFor(4);
             }
-            else if (Map.HasEventAtPoint(tile.Point))  //  larva
+            else if (!Map.IsWalkable(point))
             {
-                Map.RunEvent(player, tile, this);
+                var np = describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
+                WriteLine($"I can't walk through {np}.");
+                EmptyInputQueue();
             }
-            else if (Map.MoveActor(player, point))
+            else
             {
+                if (Map.HasEventAtPoint(tile.Point))
+                    Map.RunEvent(player, tile, this);
+
+                if (!Map.MoveActor(player, point))
+                    throw new Exception($"Somehow failed to move onto {point}, a walkable tile.");
+
                 Map.UpdatePlayerFieldOfView(player);
                 Map.DisplayDirty = true;
                 if (player.Point.X != point.X && player.Point.Y != point.Y)
                     PlayerBusyFor(17);
                 else
                     PlayerBusyFor(12);
-            }
-            else
-            {
-                WriteLine($"I can't walk through {describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle)}.");
-                EmptyInputQueue();
             }
         }
 

@@ -55,6 +55,7 @@ namespace CopperBend.App.Model
             controls.AddToSchedule(new ScheduleEntry(100, sownSeed.SeedGrows));
             controls.SetMapDirty();
             controls.PlayerBusyFor(15);
+            controls.Experience(sownSeed.PlantType, Exp.PlantSeed);
         }
 
         private int growthRound = 0;
@@ -82,7 +83,7 @@ namespace CopperBend.App.Model
         protected override void SeedMatures(IControlPanel controls, ScheduleEntry entry)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Point, 2, PlantType.Healer);
+            IItem fruit = new Fruit(this.Point, 2, this.PlantType);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this.Point);
             controls.SetMapDirty();

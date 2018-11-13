@@ -215,5 +215,13 @@ namespace CopperBend.App
 
         //  Pure plumbing -- this manifold should eliminate much other plumbing
         public void QueueCommand(GameCommand command) => GameState.QueueCommand(command);
+
+        public int XP { get; set; } = 0;
+        public void Experience(PlantType plant, Exp experience)
+        {
+            //TODO:  An entire experience subsystem.  For now it can be "points".
+
+            XP += 20;
+        }
     }
 }

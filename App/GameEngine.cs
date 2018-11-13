@@ -12,6 +12,12 @@ namespace CopperBend.App
         private RLConsole MapConsole;
         private int MapWidth = 60;
         private int MapHeight = 60;
+        private RLConsole StatConsole;
+        private int StatWidth = 20;
+        private int StatHeight = 60;
+        private RLConsole TextConsole;
+        private int TextWidth = 80;
+        private int TextHeight = 20;
 
         private Queue<RLKeyPress> InputQueue;
         private Queue<GameCommand> CommandQueue;
@@ -27,6 +33,8 @@ namespace CopperBend.App
         {
             RootConsole = console;
             MapConsole = new RLConsole(MapWidth, MapHeight);
+            StatConsole = new RLConsole(StatWidth, StatHeight);
+            TextConsole = new RLConsole(TextWidth, TextHeight);
             Player = player;
             CommandQueue = new Queue<GameCommand>();
         }
@@ -78,7 +86,7 @@ namespace CopperBend.App
             //later I want to leave some (all?) things scheduled,
             //so plants keep growing, et c...
             Scheduler.Clear();
-            Messenger.ClearMessagePanel();
+            Messenger.ResetWait();
         }
 
         public void Run()
@@ -94,11 +102,12 @@ namespace CopperBend.App
             RootConsole.Run();
         }
 
+        //0.1
         private bool MapLoaded = false;
 
         private void onRender(object sender, UpdateEventArgs e)
         {
-            //larval form of map.FirstLoaded event
+            //0.1
             if (!MapLoaded)
             {
                 MapLoaded = true;
@@ -110,15 +119,45 @@ namespace CopperBend.App
 
             //FUTURE:  real-time (background) animation around here
 
-            //  If the map hasn't changed, why render?
-            if (!Map.DisplayDirty) return;
+            bool rootDirty = false;
 
-            RootConsole.Clear();
-            Map.DrawMap(MapConsole);
-            RLConsole.Blit(MapConsole, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
-            Map.DisplayDirty = false;
+            if (Map.DisplayDirty)
+            {
+                Map.DrawMap(MapConsole);
+                RLConsole.Blit(MapConsole, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
+                Map.DisplayDirty = false;
+                rootDirty = true;
+            }
 
-            RootConsole.Draw();
+            //  I haven't even begun to code status reporting
+            //  ...I've barely thought about it.
+            //  Health reporting should be vague, perhaps just to begin with
+            //  Magical energy is called tau
+            //  Perhaps two fatigue/physical energy pools?  Wind and Vitality?
+            //  I'm not gathering experience from anywhere yet
+            //  No status effects occurring yet (haste, confusion, ...)
+            //if (Stats.DisplayDirty)
+            //{
+            //    Stats.Report(StatConsole);
+            //    RLConsole.Blit(MapConsole, 0, 0, StatWidth, StatHeight, RootConsole, MapWidth, 0);
+            //    Stats.DisplayDirty = false;
+            //    rootDirty = true;
+            //}
+
+            if (Messenger.DisplayDirty)
+            {
+                //Messenger.Report(StatConsole);  // handled as-we-go, right?
+                RLConsole.Blit(TextConsole, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
+                Messenger.DisplayDirty = false;
+                rootDirty = true;
+            }
+
+            if (rootDirty)
+            {
+                //RootConsole.Clear();  //  por que?
+                RootConsole.Draw();
+                rootDirty = false;
+            }
         }
 
         private void onUpdate(object sender, UpdateEventArgs e)
@@ -194,7 +233,7 @@ namespace CopperBend.App
 
             //  Waiting for player actions blocks Scheduler
             case GameMode.PlayerReady:
-                Messenger.ClearMessagePanel();
+                Messenger.ResetWait();
                 Dispatcher.HandlePlayerCommands();
                 break;
 

@@ -42,6 +42,7 @@ namespace CopperBend.App
         void AllMessagesSent();
 
         void QueueCommand(GameCommand command);
+        void Experience(PlantType plant, Exp experience);
     }
 
     //  State of the game, not _quite_ globals...
@@ -67,5 +68,13 @@ namespace CopperBend.App
         Unset = 0,
         Quit,
         GoToFarmhouse,  //0.1
+    }
+
+    //  Categories of experience
+    public enum Exp
+    {
+        Unknown = 0,
+        PlantSeed,
+        EatFruit,
     }
 }

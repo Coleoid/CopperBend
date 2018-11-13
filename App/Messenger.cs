@@ -15,6 +15,8 @@ namespace CopperBend.App
             Controls = controls;
         }
 
+        public bool DisplayDirty { get; set; } = false;
+
         private int ShownMessages = 0;
 
         public void Message(string newMessage)
@@ -30,6 +32,7 @@ namespace CopperBend.App
                 if (ShownMessages >= 3)
                 {
                     Controls.WriteLine("-- more --");
+                    DisplayDirty = true;
                     WaitingAtMorePrompt = true;
                     Controls.MessagePanelFull();
                     return;
@@ -37,11 +40,12 @@ namespace CopperBend.App
 
                 var nextMessage = MessageQueue.Dequeue();
                 Controls.WriteLine(nextMessage);
+                DisplayDirty = true;
                 ShownMessages++;
             }
         }
 
-        public void ClearMessagePanel()
+        public void ResetWait()
         {
             //0.1
             ShownMessages = 0;
@@ -66,7 +70,7 @@ namespace CopperBend.App
                 if (key?.Key != RLKey.Space) return;
 
                 //  Otherwise, show more messages
-                ClearMessagePanel();
+                ResetWait();
                 ShowMessages();
             }
 

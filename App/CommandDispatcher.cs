@@ -8,7 +8,6 @@ namespace CopperBend.App
 {
     public partial class CommandDispatcher
     {
-        //private Queue<RLKeyPress> InputQueue;
         public Scheduler Scheduler { get; private set; }
         public Messenger Messenger { get; private set; }
 
@@ -25,7 +24,6 @@ namespace CopperBend.App
 
         public CommandDispatcher(Scheduler scheduler, Messenger messenger)
         {
-            //InputQueue = inputQueue;
             Scheduler = scheduler;
             Messenger = messenger;
             describer = new Describer();

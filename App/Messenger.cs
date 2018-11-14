@@ -1,4 +1,5 @@
-﻿using RLNET;
+﻿using System;
+using RLNET;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -37,7 +38,8 @@ namespace CopperBend.App
                     WriteLine("-- more --");
                     DisplayDirty = true;
                     WaitingAtMorePrompt = true;
-                    Controls.MessagePanelFull();
+                    
+                    EventBus.OurBus.RaiseMessagePanelFull(this, new EventArgs());
                     return;
                 }
 
@@ -89,7 +91,7 @@ namespace CopperBend.App
             }
 
             //  If we reach this point, we sent all messages
-            Controls.AllMessagesSent();
+            EventBus.OurBus.RaiseAllMessagesSent(this, new EventArgs());
         }
 
         private const int textConsoleHeight = 12;

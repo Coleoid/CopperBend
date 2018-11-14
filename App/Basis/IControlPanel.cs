@@ -37,10 +37,6 @@ namespace CopperBend.App
         void RemovePlantAt(Point point);
         void Till(ITile tile);
 
-        //  This form may turn out well--specialist informs about its state
-        void MessagePanelFull();
-        void AllMessagesSent();
-
         void QueueCommand(GameCommand command);
         void Experience(PlantType plant, Exp experience);
     }

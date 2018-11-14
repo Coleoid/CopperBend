@@ -24,9 +24,9 @@ namespace CopperBend.App
             return asciiNum - lowercase_a;
         }
 
-        private bool IsPlayerScheduled = false;
-
         public Point PlayerPoint => Player.Point;
+
+        public bool IsPlayerScheduled { get; private set;  } = false;
 
         public void PlayerBusyFor(int ticks)
         {
@@ -161,17 +161,6 @@ namespace CopperBend.App
         public void GiveToPlayer(IItem item)
         {
             Player.AddToInventory(item);
-        }
-
-        public void MessagePanelFull()
-        {
-            GameState.Mode = GameMode.MessagesPending;
-        }
-
-        public void AllMessagesSent()
-        {
-            GameState.Mode = IsPlayerScheduled ?
-                GameMode.Schedule : GameMode.PlayerReady;
         }
 
         public void PutItemOnMap(IItem item)

@@ -29,6 +29,8 @@ namespace CopperBend.App
         public IAreaMap Map { get; private set; }
         public IActor Player { get; private set; }
 
+        #region Initialization
+        //  These methods work, yet little other rationale exists.
         public GameEngine(RLRootConsole console, Actor player)
         {
             RootConsole = console;
@@ -37,6 +39,22 @@ namespace CopperBend.App
             TextConsole = new RLConsole(TextWidth, TextHeight);
             Player = player;
             CommandQueue = new Queue<GameCommand>();
+            var bus = EventBus.OurBus;
+            bus.AllMessagesSent += AllMessagesSent;
+            bus.MessagePanelFull += MessagePanelFull;
+        }
+
+        public void Run()
+        {
+            //later these will be untrue, with load game and create new game
+            if (Player == null) throw new Exception("Must have Player before starting engine.");
+            if (Map == null) throw new Exception("Must have Map before starting engine.");
+
+            Dispatcher.Init(this);
+
+            RootConsole.Update += onUpdate;
+            RootConsole.Render += onRender;
+            RootConsole.Run();
         }
 
         public void StartNewGame()
@@ -50,6 +68,7 @@ namespace CopperBend.App
             LoadMap("Farm");
             Mode = GameMode.PlayerReady;
         }
+        #endregion
 
         private void LoadMap(string mapName)
         {
@@ -89,17 +108,9 @@ namespace CopperBend.App
             Messenger.ResetWait();
         }
 
-        public void Run()
+        public void QueueCommand(GameCommand command)
         {
-            //later these will be untrue, with load game and create new game
-            if (Player == null) throw new Exception("Must have Player before starting engine.");
-            if (Map == null) throw new Exception("Must have Map before starting engine.");
-
-            Dispatcher.Init(this);
-
-            RootConsole.Update += onUpdate;
-            RootConsole.Render += onRender;
-            RootConsole.Run();
+            CommandQueue.Enqueue(command);
         }
 
         //0.1
@@ -198,7 +209,6 @@ namespace CopperBend.App
 
                 case GameCommand.GoToFarmhouse:
                     LoadMap("Farmhouse");
-                    Player.MoveTo(new Point(2, 2));
                     break;
 
                 case GameCommand.Unset:
@@ -208,12 +218,6 @@ namespace CopperBend.App
                     throw new Exception($"Haven't coded case [{command}] yet.");
                 }
             }
-        }
-
-        private void QuitGame()
-        {
-            //0.1, later verify, offer save
-            RootConsole.Close();
         }
 
         public GameMode Mode { get; set; }
@@ -258,9 +262,26 @@ namespace CopperBend.App
             //  Save and Quit
         }
 
-        public void QueueCommand(GameCommand command)
+        private void QuitGame()
         {
-            CommandQueue.Enqueue(command);
+            //0.1, later verify, offer save
+            RootConsole.Close();
         }
+
+
+        #region Event handlers
+
+        private void MessagePanelFull(object sender, EventArgs args)
+        {
+            Mode = GameMode.MessagesPending;
+        }
+
+        private void AllMessagesSent(object sender, EventArgs args)
+        {
+            Mode = Dispatcher.IsPlayerScheduled ?
+                GameMode.Schedule : GameMode.PlayerReady;
+        }
+
+        #endregion
     }
 }

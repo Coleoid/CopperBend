@@ -1,6 +1,9 @@
 ﻿using CopperBend.App.Model;
 using CopperBend.MapUtil;
+using log4net.Appender;
 using RLNET;
+using log4net.Config;
+using log4net.Layout;
 
 namespace CopperBend.App
 {
@@ -8,12 +11,15 @@ namespace CopperBend.App
     {
         static void Main(string[] args)
         {
+            var log = log4net.LogManager.GetLogger("CB");
+            log.Info("Run started");
             var rootConsole = InitRootConsole();
             var player = InitPlayer();
             var game = new GameEngine(rootConsole, player);
 
             game.StartNewGame();
             game.Run();
+            log.Info("Run ended");
         }
 
         private static RLRootConsole InitRootConsole()

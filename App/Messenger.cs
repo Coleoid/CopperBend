@@ -13,8 +13,9 @@ namespace CopperBend.App
         private readonly RLConsole TextConsole;
         private Queue<RLKeyPress> InputQueue;
 
-        public Messenger(Queue<RLKeyPress> InputQueue, RLConsole textConsole)
+        public Messenger(Queue<RLKeyPress> inputQueue, RLConsole textConsole)
         {
+            InputQueue = inputQueue;
             TextConsole = textConsole;
             MessageQueue = new Queue<string>();
         }

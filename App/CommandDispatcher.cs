@@ -8,11 +8,12 @@ namespace CopperBend.App
 {
     public partial class CommandDispatcher
     {
-        private Queue<RLKeyPress> InputQueue;
+        //private Queue<RLKeyPress> InputQueue;
+        public Scheduler Scheduler { get; private set; }
+        public Messenger Messenger { get; private set; }
 
         public IActor Player { get => GameState.Player; }
         public IAreaMap Map { get => GameState.Map; }
-        public Scheduler Scheduler { get; private set; }
         public IGameState GameState { get; private set; }
         private Describer describer;
 
@@ -22,10 +23,11 @@ namespace CopperBend.App
             get => NextStep != null;
         }
 
-        public CommandDispatcher(Queue<RLKeyPress> inputQueue, Scheduler scheduler)
+        public CommandDispatcher(Scheduler scheduler, Messenger messenger)
         {
-            InputQueue = inputQueue;
+            //InputQueue = inputQueue;
             Scheduler = scheduler;
+            Messenger = messenger;
             describer = new Describer();
         }
 
@@ -37,7 +39,7 @@ namespace CopperBend.App
 
         public void HandlePlayerCommands()
         {
-            var key = GetNextKeyPress();
+            var key = Messenger.GetNextKeyPress();
             if (key == null) return;
 
             if (InMultiStepCommand)  //  Drop, throw, wield, etc.
@@ -114,7 +116,7 @@ namespace CopperBend.App
             {
                 var np = describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
                 WriteLine($"I can't walk through {np}.");
-                EmptyInputQueue();
+                Messenger.EmptyInputQueue();
             }
             else
             {

@@ -29,7 +29,7 @@ namespace CopperBend.App
         void Learn(Fruit fruit);
         void SetMapDirty();
 
-        RLKeyPress GetNextKeyPress();
+        //RLKeyPress GetNextKeyPress();
         void WriteLine(string text);
         void Prompt(string text);
 

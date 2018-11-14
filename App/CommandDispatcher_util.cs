@@ -12,16 +12,9 @@ namespace CopperBend.App
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
 
-        public void WriteLine(string text)
-        {
-            Console.Out.WriteLine(text);
-        }
+        public void WriteLine(string text) => Messenger.WriteLine(text);
 
-        public void Prompt(string text)
-        {
-            Console.Out.Write(text);
-            Console.Out.Flush();
-        }
+        public void Prompt(string text) => Messenger.Prompt(text);
 
         private int AlphaIndexOfKeyPress(RLKeyPress key)
         {
@@ -168,17 +161,6 @@ namespace CopperBend.App
         public void GiveToPlayer(IItem item)
         {
             Player.AddToInventory(item);
-        }
-
-        public RLKeyPress GetNextKeyPress()
-        {
-            return InputQueue.Any() ? InputQueue.Dequeue() : null;
-        }
-
-        public void EmptyInputQueue()
-        {
-            while (InputQueue.Any())
-                InputQueue.Dequeue();
         }
 
         public void MessagePanelFull()

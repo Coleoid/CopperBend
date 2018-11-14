@@ -143,8 +143,8 @@ namespace CopperBend.App
 
         public void OpenDoor(ITile tile)
         {
-            Guard.Against(tile.TileType.Name != "ClosedDoor");
-            tile.SetTileType(TileTypes["OpenDoor"]);
+            Guard.Against(tile.TileType.Name != "closed door");
+            tile.SetTileType(TileTypes["open door"]);
             SetIsTransparent(tile.Point, true);
             SetIsWalkable(tile.Point, true);
             DisplayDirty = true;

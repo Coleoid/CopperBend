@@ -43,8 +43,8 @@ namespace CopperBend.App
         {
             InputQueue = new Queue<RLKeyPress>();
             Scheduler = new Scheduler();
-            Dispatcher = new CommandDispatcher(InputQueue, Scheduler);
-            Messenger = new Messenger(Dispatcher);
+            Messenger = new Messenger(InputQueue, TextConsole);
+            Dispatcher = new CommandDispatcher(Scheduler, Messenger);
             MapLoader = new MapLoader();
 
             LoadMap("Farm");
@@ -144,13 +144,13 @@ namespace CopperBend.App
             //    rootDirty = true;
             //}
 
-            if (Messenger.DisplayDirty)
-            {
-                //Messenger.Report(StatConsole);  // handled as-we-go, right?
-                RLConsole.Blit(TextConsole, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
-                Messenger.DisplayDirty = false;
-                rootDirty = true;
-            }
+            //if (Messenger.DisplayDirty)
+            //{
+            //    //Messenger.Report(StatConsole);  // handled as-we-go, right?
+            RLConsole.Blit(TextConsole, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
+            //    Messenger.DisplayDirty = false;
+            rootDirty = true;
+            //}
 
             if (rootDirty)
             {

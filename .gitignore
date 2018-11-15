@@ -8,5 +8,6 @@ bin
 obj
 /deploy/*.exe
 /deploy/assets/*.*
+/deploy/*.log
 **/packages/**/*.*
 App/App.csproj.user

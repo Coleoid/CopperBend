@@ -6,6 +6,7 @@ using System.Collections.Generic;
 //  Here I have some mechanisms to communicate and control,
 //  with nothing coherent shaken out yet.  In other places
 //  I'm passing important domain bits as arguments.
+//  Also see the EventBus for another channel.
 
 namespace CopperBend.App
 {

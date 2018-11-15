@@ -65,6 +65,7 @@ namespace CopperBend.App
         Unset = 0,
         Quit,
         GoToFarmhouse,  //0.1
+        NotReadyToLeave,
     }
 
     //  Categories of experience

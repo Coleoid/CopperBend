@@ -280,8 +280,15 @@ namespace CopperBend.App
             if (_farmMap == null)
             {
                 _farmMap = MapFromYAML(FarmMapYaml);
-                _farmMap.AddEventAtLocation(new Point(28, 14));
-                _farmMap.PlayerStartsAt = new Point(18, 21);
+                _farmMap.PlayerStartsAt = new Point(23, 21);
+
+                //  Obscure point on the edge to test map transitions
+                _farmMap.AddEventAtLocation(new Point(41, 1), new CommandEntry(GameCommand.GoToFarmhouse, null));
+
+                //  Barrier in front of the gate out
+                _farmMap.AddEventAtLocation(new Point(5, 16), new CommandEntry(GameCommand.NotReadyToLeave, null));
+                _farmMap.AddEventAtLocation(new Point(5, 17), new CommandEntry(GameCommand.NotReadyToLeave, null));
+                _farmMap.AddEventAtLocation(new Point(5, 18), new CommandEntry(GameCommand.NotReadyToLeave, null));
             }
 
             return _farmMap;

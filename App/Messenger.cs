@@ -24,7 +24,7 @@ namespace CopperBend.App
 
         private int ShownMessages = 0;
 
-        public void Message(string newMessage)
+        public void AddMessage(string newMessage)
         {
             MessageQueue.Enqueue(newMessage);
             ShowMessages();
@@ -103,7 +103,7 @@ namespace CopperBend.App
         int CursorY = 1;  //  I haven't looked at this closely yet
         public void WriteLine(string text)
         {
-            int linesWritten = TextConsole.Print(1, 1, 5, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 40, 1);
+            int linesWritten = TextConsole.Print(1, 1, 5, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
         }
 
         public void Prompt(string text)

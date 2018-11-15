@@ -181,7 +181,7 @@ namespace CopperBend.App
             //0.3 may unify those collections and loops, may restructure flow
         }
 
-        public void AddEventAtLocation(Point point)
+        public void AddEventAtLocation(Point point, CommandEntry entry)
         {
             if (!LocationEventEntries.ContainsKey(point))
             {
@@ -189,7 +189,8 @@ namespace CopperBend.App
             }
 
             var list = LocationEventEntries[point];
-            list.Add(new CommandEntry(GameCommand.GoToFarmhouse, null));
+            list.Add(entry);
+
         }
 
          public Point PlayerStartsAt { get; set; }

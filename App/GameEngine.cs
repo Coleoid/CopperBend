@@ -124,7 +124,7 @@ namespace CopperBend.App
                 MapLoaded = true;
                 foreach (var text in Map.FirstSightMessages)
                 {
-                    Messenger.Message(text);
+                    Messenger.AddMessage(text);
                 }
             }
 
@@ -209,6 +209,11 @@ namespace CopperBend.App
 
                 case GameCommand.GoToFarmhouse:
                     LoadMap("Farmhouse");
+                    break;
+
+                case GameCommand.NotReadyToLeave:
+                    Player.MoveTo(new Point(7, 17));
+                    Messenger.AddMessage("At the gate... and... I don't want to leave.  Some important jobs here, first.");
                     break;
 
                 case GameCommand.Unset:

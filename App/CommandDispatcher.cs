@@ -130,6 +130,28 @@ namespace CopperBend.App
                     PlayerBusyFor(17);
                 else
                     PlayerBusyFor(12);
+
+                var itemsHere = Map.Items.Where(i => i.Point == point);
+                if (itemsHere.Count() > 7)
+                {
+                    WriteLine("There are many items here.");
+                }
+                else if (itemsHere.Count() > 1)
+                {
+                    WriteLine("There are several items here.");
+                }
+                else if (itemsHere.Count() == 1)
+                {
+                    var item = itemsHere.ElementAt(0);
+                    var beVerb = item.Quantity == 1 ? "is" : "are";
+                    var np = describer.Describe(item, DescMods.Quantity);
+                    WriteLine($"There {beVerb} {np} here.");
+                }
+                else
+                {
+                    //  Nothing at this location, report nothing
+                }
+
             }
         }
 

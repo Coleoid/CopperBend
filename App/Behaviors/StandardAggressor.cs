@@ -50,7 +50,7 @@ namespace CopperBend.App.Behaviors
             // player in FOV, but not reachable
             if (!pathList.Any())
             {
-                Console.WriteLine($"The {actor.Name} waits for an opening...");
+                //WriteLine($"The {actor.Name} waits for an opening...");
                 return 6;
             }
 

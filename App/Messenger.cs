@@ -96,19 +96,59 @@ namespace CopperBend.App
         }
 
         private const int textConsoleHeight = 12;
-        private Stack<string> Messages = new Stack<string>();
-        private Stack<int> MessageLines = new Stack<int>();  // probably begging for desync bugs
 
         int CursorX = 1;
         int CursorY = 1;  //  I haven't looked at this closely yet
+
+        struct PrintedText
+        {
+            public string Text { get; set; }
+            public int Lines { get; set; }
+        }
+        private Queue<PrintedText> Messages = new Queue<PrintedText>();
+
         public void WriteLine(string text)
         {
-            int linesWritten = TextConsole.Print(1, 1, 5, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+            if (promptText != string.Empty)
+            {
+                text = promptText + text;
+                promptText = string.Empty;
+            }
+
+            int maxLinesWritable = textConsoleHeight - CursorY - 1;
+            int linesWritten = TextConsole.Print(CursorX, CursorY, maxLinesWritable, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+
+            var newMessage = new PrintedText { Text = text, Lines = linesWritten };
+            Messages.Enqueue(newMessage);
+            CursorY += linesWritten;
+            CursorX = 1;
+
+            //  Time to scroll?
+            bool scrollTime = CursorY == textConsoleHeight;
+            while (scrollTime)
+            {
+                TextConsole.Clear();
+                Messages.Dequeue();
+                CursorY = 1;
+                foreach (var msg in Messages)
+                {
+                    linesWritten = TextConsole.Print(CursorX, CursorY, maxLinesWritable, msg.Text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+                    CursorY += linesWritten;
+                }
+
+                //  Were we cutting off some of the latest message?  Then scroll more...
+                scrollTime = linesWritten != newMessage.Lines;
+                //  ...unless that single message is now filling the text console
+                scrollTime = scrollTime && Messages.Count() > 1;
+            }
         }
 
+        private string promptText = string.Empty;
         public void Prompt(string text)
         {
-            TextConsole.Print(1, 1, 5, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 40, 1);
+            promptText += text;
+            TextConsole.Print(1, CursorY, 5, promptText, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+            CursorX += promptText.Length;
         }
     }
 }

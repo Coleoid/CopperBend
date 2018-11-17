@@ -147,10 +147,7 @@ namespace CopperBend.App
                     var np = describer.Describe(item, DescMods.Quantity);
                     WriteLine($"There {beVerb} {np} here.");
                 }
-                else
-                {
-                    //  Nothing at this location, report nothing
-                }
+                else {}  //  Nothing here, report nothing
 
             }
         }
@@ -160,10 +157,10 @@ namespace CopperBend.App
             //0.1
             int damage = 2;
             targetActor.AdjustHealth(-damage);
-            Console.WriteLine($"I hit the {targetActor.Name} for {damage}.");
+            WriteLine($"I hit the {targetActor.Name} for {damage}.");
             if (targetActor.Health < 1)
             {
-                Console.WriteLine($"The {targetActor.Name} dies.");
+                WriteLine($"The {targetActor.Name} dies.");
                 Map.Actors.Remove(targetActor);
                 Map.SetIsWalkable(targetActor.Point, true);
                 Map.DisplayDirty = true;
@@ -285,12 +282,12 @@ namespace CopperBend.App
 
         private void Command_Inventory()
         {
-            Console.WriteLine("Inventory:");
+            WriteLine("Inventory:");
             if (Player.Inventory.Count() == 0)
             {
-                Console.WriteLine("empty.");
+                WriteLine("empty.");
             }
-            else
+            else if (Player.Inventory.Count() < 8)
             {
                 int asciiSlot = lowercase_a;
                 foreach (var item in Player.Inventory)
@@ -299,6 +296,11 @@ namespace CopperBend.App
                     Console.WriteLine($"{(char)asciiSlot})  {description}");
                     asciiSlot++;
                 }
+            }
+            else
+            {
+                //  Bring up an inventory console
+                throw new Exception("I really need an inventory console now.");
             }
         }
 
@@ -360,7 +362,7 @@ namespace CopperBend.App
         {
             if (key.Key == RLKey.Escape)
             {
-                Console.WriteLine("cancelled.");
+                WriteLine("cancelled.");
                 NextStep = null;
                 return;
             }
@@ -450,13 +452,13 @@ namespace CopperBend.App
 
             if (topItem == null)
             {
-                Console.WriteLine("Nothing to pick up here.");
+                WriteLine("Nothing to pick up here.");
                 return;
             }
 
             Map.Items.Remove(topItem);
             Player.AddToInventory(topItem);
-            Console.WriteLine($"Picked up {topItem.Name}");
+            WriteLine($"Picked up {topItem.Name}");
             PlayerBusyFor(2);
         }
     }

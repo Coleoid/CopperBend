@@ -9,15 +9,23 @@ namespace CopperBend.App
     public class GameEngine : IGameState
     {
         private RLRootConsole RootConsole;
+
         private RLConsole MapConsole;
         private int MapWidth = 60;
         private int MapHeight = 60;
+
         private RLConsole StatConsole;
         private int StatWidth = 20;
         private int StatHeight = 60;
+
         private RLConsole TextConsole;
         private int TextWidth = 80;
         private int TextHeight = 20;
+
+        private RLConsole LargeMessageConsole;
+        private int LargeMessageWidth = 60;
+        private int LargeMessageHeight = 60;
+        private bool LargeMessagesVisible;
 
         private Queue<RLKeyPress> InputQueue;
         private Queue<GameCommand> CommandQueue;
@@ -30,13 +38,17 @@ namespace CopperBend.App
         public IActor Player { get; private set; }
 
         #region Initialization
-        //  These methods work, yet little other rationale exists.
+        //  The division of responsibilities among these methods works for now
+        //  When load/save comes in, they'll need reworking
         public GameEngine(RLRootConsole console, Actor player)
         {
             RootConsole = console;
             MapConsole = new RLConsole(MapWidth, MapHeight);
             StatConsole = new RLConsole(StatWidth, StatHeight);
             TextConsole = new RLConsole(TextWidth, TextHeight);
+            LargeMessageConsole = new RLConsole(LargeMessageWidth, LargeMessageHeight);
+            LargeMessagesVisible = false;
+
             Player = player;
             CommandQueue = new Queue<GameCommand>();
             var bus = EventBus.OurBus;
@@ -83,6 +95,7 @@ namespace CopperBend.App
             LoadMap(map);
             Player.MoveTo(Map.PlayerStartsAt);
             Map.UpdatePlayerFieldOfView(Player);
+            Dispatcher.LargeMessage(Map.FirstSightMessages);
         }
 
         public void LoadMap(IAreaMap map)
@@ -143,7 +156,7 @@ namespace CopperBend.App
             //  I haven't even begun to code status reporting
             //  ...I've barely thought about it.
             //  Health reporting should be vague, perhaps just to begin with
-            //  Magical energy is called tau
+            //  Magical energy is called...  something that's not greek.
             //  Perhaps two fatigue/physical energy pools?  Wind and Vitality?
             //  I'm not gathering experience from anywhere yet
             //  No status effects occurring yet (haste, confusion, ...)
@@ -157,11 +170,16 @@ namespace CopperBend.App
 
             //if (Messenger.DisplayDirty)
             //{
-            //    //Messenger.Report(StatConsole);  // handled as-we-go, right?
             RLConsole.Blit(TextConsole, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
-            //    Messenger.DisplayDirty = false;
             rootDirty = true;
+            //Messenger.DisplayDirty = false;
             //}
+
+            //  Large messages blitted last since they overlay the rest of the panes
+            if (LargeMessagesVisible)
+            {
+                RLConsole.Blit(LargeMessageConsole, 0, 0, LargeMessageWidth, LargeMessageHeight, RootConsole, 10, 10);
+            }
 
             if (rootDirty)
             {

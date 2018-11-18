@@ -3,7 +3,6 @@ using CopperBend.MapUtil;
 using RLNET;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CopperBend.App
 {
@@ -13,6 +12,7 @@ namespace CopperBend.App
         private const int lowercase_z = 123;
 
         public void WriteLine(string text) => Messenger.WriteLine(text);
+        public void LargeMessage(List<string> message) => Messenger.LargeMessage(message);
 
         public void Prompt(string text) => Messenger.Prompt(text);
 

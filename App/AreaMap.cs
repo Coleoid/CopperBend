@@ -26,13 +26,13 @@ namespace CopperBend.App
             Tiles = new ITile[xWidth, yHeight];
             Actors = new List<IActor>();
             Items = new List<IItem>();
-            FirstSightMessages = new List<string>();
+            FirstSightMessage = new List<string>();
             LocationMessages = new Dictionary<Point, List<string>>();
             LocationEventEntries = new Dictionary<Point, List<CommandEntry>>();
             DisplayDirty = true;
         }
 
-        public List<string> FirstSightMessages { get; set; }
+        public List<string> FirstSightMessage { get; set; }
         public Dictionary<Point, List<string>> LocationMessages { get; private set; }
         public Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; private set; }
 

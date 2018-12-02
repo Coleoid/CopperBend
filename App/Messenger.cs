@@ -7,21 +7,22 @@ namespace CopperBend.App
 {
     public class Messenger
     {
-        public Queue<string> MessageQueue;
-        public bool WaitingAtMorePrompt = false;
-        //private readonly IControlPanel Controls;
-        private readonly RLConsole TextConsole;
         private Queue<RLKeyPress> InputQueue;
+        private readonly RLConsole TextPane;
+        private readonly RLConsole LargePane;
 
-        public Messenger(Queue<RLKeyPress> inputQueue, RLConsole textConsole)
+        public Messenger(Queue<RLKeyPress> inputQueue, RLConsole textPane, RLConsole largePane)
         {
             InputQueue = inputQueue;
-            TextConsole = textConsole;
+            TextPane = textPane;
+            LargePane = largePane;
             MessageQueue = new Queue<string>();
+            EventBus.OurBus.SendLargeMessageSubscribers += LargeMessage;
         }
 
+        public Queue<string> MessageQueue;
+        public bool WaitingAtMorePrompt = false;
         public bool DisplayDirty { get; set; } = false;
-
         private int ShownMessages = 0;
 
         public void AddMessage(string newMessage)
@@ -40,7 +41,7 @@ namespace CopperBend.App
                     DisplayDirty = true;
                     WaitingAtMorePrompt = true;
                     
-                    EventBus.OurBus.RaiseMessagePanelFull(this, new EventArgs());
+                    EventBus.OurBus.MessagePanelFull(this, new EventArgs());
                     return;
                 }
 
@@ -65,8 +66,7 @@ namespace CopperBend.App
 
         public void EmptyInputQueue()
         {
-            while (InputQueue.Any())
-                InputQueue.Dequeue();
+            InputQueue.Clear();
         }
 
         public void HandlePendingMessages()
@@ -92,7 +92,7 @@ namespace CopperBend.App
             }
 
             //  If we reach this point, we sent all messages
-            EventBus.OurBus.RaiseAllMessagesSent(this, new EventArgs());
+            EventBus.OurBus.AllMessagesSent(this, new EventArgs());
         }
 
         private const int textConsoleHeight = 12;
@@ -116,7 +116,7 @@ namespace CopperBend.App
             }
 
             int maxLinesWritable = textConsoleHeight - CursorY - 1;
-            int linesWritten = TextConsole.Print(CursorX, CursorY, maxLinesWritable, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+            int linesWritten = TextPane.Print(CursorX, CursorY, maxLinesWritable, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
 
             var newMessage = new MessageLine { Text = text, Lines = linesWritten };
             MessageLines.Enqueue(newMessage);
@@ -127,12 +127,12 @@ namespace CopperBend.App
             bool scrollTime = CursorY == textConsoleHeight;
             while (scrollTime)
             {
-                TextConsole.Clear();
+                TextPane.Clear();
                 MessageLines.Dequeue();
                 CursorY = 1;
                 foreach (var msg in MessageLines)
                 {
-                    linesWritten = TextConsole.Print(CursorX, CursorY, maxLinesWritable, msg.Text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+                    linesWritten = TextPane.Print(CursorX, CursorY, maxLinesWritable, msg.Text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
                     CursorY += linesWritten;
                 }
 
@@ -149,53 +149,35 @@ namespace CopperBend.App
         public void Prompt(string text)
         {
             promptText += text;
-            TextConsole.Print(1, CursorY, 5, promptText, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+            TextPane.Print(1, CursorY, 5, promptText, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
             CursorX += promptText.Length;
         }
 
-        internal void LargeMessage(List<string> message)
+        //  The engine calls here when we're in GameMode.LargeMessagePending
+        public void HandleLargeMessage()
         {
-            //TODO:  signal this? LargeMessageVisible = (message.Count > 0);
-            foreach (var line in message)
+            RLKeyPress press = GetNextKeyPress();
+            while (press != null && press.Key != RLKey.Escape)
             {
-                LargeMessageLine(line);
+                press = GetNextKeyPress();
             }
 
+            if (press == null) return;
+
+            EventBus.OurBus.ClearLargeMessage(this, new EventArgs());
         }
 
-        private Queue<MessageLine> LargeMessageLines = new Queue<MessageLine>();
-        //PASTA  0.1  HACK  FIXME
-        internal void LargeMessageLine(string line)
+        internal void LargeMessage(object sender, LargeMessageEventArgs args)
         {
-            int maxLinesWritable = 60 - CursorY - 1;
-            int linesWritten = TextConsole.Print(CursorX, CursorY, maxLinesWritable, line, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+            var lines = args.Lines.ToList();
 
-            var newMessage = new MessageLine { Text = line, Lines = linesWritten };
-            LargeMessageLines.Enqueue(newMessage);
-            CursorY += linesWritten;
-            CursorX = 1;
-
-            //  Time to scroll?
-            bool scrollTime = CursorY == textConsoleHeight;
-            while (scrollTime)
+            int cY = 1;
+            
+            foreach (var line in lines)
             {
-                TextConsole.Clear();
-                LargeMessageLines.Dequeue();
-                CursorY = 1;
-                foreach (var msg in LargeMessageLines)
-                {
-                    linesWritten = TextConsole.Print(CursorX, CursorY, maxLinesWritable, msg.Text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
-                    CursorY += linesWritten;
-                }
-
-                //  Were we cutting off some of the latest message?  Then scroll more...
-                scrollTime = linesWritten != newMessage.Lines;
-                //  ...unless that single message is now filling the text console.
-                scrollTime = scrollTime && LargeMessageLines.Count() > 1;
+                int linesWritten = LargePane.Print(1, cY, 0, line, Palette.PrimaryLighter, new RLColor(0, 0, 0), 58, 1);
+                cY += linesWritten;
             }
-            //  This works fine, though does significantly more graphic work
-            //  than necessary--if this shows slowness, we can get wins here.
-
         }
     }
 }

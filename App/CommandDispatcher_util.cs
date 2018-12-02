@@ -12,7 +12,6 @@ namespace CopperBend.App
         private const int lowercase_z = 123;
 
         public void WriteLine(string text) => Messenger.WriteLine(text);
-        public void LargeMessage(List<string> message) => Messenger.LargeMessage(message);
 
         public void Prompt(string text) => Messenger.Prompt(text);
 
@@ -176,7 +175,7 @@ namespace CopperBend.App
         public void Till(ITile tile)
         {
             tile.Till();
-            tile.SetTileType(Map.TileTypes["TilledDirt"]);
+            tile.SetTileType(Map.TileTypes["tilled dirt"]);
         }
 
         public void Learn(Fruit fruit)

@@ -55,6 +55,7 @@ namespace CopperBend.App
     {
         Unknown = 0,
         MenuOpen,
+        LargeMessagePending,
         MessagesPending,
         PlayerReady,
         Schedule,

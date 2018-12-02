@@ -20,7 +20,7 @@ namespace CopperBend.App
         void UpdatePlayerFieldOfView(IActor player);
         void DrawMap(RLConsole mapConsole);
         IActor GetActorAtPoint(Point point);
-        List<string> FirstSightMessages { get; set; }
+        List<string> FirstSightMessage { get; set; }
         Dictionary<Point, List<string>> LocationMessages { get; }
         Point PlayerStartsAt { get; set; }
 

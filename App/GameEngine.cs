@@ -10,22 +10,22 @@ namespace CopperBend.App
     {
         private RLRootConsole RootConsole;
 
-        private RLConsole MapConsole;
+        private RLConsole MapPane;
         private int MapWidth = 60;
         private int MapHeight = 60;
 
-        private RLConsole StatConsole;
+        private RLConsole StatPane;
         private int StatWidth = 20;
         private int StatHeight = 60;
 
-        private RLConsole TextConsole;
+        private RLConsole TextPane;
         private int TextWidth = 80;
         private int TextHeight = 20;
 
-        private RLConsole LargeMessageConsole;
-        private int LargeMessageWidth = 60;
-        private int LargeMessageHeight = 60;
-        private bool LargeMessagesVisible;
+        private RLConsole LargePane;
+        private int LargeWidth = 60;
+        private int LargeHeight = 60;
+        private bool LargePaneVisible;
 
         private Queue<RLKeyPress> InputQueue;
         private Queue<GameCommand> CommandQueue;
@@ -34,6 +34,7 @@ namespace CopperBend.App
         private Messenger Messenger;
         private MapLoader MapLoader;
 
+        private readonly EventBus Bus;
         public IAreaMap Map { get; private set; }
         public IActor Player { get; private set; }
 
@@ -43,24 +44,24 @@ namespace CopperBend.App
         public GameEngine(RLRootConsole console, Actor player)
         {
             RootConsole = console;
-            MapConsole = new RLConsole(MapWidth, MapHeight);
-            StatConsole = new RLConsole(StatWidth, StatHeight);
-            TextConsole = new RLConsole(TextWidth, TextHeight);
-            LargeMessageConsole = new RLConsole(LargeMessageWidth, LargeMessageHeight);
-            LargeMessagesVisible = false;
+            MapPane = new RLConsole(MapWidth, MapHeight);
+            StatPane = new RLConsole(StatWidth, StatHeight);
+            TextPane = new RLConsole(TextWidth, TextHeight);
+            LargePane = new RLConsole(LargeWidth, LargeHeight);
+            LargePaneVisible = false;
 
             Player = player;
             CommandQueue = new Queue<GameCommand>();
-            var bus = EventBus.OurBus;
-            bus.AllMessagesSent += AllMessagesSent;
-            bus.MessagePanelFull += MessagePanelFull;
+            Bus = EventBus.OurBus;
+            Bus.AllMessagesSentSubscribers += AllMessagesSent;
+            Bus.MessagePanelFullSubscribers += MessagePanelFull;
         }
 
         public void Run()
         {
             //later these will be untrue, with load game and create new game
-            if (Player == null) throw new Exception("Must have Player before starting engine.");
-            if (Map == null) throw new Exception("Must have Map before starting engine.");
+            if (Player == null) throw new Exception("Currently need Player before starting engine.");
+            if (Map == null) throw new Exception("Currently need Map before starting engine.");
 
             Dispatcher.Init(this);
 
@@ -73,7 +74,7 @@ namespace CopperBend.App
         {
             InputQueue = new Queue<RLKeyPress>();
             Scheduler = new Scheduler();
-            Messenger = new Messenger(InputQueue, TextConsole);
+            Messenger = new Messenger(InputQueue, TextPane, LargePane);
             Dispatcher = new CommandDispatcher(Scheduler, Messenger);
             MapLoader = new MapLoader();
 
@@ -95,7 +96,7 @@ namespace CopperBend.App
             LoadMap(map);
             Player.MoveTo(Map.PlayerStartsAt);
             Map.UpdatePlayerFieldOfView(Player);
-            Dispatcher.LargeMessage(Map.FirstSightMessages);
+            Bus.SendLargeMessage(this, Map.FirstSightMessage);
         }
 
         public void LoadMap(IAreaMap map)
@@ -135,7 +136,7 @@ namespace CopperBend.App
             if (!MapLoaded)
             {
                 MapLoaded = true;
-                foreach (var text in Map.FirstSightMessages)
+                foreach (var text in Map.FirstSightMessage)
                 {
                     Messenger.AddMessage(text);
                 }
@@ -147,8 +148,8 @@ namespace CopperBend.App
 
             if (Map.DisplayDirty)
             {
-                Map.DrawMap(MapConsole);
-                RLConsole.Blit(MapConsole, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
+                Map.DrawMap(MapPane);
+                RLConsole.Blit(MapPane, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
                 Map.DisplayDirty = false;
                 rootDirty = true;
             }
@@ -170,15 +171,15 @@ namespace CopperBend.App
 
             //if (Messenger.DisplayDirty)
             //{
-            RLConsole.Blit(TextConsole, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
+            RLConsole.Blit(TextPane, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
             rootDirty = true;
             //Messenger.DisplayDirty = false;
             //}
 
             //  Large messages blitted last since they overlay the rest of the panes
-            if (LargeMessagesVisible)
+            if (LargePaneVisible)
             {
-                RLConsole.Blit(LargeMessageConsole, 0, 0, LargeMessageWidth, LargeMessageHeight, RootConsole, 10, 10);
+                RLConsole.Blit(LargePane, 0, 0, LargeWidth, LargeHeight, RootConsole, 10, 10);
             }
 
             if (rootDirty)
@@ -251,6 +252,11 @@ namespace CopperBend.App
             //  A game menu will block even pending messages 
             case GameMode.MenuOpen:
                 HandleMenus();
+                break;
+
+            //  The large message pane overlays most of the game
+            case GameMode.LargeMessagePending:
+                Messenger.HandleLargeMessage();
                 break;
 
             //  Messages waiting for the player block player input and scheduled events

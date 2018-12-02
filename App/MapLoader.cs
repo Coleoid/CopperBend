@@ -271,6 +271,9 @@ namespace CopperBend.App
             }
 
             map.TileTypes = TileTypes;
+
+            map.FirstSightMessage = data.FirstSightMessage;
+
             return map;
         }
 
@@ -299,7 +302,7 @@ namespace CopperBend.App
         {
             if (_farmhouseMap == null)
             {
-                _farmhouseMap = MapFromYAML(FarmhouseMapYaml);
+                _farmhouseMap = MapFromYAML(RootCellarYaml);
                 _farmhouseMap.PlayerStartsAt = new Point(2, 7);
             }
 
@@ -362,11 +365,6 @@ terrain:
             };
             map.Actors.Add(glom);
 
-            map.FirstSightMessages.Add("I wake up.  Cold--frost on the ground, except where I was lying.");
-            map.FirstSightMessages.Add("Everything hurts when I stand up.");
-            map.FirstSightMessages.Add("The sky... says it's morning.  A small farmhouse to the east.");
-            map.FirstSightMessages.Add("Something real wrong with the ground to the west, and the north.");
-
             map.LocationMessages[new Point(1, 6)] = new List<string> { "a shiversome feeling..." };
 
             return map;
@@ -388,10 +386,16 @@ legend:
  ',': grass
  'w': tall weeds
  'T': table
- '>': stairs
+ '>': stairs down
+
+firstSightMessage:
+ - 'I wake up.  Cold--frost on the ground, except where I was lying.'
+ - 'Everything hurts when I stand up.'
+ - 'The sky... says it''s morning.  A small farmhouse to the east.'
+ - 'Something real wrong with the ground to the west, and the northwest.'
 
 terrain:
-#   0    5    1    5    2    5    3    5    4 
+#   0    +    1    +    2    +    3    +    4    +
  - ',,,,,#########################################'  # 0
  - ',,,,,#,,,....,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#'
  - ',,,,,#,,,,...,,,,,,,,,,,,,,,,,,,,x.x.xxx..x,,#'
@@ -459,29 +463,28 @@ blight:
 ";
 
 
-        private readonly string FarmhouseMapYaml = @"---
-name:  Farmhouse
+        private readonly string RootCellarYaml = @"---
+name:  Root Cellar
 
 legend:
- '.': Dirt
- '+': ClosedDoor
- '-': OpenDoor
- '=': Wall
+ '.': dirt floor
+ '=': plank wall
+ '<': stairs up
 
 terrain:
 #   0    5    1    5    2    5    3    5    4 
- - '========================'  # 0
- - '=......................='
- - '=......................='
- - '=......................='
- - '=......................='
- - '=......................='
- - '-......................='
- - '=......................='
- - '=......................='
- - '=......................='
- - '=......................='
- - '========================'
+ - '============'  # 0
+ - '=..........='
+ - '=..........='
+ - '=.........<='
+ - '=..........='
+ - '=..........='
+ - '=..........='
+ - '=..........='
+ - '=..........='
+ - '=..........='
+ - '=..........='
+ - '=..........='
 ";
         #endregion
 
@@ -493,6 +496,7 @@ terrain:
         public Dictionary<string, string> Legend { get; set; }
         public List<string> Terrain { get; set; }
         public List<BlightOverlayData> Blight { get; set; }
+        public List<string> FirstSightMessage { get; set; }
     }
 
     public class BlightOverlayData

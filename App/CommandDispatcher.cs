@@ -98,7 +98,7 @@ namespace CopperBend.App
             }
             else
             {
-                Command_DirectionAttack(targetActor, point);
+                Command_DirectionAttack(targetActor);
             }
         }
 
@@ -152,23 +152,11 @@ namespace CopperBend.App
             }
         }
 
-        private void Command_DirectionAttack(IActor targetActor, Point point)
+        private void Command_DirectionAttack(IActor targetActor)
         {
             //0.1
-            int damage = 2;
-            targetActor.AdjustHealth(-damage);
-            WriteLine($"I hit the {targetActor.Name} for {damage}.");
-            if (targetActor.Health < 1)
-            {
-                WriteLine($"The {targetActor.Name} dies.");
-                Map.Actors.Remove(targetActor);
-                Map.SetIsWalkable(targetActor.Point, true);
-                Map.DisplayDirty = true;
-
-                //TODO: drop items, body
-
-                Scheduler.RemoveActor(targetActor);
-            }
+            var conflictSystem = new ConflictSystem(Messenger, Map, Scheduler);
+            conflictSystem.Attack("Wah!", 2, targetActor);
 
             PlayerBusyFor(12);
         }

@@ -66,7 +66,7 @@ namespace CopperBend.App
 
         private void DrawLocation(RLConsole console, Point point)
         {
-            if (!IsExplored(point)) return;  // unknown is unshown
+            if (!IsExplored(point)) return;  // unknown is undrawn
             var tile = this[point];
 
             tile.IsInFOV = IsInFov(point);
@@ -74,6 +74,8 @@ namespace CopperBend.App
             var fgColor = tile.ColorForeground;
             var symbol = tile.Symbol;
 
+            //FUTURE:  Also level of illumination on tile
+            //...which is where we need to go for remote sensing via allied plant
             if (tile.IsInFOV)  //  If we can see this tile, we can see actors or items on it
             {
                 var actor = Actors.Where(a => a.Point.Equals(point)).SingleOrDefault();
@@ -123,7 +125,7 @@ namespace CopperBend.App
         }
 
         //  Player field of view changes whenever player moves
-        //FUTURE: more cases (shifting terrain, smoke cloud, et c.)
+        //FUTURE: more trigger cases (shifting terrain, smoke cloud, et c.)
         public void UpdatePlayerFieldOfView(IActor actor)
         {
             var fovCells = ComputeFov(actor.Point, actor.Awareness, true);

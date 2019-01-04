@@ -118,7 +118,7 @@ namespace CopperBend.App
             //0.1
             int damage = 2;
             WriteLine($"The {actor.Name} hit me for {damage}.");
-            Player.AdjustHealth(-damage);
+            Player.Hurt(-damage);
 
             if (damage > 0)
                 WriteLine($"Ow.  Down to {Player.Health}.");
@@ -126,7 +126,7 @@ namespace CopperBend.App
 
         public void HealPlayer(int amount)
         {
-            Player.AdjustHealth(amount);
+            Player.Hurt(amount);
             WriteLine($"So nice.  Up to {Player.Health}.");
         }
 

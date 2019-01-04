@@ -20,7 +20,11 @@ namespace CopperBend.App.Model
             _behavior = new StandardMoveAndAttack();
         }
 
+        //  IComponent
+        public IActor Entity { get => this; }
+
         //  IDrawable
+        public Point Point { get; protected set; }
         public RLColor ColorForeground { get; set; }
         public char Symbol { get; set; }
         public void MoveTo(Point point)
@@ -28,17 +32,19 @@ namespace CopperBend.App.Model
             Point = point;
         }
 
-        public Point Point { get; protected set; }
-
-
         //  IActor
         public string Name { get; set; }
         public int Awareness { get; set; }
 
+        //  IHealAndHurt
         public int Health { get; set; }
-        public void AdjustHealth(int amount)
+        public void Heal(int amount)
         {
             Health += amount;
+        }
+        public void Hurt(int amount)
+        {
+            Health -= amount;
         }
 
         public Action<IControlPanel, ScheduleEntry> NextAction => _behavior.NextAction;

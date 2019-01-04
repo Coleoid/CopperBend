@@ -15,20 +15,20 @@
             Scheduler = scheduler;
         }
 
-        public void Attack(string attack, int damage, IActor target)
+        public void Attack(string attack, int damage, IHealAndHurt target)
         {
-            target.AdjustHealth(-damage);
-            WriteLine($"I hit the {target.Name} for {damage}.");
+            target.Hurt(damage);
+            WriteLine($"I hit the {target.Entity.Name} for {damage}.");
             if (target.Health < 1)
             {
-                WriteLine($"The {target.Name} dies.");
-                Map.Actors.Remove(target);
-                Map.SetIsWalkable(target.Point, true);
+                WriteLine($"The {target.Entity.Name} dies.");
+                Map.Actors.Remove(target.Entity);
+                Map.SetIsWalkable(target.Entity.Point, true);
                 Map.DisplayDirty = true;
 
                 //TODO: drop items, body
 
-                Scheduler.RemoveActor(target);
+                Scheduler.RemoveActor(target.Entity);
             }
         }
     }

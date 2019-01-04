@@ -4,13 +4,23 @@ using CopperBend.MapUtil;
 
 namespace CopperBend.App
 {
-    public interface IActor : IDrawable
+    public interface IComponent
+    {
+        IActor Entity { get; }
+    }
+
+    public interface IHealAndHurt : IComponent
+    {
+        int Health { get; }
+        void Heal(int amount);
+        void Hurt(int amount);
+    }
+
+    public interface IActor : IDrawable, IHealAndHurt
     {
         Point Point { get; }
         string Name { get; set; }
         int Awareness { get; set; }
-        int Health { get; }
-        void AdjustHealth(int amount);
         void MoveTo(Point point);
         IItem WieldedTool { get; }
         void Wield(IItem item);

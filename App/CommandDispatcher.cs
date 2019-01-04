@@ -205,7 +205,6 @@ namespace CopperBend.App
         #endregion
 
         #region Drop
-
         private void Drop_Prompt(RLKeyPress key)
         {
             Prompt("Drop (inventory letter or ? to show inventory): ");

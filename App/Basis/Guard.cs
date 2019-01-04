@@ -9,5 +9,10 @@ namespace CopperBend.App
             if (condition) throw new Exception(message);
         }
 
+        public static void AgainstNullArgument(object argument, string message = "Argument null")
+        {
+            if (argument == null) throw new Exception(message);
+        }
+
     }
 }

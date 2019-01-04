@@ -62,6 +62,7 @@
     <Compile Include="Behaviors\StandardAggressor.cs" />
     <Compile Include="CommandDispatcher.cs" />
     <Compile Include="CommandDispatcher_util.cs" />
+    <Compile Include="ConflictSystem.cs" />
     <Compile Include="EventBus.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="Map.cs" />

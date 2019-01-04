@@ -59,9 +59,8 @@ namespace CopperBend.App
 
         public void Run()
         {
-            //later these will be untrue, with load game and create new game
-            if (Player == null) throw new Exception("Currently need Player before starting engine.");
-            if (Map == null) throw new Exception("Currently need Map before starting engine.");
+            Guard.AgainstNullArgument(Player, "Currently need Player before starting engine.");
+            Guard.AgainstNullArgument(Map, "Currently need Map before starting engine.");
 
             Dispatcher.Init(this);
 

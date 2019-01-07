@@ -8,30 +8,12 @@ namespace CopperBend.App
 {
     public class GameEngine : IGameState
     {
-        private RLRootConsole RootConsole;
-
-        private RLConsole MapPane;
-        private int MapWidth = 60;
-        private int MapHeight = 60;
-
-        private RLConsole StatPane;
-        private int StatWidth = 20;
-        private int StatHeight = 60;
-
-        private RLConsole TextPane;
-        private int TextWidth = 80;
-        private int TextHeight = 20;
-
-        private RLConsole LargePane;
-        private int LargeWidth = 60;
-        private int LargeHeight = 60;
-        private bool LargePaneVisible;
+        private GameWindow GameWindow;
 
         private Queue<RLKeyPress> InputQueue;
         private Queue<GameCommand> CommandQueue;
         private Scheduler Scheduler;
         private CommandDispatcher Dispatcher;
-        private Messenger Messenger;
         private MapLoader MapLoader;
 
         private readonly EventBus Bus;
@@ -41,20 +23,19 @@ namespace CopperBend.App
         #region Initialization
         //  The division of responsibilities among these methods works for now
         //  When load/save comes in, they'll need reworking
-        public GameEngine(RLRootConsole console, Actor player)
+        public GameEngine()
         {
-            RootConsole = console;
-            MapPane = new RLConsole(MapWidth, MapHeight);
-            StatPane = new RLConsole(StatWidth, StatHeight);
-            TextPane = new RLConsole(TextWidth, TextHeight);
-            LargePane = new RLConsole(LargeWidth, LargeHeight);
-            LargePaneVisible = false;
+            InputQueue = new Queue<RLKeyPress>();
+            GameWindow = new GameWindow(InputQueue);
 
-            Player = player;
             CommandQueue = new Queue<GameCommand>();
             Bus = EventBus.OurBus;
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
+
+            Scheduler = new Scheduler();
+            Dispatcher = new CommandDispatcher(Scheduler, GameWindow);
+            MapLoader = new MapLoader();
         }
 
         public void Run()
@@ -64,22 +45,72 @@ namespace CopperBend.App
 
             Dispatcher.Init(this);
 
-            RootConsole.Update += onUpdate;
-            RootConsole.Render += onRender;
-            RootConsole.Run();
+            GameWindow.Run(onUpdate, onRender);
         }
 
         public void StartNewGame()
         {
-            InputQueue = new Queue<RLKeyPress>();
-            Scheduler = new Scheduler();
-            Messenger = new Messenger(InputQueue, TextPane, LargePane);
-            Dispatcher = new CommandDispatcher(Scheduler, Messenger);
-            MapLoader = new MapLoader();
-
+            // recreate or clear existing game objects?
+            Player = InitPlayer();
             LoadMap("Farm");
             Mode = GameMode.PlayerReady;
         }
+
+
+        private static Actor InitPlayer()
+        {
+            var player = new Actor(At(0, 0))
+            {
+                Name = "Our Dude",
+                Symbol = '@',
+                ColorForeground = Palette.DbLight,
+                Awareness = 222,
+                Health = 23
+            };
+
+            var hoe = new Hoe(At(0, 0))
+            {
+                Name = "hoe",
+                ColorForeground = RLColor.Brown,
+                Symbol = '/',
+                IsUsable = true,
+            };
+
+            var rock = new Item(At(0, 0))
+            {
+                Name = "rock",
+                ColorForeground = RLColor.Gray,
+                Symbol = '*'
+            };
+
+            var seed = new Seed(At(0, 0), 1, PlantType.Boomer)
+            {
+                Name = "seed",
+                ColorForeground = RLColor.LightGreen,
+                Symbol = '.'
+            };
+
+            var seed_2 = new HealerSeed(At(0, 0), 2)
+            {
+                Name = "seed",
+                ColorForeground = RLColor.LightGreen,
+                Symbol = '.'
+            };
+
+            player.AddToInventory(hoe);
+            player.AddToInventory(rock);
+            player.AddToInventory(seed);
+            player.AddToInventory(seed_2);
+            player.WieldedTool = hoe;
+
+            return player;
+        }
+
+        private static Point At(int x, int y)
+        {
+            return new Point(x, y);
+        }
+
         #endregion
 
         private void LoadMap(string mapName)
@@ -118,7 +149,7 @@ namespace CopperBend.App
             //later I want to leave some (all?) things scheduled,
             //so plants keep growing, et c...
             Scheduler.Clear();
-            Messenger.ResetWait();
+            GameWindow.ResetWait();
         }
 
         public void QueueCommand(GameCommand command)
@@ -137,56 +168,11 @@ namespace CopperBend.App
                 MapLoaded = true;
                 foreach (var text in Map.FirstSightMessage)
                 {
-                    Messenger.AddMessage(text);
+                    GameWindow.AddMessage(text);
                 }
             }
 
-            //FUTURE:  real-time (background) animation around here
-
-            bool rootDirty = false;
-
-            if (Map.DisplayDirty)
-            {
-                Map.DrawMap(MapPane);
-                RLConsole.Blit(MapPane, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
-                Map.DisplayDirty = false;
-                rootDirty = true;
-            }
-
-            //  I haven't even begun to code status reporting
-            //  ...I've barely thought about it.
-            //  Health reporting should be vague, perhaps just to begin with
-            //  Magical energy is called...  something that's not greek.
-            //  Perhaps two fatigue/physical energy pools?  Wind and Vitality?
-            //  I'm not gathering experience from anywhere yet
-            //  No status effects occurring yet (haste, confusion, ...)
-            //if (Stats.DisplayDirty)
-            //{
-            //    Stats.Report(StatConsole);
-            //    RLConsole.Blit(MapConsole, 0, 0, StatWidth, StatHeight, RootConsole, MapWidth, 0);
-            //    Stats.DisplayDirty = false;
-            //    rootDirty = true;
-            //}
-
-            //if (Messenger.DisplayDirty)
-            //{
-            RLConsole.Blit(TextPane, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
-            rootDirty = true;
-            //Messenger.DisplayDirty = false;
-            //}
-
-            //  Large messages blitted last since they overlay the rest of the panes
-            if (LargePaneVisible)
-            {
-                RLConsole.Blit(LargePane, 0, 0, LargeWidth, LargeHeight, RootConsole, 10, 10);
-            }
-
-            if (rootDirty)
-            {
-                //RootConsole.Clear();  //  por que?
-                RootConsole.Draw();
-                rootDirty = false;
-            }
+            GameWindow.Render(Map);
         }
 
         private void onUpdate(object sender, UpdateEventArgs e)
@@ -201,7 +187,7 @@ namespace CopperBend.App
         private void ReadInput()
         {
             //  For now, only checking the keyboard for input
-            RLKeyPress key = RootConsole.Keyboard.GetKeyPress();
+            RLKeyPress key = GameWindow.RootConsole.Keyboard.GetKeyPress();
             if (key != null)
             {
                 if (key.Alt && key.Key == RLKey.F4)
@@ -231,7 +217,7 @@ namespace CopperBend.App
 
                 case GameCommand.NotReadyToLeave:
                     Player.MoveTo(new Point(7, 17));
-                    Messenger.AddMessage("At the gate... and... I don't want to leave.  Some important jobs here, first.");
+                    GameWindow.AddMessage("At the gate... and... I don't want to leave.  Some important jobs here, first.");
                     break;
 
                 case GameCommand.Unset:
@@ -255,17 +241,17 @@ namespace CopperBend.App
 
             //  The large message pane overlays most of the game
             case GameMode.LargeMessagePending:
-                Messenger.HandleLargeMessage();
+                GameWindow.HandleLargeMessage();
                 break;
 
             //  Messages waiting for the player block player input and scheduled events
             case GameMode.MessagesPending:
-                Messenger.HandlePendingMessages();
+                GameWindow.HandlePendingMessages();
                 break;
 
             //  Waiting for player actions blocks Scheduler
             case GameMode.PlayerReady:
-                Messenger.ResetWait();
+                GameWindow.ResetWait();
                 Dispatcher.HandlePlayerCommands();
                 break;
 
@@ -293,7 +279,7 @@ namespace CopperBend.App
         private void QuitGame()
         {
             //0.1, later verify, offer save
-            RootConsole.Close();
+            GameWindow.RootConsole.Close();
         }
 
 

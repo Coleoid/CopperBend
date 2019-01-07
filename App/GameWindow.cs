@@ -1,29 +1,124 @@
 ﻿using System;
-using RLNET;
 using System.Collections.Generic;
 using System.Linq;
+using RLNET;
 
 namespace CopperBend.App
 {
-    public class Messenger
+    public class GameWindow
     {
+        public RLRootConsole RootConsole { get; set; }
+
+        private RLConsole MapPane;
+        private int MapWidth = 60;
+        private int MapHeight = 60;
+
+        private RLConsole StatPane;
+        private int StatWidth = 20;
+        private int StatHeight = 60;
+
+        public RLConsole TextPane { get; set; }
+        private int TextWidth = 80;
+        private int TextHeight = 20;
+
+        public RLConsole LargePane { get; set; }
+        private int LargeWidth = 60;
+        private int LargeHeight = 60;
+        private bool LargePaneVisible;
+
         private Queue<RLKeyPress> InputQueue;
-        private readonly RLConsole TextPane;
-        private readonly RLConsole LargePane;
-
-        public Messenger(Queue<RLKeyPress> inputQueue, RLConsole textPane, RLConsole largePane)
-        {
-            InputQueue = inputQueue;
-            TextPane = textPane;
-            LargePane = largePane;
-            MessageQueue = new Queue<string>();
-            EventBus.OurBus.SendLargeMessageSubscribers += LargeMessage;
-        }
-
         public Queue<string> MessageQueue;
+
         public bool WaitingAtMorePrompt = false;
         public bool DisplayDirty { get; set; } = false;
         private int ShownMessages = 0;
+
+
+        public GameWindow(Queue<RLKeyPress> inputQueue)
+        {
+            var consoleSettings = new RLSettings
+            {
+                Title = "Copper Bend",
+                BitmapFile = "assets\\terminal12x12_gs_ro.png",
+                Width = 80,
+                Height = 80,
+                CharWidth = 12,
+                CharHeight = 12,
+                Scale = 1f,
+                WindowBorder = RLWindowBorder.Resizable,
+                ResizeType = RLResizeType.ResizeCells,
+            };
+
+            RootConsole = new RLRootConsole(consoleSettings);
+            MapPane = new RLConsole(MapWidth, MapHeight);
+            StatPane = new RLConsole(StatWidth, StatHeight);
+            TextPane = new RLConsole(TextWidth, TextHeight);
+            LargePane = new RLConsole(LargeWidth, LargeHeight);
+            LargePaneVisible = false;
+
+
+            InputQueue = inputQueue;
+            MessageQueue = new Queue<string>();
+            EventBus.OurBus.SendLargeMessageSubscribers += LargeMessage;
+
+        }
+
+        internal void Render(IAreaMap map)
+        {
+            //FUTURE:  real-time (background) animation around here
+
+            bool rootDirty = false;
+
+            if (map.DisplayDirty)
+            {
+                map.DrawMap(MapPane);
+                RLConsole.Blit(MapPane, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
+                map.DisplayDirty = false;
+                rootDirty = true;
+            }
+
+            //  I haven't even begun to code status reporting
+            //  ...I've barely thought about it.
+            //  Health reporting should be vague, perhaps just to begin with
+            //  Magical energy is called...  something that's not greek.
+            //  Perhaps two fatigue/physical energy pools?  Wind and Vitality?
+            //  I'm not gathering experience from anywhere yet
+            //  No status effects occurring yet (haste, confusion, ...)
+            //if (Stats.DisplayDirty)
+            //{
+            //    Stats.Report(StatConsole);
+            //    RLConsole.Blit(MapConsole, 0, 0, StatWidth, StatHeight, RootConsole, MapWidth, 0);
+            //    Stats.DisplayDirty = false;
+            //    rootDirty = true;
+            //}
+
+            //if (GameWindow.DisplayDirty)
+            //{
+            RLConsole.Blit(TextPane, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
+            rootDirty = true;
+            //GameWindow.DisplayDirty = false;
+            //}
+
+            //  Large messages blitted last since they overlay the rest of the panes
+            if (LargePaneVisible)
+            {
+                RLConsole.Blit(LargePane, 0, 0, LargeWidth, LargeHeight, RootConsole, 10, 10);
+            }
+
+            if (rootDirty)
+            {
+                //RootConsole.Clear();  //  por que?
+                RootConsole.Draw();
+                rootDirty = false;
+            }
+        }
+
+        internal void Run(UpdateEventHandler onUpdate, UpdateEventHandler onRender)
+        {
+            RootConsole.Update += onUpdate;
+            RootConsole.Render += onRender;
+            RootConsole.Run();
+        }
 
         public void AddMessage(string newMessage)
         {
@@ -40,7 +135,7 @@ namespace CopperBend.App
                     WriteLine("-- more --");
                     DisplayDirty = true;
                     WaitingAtMorePrompt = true;
-                    
+
                     EventBus.OurBus.MessagePanelFull(this, new EventArgs());
                     return;
                 }
@@ -172,11 +267,10 @@ namespace CopperBend.App
             var lines = args.Lines.ToList();
 
             int cY = 1;
-            
+
             foreach (var line in lines)
             {
-                int linesWritten = LargePane.Print(1, cY, 0, line, Palette.PrimaryLighter, new RLColor(0, 0, 0), 58, 1);
-                cY += linesWritten;
+                int linesWritten = LargePane.Print(1, cY, 0, line, Palette.PrimaryLighter, new RLColor(0, 0, 0), 58, 1);                cY += linesWritten;
             }
         }
     }

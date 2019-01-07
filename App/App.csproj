@@ -65,8 +65,8 @@
     <Compile Include="ConflictSystem.cs" />
     <Compile Include="EventBus.cs" />
     <Compile Include="GameEngine.cs" />
+    <Compile Include="GameWindow.cs" />
     <Compile Include="Map.cs" />
-    <Compile Include="Messenger.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
     <Compile Include="Basis\Direction.cs" />

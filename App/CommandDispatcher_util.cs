@@ -11,9 +11,9 @@ namespace CopperBend.App
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
 
-        public void WriteLine(string text) => Messenger.WriteLine(text);
+        public void WriteLine(string text) => Window.WriteLine(text);
 
-        public void Prompt(string text) => Messenger.Prompt(text);
+        public void Prompt(string text) => Window.Prompt(text);
 
         private int AlphaIndexOfKeyPress(RLKeyPress key)
         {

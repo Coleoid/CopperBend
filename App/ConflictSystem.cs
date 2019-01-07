@@ -2,15 +2,15 @@
 {
     public class ConflictSystem
     {
-        public Messenger Messenger { get; private set; }
-        public void WriteLine(string text) => Messenger.WriteLine(text);
+        public GameWindow GameWindow { get; private set; }
+        public void WriteLine(string text) => GameWindow.WriteLine(text);
 
         public IAreaMap Map { get; private set; }
         public Scheduler Scheduler { get; private set; }
 
-        public ConflictSystem(Messenger messenger, IAreaMap map, Scheduler scheduler)
+        public ConflictSystem(GameWindow gameWindow, IAreaMap map, Scheduler scheduler)
         {
-            Messenger = messenger;
+            GameWindow = gameWindow;
             Map = map;
             Scheduler = scheduler;
         }

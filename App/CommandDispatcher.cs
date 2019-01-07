@@ -9,7 +9,7 @@ namespace CopperBend.App
     public partial class CommandDispatcher
     {
         public Scheduler Scheduler { get; private set; }
-        public Messenger Messenger { get; private set; }
+        public GameWindow Window { get; private set; }
 
         public IActor Player { get => GameState.Player; }
         public IAreaMap Map { get => GameState.Map; }
@@ -22,10 +22,10 @@ namespace CopperBend.App
             get => NextStep != null;
         }
 
-        public CommandDispatcher(Scheduler scheduler, Messenger messenger)
+        public CommandDispatcher(Scheduler scheduler, GameWindow window)
         {
             Scheduler = scheduler;
-            Messenger = messenger;
+            Window = window;
             describer = new Describer();
         }
 
@@ -37,7 +37,7 @@ namespace CopperBend.App
 
         public void HandlePlayerCommands()
         {
-            var key = Messenger.GetNextKeyPress();
+            var key = Window.GetNextKeyPress();
             if (key == null) return;
 
             if (InMultiStepCommand)  //  Drop, throw, wield, etc.
@@ -114,7 +114,7 @@ namespace CopperBend.App
             {
                 var np = describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
                 WriteLine($"I can't walk through {np}.");
-                Messenger.EmptyInputQueue();
+                Window.EmptyInputQueue();
             }
             else
             {
@@ -155,7 +155,7 @@ namespace CopperBend.App
         private void Command_DirectionAttack(IActor targetActor)
         {
             //0.1
-            var conflictSystem = new ConflictSystem(Messenger, Map, Scheduler);
+            var conflictSystem = new ConflictSystem(Window, Map, Scheduler);
             conflictSystem.Attack("Wah!", 2, targetActor);
 
             PlayerBusyFor(12);

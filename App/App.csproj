@@ -64,6 +64,10 @@
     <Compile Include="CommandDispatcher.cs" />
     <Compile Include="CommandDispatcher_util.cs" />
     <Compile Include="ConflictSystem.cs" />
+    <Compile Include="DryIoc\AsyncExecutionFlowScopeContext.cs" />
+    <Compile Include="DryIoc\Container.cs" />
+    <Compile Include="DryIoc\FastExpressionCompiler.cs" />
+    <Compile Include="DryIoc\ImTools.cs" />
     <Compile Include="EventBus.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="GameWindow.cs" />

@@ -66,6 +66,7 @@
     <Compile Include="EventBus.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="GameWindow.cs" />
+    <Compile Include="Basis\IScheduler.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />

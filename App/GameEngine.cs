@@ -34,21 +34,17 @@ namespace CopperBend.App
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
 
             Scheduler = new Scheduler();
-            Dispatcher = new CommandDispatcher(Scheduler, GameWindow);
+            Dispatcher = new CommandDispatcher(Scheduler, GameWindow, this);
             MapLoader = new MapLoader();
         }
 
         public void Run()
         {
-            Guard.AgainstNullArgument(Player, "Currently need Player before starting engine.");
-            Guard.AgainstNullArgument(Map, "Currently need Map before starting engine.");
-
-            Dispatcher.Init(this);
-
+            LoadNewGame();
             GameWindow.Run(onUpdate, onRender);
         }
 
-        public void StartNewGame()
+        public void LoadNewGame()
         {
             // recreate or clear existing game objects?
             Player = InitPlayer();
@@ -178,9 +174,7 @@ namespace CopperBend.App
         private void onUpdate(object sender, UpdateEventArgs e)
         {
             ReadInput();
-
             WorkCommandQueue();
-
             ActOnMode();
         }
 
@@ -211,20 +205,22 @@ namespace CopperBend.App
                     QuitGame();
                     break;
 
+                //0.1
                 case GameCommand.GoToFarmhouse:
                     LoadMap("Farmhouse");
                     break;
 
+                //0.1
                 case GameCommand.NotReadyToLeave:
                     Player.MoveTo(new Point(7, 17));
                     GameWindow.AddMessage("At the gate... and... I don't want to leave.  Some important jobs here, first.");
                     break;
 
                 case GameCommand.Unset:
-                    throw new Exception("Command unset--preparation missed.");
+                    throw new Exception("Dev error:  Unset command on the queue--preparation missed.");
 
                 default:
-                    throw new Exception($"Haven't coded case [{command}] yet.");
+                    throw new Exception($"Dev error:  Don't know how to work the [{command}] command yet.");
                 }
             }
         }
@@ -249,7 +245,7 @@ namespace CopperBend.App
                 GameWindow.HandlePendingMessages();
                 break;
 
-            //  Waiting for player actions blocks Scheduler
+            //  Waiting for player input blocks Scheduler
             case GameMode.PlayerReady:
                 GameWindow.ResetWait();
                 Dispatcher.HandlePlayerCommands();

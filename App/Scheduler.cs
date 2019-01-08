@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace CopperBend.App
 {
-    public class Scheduler
+    public class Scheduler : IScheduler
     {
         private readonly SortedDictionary<int, List<ScheduleEntry>> _schedule;
 

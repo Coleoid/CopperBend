@@ -11,9 +11,10 @@ namespace CopperBend.App
         public Scheduler Scheduler { get; private set; }
         public GameWindow Window { get; private set; }
 
+        public IGameState GameState { get; private set; }
         public IActor Player { get => GameState.Player; }
         public IAreaMap Map { get => GameState.Map; }
-        public IGameState GameState { get; private set; }
+
         private Describer describer;
 
         private Action<RLKeyPress> NextStep = null;
@@ -22,18 +23,13 @@ namespace CopperBend.App
             get => NextStep != null;
         }
 
-        public CommandDispatcher(Scheduler scheduler, GameWindow window)
+        public CommandDispatcher(Scheduler scheduler, GameWindow window, IGameState gameState)
         {
             Scheduler = scheduler;
             Window = window;
+            GameState = gameState;
             describer = new Describer();
         }
-
-        public void Init(IGameState gameState)
-        {
-            GameState = gameState;
-        }
-
 
         public void HandlePlayerCommands()
         {

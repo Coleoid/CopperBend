@@ -15,8 +15,6 @@ namespace CopperBend.App
             try
             {
                 var game = new GameEngine();
-
-                game.StartNewGame();
                 game.Run();
             }
             catch (Exception ex)

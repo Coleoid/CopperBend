@@ -21,6 +21,7 @@ namespace CopperBend.App
         Point Point { get; }
         string Name { get; set; }
         int Awareness { get; set; }
+        IDefenseAspect DefenseAspect { get; set; }
         void MoveTo(Point point);
         IItem WieldedTool { get; }
         void Wield(IItem item);

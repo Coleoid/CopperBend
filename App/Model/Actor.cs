@@ -38,14 +38,9 @@ namespace CopperBend.App.Model
 
         //  IHealAndHurt
         public int Health { get; set; }
-        public void Heal(int amount)
-        {
-            Health += amount;
-        }
-        public void Hurt(int amount)
-        {
-            Health -= amount;
-        }
+        public void Heal(int amount) => Health += amount;
+        public void Hurt(int amount) => Health -= amount;
+        public IDefenseAspect DefenseAspect { get; set; }
 
         public Action<IControlPanel, ScheduleEntry> NextAction => _behavior.NextAction;
 

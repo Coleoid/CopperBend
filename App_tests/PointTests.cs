@@ -6,13 +6,13 @@ using System.Collections.Generic;
 namespace CopperBend.App.tests
 {
     [TestFixture]
-    public class PointinateTests
+    public class PointTests
     {
-        //  Earlier, I had Point as a class.  
+        //  Earlier, I had Point as a class instead of a struct.
         //  Neither of these tests passed, reducing the usefulness of Point.
 
         [Test]
-        public void Comparing_coords_works_with_coords_as_structs()
+        public void Points_are_equal_when_XY_values_are_equal()
         {
             Point a = new Point(1, 2);
             Point b = new Point(1, 2);
@@ -23,7 +23,7 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void Point_as_Keys_work_through_interface()
+        public void Points_as_keys_work_on_XY()
         {
             Point a = new Point(1, 2);
             Point b = new Point(1, 2);
@@ -44,8 +44,8 @@ namespace CopperBend.App.tests
 
             var distance = origin.DistanceTo(target);
 
-            var s2 = Math.Sqrt(2);
-            Assert.That(distance, Is.EqualTo(s2));
+            var sro2 = Math.Sqrt(2);
+            Assert.That(distance, Is.EqualTo(sro2));
         }
     }
 }

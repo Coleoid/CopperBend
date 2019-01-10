@@ -180,11 +180,8 @@ namespace CopperBend.App
 
         public void Learn(Fruit fruit)
         {
-            describer.Learn(fruit);
+            Describer.Learn(fruit);
         }
-
-        //  Pure plumbing -- this manifold should eliminate much other plumbing
-        public void QueueCommand(GameCommand command) => GameState.QueueCommand(command);
 
         public int XP { get; set; } = 0;
         public void Experience(PlantType plant, Exp experience)

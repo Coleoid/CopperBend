@@ -49,6 +49,19 @@ namespace CopperBend.App.tests
         public void Defense_can_reduce_damage(int startingHealth, int amount, double portionBlocked, int expectedHealth)
         {
             var actor = CreateActor(startingHealth);
+            actor.DefenseAspect.SetResistance("Sharp", portionBlocked);
+
+            var damage = new Damage { Quantity = amount, DamageType = "Sharp" };
+            actor.DefenseAspect.ApplyDamage(damage);
+
+            Assert.That(actor.Health, Is.EqualTo(expectedHealth));
+        }
+
+        [TestCase(10, 10, .5, 5)]
+        [TestCase(10, 10, 1, 10)]
+        public void Defense_can_catch_more_specific_types(int startingHealth, int amount, double portionBlocked, int expectedHealth)
+        {
+            var actor = CreateActor(startingHealth);
             actor.DefenseAspect.SetResistance("General", portionBlocked);
 
             var damage = new Damage { Quantity = amount, DamageType = "Sharp" };

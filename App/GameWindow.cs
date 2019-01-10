@@ -28,14 +28,17 @@ namespace CopperBend.App
 
         private Queue<RLKeyPress> InputQueue;
         public Queue<string> MessageQueue;
+        private EventBus EventBus;
 
         public bool WaitingAtMorePrompt = false;
         public bool DisplayDirty { get; set; } = false;
         private int ShownMessages = 0;
 
 
-        public GameWindow(Queue<RLKeyPress> inputQueue)
+        public GameWindow(Queue<RLKeyPress> inputQueue, EventBus eventBus)
         {
+            InputQueue = inputQueue;
+            EventBus = eventBus;
             var consoleSettings = new RLSettings
             {
                 Title = "Copper Bend",
@@ -57,9 +60,8 @@ namespace CopperBend.App
             LargePaneVisible = false;
 
 
-            InputQueue = inputQueue;
             MessageQueue = new Queue<string>();
-            EventBus.OurBus.SendLargeMessageSubscribers += LargeMessage;
+            EventBus.SendLargeMessageSubscribers += LargeMessage;
 
         }
 
@@ -136,7 +138,7 @@ namespace CopperBend.App
                     DisplayDirty = true;
                     WaitingAtMorePrompt = true;
 
-                    EventBus.OurBus.MessagePanelFull(this, new EventArgs());
+                    EventBus.MessagePanelFull(this, new EventArgs());
                     return;
                 }
 
@@ -187,7 +189,7 @@ namespace CopperBend.App
             }
 
             //  If we reach this point, we sent all messages
-            EventBus.OurBus.AllMessagesSent(this, new EventArgs());
+            EventBus.AllMessagesSent(this, new EventArgs());
         }
 
         private const int textConsoleHeight = 12;
@@ -259,7 +261,7 @@ namespace CopperBend.App
 
             if (press == null) return;
 
-            EventBus.OurBus.ClearLargeMessage(this, new EventArgs());
+            EventBus.ClearLargeMessage(this, new EventArgs());
         }
 
         internal void LargeMessage(object sender, LargeMessageEventArgs args)

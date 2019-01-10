@@ -15,7 +15,8 @@ namespace CopperBend.App
         public IActor Player { get => GameState.Player; }
         public IAreaMap Map { get => GameState.Map; }
 
-        private Describer describer;
+        private Describer Describer;
+        private Queue<GameCommand> CommandQueue;
 
         private Action<RLKeyPress> NextStep = null;
         private bool InMultiStepCommand
@@ -23,12 +24,18 @@ namespace CopperBend.App
             get => NextStep != null;
         }
 
-        public CommandDispatcher(Scheduler scheduler, GameWindow window, IGameState gameState)
+        public CommandDispatcher(
+            Scheduler scheduler, 
+            GameWindow window, 
+            IGameState gameState, 
+            Describer describer,
+            Queue<GameCommand> commandQueue)
         {
             Scheduler = scheduler;
             Window = window;
             GameState = gameState;
-            describer = new Describer();
+            Describer = describer;
+            CommandQueue = commandQueue;
         }
 
         public void HandlePlayerCommands()
@@ -108,14 +115,14 @@ namespace CopperBend.App
             }
             else if (!Map.IsWalkable(point))
             {
-                var np = describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
+                var np = Describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
                 WriteLine($"I can't walk through {np}.");
                 Window.EmptyInputQueue();
             }
             else
             {
                 if (Map.HasEventAtPoint(tile.Point))
-                    Map.RunEvent(player, tile, this);
+                    RunEvent(tile);
 
                 if (!Map.MoveActor(player, point))
                     throw new Exception($"Somehow failed to move onto {point}, a walkable tile.");
@@ -140,7 +147,7 @@ namespace CopperBend.App
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
-                    var np = describer.Describe(item, DescMods.Quantity);
+                    var np = Describer.Describe(item, DescMods.Quantity);
                     WriteLine($"There {beVerb} {np} here.");
                 }
                 else {}  //  Nothing here, report nothing
@@ -148,6 +155,30 @@ namespace CopperBend.App
             }
         }
 
+
+        public void RunEvent(ITile tile)
+        {
+            if (GameState.Map.LocationMessages.ContainsKey(tile.Point))
+            {
+                var message = GameState.Map.LocationMessages[tile.Point];
+                foreach (var line in message)
+                    WriteLine(line);
+
+                GameState.Map.LocationMessages.Remove(tile.Point);
+            }
+
+            //0.2
+            if (GameState.Map.LocationEventEntries.ContainsKey(tile.Point))
+            {
+                var entries = GameState.Map.LocationEventEntries[tile.Point];
+                foreach (var entry in entries)
+                {
+                    CommandQueue.Enqueue(entry.Command);
+                }
+            }
+
+            //0.3 may unify those collections and loops, may restructure flow
+        }
         private void Command_DirectionAttack(IActor targetActor)
         {
             //0.1
@@ -189,7 +220,7 @@ namespace CopperBend.App
             var item = Player.Inventory.ElementAt(inventorySlot);
             if (!item.IsConsumable)
             {
-                WriteLine($"I can't {item.ConsumeVerb} {describer.Describe(item, DescMods.IndefiniteArticle)}.");
+                WriteLine($"I can't {item.ConsumeVerb} {Describer.Describe(item, DescMods.IndefiniteArticle)}.");
                 Consume_Prompt(null);
                 return;
             }
@@ -275,7 +306,7 @@ namespace CopperBend.App
                 int asciiSlot = lowercase_a;
                 foreach (var item in Player.Inventory)
                 {
-                    var description = describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);
+                    var description = Describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);
                     Console.WriteLine($"{(char)asciiSlot})  {description}");
                     asciiSlot++;
                 }

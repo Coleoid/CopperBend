@@ -6,36 +6,42 @@ using RLNET;
 
 namespace CopperBend.App
 {
-    public class GameEngine : IGameState
+    public class GameEngine // : IGameState
     {
         private GameWindow GameWindow;
-
-        private Queue<RLKeyPress> InputQueue;
         private Queue<GameCommand> CommandQueue;
+        private Queue<RLKeyPress> InputQueue;
         private Scheduler Scheduler;
         private CommandDispatcher Dispatcher;
         private MapLoader MapLoader;
-
+        private GameState GameState;
         private readonly EventBus Bus;
-        public IAreaMap Map { get; private set; }
-        public IActor Player { get; private set; }
 
         #region Initialization
         //  The division of responsibilities among these methods works for now
         //  When load/save comes in, they'll need reworking
-        public GameEngine()
+        public GameEngine(
+            EventBus bus, 
+            Scheduler scheduler, 
+            GameWindow gameWindow, 
+            Queue<GameCommand> commandQueue, 
+            Queue<RLKeyPress> inputQueue, 
+            MapLoader mapLoader, 
+            IGameState gameState, 
+            CommandDispatcher commandDispatcher)
         {
-            InputQueue = new Queue<RLKeyPress>();
-            GameWindow = new GameWindow(InputQueue);
-
-            CommandQueue = new Queue<GameCommand>();
-            Bus = EventBus.OurBus;
+            Bus = bus;
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
 
-            Scheduler = new Scheduler();
-            Dispatcher = new CommandDispatcher(Scheduler, GameWindow, this);
-            MapLoader = new MapLoader();
+            Scheduler = scheduler;
+            GameWindow = gameWindow;
+            Dispatcher = commandDispatcher;
+
+            CommandQueue = commandQueue;
+            InputQueue = inputQueue;
+            MapLoader = mapLoader;
+            GameState = (GameState)gameState;  // not right, but compiling...
         }
 
         public void Run()
@@ -47,7 +53,7 @@ namespace CopperBend.App
         public void LoadNewGame()
         {
             // recreate or clear existing game objects?
-            Player = InitPlayer();
+            GameState.Player = InitPlayer();
             LoadMap("Farm");
             Mode = GameMode.PlayerReady;
         }
@@ -120,23 +126,23 @@ namespace CopperBend.App
                 map = MapLoader.DemoMap();
 
             LoadMap(map);
-            Player.MoveTo(Map.PlayerStartsAt);
-            Map.UpdatePlayerFieldOfView(Player);
-            Bus.SendLargeMessage(this, Map.FirstSightMessage);
+            GameState.Player.MoveTo(GameState.Map.PlayerStartsAt);
+            GameState.Map.UpdatePlayerFieldOfView(GameState.Player);
+            Bus.SendLargeMessage(this, GameState.Map.FirstSightMessage);
         }
 
         public void LoadMap(IAreaMap map)
         {
             UnloadCurrentMap();
 
-            Map = map;
+            GameState.Map = map;
             foreach (var actor in map.Actors)
             {
                 Scheduler.Add(new ScheduleEntry(12, null, actor));
             }
 
-            map.ViewpointActor = Player;
-            map.Actors.Add(Player);
+            map.ViewpointActor = GameState.Player;
+            map.Actors.Add(GameState.Player);
         }
 
         public void UnloadCurrentMap()
@@ -162,13 +168,13 @@ namespace CopperBend.App
             if (!MapLoaded)
             {
                 MapLoaded = true;
-                foreach (var text in Map.FirstSightMessage)
+                foreach (var text in GameState.Map.FirstSightMessage)
                 {
                     GameWindow.AddMessage(text);
                 }
             }
 
-            GameWindow.Render(Map);
+            GameWindow.Render(GameState.Map);
         }
 
         private void onUpdate(object sender, UpdateEventArgs e)
@@ -212,7 +218,7 @@ namespace CopperBend.App
 
                 //0.1
                 case GameCommand.NotReadyToLeave:
-                    Player.MoveTo(new Point(7, 17));
+                    GameState.Player.MoveTo(new Point(7, 17));
                     GameWindow.AddMessage("At the gate... and... I don't want to leave.  Some important jobs here, first.");
                     break;
 

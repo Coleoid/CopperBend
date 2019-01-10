@@ -159,30 +159,6 @@ namespace CopperBend.App
                 || LocationEventEntries.ContainsKey(point);
         }
 
-        public void RunEvent(IActor player, ITile tile, IControlPanel controls)
-        {
-            if (LocationMessages.ContainsKey(tile.Point))
-            {
-                var message = LocationMessages[tile.Point];
-                foreach (var line in message)
-                    controls.WriteLine(line);
-
-                LocationMessages.Remove(tile.Point);
-            }
-
-            //0.2
-            if (LocationEventEntries.ContainsKey(tile.Point))
-            {
-                var entries = LocationEventEntries[tile.Point];
-                foreach (var entry in entries)
-                {
-                    controls.QueueCommand(entry.Command);
-                }
-            }
-
-            //0.3 may unify those collections and loops, may restructure flow
-        }
-
         public void AddEventAtLocation(Point point, CommandEntry entry)
         {
             if (!LocationEventEntries.ContainsKey(point))

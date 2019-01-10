@@ -30,7 +30,6 @@ namespace CopperBend.App
         void Learn(Fruit fruit);
         void SetMapDirty();
 
-        //RLKeyPress GetNextKeyPress();
         void WriteLine(string text);
         void Prompt(string text);
 
@@ -38,7 +37,6 @@ namespace CopperBend.App
         void RemovePlantAt(Point point);
         void Till(ITile tile);
 
-        void QueueCommand(GameCommand command);
         void Experience(PlantType plant, Exp experience);
     }
 
@@ -48,7 +46,13 @@ namespace CopperBend.App
         IAreaMap Map { get; }
         IActor Player { get; }
         GameMode Mode { get; set; }
-        void QueueCommand(GameCommand command);
+    }
+
+    public class GameState : IGameState
+    {
+        public IAreaMap Map { get; set; }
+        public IActor Player { get; set; }
+        public GameMode Mode { get; set; }
     }
 
     public enum GameMode

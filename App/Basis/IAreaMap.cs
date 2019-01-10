@@ -22,11 +22,11 @@ namespace CopperBend.App
         IActor GetActorAtPoint(Point point);
         List<string> FirstSightMessage { get; set; }
         Dictionary<Point, List<string>> LocationMessages { get; }
+        Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; }
         Point PlayerStartsAt { get; set; }
 
         void OpenDoor(ITile tile);
         bool HasEventAtPoint(Point point);
-        void RunEvent(IActor player, ITile tile, IControlPanel controls);
         void AddEventAtLocation(Point point, CommandEntry entry);
     }
 }

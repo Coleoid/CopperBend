@@ -1,12 +1,11 @@
 ﻿using CopperBend.App.Model;
 using CopperBend.MapUtil;
-using RLNET;
 using System.Collections.Generic;
 
-//  Here I have some mechanisms to communicate and control,
-//  with nothing coherent shaken out yet.  In other places
-//  I'm passing important domain bits as arguments.
-//  Also see the EventBus for another channel.
+//  Some methods to communicate and control, in junk drawer mode.
+//  I'll keep accumulating until structure emerges.
+//  In other places I pass important domain bits as arguments.
+//  See the EventBus for another channel.
 
 namespace CopperBend.App
 {
@@ -25,7 +24,6 @@ namespace CopperBend.App
         bool CanActorSeeTarget(IActor actor, Point target);
         List<Point> GetPathTo(Point start, Point target);
 
-        // keep accumulating miscellaneous methods until structure becomes clear
         void AddToSchedule(ScheduleEntry entry);
         void Learn(Fruit fruit);
         void SetMapDirty();
@@ -38,21 +36,6 @@ namespace CopperBend.App
         void Till(ITile tile);
 
         void Experience(PlantType plant, Exp experience);
-    }
-
-    //  State of the game, not _quite_ globals...
-    public interface IGameState
-    {
-        IAreaMap Map { get; }
-        IActor Player { get; }
-        GameMode Mode { get; set; }
-    }
-
-    public class GameState : IGameState
-    {
-        public IAreaMap Map { get; set; }
-        public IActor Player { get; set; }
-        public GameMode Mode { get; set; }
     }
 
     public enum GameMode

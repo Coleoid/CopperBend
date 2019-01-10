@@ -6,7 +6,7 @@ using RLNET;
 
 namespace CopperBend.App
 {
-    public class GameEngine // : IGameState
+    public class GameEngine
     {
         private GameWindow GameWindow;
         private Queue<GameCommand> CommandQueue;

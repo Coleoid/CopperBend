@@ -6,13 +6,13 @@
         public void WriteLine(string text) => GameWindow.WriteLine(text);
 
         public IAreaMap Map { get; private set; }
-        public Scheduler Scheduler { get; private set; }
+        public Schedule Schedule { get; private set; }
 
-        public ConflictSystem(GameWindow gameWindow, IAreaMap map, Scheduler scheduler)
+        public ConflictSystem(GameWindow gameWindow, IAreaMap map, Schedule schedule)
         {
             GameWindow = gameWindow;
             Map = map;
-            Scheduler = scheduler;
+            Schedule = schedule;
         }
 
         public void Attack(string attack, int damage, IHealAndHurt target)
@@ -23,12 +23,12 @@
             {
                 WriteLine($"The {target.Entity.Name} dies.");
                 Map.Actors.Remove(target.Entity);
-                Map.SetIsWalkable(target.Entity.Point, true);
-                Map.DisplayDirty = true;
+                Map.SetWalkable(target.Entity.Point, true);
+                Map.IsDisplayDirty = true;
 
                 //TODO: drop items, body
 
-                Scheduler.RemoveActor(target.Entity);
+                Schedule.RemoveActor(target.Entity);
             }
         }
     }

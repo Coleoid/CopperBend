@@ -14,25 +14,29 @@ namespace CopperBend.App
             log.Info("Run started");
             try
             {
-                var c = new Container();
-                c.Register<EventBus, EventBus>(Reuse.Singleton);
-                c.Register<Describer, Describer>(Reuse.Singleton);
-                c.Register<Scheduler, Scheduler>(Reuse.Singleton);
-                c.Register<GameWindow, GameWindow>(Reuse.Singleton);
-                c.Register<Queue<GameCommand>, Queue<GameCommand>>(Reuse.Singleton, Made.Of(() => new Queue<GameCommand>()));
-                c.Register<Queue<RLKeyPress>, Queue<RLKeyPress>>(Reuse.Singleton, Made.Of(() => new Queue<RLKeyPress>()));
-                c.Register<MapLoader, MapLoader>(Reuse.Singleton);
-                c.Register<IGameState, GameState>(Reuse.Singleton);
-                c.Register<CommandDispatcher, CommandDispatcher>(Reuse.Singleton);
+                var c = new Container(rules => rules.WithDefaultReuse(Reuse.InCurrentScope));
 
-                c.Register<GameEngine, GameEngine>(Reuse.Singleton);
+                c.Register<EventBus, EventBus>();
+                c.Register<Describer, Describer>();
+                c.Register<Schedule, Schedule>();
+                c.Register<GameWindow, GameWindow>();
+                c.Register<Queue<GameCommand>, Queue<GameCommand>>(Made.Of(() => new Queue<GameCommand>()));
+                c.Register<Queue<RLKeyPress>, Queue<RLKeyPress>>(Made.Of(() => new Queue<RLKeyPress>()));
+                c.Register<MapLoader, MapLoader>();
+                c.Register<IGameState, GameState>();
+                c.Register<CommandDispatcher, CommandDispatcher>();
 
-                var game = c.Resolve<GameEngine>();
-                game.Run();
+                c.Register<GameEngine, GameEngine>();
+
+                using (var scope = c.OpenScope())
+                {
+                    var game = scope.Resolve<GameEngine>();
+                    game.Run();
+                }
             }
             catch (Exception ex)
             {
-                log.Fatal("Bah.", ex);
+                log.Fatal("Exception terminated app", ex);
             }
             log.Info("Run ended");
         }

@@ -1,6 +1,6 @@
 ﻿namespace CopperBend.App
 {
-    public interface IScheduler
+    public interface ISchedule
     {
         int CurrentTick { get; }
 

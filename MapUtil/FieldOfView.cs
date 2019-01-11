@@ -14,11 +14,11 @@ namespace CopperBend.MapUtil
             _inFov = new HashSet<int>();
         }
 
-        public FieldOfView(IMap map, HashSet<int> inFov)
-        {
-            _map = map;
-            _inFov = inFov;
-        }
+        //public FieldOfView(IMap map, HashSet<int> inFov)
+        //{
+        //    _map = map;
+        //    _inFov = inFov;
+        //}
 
         public ReadOnlyCollection<Cell> ComputeFov(Point origin, int radius, bool lightWalls)
         {

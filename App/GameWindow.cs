@@ -71,11 +71,11 @@ namespace CopperBend.App
 
             bool rootDirty = false;
 
-            if (map.DisplayDirty)
+            if (map.IsDisplayDirty)
             {
                 map.DrawMap(MapPane);
                 RLConsole.Blit(MapPane, 0, 0, MapWidth, MapHeight, RootConsole, 0, 0);
-                map.DisplayDirty = false;
+                map.IsDisplayDirty = false;
                 rootDirty = true;
             }
 
@@ -86,19 +86,19 @@ namespace CopperBend.App
             //  Perhaps two fatigue/physical energy pools?  Wind and Vitality?
             //  I'm not gathering experience from anywhere yet
             //  No status effects occurring yet (haste, confusion, ...)
-            //if (Stats.DisplayDirty)
+            //if (Stats.IsDisplayDirty)
             //{
             //    Stats.Report(StatConsole);
             //    RLConsole.Blit(MapConsole, 0, 0, StatWidth, StatHeight, RootConsole, MapWidth, 0);
-            //    Stats.DisplayDirty = false;
+            //    Stats.IsDisplayDirty = false;
             //    rootDirty = true;
             //}
 
-            //if (GameWindow.DisplayDirty)
+            //if (GameWindow.IsDisplayDirty)
             //{
             RLConsole.Blit(TextPane, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
             rootDirty = true;
-            //GameWindow.DisplayDirty = false;
+            //GameWindow.IsDisplayDirty = false;
             //}
 
             //  Large messages blitted last since they overlay the rest of the panes

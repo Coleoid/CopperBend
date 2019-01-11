@@ -13,13 +13,13 @@ namespace CopperBend.MapUtil
 
         bool IsTransparent(int x, int y);
         bool IsTransparent(Point point);
-        void SetIsTransparent(Point point, bool isTransparent);
+        void SetTransparent(Point point, bool isTransparent);
 
         bool IsWalkable(Point point);
-        void SetIsWalkable(Point point, bool isWalkable);
+        void SetWalkable(Point point, bool isWalkable);
 
         bool IsExplored(Point point);
-        void SetIsExplored(Point point, bool isExplored);
+        void SetExplored(Point point, bool isExplored);
 
         bool IsWithinMap(Point point);
 
@@ -29,7 +29,7 @@ namespace CopperBend.MapUtil
         /// <summary> Sets the whole Map to the specified values </summary>
         void Clear(bool isTransparent, bool isWalkable);
 
-        IMap Clone();
+        //IMap Clone();
 
         /// <summary>
         /// Overwrites the cells of this map with the source Map, at the specified offset

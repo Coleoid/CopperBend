@@ -29,7 +29,7 @@ namespace CopperBend.App
 
         public void PlayerBusyFor(int ticks)
         {
-            Scheduler.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
+            Schedule.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
             GameState.Mode = GameMode.Schedule;
             IsPlayerScheduled = true;
         }
@@ -97,12 +97,12 @@ namespace CopperBend.App
 
         public void AddToSchedule(ScheduleEntry entry)
         {
-            Scheduler.Add(entry);
+            Schedule.Add(entry);
         }
 
         public void SetMapDirty()
         {
-            Map.DisplayDirty = true;
+            Map.IsDisplayDirty = true;
         }
 
         public bool CanActorSeeTarget(IActor actor, Point target)
@@ -132,15 +132,15 @@ namespace CopperBend.App
 
         public List<Point> GetPathTo(Point start, Point target)
         {
-            Map.SetIsWalkable(start, true);
-            Map.SetIsWalkable(target, true);
+            Map.SetWalkable(start, true);
+            Map.SetWalkable(target, true);
 
             PathFinder pathFinder = new PathFinder(Map, 1.0, Math.Sqrt(2));
 
             var pathList = pathFinder.ShortestPathList(start, target);
 
-            Map.SetIsWalkable(start, false);
-            Map.SetIsWalkable(target, false);
+            Map.SetWalkable(start, false);
+            Map.SetWalkable(target, false);
 
             return pathList;
         }

@@ -241,8 +241,8 @@ namespace CopperBend.App
 
                     //TODO:  push down/unify
                     
-                    map.SetIsTransparent(tile.Point, type.IsTransparent);
-                    map.SetIsWalkable(tile.Point, type.IsWalkable);
+                    map.SetTransparent(tile.Point, type.IsTransparent);
+                    map.SetWalkable(tile.Point, type.IsWalkable);
                 }
             }
 

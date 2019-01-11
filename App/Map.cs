@@ -39,26 +39,26 @@ namespace CopperBend.MapUtil
         {
             foreach (Point point in GetAllPoints())
             {
-                SetIsTransparent(point, isTransparent);
-                SetIsWalkable(point, isWalkable);
+                SetTransparent(point, isTransparent);
+                SetWalkable(point, isWalkable);
             }
         }
 
         public bool IsTransparent(int x, int y) => _isTransparent[x, y];
         public bool IsTransparent(Point point) => _isTransparent[point.X, point.Y];
-        public void SetIsTransparent(Point point, bool isTransparent)
+        public void SetTransparent(Point point, bool isTransparent)
         {
             _isTransparent[point.X, point.Y] = isTransparent;
         }
 
         public bool IsWalkable(Point point) => _isWalkable[point.X, point.Y];
-        public void SetIsWalkable(Point point, bool isWalkable)
+        public void SetWalkable(Point point, bool isWalkable)
         {
             _isWalkable[point.X, point.Y] = isWalkable;
         }
 
         public bool IsExplored(Point point) => _isExplored[point.X, point.Y];
-        public void SetIsExplored(Point point, bool isExplored)
+        public void SetExplored(Point point, bool isExplored)
         {
             _isExplored[point.X, point.Y] = isExplored;
         }
@@ -72,23 +72,23 @@ namespace CopperBend.MapUtil
                 0 <= point.Y && point.Y < Height;
         }
 
-        public IMap Clone()
-        {
-            var map = new Map(Width, Height);
-            foreach (Cell cell in GetAllCells())
-            {
-                map.CopyCellToLocation(cell);
-            }
+        //public IMap Clone()
+        //{
+        //    var map = new Map(Width, Height);
+        //    foreach (Cell cell in GetAllCells())
+        //    {
+        //        map.CopyCellToLocation(cell);
+        //    }
 
-            return map;
-        }
+        //    return map;
+        //}
 
         public void CopyCellToLocation(Cell cell) => CopyCellToLocation(cell, cell.Point);
         public void CopyCellToLocation(Cell cell, Point point)
         {
-            SetIsTransparent(point, cell.IsTransparent);
-            SetIsWalkable(point, cell.IsWalkable);
-            SetIsExplored(point, cell.IsExplored);
+            SetTransparent(point, cell.IsTransparent);
+            SetWalkable(point, cell.IsWalkable);
+            SetExplored(point, cell.IsExplored);
         }
 
         public void Copy(IMap sourceMap, Point offset)

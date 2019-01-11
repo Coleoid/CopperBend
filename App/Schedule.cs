@@ -3,28 +3,28 @@ using System.Linq;
 
 namespace CopperBend.App
 {
-    public class Scheduler : IScheduler
+    public class Schedule : ISchedule
     {
-        private readonly SortedDictionary<int, List<ScheduleEntry>> _schedule;
+        private readonly SortedDictionary<int, List<ScheduleEntry>> _entries;
 
         public int CurrentTick { get; private set; } = 0;
 
-        public Scheduler()
+        public Schedule()
         {
-            _schedule = new SortedDictionary<int, List<ScheduleEntry>>();
+            _entries = new SortedDictionary<int, List<ScheduleEntry>>();
         }
 
         //  Removes and returns the next thing to happen
         //  Ordered by tick of occurrence, then FIFO per tick
         public ScheduleEntry GetNext()
         {
-            if (_schedule.Count() == 0) return null;
+            if (_entries.Count() == 0) return null;
 
-            var tickAgenda = _schedule.First();
+            var tickAgenda = _entries.First();
             while (tickAgenda.Value.Count() == 0)
             {
-                _schedule.Remove(tickAgenda.Key);
-                tickAgenda = _schedule.First();
+                _entries.Remove(tickAgenda.Key);
+                tickAgenda = _entries.First();
             }
             CurrentTick = tickAgenda.Key;
 
@@ -45,23 +45,23 @@ namespace CopperBend.App
             if (toAct == null) return;
 
             int actionTick = CurrentTick + toAct.TicksUntilNextAction;
-            if (!_schedule.ContainsKey(actionTick))
+            if (!_entries.ContainsKey(actionTick))
             {
-                _schedule.Add(actionTick, new List<ScheduleEntry>());
+                _entries.Add(actionTick, new List<ScheduleEntry>());
             }
-            _schedule[actionTick].Add(toAct);
+            _entries[actionTick].Add(toAct);
         }
 
         public void Remove(ScheduleEntry scheduleEntry)
         {
-            foreach (var busyTick in _schedule)
+            foreach (var busyTick in _entries)
             {
                 if (busyTick.Value.Contains(scheduleEntry))
                 {
                     busyTick.Value.Remove(scheduleEntry);
                     if (!busyTick.Value.Any())
                     {
-                        _schedule.Remove(busyTick.Key);
+                        _entries.Remove(busyTick.Key);
                     }
 
                     return;
@@ -71,7 +71,7 @@ namespace CopperBend.App
 
         public void RemoveActor(IActor targetActor)
         {
-            foreach (var busyTick in _schedule)
+            foreach (var busyTick in _entries)
             {
                 busyTick.Value.RemoveAll(e => e.Actor == targetActor);
             }
@@ -79,7 +79,7 @@ namespace CopperBend.App
 
         public void Clear()
         {
-            _schedule.Clear();
+            _entries.Clear();
         }
     }
 }

@@ -11,7 +11,7 @@ namespace CopperBend.App
         private GameWindow GameWindow;
         private Queue<GameCommand> CommandQueue;
         private Queue<RLKeyPress> InputQueue;
-        private Scheduler Scheduler;
+        private Schedule _schedule;
         private CommandDispatcher Dispatcher;
         private MapLoader MapLoader;
         private GameState GameState;
@@ -22,7 +22,7 @@ namespace CopperBend.App
         //  When load/save comes in, they'll need reworking
         public GameEngine(
             EventBus bus, 
-            Scheduler scheduler, 
+            Schedule schedule, 
             GameWindow gameWindow, 
             Queue<GameCommand> commandQueue, 
             Queue<RLKeyPress> inputQueue, 
@@ -34,14 +34,14 @@ namespace CopperBend.App
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
 
-            Scheduler = scheduler;
+            _schedule = schedule;
             GameWindow = gameWindow;
             Dispatcher = commandDispatcher;
 
             CommandQueue = commandQueue;
             InputQueue = inputQueue;
             MapLoader = mapLoader;
-            GameState = (GameState)gameState;  // not right, but compiling...
+            GameState = (GameState)gameState;  // not great, but working...
         }
 
         public void Run()
@@ -126,31 +126,32 @@ namespace CopperBend.App
                 map = MapLoader.DemoMap();
 
             LoadMap(map);
-            GameState.Player.MoveTo(GameState.Map.PlayerStartsAt);
-            GameState.Map.UpdatePlayerFieldOfView(GameState.Player);
-            Bus.SendLargeMessage(this, GameState.Map.FirstSightMessage);
         }
 
         public void LoadMap(IAreaMap map)
         {
             UnloadCurrentMap();
 
-            GameState.Map = map;
             foreach (var actor in map.Actors)
             {
-                Scheduler.Add(new ScheduleEntry(12, null, actor));
+                _schedule.Add(new ScheduleEntry(12, null, actor));
             }
 
             map.ViewpointActor = GameState.Player;
             map.Actors.Add(GameState.Player);
+            GameState.Player.MoveTo(map.PlayerStartsAt);
+            map.UpdatePlayerFieldOfView(GameState.Player);
+            Bus.SendLargeMessage(this, map.FirstSightMessage);
+            GameState.Map = map;
         }
 
         public void UnloadCurrentMap()
         {
-            //later persist map changes off
-            //later I want to leave some (all?) things scheduled,
-            //so plants keep growing, et c...
-            Scheduler.Clear();
+            //TODO: persist map content/changes
+
+            //TODO:  Keep some things scheduled
+            //  so plants keep growing, et c...
+            _schedule.Clear();
             GameWindow.ResetWait();
         }
 
@@ -251,7 +252,7 @@ namespace CopperBend.App
                 GameWindow.HandlePendingMessages();
                 break;
 
-            //  Waiting for player input blocks Scheduler
+            //  Waiting for player input blocks Schedule
             case GameMode.PlayerReady:
                 GameWindow.ResetWait();
                 Dispatcher.HandlePlayerCommands();
@@ -259,7 +260,7 @@ namespace CopperBend.App
 
             //  When the player has committed to a slow action, time passes
             case GameMode.Schedule:
-                Scheduler.DoNext(Dispatcher);
+                _schedule.DoNext(Dispatcher);
                 break;
 
             case GameMode.Unknown:

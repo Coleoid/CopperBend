@@ -55,6 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Basis\GameState.cs" />
     <Compile Include="Basis\Guard.cs" />
     <Compile Include="Basis\IAreaMap.cs" />
     <Compile Include="Basis\IControlPanel.cs" />
@@ -71,7 +72,7 @@
     <Compile Include="EventBus.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="GameWindow.cs" />
-    <Compile Include="Basis\IScheduler.cs" />
+    <Compile Include="Basis\ISchedule.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
@@ -93,7 +94,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Tile.cs" />
-    <Compile Include="Scheduler.cs" />
+    <Compile Include="Schedule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

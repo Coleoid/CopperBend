@@ -29,7 +29,7 @@ namespace CopperBend.App
             FirstSightMessage = new List<string>();
             LocationMessages = new Dictionary<Point, List<string>>();
             LocationEventEntries = new Dictionary<Point, List<CommandEntry>>();
-            DisplayDirty = true;
+            IsDisplayDirty = true;
         }
 
         public List<string> FirstSightMessage { get; set; }
@@ -51,7 +51,7 @@ namespace CopperBend.App
         public bool IsTillable(int x, int y) => Tiles[x, y].IsTillable;
         public bool IsTillable(Cell cell) => this[cell.Point].IsTillable;
 
-        public bool DisplayDirty { get; set; }
+        public bool IsDisplayDirty { get; set; }
         public void DrawMap(RLConsole mapConsole)
         {
             mapConsole.Clear();
@@ -116,10 +116,10 @@ namespace CopperBend.App
             if (!GetCell(targetPoint).IsWalkable) return false;
 
             var startPoint = actor.Point;
-            SetIsWalkable(startPoint, true);
+            SetWalkable(startPoint, true);
             actor.MoveTo(targetPoint);
-            SetIsWalkable(targetPoint, false);
-            DisplayDirty = true;
+            SetWalkable(targetPoint, false);
+            IsDisplayDirty = true;
 
             return true;
         }
@@ -132,7 +132,7 @@ namespace CopperBend.App
 
             foreach (Cell cell in fovCells)
             {
-                SetIsExplored(cell.Point, true);
+                SetExplored(cell.Point, true);
             }
         }
 
@@ -147,9 +147,9 @@ namespace CopperBend.App
         {
             Guard.Against(tile.TileType.Name != "closed door");
             tile.SetTileType(TileTypes["open door"]);
-            SetIsTransparent(tile.Point, true);
-            SetIsWalkable(tile.Point, true);
-            DisplayDirty = true;
+            SetTransparent(tile.Point, true);
+            SetWalkable(tile.Point, true);
+            IsDisplayDirty = true;
             UpdatePlayerFieldOfView(ViewpointActor);
         }
 

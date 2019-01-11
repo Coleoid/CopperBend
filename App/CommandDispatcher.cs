@@ -8,12 +8,12 @@ namespace CopperBend.App
 {
     public partial class CommandDispatcher
     {
-        public Scheduler Scheduler { get; private set; }
-        public GameWindow Window { get; private set; }
+        private Schedule Schedule { get; set; }
+        private GameWindow Window { get; set; }
 
-        public IGameState GameState { get; private set; }
-        public IActor Player { get => GameState.Player; }
-        public IAreaMap Map { get => GameState.Map; }
+        private IGameState GameState { get; set; }
+        private IActor Player { get => GameState.Player; }
+        private IAreaMap Map { get => GameState.Map; }
 
         private Describer Describer;
         private Queue<GameCommand> CommandQueue;
@@ -25,13 +25,13 @@ namespace CopperBend.App
         }
 
         public CommandDispatcher(
-            Scheduler scheduler, 
+            Schedule schedule, 
             GameWindow window, 
             IGameState gameState, 
             Describer describer,
             Queue<GameCommand> commandQueue)
         {
-            Scheduler = scheduler;
+            Schedule = schedule;
             Window = window;
             GameState = gameState;
             Describer = describer;
@@ -128,7 +128,7 @@ namespace CopperBend.App
                     throw new Exception($"Somehow failed to move onto {point}, a walkable tile.");
 
                 Map.UpdatePlayerFieldOfView(player);
-                Map.DisplayDirty = true;
+                Map.IsDisplayDirty = true;
                 if (player.Point.X != point.X && player.Point.Y != point.Y)
                     PlayerBusyFor(17);
                 else
@@ -158,19 +158,19 @@ namespace CopperBend.App
 
         public void RunEvent(ITile tile)
         {
-            if (GameState.Map.LocationMessages.ContainsKey(tile.Point))
+            if (Map.LocationMessages.ContainsKey(tile.Point))
             {
-                var message = GameState.Map.LocationMessages[tile.Point];
+                var message = Map.LocationMessages[tile.Point];
                 foreach (var line in message)
                     WriteLine(line);
 
-                GameState.Map.LocationMessages.Remove(tile.Point);
+                Map.LocationMessages.Remove(tile.Point);
             }
 
             //0.2
-            if (GameState.Map.LocationEventEntries.ContainsKey(tile.Point))
+            if (Map.LocationEventEntries.ContainsKey(tile.Point))
             {
-                var entries = GameState.Map.LocationEventEntries[tile.Point];
+                var entries = Map.LocationEventEntries[tile.Point];
                 foreach (var entry in entries)
                 {
                     CommandQueue.Enqueue(entry.Command);
@@ -182,7 +182,7 @@ namespace CopperBend.App
         private void Command_DirectionAttack(IActor targetActor)
         {
             //0.1
-            var conflictSystem = new ConflictSystem(Window, Map, Scheduler);
+            var conflictSystem = new ConflictSystem(Window, Map, Schedule);
             conflictSystem.Attack("Wah!", 2, targetActor);
 
             PlayerBusyFor(12);

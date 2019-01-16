@@ -8,7 +8,7 @@ namespace CopperBend.App
 {
     public class GameEngine
     {
-        private GameWindow GameWindow;
+        private IGameWindow GameWindow;
         private Queue<GameCommand> CommandQueue;
         private Queue<RLKeyPress> InputQueue;
         private Schedule _schedule;
@@ -23,7 +23,7 @@ namespace CopperBend.App
         public GameEngine(
             EventBus bus, 
             Schedule schedule, 
-            GameWindow gameWindow, 
+            IGameWindow gameWindow, 
             Queue<GameCommand> commandQueue, 
             Queue<RLKeyPress> inputQueue, 
             MapLoader mapLoader, 
@@ -161,7 +161,7 @@ namespace CopperBend.App
         }
 
         //0.1
-        private bool MapLoaded = false;
+        private bool MapLoaded { get; set; } = false;
 
         private void onRender(object sender, UpdateEventArgs e)
         {

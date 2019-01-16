@@ -7,7 +7,7 @@ namespace CopperBend.App.tests
     [TestFixture]
     public class MapLoaderTests
     {
-        [Test]
+        [Test, Ignore("Not currently loading maps from disk")]
         public void LoadMap_returns_something()
         {
             var loader = new MapLoader();
@@ -31,7 +31,7 @@ namespace CopperBend.App.tests
             Assert.That(dto.Legend.ContainsKey("#"));
             Assert.That(dto.Legend["."], Is.EqualTo("Dirt"));
             Assert.That(dto.Terrain.Count(), Is.EqualTo(5));
-            Assert.That(dto.Terrain[1], Is.EqualTo(".##..##."));
+            Assert.That(dto.Terrain[1], Is.EqualTo(".##.##."));
         }
 
         [Test]
@@ -42,10 +42,10 @@ namespace CopperBend.App.tests
 
             Assert.That(map.Name, Is.EqualTo("The Round Room"));
             Assert.That(map.Height, Is.EqualTo(5));
-            Assert.That(map.Width, Is.EqualTo(8));
-            Assert.That(map.Tiles[1, 0].TileType.Name, Is.EqualTo("Dirt"));
+            Assert.That(map.Width, Is.EqualTo(7));
+            Assert.That(map.Tiles[1, 0].TileType.Name, Is.EqualTo("Unknown"));
             Assert.That(map.Tiles[1, 1].TileType.Name, Is.EqualTo("StoneWall"));
-       }
+        }
 
         [Test]
         public void DTO_to_map()
@@ -66,11 +66,11 @@ legend:
  '+': ClosedDoor
 
 terrain:
- - ..####..
- - .##..##.
- - .#....+.
- - .##..##.
- - ...##...
+ - ..###..
+ - .##.##.
+ - .#...+.
+ - .##.##.
+ - ..###..
 ";
     }
 }

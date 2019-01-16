@@ -5,7 +5,7 @@ using RLNET;
 
 namespace CopperBend.App
 {
-    public class GameWindow
+    public class GameWindow : IGameWindow
     {
         public RLRootConsole RootConsole { get; set; }
 
@@ -65,7 +65,7 @@ namespace CopperBend.App
 
         }
 
-        internal void Render(IAreaMap map)
+        public void Render(IAreaMap map)
         {
             //FUTURE:  real-time (background) animation around here
 
@@ -115,7 +115,7 @@ namespace CopperBend.App
             }
         }
 
-        internal void Run(UpdateEventHandler onUpdate, UpdateEventHandler onRender)
+        public void Run(UpdateEventHandler onUpdate, UpdateEventHandler onRender)
         {
             RootConsole.Update += onUpdate;
             RootConsole.Render += onRender;

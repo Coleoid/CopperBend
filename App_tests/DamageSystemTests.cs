@@ -5,18 +5,6 @@ using NUnit.Framework;
 
 namespace CopperBend.App.tests
 {
-    public class DamageSystem
-    {
-        //public int ApplyDamage(IActor actor, IDamage damage)
-        //{
-        //    var defense = actor.DefenseAspect;
-        //    var blocked = (int) Math.Ceiling(defense.PortionBlocked * damage.Quantity);
-        //    var done = damage.Quantity - blocked;
-        //    actor.Hurt(done);
-        //    return done;
-        //}
-    }
-
     [TestFixture]
     public class DamageSystemTests
     {

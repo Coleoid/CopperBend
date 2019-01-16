@@ -51,7 +51,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="YamlDotNet, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YamlDotNet.5.2.1\lib\net45\YamlDotNet.dll</HintPath>
+      <HintPath>..\packages\YamlDotNet.5.3.0\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +73,7 @@
     <Compile Include="GameEngine.cs" />
     <Compile Include="GameWindow.cs" />
     <Compile Include="Basis\ISchedule.cs" />
+    <Compile Include="Basis\IGameWindow.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />

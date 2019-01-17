@@ -43,8 +43,9 @@ namespace CopperBend.App.tests
             Assert.That(map.Name, Is.EqualTo("The Round Room"));
             Assert.That(map.Height, Is.EqualTo(5));
             Assert.That(map.Width, Is.EqualTo(7));
-            Assert.That(map.Tiles[1, 0].TileType.Name, Is.EqualTo("Unknown"));
-            Assert.That(map.Tiles[1, 1].TileType.Name, Is.EqualTo("StoneWall"));
+            Assert.That(map.Tiles[1, 0].TileType.Name, Is.EqualTo("dirt"));
+            Assert.That(map.Tiles[1, 1].TileType.Name, Is.EqualTo("stone wall"));
+            Assert.That(map.Tiles[5, 2].TileType.Name, Is.EqualTo("closed door"));
         }
 
         [Test]
@@ -62,8 +63,8 @@ name:  The Round Room
 
 legend:
  '.': Dirt
- '#': StoneWall
- '+': ClosedDoor
+ '#': Stone Wall
+ '+': Closed Door
 
 terrain:
  - ..###..

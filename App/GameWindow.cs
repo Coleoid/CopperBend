@@ -9,22 +9,22 @@ namespace CopperBend.App
     {
         public RLRootConsole RootConsole { get; set; }
 
-        private RLConsole MapPane;
-        private int MapWidth = 60;
-        private int MapHeight = 60;
+        private readonly RLConsole MapPane;
+        private readonly int MapWidth = 60;
+        private readonly int MapHeight = 60;
 
-        private RLConsole StatPane;
-        private int StatWidth = 20;
-        private int StatHeight = 60;
+        private readonly RLConsole StatPane;
+        private readonly int StatWidth = 20;
+        private readonly int StatHeight = 60;
 
         public RLConsole TextPane { get; set; }
-        private int TextWidth = 80;
-        private int TextHeight = 20;
+        private readonly int TextWidth = 80;
+        private readonly int TextHeight = 20;
 
         public RLConsole LargePane { get; set; }
-        private int LargeWidth = 60;
-        private int LargeHeight = 60;
-        private bool LargePaneVisible;
+        private readonly int LargeWidth = 60;
+        private readonly int LargeHeight = 60;
+        private readonly bool LargePaneVisible;
 
         private Queue<RLKeyPress> InputQueue;
         public Queue<string> MessageQueue;
@@ -195,7 +195,7 @@ namespace CopperBend.App
         private const int textConsoleHeight = 12;
 
         int CursorX = 1;
-        int CursorY = 1;  //  I haven't looked at this closely yet
+        int CursorY = 1;  //  I haven't looked at this closely yet   HA
 
         struct MessageLine
         {

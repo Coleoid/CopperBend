@@ -16,7 +16,7 @@ using NUnit.Framework;
 namespace CopperBend.App.tests
 {
     [TestFixture]
-    public class EventSystemTests
+    public class VignetteTests
     {
         [Test]
         public void Event_can_send_message()

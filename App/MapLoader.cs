@@ -311,6 +311,7 @@ namespace CopperBend.App
 
         public TileType TerrainFrom(string name)
         {
+            name = name.ToLower();
             var foundType = TileTypes.ContainsKey(name) ? name : "Unknown";
             return TileTypes[foundType];
         }

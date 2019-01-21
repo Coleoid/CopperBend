@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CopperBend.App
@@ -39,12 +40,12 @@ namespace CopperBend.App
             nextUp.Action(controls, nextUp);
         }
 
-        //  Entry scheduled at CurrentTick plus .TicksUntilNextAction
+        //  Entry scheduled at CurrentTick plus .Offset
         public void Add(ScheduleEntry toAct)
         {
             if (toAct == null) return;
 
-            int actionTick = CurrentTick + toAct.TicksUntilNextAction;
+            int actionTick = CurrentTick + toAct.Offset;
             if (!_entries.ContainsKey(actionTick))
             {
                 _entries.Add(actionTick, new List<ScheduleEntry>());

@@ -4,17 +4,24 @@ namespace CopperBend.App
 {
     public class ScheduleEntry
     {
-        public int TicksUntilNextAction { get; private set; }
+        public int Offset { get; private set; }
 
         public Action<IControlPanel, ScheduleEntry> Action { get; private set; }
 
         public IActor Actor { get; private set; }
 
-        public ScheduleEntry(int ticks, Action<IControlPanel, ScheduleEntry> action, IActor actor = null)
+        public ScheduleEntry(int offset, Action<IControlPanel, ScheduleEntry> action)
         {
-            Guard.Against(action == null && actor == null, "A schedule entry needs an action or an actor.");
-            TicksUntilNextAction = ticks;
-            Action = action ?? actor.NextAction;
+            Guard.Against(action == null, "A schedule entry needs an action or an actor.");
+            Offset = offset;
+            Action = action;
+        }
+
+        public ScheduleEntry(int offset, IActor actor)
+        {
+            Guard.Against(actor == null, "A schedule entry needs an action or an actor.");
+            Offset = offset;
+            Action = actor.NextAction;
             Actor = actor;
         }
     }

@@ -134,7 +134,7 @@ namespace CopperBend.App
 
             foreach (var actor in map.Actors)
             {
-                _schedule.Add(new ScheduleEntry(12, null, actor));
+                _schedule.Add(new ScheduleEntry(12, actor.NextAction));
             }
 
             map.ViewpointActor = GameState.Player;

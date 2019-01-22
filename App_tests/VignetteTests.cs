@@ -1,16 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using CopperBend.App.Model;
+using CopperBend.MapUtil;
 using NSubstitute;
 using NUnit.Framework;
 
 //  Vignettes are game-advancing mini-scenes
 //  They pace themselves via the Schedule
+//TODO:  Split some of these off into ScheduleTests
 
 namespace CopperBend.App.tests
 {
     [TestFixture]
-    public class VignetteTests
+    public class ScheduleTests
     {
+        private Schedule schedule;
+        private IControlPanel nullControlPanel;
+
+        [SetUp]
+        public void SetUp()
+        {
+            schedule = new Schedule();
+            nullControlPanel = null;
+        }
 
         [Test]
         public void Schedule_calls_action_in_entry()
@@ -19,12 +31,25 @@ namespace CopperBend.App.tests
 
             void call(IControlPanel cp, ScheduleEntry se) { calledFromSchedule = true; }
             var entry = new ScheduleEntry(3, call);
-            var schedule = new Schedule();
 
             schedule.Add(entry);
-            schedule.DoNext(null);
+            schedule.DoNext(nullControlPanel);
 
             Assert.That(calledFromSchedule);
+        }
+
+        [Test]
+        public void ScheduleEntry_with_null_action_throws_clear()
+        {
+            Action<IControlPanel, ScheduleEntry> nullCall = null;
+            var ex = Assert.Throws<Exception>(() => new ScheduleEntry(3, nullCall));
+            //  This is nearly the stupidest test, yet it found a bug.
+        }
+
+        [Test]
+        public void Schedule_Add_null_Entry_throws_clear()
+        {
+            var ex = Assert.Throws<Exception>(() => schedule.Add(null));
         }
 
         [Test]
@@ -40,7 +65,6 @@ namespace CopperBend.App.tests
             }
 
             var entry = new ScheduleEntry(3, write_foo);
-            var schedule = new Schedule();
 
             schedule.Add(entry);
             schedule.DoNext(icp);
@@ -49,5 +73,39 @@ namespace CopperBend.App.tests
             Assert.That(receivedSE, Is.SameAs(entry));
         }
 
+        [Test]
+        public void ScheduleEntry_gets_actor_and_targets()
+        {
+            bool checksRan = false;
+            var actor = new Actor(new Point(0, 0));
+            var targets = new List<Actor>();
+            void check_actor_and_targets(IControlPanel cp, ScheduleEntry se)
+            {
+                Assert.That(se.Actor, Is.SameAs(actor));
+                Assert.That(se.Targets, Is.SameAs(targets));
+                checksRan = true;
+            }
+
+            var entry = new ScheduleEntry(3, check_actor_and_targets, actor, targets);
+            schedule.Add(entry);
+            schedule.DoNext(nullControlPanel);
+
+            Assert.That(checksRan);
+        }
+
+    }
+
+    [TestFixture]
+    public class VignetteTests
+    {
+        private Schedule schedule;
+        private IControlPanel nullControlPanel;
+
+        [SetUp]
+        public void SetUp()
+        {
+            schedule = new Schedule();
+            nullControlPanel = null;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,73 +7,72 @@ namespace CopperBend.App
 {
     public class Schedule : ISchedule
     {
-        private readonly SortedDictionary<int, List<ScheduleEntry>> _entries;
-
         public int CurrentTick { get; private set; } = 0;
+        private readonly SortedDictionary<int, List<ScheduleEntry>> TickEntries;
+        private readonly ILog log;
 
         public Schedule()
         {
-            _entries = new SortedDictionary<int, List<ScheduleEntry>>();
+            TickEntries = new SortedDictionary<int, List<ScheduleEntry>>();
+            log = LogManager.GetLogger("CB.Schedule");
         }
 
         //  Removes and returns the next thing to happen
         //  Ordered by tick of occurrence, then FIFO per tick
         public ScheduleEntry GetNext()
         {
-            if (_entries.Count() == 0) return null;
+            log.DebugFormat("GetNext at CurrentTick {0}", CurrentTick);
+            if (TickEntries.Count() == 0) return null;
 
-            var tickAgenda = _entries.First();
-            while (tickAgenda.Value.Count() == 0)
+            var busyTick = TickEntries.First();
+            while (busyTick.Value.Count() == 0)
             {
-                _entries.Remove(tickAgenda.Key);
-                tickAgenda = _entries.First();
+                TickEntries.Remove(busyTick.Key);
+                busyTick = TickEntries.First();
             }
-            CurrentTick = tickAgenda.Key;
+            CurrentTick = busyTick.Key;
 
-            var nextEntry = tickAgenda.Value.FirstOrDefault();
-            if (nextEntry != null) Remove(nextEntry);
+            var nextEntry = busyTick.Value.First();
+            Remove(nextEntry);
             return nextEntry;
         }
 
         public void DoNext(IControlPanel controls)
         {
-            var nextUp = GetNext();
-            nextUp.Action(controls, nextUp);
+            var entry = GetNext();
+            entry.Execute(controls);
         }
 
         //  Entry scheduled at CurrentTick plus .Offset
-        public void Add(ScheduleEntry toAct)
+        public void Add(ScheduleEntry entry)
         {
-            if (toAct == null) return;
+            //if (entry == null) return;
+            Guard.AgainstNullArgument(entry);
 
-            int actionTick = CurrentTick + toAct.Offset;
-            if (!_entries.ContainsKey(actionTick))
+            int actionTick = CurrentTick + entry.Offset;
+            if (!TickEntries.ContainsKey(actionTick))
             {
-                _entries.Add(actionTick, new List<ScheduleEntry>());
+                TickEntries.Add(actionTick, new List<ScheduleEntry>());
             }
-            _entries[actionTick].Add(toAct);
+            TickEntries[actionTick].Add(entry);
         }
 
-        public void Remove(ScheduleEntry scheduleEntry)
+        public void Remove(ScheduleEntry entry)
         {
-            foreach (var busyTick in _entries)
+            foreach (var busyTick in TickEntries)
             {
-                if (busyTick.Value.Contains(scheduleEntry))
+                if (busyTick.Value.Contains(entry))
                 {
-                    busyTick.Value.Remove(scheduleEntry);
-                    if (!busyTick.Value.Any())
-                    {
-                        _entries.Remove(busyTick.Key);
-                    }
-
+                    busyTick.Value.Remove(entry);
                     return;
                 }
             }
+            log.Debug("Remove did not find entry.");
         }
 
         public void RemoveActor(IActor targetActor)
         {
-            foreach (var busyTick in _entries)
+            foreach (var busyTick in TickEntries)
             {
                 busyTick.Value.RemoveAll(e => e.Actor == targetActor);
             }
@@ -80,7 +80,7 @@ namespace CopperBend.App
 
         public void Clear()
         {
-            _entries.Clear();
+            TickEntries.Clear();
         }
     }
 }

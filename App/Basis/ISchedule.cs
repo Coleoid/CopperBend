@@ -4,11 +4,11 @@
     {
         int CurrentTick { get; }
 
-        void Add(ScheduleEntry toAct);
+        void Add(ScheduleEntry entry);
         void Clear();
         void DoNext(IControlPanel controls);
         ScheduleEntry GetNext();
-        void Remove(ScheduleEntry scheduleEntry);
+        void Remove(ScheduleEntry entry);
         void RemoveActor(IActor targetActor);
     }
 }

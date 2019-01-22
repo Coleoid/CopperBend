@@ -55,7 +55,7 @@ namespace CopperBend.App
             // recreate or clear existing game objects?
             GameState.Player = InitPlayer();
             LoadMap("Farm");
-            Mode = GameMode.PlayerReady;
+            PushMode(GameMode.PlayerReady);
         }
 
 
@@ -114,6 +114,62 @@ namespace CopperBend.App
         }
 
         #endregion
+
+        private Stack<GameMode> ModeStack = new Stack<GameMode>();
+        public GameMode Mode { get => ModeStack.Peek(); }
+
+        private void PushMode(GameMode newMode)
+        {
+            ModeStack.Push(newMode);
+        }
+
+        private void ActOnMode()
+        {
+            switch (Mode)
+            {
+            //  A game menu will block even pending messages 
+            case GameMode.MenuOpen:
+                HandleMenus();
+                break;
+
+            //  The large message pane overlays most of the game
+            case GameMode.LargeMessagePending:
+                GameWindow.HandleLargeMessage();
+                break;
+
+            //  Messages waiting for the player block player input and scheduled events
+            case GameMode.MessagesPending:
+                GameWindow.HandlePendingMessages();
+                break;
+
+            //MAYBE:  A "cinematic" mode for story scenes
+            // Player input not routed as normal commands, though it
+            //   still handles message pauses, escape-to-menu, or choices
+            //   presented by the scene.
+            // NPC/Creature/world effects advance at dramatic (slow) pacing.
+            //case GameMode.Cinematic:
+            //    GameWindow.MuchScene();
+            //    break;
+
+            //  Waiting for player input blocks Schedule
+            case GameMode.PlayerReady:
+                GameWindow.ResetWait();
+                Dispatcher.HandlePlayerCommands();
+                break;
+
+            //  When the player has committed to a slow action, time passes
+            case GameMode.Schedule:
+                _schedule.DoNext(Dispatcher);
+                break;
+
+            case GameMode.Unknown:
+                throw new Exception("Game mode unknown, perhaps Init() was missed.");
+
+            default:
+                throw new Exception($"Game mode [{Mode}] not written yet.");
+            }
+        }
+
 
         private void LoadMap(string mapName)
         {
@@ -232,45 +288,6 @@ namespace CopperBend.App
             }
         }
 
-        public GameMode Mode { get; set; }
-        private void ActOnMode()
-        {
-            switch (Mode)
-            {
-            //  A game menu will block even pending messages 
-            case GameMode.MenuOpen:
-                HandleMenus();
-                break;
-
-            //  The large message pane overlays most of the game
-            case GameMode.LargeMessagePending:
-                GameWindow.HandleLargeMessage();
-                break;
-
-            //  Messages waiting for the player block player input and scheduled events
-            case GameMode.MessagesPending:
-                GameWindow.HandlePendingMessages();
-                break;
-
-            //  Waiting for player input blocks Schedule
-            case GameMode.PlayerReady:
-                GameWindow.ResetWait();
-                Dispatcher.HandlePlayerCommands();
-                break;
-
-            //  When the player has committed to a slow action, time passes
-            case GameMode.Schedule:
-                _schedule.DoNext(Dispatcher);
-                break;
-
-            case GameMode.Unknown:
-                throw new Exception("Game mode unknown, perhaps Init() was missed.");
-
-            default:
-                throw new Exception($"Game mode [{Mode}] not written yet.");
-            }
-        }
-
         private void HandleMenus()
         {
             //TODO:  All these:
@@ -290,13 +307,12 @@ namespace CopperBend.App
 
         private void MessagePanelFull(object sender, EventArgs args)
         {
-            Mode = GameMode.MessagesPending;
+            PushMode(GameMode.MessagesPending);
         }
 
         private void AllMessagesSent(object sender, EventArgs args)
         {
-            Mode = Dispatcher.IsPlayerScheduled ?
-                GameMode.Schedule : GameMode.PlayerReady;
+            ModeStack.Pop();
         }
 
         #endregion

@@ -28,6 +28,7 @@ namespace CopperBend.App
             while (busyTick.Value.Count() == 0)
             {
                 TickEntries.Remove(busyTick.Key);
+                if (TickEntries.Count() == 0) return null;
                 busyTick = TickEntries.First();
             }
             CurrentTick = busyTick.Key;

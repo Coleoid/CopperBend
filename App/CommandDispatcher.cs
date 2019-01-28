@@ -19,10 +19,7 @@ namespace CopperBend.App
         private Queue<GameCommand> CommandQueue;
 
         private Action<RLKeyPress> NextStep = null;
-        private bool InMultiStepCommand
-        {
-            get => NextStep != null;
-        }
+        private bool InMultiStepCommand => NextStep != null;
 
         public CommandDispatcher(
             Schedule schedule, 
@@ -382,7 +379,7 @@ namespace CopperBend.App
             }
 
             var selectedIndex = AlphaIndexOfKeyPress(key);
-            if (selectedIndex < 0 || selectedIndex > Player.Inventory.Count())
+            if (selectedIndex < 0 || Player.Inventory.Count() <= selectedIndex)
             {
                 WriteLine($"The key [{key.Char}] does not match an inventory item.  Pick another.");
                 return;

@@ -68,6 +68,7 @@
     <Compile Include="Basis\GameState.cs" />
     <Compile Include="Basis\Guard.cs" />
     <Compile Include="Basis\IAreaMap.cs" />
+    <Compile Include="Basis\ICommandSource.cs" />
     <Compile Include="Basis\IControlPanel.cs" />
     <Compile Include="Basis\IDamage.cs" />
     <Compile Include="Basis\IItem.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="GameWindow.cs" />
     <Compile Include="Basis\ISchedule.cs" />
     <Compile Include="Basis\IGameWindow.cs" />
+    <Compile Include="InputCommandSource.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Model\Actor.cs" />
     <Compile Include="AreaMap.cs" />
@@ -100,6 +102,7 @@
     <Compile Include="Basis\Palette.cs" />
     <Compile Include="Basis\ITile.cs" />
     <Compile Include="Basis\ScheduleEntry.cs" />
+    <Compile Include="Model\Knife.cs" />
     <Compile Include="Model\Seed.cs" />
     <Compile Include="Describer.cs" />
     <Compile Include="Program.cs" />

@@ -35,6 +35,7 @@ namespace CopperBend.App.Model
         //  IActor
         public string Name { get; set; }
         public int Awareness { get; set; }
+        public IAreaMap Map { get; set; }
 
         //  IHealAndHurt
         public int Health { get; set; }
@@ -93,5 +94,11 @@ namespace CopperBend.App.Model
             if (item != null && !InventoryList.Any(i => i == item))
                 AddToInventory(item);
         }
+
+        public IEnumerable<IItem> ReachableItems()
+        {
+            return Map.Items.Where(i => i.Point.Equals(Point));
+        }
+
     }
 }

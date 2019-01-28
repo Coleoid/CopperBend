@@ -21,6 +21,7 @@ namespace CopperBend.App
         Point Point { get; }
         string Name { get; set; }
         int Awareness { get; set; }
+        IAreaMap Map { get; set; }
         IDefenseAspect DefenseAspect { get; set; }
         void MoveTo(Point point);
         IItem WieldedTool { get; }
@@ -30,6 +31,8 @@ namespace CopperBend.App
         void AddToInventory(IItem item);
         IItem RemoveFromInventory(int inventorySlot);
         IItem RemoveFromInventory(IItem item);
+
+        IEnumerable<IItem> ReachableItems();
 
         Action<IControlPanel, ScheduleEntry> NextAction { get; }
     }

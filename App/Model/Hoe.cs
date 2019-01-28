@@ -4,7 +4,7 @@ namespace CopperBend.App.Model
 {
     public class Hoe : Item
     {
-        public override string Name { get => "Hoe"; }
+        public override string Name { get => "hoe"; }
 
         public Hoe(Point point)
             : base(point, 1, true)

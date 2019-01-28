@@ -43,6 +43,12 @@
     <Reference Include="nunit.framework, Version=3.11.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.11.0\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="RLNET, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RLNET.1.0.6\lib\RLNET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -61,6 +67,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DamageSystemTests.cs" />
+    <Compile Include="InputCommandSourceTests.cs" />
+    <Compile Include="InputCommandSourceTestsBase.cs" />
+    <Compile Include="InputCommandSourceUseTests.cs" />
     <Compile Include="ScheduleTests.cs" />
     <Compile Include="VignetteTests.cs" />
     <Compile Include="PointTests.cs" />

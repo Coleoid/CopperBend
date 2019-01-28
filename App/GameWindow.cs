@@ -29,16 +29,18 @@ namespace CopperBend.App
         private Queue<RLKeyPress> InputQueue;
         public Queue<string> MessageQueue;
         private EventBus EventBus;
+        private Describer Describer { get; set; }
 
         public bool WaitingAtMorePrompt = false;
         public bool DisplayDirty { get; set; } = false;
         private int ShownMessages = 0;
 
 
-        public GameWindow(Queue<RLKeyPress> inputQueue, EventBus eventBus)
+        public GameWindow(Queue<RLKeyPress> inputQueue, EventBus eventBus, Describer describer)
         {
             InputQueue = inputQueue;
             EventBus = eventBus;
+            Describer = describer;
             var consoleSettings = new RLSettings
             {
                 Title = "Copper Bend",
@@ -274,6 +276,29 @@ namespace CopperBend.App
             {
                 int linesWritten = LargePane.Print(1, cY, 0, line, Palette.PrimaryLighter, new RLColor(0, 0, 0), 58, 1);                cY += linesWritten;
             }
+        }
+
+        private const int lowercase_a = 97;
+        private const int lowercase_z = 123;
+        public void ShowInventory(IEnumerable<IItem> inventory, Func<IItem, bool> filter = null)
+        {
+            if (filter == null) filter = i => true;
+            bool showedAnItem = false;
+            WriteLine("Inventory:");
+
+            int asciiSlot = lowercase_a - 1;
+            foreach (var item in inventory)
+            {
+                asciiSlot++;
+                if (!filter(item)) continue;
+
+                var description = Describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);
+                WriteLine($"{(char)asciiSlot})  {description}");
+                showedAnItem = true;
+            }
+
+            if (!showedAnItem)
+                WriteLine("Nothing");
         }
     }
 }

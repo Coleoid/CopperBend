@@ -9,7 +9,7 @@ namespace CopperBend.App.Model
         public PlantType PlantType;
 
         public Fruit(Point point, int quantity, PlantType plantType)
-            : base(point, quantity, true)
+            : base(point, quantity, false)
         {
             PlantType = plantType;
             Symbol = '%';

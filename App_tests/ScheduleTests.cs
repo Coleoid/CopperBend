@@ -49,6 +49,12 @@ namespace CopperBend.App.tests
         }
 
         [Test]
+        public void Empty_Schedule_GetNext_throws_clear()
+        {
+            schedule.GetNext();
+        }
+
+        [Test]
         public void Schedule_passes_ControlPanel_and_ScheduleEntry_to_action()
         {
             var icp = Substitute.For<IControlPanel>();

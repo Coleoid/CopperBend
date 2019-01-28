@@ -1,4 +1,6 @@
-﻿using RLNET;
+﻿using System;
+using System.Collections.Generic;
+using RLNET;
 
 namespace CopperBend.App
 {
@@ -13,12 +15,13 @@ namespace CopperBend.App
         void Render(IAreaMap map);
         void AddMessage(string newMessage);
         void EmptyInputQueue();
-        RLKeyPress GetNextKeyPress();
+        //RLKeyPress GetNextKeyPress();
         void HandleLargeMessage();
         void HandlePendingMessages();
         void Prompt(string text);
         void ResetWait();
         void ShowMessages();
         void WriteLine(string text);
+        void ShowInventory(IEnumerable<IItem> inventory, Func<IItem, bool> filter);
     }
 }

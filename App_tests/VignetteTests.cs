@@ -16,5 +16,26 @@ namespace CopperBend.App.tests
             schedule = new Schedule();
             nullControlPanel = null;
         }
+
+
+/*
+Fantasy syntax for Vignettes.  We want to...
+Have multiple actions, with time offsets
+  30, WriteLine, "Howdy..."
+  120, WriteLine, "Pardner"
+or
+  (30 (WriteLine "Howdy"))
+Run same action against actor or targets?
+  Not an issue, we can put actor in targets
+Chain actions for player and NPCs/entities
+  (Walk player
+    (1 -5)
+    (0 -2)
+    (3  0)
+  )
+
+  Too generic.  Since I already know of some vignettes I want to implement,
+let's try syntax to support those.
+*/
     }
 }

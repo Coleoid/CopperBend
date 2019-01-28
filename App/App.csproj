@@ -105,6 +105,7 @@
     <Compile Include="Model\Knife.cs" />
     <Compile Include="Model\Seed.cs" />
     <Compile Include="Describer.cs" />
+    <Compile Include="PresetCommandSource.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Tile.cs" />

@@ -17,6 +17,7 @@ namespace CopperBend.App
         Consume,
         Drop,
         Use,
+        Wait,
     }
 
     [Flags]

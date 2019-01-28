@@ -70,6 +70,7 @@
     <Compile Include="InputCommandSourceTests.cs" />
     <Compile Include="InputCommandSourceTestsBase.cs" />
     <Compile Include="InputCommandSourceUseTests.cs" />
+    <Compile Include="PresetCommandSourceTests.cs" />
     <Compile Include="ScheduleTests.cs" />
     <Compile Include="VignetteTests.cs" />
     <Compile Include="PointTests.cs" />

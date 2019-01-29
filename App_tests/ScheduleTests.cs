@@ -25,54 +25,42 @@ namespace CopperBend.App.tests
         {
             bool calledFromSchedule = false;
 
-            void call(IControlPanel cp, ScheduleEntry se) { calledFromSchedule = true; }
-            var entry = new ScheduleEntry(3, call);
+            void call(IControlPanel cp) { calledFromSchedule = true; }
+            //var entry = new ScheduleEntry(3, call);
 
-            schedule.Add(entry);
+            schedule.Add(call, 3);
             schedule.DoNext(nullControlPanel);
 
             Assert.That(calledFromSchedule);
         }
 
         [Test]
-        public void ScheduleEntry_with_null_action_throws_clear()
-        {
-            Action<IControlPanel, ScheduleEntry> nullCall = null;
-            var ex = Assert.Throws<Exception>(() => new ScheduleEntry(3, nullCall));
-            //  This is nearly the stupidest test, yet it found a bug.
-        }
-
-        [Test]
         public void Schedule_Add_null_Entry_throws_clear()
         {
-            var ex = Assert.Throws<Exception>(() => schedule.Add(null));
+            var ex = Assert.Throws<Exception>(() => schedule.Add(null, 0));
         }
 
         [Test]
-        public void Empty_Schedule_GetNext_throws_clear()
+        public void Empty_Schedule_GetNext_returns_null()
         {
-            schedule.GetNext();
+            var nextAction = schedule.GetNextAction();
+            Assert.IsNull(nextAction);
         }
 
         [Test]
-        public void Schedule_passes_ControlPanel_and_ScheduleEntry_to_action()
+        public void Schedule_passes_ControlPanel_to_action()
         {
             var icp = Substitute.For<IControlPanel>();
-            ScheduleEntry receivedSE = null;
 
-            void write_foo(IControlPanel cp, ScheduleEntry se)
+            void write_foo(IControlPanel cp)
             {
                 cp.WriteLine("foo");
-                receivedSE = se;
             }
 
-            var entry = new ScheduleEntry(3, write_foo);
-
-            schedule.Add(entry);
+            schedule.Add(write_foo, 3);
             schedule.DoNext(icp);
 
             icp.Received().WriteLine("foo");
-            Assert.That(receivedSE, Is.SameAs(entry));
         }
 
         [Test]
@@ -81,15 +69,18 @@ namespace CopperBend.App.tests
             bool checksRan = false;
             var actor = new Actor(new Point(0, 0));
             var targets = new List<Actor>();
-            void check_actor_and_targets(IControlPanel cp, ScheduleEntry se)
+
+            void check_actor_and_targets(IControlPanel cp, IActor argActor, List<Actor> argTargets)
             {
-                Assert.That(se.Actor, Is.SameAs(actor));
-                Assert.That(se.Targets, Is.SameAs(targets));
+                Assert.That(argActor, Is.SameAs(actor));
+                Assert.That(argTargets, Is.SameAs(targets));
                 checksRan = true;
             }
 
-            var entry = new ScheduleEntry(3, check_actor_and_targets, actor, targets);
-            schedule.Add(entry);
+            Action<IControlPanel> wrapper = (IControlPanel icp) =>
+                check_actor_and_targets(icp, actor, targets);
+
+            schedule.Add(wrapper, 2);
             schedule.DoNext(nullControlPanel);
 
             Assert.That(checksRan);

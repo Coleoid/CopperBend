@@ -151,11 +151,12 @@ namespace CopperBend.App
             //    GameWindow.MuchScene();
             //    break;
 
+            //>>>  The player is being unified into the rest of the schedule...
             //  Waiting for player input blocks Schedule
-            case GameMode.PlayerReady:
-                GameWindow.ResetWait();
-                Dispatcher.HandlePlayerCommands();
-                break;
+            //case GameMode.PlayerReady:
+            //    GameWindow.ResetWait();
+            //    Dispatcher.HandlePlayerCommands();
+            //    break;
 
             //  When the player has committed to a slow action, time passes
             case GameMode.Schedule:
@@ -190,7 +191,7 @@ namespace CopperBend.App
 
             foreach (var actor in map.Actors)
             {
-                _schedule.Add(new ScheduleEntry(12, actor.NextAction));
+                _schedule.Add(actor.NextAction, 12);
             }
 
             map.ViewpointActor = GameState.Player;

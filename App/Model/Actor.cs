@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using CopperBend.App.Behaviors;
 using CopperBend.MapUtil;
 using RLNET;
@@ -9,7 +10,7 @@ namespace CopperBend.App.Model
 {
     public class Actor : IActor
     {
-        private IBehavior _behavior;
+        public ICommandSource CommandSource { get; set; }
         public Actor(Point point)
         {
             Point = point;
@@ -17,7 +18,6 @@ namespace CopperBend.App.Model
             Awareness = 6;
 
             InventoryList = new List<IItem>();
-            _behavior = new StandardMoveAndAttack();
         }
 
         //  IComponent
@@ -43,7 +43,17 @@ namespace CopperBend.App.Model
         public void Hurt(int amount) => Health -= amount;
         public IDefenseAspect DefenseAspect { get; set; }
 
-        public Action<IControlPanel, ScheduleEntry> NextAction => _behavior.NextAction;
+        public void NextAction(IControlPanel controls)
+        {
+            //var command = CommandSource.CommandNone;
+            //while (command.Equals(CommandNone))
+            //{
+            //    Thread.Sleep(100);  //  aaqaruggaoiugghhhh
+            //    command = CommandSource.GetCommand();
+            //}
+
+            //return CommandSource.NextAction(controls);
+        }
 
         public IItem WieldedTool { get; internal set; }
 
@@ -99,6 +109,5 @@ namespace CopperBend.App.Model
         {
             return Map.Items.Where(i => i.Point.Equals(Point));
         }
-
     }
 }

@@ -3,7 +3,7 @@ using System;
 
 namespace CopperBend.App.Model
 {
-    public class Seed : Item, ISeed
+    public class Seed : Item, ISeed, ICanAct
     {
         public PlantType PlantType;
 
@@ -52,7 +52,7 @@ namespace CopperBend.App.Model
                 controls.RemoveFromInventory(this);
             }
 
-            controls.AddToSchedule(new ScheduleEntry(100, sownSeed.SeedGrows));
+            controls.AddToSchedule(this, 100);
             controls.SetMapDirty();
             controls.PlayerBusyFor(15);
             controls.Experience(sownSeed.PlantType, Exp.PlantSeed);
@@ -60,15 +60,19 @@ namespace CopperBend.App.Model
 
         private int growthRound = 0;
 
-        private void SeedGrows(IControlPanel controls, ScheduleEntry entry)
+        public void NextAction(IControlPanel controls)
         {
-            controls.WriteLine($"The seed is growing... Round {growthRound++}");
-            controls.AddToSchedule( growthRound > 2 ? 
-                  new ScheduleEntry(10, SeedMatures)
-                : new ScheduleEntry(100, SeedGrows));
+            throw new NotImplementedException();
+            //return CommandNone
         }
 
-        protected virtual void SeedMatures(IControlPanel controls, ScheduleEntry entry)
+        private void SeedGrows(IControlPanel controls)
+        {
+            controls.WriteLine($"The seed is growing... Round {growthRound++}");
+            controls.AddToSchedule(this, growthRound > 2 ? 10 : 100);
+        }
+
+        protected virtual void SeedMatures(IControlPanel controls)
         {
             throw new Exception("Override or come up with a default implementation");
         }
@@ -80,7 +84,7 @@ namespace CopperBend.App.Model
             : base(point, quantity, PlantType.Healer)
         {}
 
-        protected override void SeedMatures(IControlPanel controls, ScheduleEntry entry)
+        protected override void SeedMatures(IControlPanel controls)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
             IItem fruit = new Fruit(this.Point, 2, this.PlantType);

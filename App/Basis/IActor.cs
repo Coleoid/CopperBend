@@ -16,8 +16,14 @@ namespace CopperBend.App
         void Hurt(int amount);
     }
 
-    public interface IActor : IDrawable, IHealAndHurt
+    public interface ICanAct
     {
+        void NextAction(IControlPanel controls);
+    }
+
+    public interface IActor : IDrawable, IHealAndHurt, ICanAct
+    {
+        ICommandSource CommandSource { get; set; }
         Point Point { get; }
         string Name { get; set; }
         int Awareness { get; set; }
@@ -34,6 +40,5 @@ namespace CopperBend.App
 
         IEnumerable<IItem> ReachableItems();
 
-        Action<IControlPanel, ScheduleEntry> NextAction { get; }
     }
 }

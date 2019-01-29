@@ -8,18 +8,18 @@ namespace CopperBend.App
     public class Schedule : ISchedule
     {
         public int CurrentTick { get; private set; } = 0;
-        private readonly SortedDictionary<int, List<ScheduleEntry>> TickEntries;
+        private readonly SortedDictionary<int, List<Action<IControlPanel>>> TickEntries;
         private readonly ILog log;
 
         public Schedule()
         {
-            TickEntries = new SortedDictionary<int, List<ScheduleEntry>>();
+            TickEntries = new SortedDictionary<int, List<Action<IControlPanel>>>();
             log = LogManager.GetLogger("CB.Schedule");
         }
 
-        //  Removes and returns the next thing to happen
+        //  Removes and returns the next to act
         //  Ordered by tick of occurrence, then FIFO per tick
-        public ScheduleEntry GetNext()
+        public Action<IControlPanel> GetNextAction()
         {
             log.DebugFormat("GetNext at CurrentTick {0}", CurrentTick);
             if (TickEntries.Count() == 0) return null;
@@ -33,50 +33,28 @@ namespace CopperBend.App
             }
             CurrentTick = busyTick.Key;
 
-            var nextEntry = busyTick.Value.First();
-            Remove(nextEntry);
-            return nextEntry;
+            var nextAction = busyTick.Value.First();
+            busyTick.Value.RemoveAt(0);
+            return nextAction;
         }
 
         public void DoNext(IControlPanel controls)
         {
-            var entry = GetNext();
-            entry.Execute(controls);
+            var nextAction = GetNextAction();
+            nextAction?.Invoke(controls);
         }
 
-        //  Entry scheduled at CurrentTick plus .Offset
-        public void Add(ScheduleEntry entry)
+        //  Action scheduled at CurrentTick plus offset
+        public void Add(Action<IControlPanel> action, int offset)
         {
-            //if (entry == null) return;
-            Guard.AgainstNullArgument(entry);
+            Guard.AgainstNullArgument(action);
 
-            int actionTick = CurrentTick + entry.Offset;
+            int actionTick = CurrentTick + offset;
             if (!TickEntries.ContainsKey(actionTick))
             {
-                TickEntries.Add(actionTick, new List<ScheduleEntry>());
+                TickEntries.Add(actionTick, new List<Action<IControlPanel>>());
             }
-            TickEntries[actionTick].Add(entry);
-        }
-
-        public void Remove(ScheduleEntry entry)
-        {
-            foreach (var busyTick in TickEntries)
-            {
-                if (busyTick.Value.Contains(entry))
-                {
-                    busyTick.Value.Remove(entry);
-                    return;
-                }
-            }
-            log.Debug("Remove did not find entry.");
-        }
-
-        public void RemoveActor(IActor targetActor)
-        {
-            foreach (var busyTick in TickEntries)
-            {
-                busyTick.Value.RemoveAll(e => e.Actor == targetActor);
-            }
+            TickEntries[actionTick].Add(action);
         }
 
         public void Clear()

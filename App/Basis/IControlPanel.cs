@@ -24,7 +24,7 @@ namespace CopperBend.App
         bool CanActorSeeTarget(IActor actor, Point target);
         List<Point> GetPathTo(Point start, Point target);
 
-        void AddToSchedule(ScheduleEntry entry);
+        void AddToSchedule(ICanAct actor, int offset);
         void Learn(Fruit fruit);
         void SetMapDirty();
 

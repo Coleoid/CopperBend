@@ -1,14 +1,14 @@
-﻿namespace CopperBend.App
+﻿using System;
+
+namespace CopperBend.App
 {
     public interface ISchedule
     {
         int CurrentTick { get; }
 
-        void Add(ScheduleEntry entry);
+        void Add(Action<IControlPanel> action, int offset);
         void Clear();
         void DoNext(IControlPanel controls);
-        ScheduleEntry GetNext();
-        void Remove(ScheduleEntry entry);
-        void RemoveActor(IActor targetActor);
+        Action<IControlPanel> GetNextAction();
     }
 }

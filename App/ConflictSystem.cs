@@ -28,7 +28,7 @@
 
                 //TODO: drop items, body
 
-                Schedule.RemoveActor(target.Entity);
+                //Schedule.RemoveAction(target.Entity);
             }
         }
     }

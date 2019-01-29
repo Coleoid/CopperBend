@@ -25,19 +25,12 @@ namespace CopperBend.App
 
         public Point PlayerPoint => Player.Point;
 
-        public bool IsPlayerScheduled { get; private set;  } = false;
 
+        //>>> elim
         public void PlayerBusyFor(int ticks)
         {
-            Schedule.Add(new ScheduleEntry(ticks, PlayerReadyForInput));
-            GameState.Mode = GameMode.Schedule;
-            IsPlayerScheduled = true;
-        }
-
-        private void PlayerReadyForInput(IControlPanel controls, ScheduleEntry entry)
-        {
-            GameState.Mode = GameMode.PlayerReady;
-            IsPlayerScheduled = false;
+            //Schedule.Add(Player, ticks);
+            //GameState.Mode = GameMode.Schedule;
         }
 
         private Point PointInDirection(Point start, Direction direction)
@@ -95,9 +88,9 @@ namespace CopperBend.App
                 Direction.None;
         }
 
-        public void AddToSchedule(ScheduleEntry entry)
+        public void AddToSchedule(IActor actor, int offset)
         {
-            Schedule.Add(entry);
+            Schedule.Add(actor.NextAction, offset);
         }
 
         public void SetMapDirty()
@@ -189,6 +182,11 @@ namespace CopperBend.App
             //TODO:  An entire experience subsystem.  For now it can be "points".
 
             XP += 20;
+        }
+
+        public void AddToSchedule(ICanAct actor, int offset)
+        {
+            throw new NotImplementedException();
         }
     }
 }

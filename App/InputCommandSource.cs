@@ -3,6 +3,7 @@ using RLNET;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace CopperBend.App
 {
@@ -22,6 +23,7 @@ namespace CopperBend.App
             Window = window;
             log = LogManager.GetLogger("CB.InputMapper");
         }
+        
 
         public bool InMultiStepCommand => NextStep != null;
         private Func<RLKeyPress, Command> NextStep = null;
@@ -36,7 +38,6 @@ namespace CopperBend.App
         {
             Actor = actor;
         }
-
         public Command GetCommand()
         {
             if (QueueIsEmpty) return CommandNone;

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+/*
 namespace CopperBend.App.Behaviors
 {
     public interface IBehavior
@@ -73,3 +73,4 @@ namespace CopperBend.App.Behaviors
         //        }
     }
 }
+*/

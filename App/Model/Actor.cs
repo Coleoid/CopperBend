@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using CopperBend.App.Behaviors;
 using CopperBend.MapUtil;
 using RLNET;
 

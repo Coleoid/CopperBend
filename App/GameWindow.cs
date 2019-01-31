@@ -7,7 +7,7 @@ namespace CopperBend.App
 {
     public class GameWindow : IGameWindow
     {
-        public RLRootConsole RootConsole { get; set; }
+        private RLRootConsole RootConsole { get; set; }
 
         private readonly RLConsole MapPane;
         private readonly int MapWidth = 60;
@@ -151,7 +151,7 @@ namespace CopperBend.App
             }
         }
 
-        public void ResetWait()
+        public void ClearMessagePause()
         {
             //0.1
             ShownMessages = 0;
@@ -186,7 +186,7 @@ namespace CopperBend.App
                 if (key?.Key != RLKey.Space) return;
 
                 //  Otherwise, show more messages
-                ResetWait();
+                ClearMessagePause();
                 ShowMessages();
             }
 
@@ -299,6 +299,16 @@ namespace CopperBend.App
 
             if (!showedAnItem)
                 WriteLine("Nothing");
+        }
+
+        public RLKeyPress GetKeyPress()
+        {
+            return RootConsole.Keyboard.GetKeyPress();
+        }
+
+        public void Close()
+        {
+            RootConsole.Close();
         }
     }
 }

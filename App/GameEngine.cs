@@ -153,10 +153,10 @@ namespace CopperBend.App
 
             //>>>  The player is being unified into the rest of the schedule...
             //  Waiting for player input blocks Schedule
-            //case GameMode.PlayerReady:
-            //    GameWindow.ResetWait();
-            //    Dispatcher.HandlePlayerCommands();
-            //    break;
+            case GameMode.PlayerReady:
+                GameWindow.ClearMessagePause();
+                Dispatcher.HandlePlayerCommands();
+                break;
 
             //  When the player has committed to a slow action, time passes
             case GameMode.Schedule:
@@ -209,7 +209,7 @@ namespace CopperBend.App
             //TODO:  Keep some things scheduled
             //  so plants keep growing, et c...
             _schedule.Clear();
-            GameWindow.ResetWait();
+            GameWindow.ClearMessagePause();
         }
 
         public void QueueCommand(GameCommand command)
@@ -245,8 +245,8 @@ namespace CopperBend.App
         private void ReadInput()
         {
             //  For now, only checking the keyboard for input
-            RLKeyPress key = GameWindow.RootConsole.Keyboard.GetKeyPress();
-            if (key != null)
+            RLKeyPress key = GameWindow.GetKeyPress();
+            while (key != null)
             {
                 if (key.Alt && key.Key == RLKey.F4)
                 {
@@ -255,6 +255,7 @@ namespace CopperBend.App
                 }
 
                 InputQueue.Enqueue(key);
+                key = GameWindow.GetKeyPress();
             }
         }
 
@@ -300,7 +301,7 @@ namespace CopperBend.App
         private void QuitGame()
         {
             //0.1, later verify, offer save
-            GameWindow.RootConsole.Close();
+            GameWindow.Close();
         }
 
 

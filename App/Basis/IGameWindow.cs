@@ -8,7 +8,6 @@ namespace CopperBend.App
     {
         bool DisplayDirty { get; set; }
         RLConsole LargePane { get; set; }
-        RLRootConsole RootConsole { get; set; }
         RLConsole TextPane { get; set; }
 
         void Run(UpdateEventHandler onUpdate, UpdateEventHandler onRender);
@@ -19,9 +18,11 @@ namespace CopperBend.App
         void HandleLargeMessage();
         void HandlePendingMessages();
         void Prompt(string text);
-        void ResetWait();
+        void ClearMessagePause();
         void ShowMessages();
         void WriteLine(string text);
         void ShowInventory(IEnumerable<IItem> inventory, Func<IItem, bool> filter);
+        RLKeyPress GetKeyPress();
+        void Close();
     }
 }

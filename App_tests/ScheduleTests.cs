@@ -26,7 +26,6 @@ namespace CopperBend.App.tests
             bool calledFromSchedule = false;
 
             void call(IControlPanel cp) { calledFromSchedule = true; }
-            //var entry = new ScheduleEntry(3, call);
 
             schedule.Add(call, 3);
             schedule.DoNext(nullControlPanel);
@@ -64,17 +63,17 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void ScheduleEntry_gets_actor_and_targets()
+        public void Local_sub_or_lambda_to_close_over_more_data()
         {
-            bool checksRan = false;
             var actor = new Actor(new Point(0, 0));
             var targets = new List<Actor>();
+            IActor passedActor = null;
+            List<Actor> passedTargets = null;
 
             void check_actor_and_targets(IControlPanel cp, IActor argActor, List<Actor> argTargets)
             {
-                Assert.That(argActor, Is.SameAs(actor));
-                Assert.That(argTargets, Is.SameAs(targets));
-                checksRan = true;
+                passedActor = argActor;
+                passedTargets = argTargets;
             }
 
             Action<IControlPanel> wrapper = (IControlPanel icp) =>
@@ -83,7 +82,8 @@ namespace CopperBend.App.tests
             schedule.Add(wrapper, 2);
             schedule.DoNext(nullControlPanel);
 
-            Assert.That(checksRan);
+            Assert.That(passedActor, Is.SameAs(actor));
+            Assert.That(passedTargets, Is.SameAs(targets));
         }
 
     }

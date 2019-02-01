@@ -3,7 +3,6 @@ using RLNET;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace CopperBend.App
 {
@@ -21,7 +20,7 @@ namespace CopperBend.App
             InQ = inQ;
             Describer = describer;
             Window = window;
-            log = LogManager.GetLogger("CB.InputMapper");
+            log = LogManager.GetLogger("CB.InputCommandSource");
         }
         
 
@@ -38,6 +37,24 @@ namespace CopperBend.App
         {
             Actor = actor;
         }
+
+        public void GiveCommand(IControlPanel controls, IActor actor)
+        {
+            
+        }
+
+        internal bool InputUntilCommandGenerated(IControlPanel controls)
+        {
+            var command = GetCommand();
+            if (command.Action != CmdAction.None)
+            {
+                Actor.Command(command);
+                NextStep = null;
+            }
+
+            return InMultiStepCommand;
+        }
+
         public Command GetCommand()
         {
             if (QueueIsEmpty) return CommandNone;

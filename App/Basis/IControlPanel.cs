@@ -38,13 +38,13 @@ namespace CopperBend.App
         void Experience(PlantType plant, Exp experience);
     }
 
-    public enum GameMode
+    public enum EngineMode
     {
         Unknown = 0,
         MenuOpen,
         LargeMessagePending,
         MessagesPending,
-        PlayerReady,
+        InputBound,
         Schedule,
     }
 

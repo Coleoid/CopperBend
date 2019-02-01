@@ -252,7 +252,7 @@ namespace CopperBend.App
             CursorX += promptText.Length;
         }
 
-        //  The engine calls here when we're in GameMode.LargeMessagePending
+        //  The engine calls here when we're in EngineMode.LargeMessagePending
         public void HandleLargeMessage()
         {
             RLKeyPress press = GetNextKeyPress();

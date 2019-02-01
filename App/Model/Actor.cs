@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CopperBend.MapUtil;
 using RLNET;
@@ -42,14 +43,34 @@ namespace CopperBend.App.Model
 
         public void NextAction(IControlPanel controls)
         {
-            //var command = CommandSource.CommandNone;
-            //while (command.Equals(CommandNone))
-            //{
-            //    Thread.Sleep(100);  //  aaqaruggaoiugghhhh
-            //    command = CommandSource.GetCommand();
-            //}
+            CommandSource.GiveCommand(controls, this);
+        }
 
-            //return CommandSource.NextAction(controls);
+        public void Command(Command command)
+        {
+            switch (command.Action)
+            {
+            case CmdAction.Consume:
+                break;
+            case CmdAction.Unset:
+                break;
+            case CmdAction.Move:
+                break;
+            case CmdAction.PickUp:
+                break;
+            case CmdAction.Drop:
+                break;
+            case CmdAction.Use:
+                break;
+            case CmdAction.Wait:
+                break;
+
+            case CmdAction.None:
+            case CmdAction.Unknown:
+                var name = Enum.GetName(typeof(Command), command.Action);
+                throw new Exception($"An actor should never receive command [{name}].");
+            }
+            throw new NotImplementedException();
         }
 
         public IItem WieldedTool { get; internal set; }

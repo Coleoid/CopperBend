@@ -11,15 +11,13 @@ namespace CopperBend.App
         private IGameWindow GameWindow;
         private Queue<GameCommand> CommandQueue;
         private Queue<RLKeyPress> InputQueue;
-        private Schedule _schedule;
+        private Schedule Schedule;
         private CommandDispatcher Dispatcher;
         private MapLoader MapLoader;
         private GameState GameState;
         private readonly EventBus Bus;
 
         #region Initialization
-        //  The division of responsibilities among these methods works for now
-        //  When load/save comes in, they'll need reworking
         public GameEngine(
             EventBus bus, 
             Schedule schedule, 
@@ -34,7 +32,7 @@ namespace CopperBend.App
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
 
-            _schedule = schedule;
+            Schedule = schedule;
             GameWindow = gameWindow;
             Dispatcher = commandDispatcher;
 
@@ -53,13 +51,21 @@ namespace CopperBend.App
         public void LoadNewGame()
         {
             // recreate or clear existing game objects?
-            GameState.Player = InitPlayer();
             LoadMap("Farm");
-            PushMode(GameMode.PlayerReady);
+
+            var player = InitPlayer();
+            GameState.Player = player;
+
+            var ics = new InputCommandSource(InputQueue, new Describer(), GameWindow);
+            player.CommandSource = ics;
+            ics.SetActor(player);
+
+            BindInputToFunc(ics.InputUntilCommandGenerated);
+            //EnterMode(EngineMode.InputBound);
         }
 
 
-        private static Actor InitPlayer()
+        private Actor InitPlayer()
         {
             var player = new Actor(At(0, 0))
             {
@@ -115,12 +121,62 @@ namespace CopperBend.App
 
         #endregion
 
-        private Stack<GameMode> ModeStack = new Stack<GameMode>();
-        public GameMode Mode { get => ModeStack.Peek(); }
+        private void onRender(object sender, UpdateEventArgs e)
+        {
+            //0.1
+            if (!MapLoaded)
+            {
+                MapLoaded = true;
+                foreach (var text in GameState.Map.FirstSightMessage)
+                {
+                    GameWindow.AddMessage(text);
+                }
+            }
 
-        private void PushMode(GameMode newMode)
+            GameWindow.Render(GameState.Map);
+        }
+
+        private void onUpdate(object sender, UpdateEventArgs e)
+        {
+            QueueInput();
+            //WorkCommandQueue();
+            ActOnMode();
+        }
+
+        private void QueueInput()
+        {
+            //  For now, only checking the keyboard for input
+            RLKeyPress key = GameWindow.GetKeyPress();
+            while (key != null)
+            {
+                if (key.Alt && key.Key == RLKey.F4)
+                {
+                    //CommandQueue.Enqueue(GameCommand.Quit);
+                    QuitGame();
+                    return;
+                }
+
+                InputQueue.Enqueue(key);
+                key = GameWindow.GetKeyPress();
+            }
+        }
+
+        private Stack<EngineMode> ModeStack = new Stack<EngineMode>();
+        public EngineMode Mode { get => ModeStack.Peek(); }
+        public void EnterMode(EngineMode newMode)
         {
             ModeStack.Push(newMode);
+        }
+        public void LeaveMode()
+        {
+            ModeStack.Pop();
+        }
+
+        private Func<IControlPanel, bool> InputUsingCall { get; set; }
+        public void BindInputToFunc(Func<IControlPanel, bool> func)
+        {
+            InputUsingCall = func;
+            EnterMode(EngineMode.InputBound);
         }
 
         private void ActOnMode()
@@ -128,17 +184,17 @@ namespace CopperBend.App
             switch (Mode)
             {
             //  A game menu will block even pending messages 
-            case GameMode.MenuOpen:
+            case EngineMode.MenuOpen:
                 HandleMenus();
                 break;
 
             //  The large message pane overlays most of the game
-            case GameMode.LargeMessagePending:
+            case EngineMode.LargeMessagePending:
                 GameWindow.HandleLargeMessage();
                 break;
 
             //  Messages waiting for the player block player input and scheduled events
-            case GameMode.MessagesPending:
+            case EngineMode.MessagesPending:
                 GameWindow.HandlePendingMessages();
                 break;
 
@@ -147,28 +203,39 @@ namespace CopperBend.App
             //   still handles message pauses, escape-to-menu, or choices
             //   presented by the scene.
             // NPC/Creature/world effects advance at dramatic (slow) pacing.
-            //case GameMode.Cinematic:
+            //case EngineMode.Cinematic:
             //    GameWindow.MuchScene();
             //    break;
 
-            //>>>  The player is being unified into the rest of the schedule...
             //  Waiting for player input blocks Schedule
-            case GameMode.PlayerReady:
-                GameWindow.ClearMessagePause();
-                Dispatcher.HandlePlayerCommands();
+            case EngineMode.InputBound:
+                bool stillInputBound = InputUsingCall((IControlPanel) Dispatcher);
+                if (!stillInputBound)
+                {
+                    LeaveMode();
+                    InputUsingCall = null;
+                }
+                //GameWindow.ClearMessagePause();
+                //Dispatcher.HandlePlayerCommands();
                 break;
 
             //  When the player has committed to a slow action, time passes
-            case GameMode.Schedule:
-                _schedule.DoNext(Dispatcher);
+            case EngineMode.Schedule:
+                DoNextScheduled();
                 break;
 
-            case GameMode.Unknown:
+            case EngineMode.Unknown:
                 throw new Exception("Game mode unknown, perhaps Init() was missed.");
 
             default:
                 throw new Exception($"Game mode [{Mode}] not written yet.");
             }
+        }
+
+        public void DoNextScheduled()
+        {
+            var nextAction = Schedule.GetNextAction();
+            nextAction?.Invoke(Dispatcher);
         }
 
 
@@ -191,7 +258,7 @@ namespace CopperBend.App
 
             foreach (var actor in map.Actors)
             {
-                _schedule.Add(actor.NextAction, 12);
+                Schedule.Add(actor.NextAction, 12);
             }
 
             map.ViewpointActor = GameState.Player;
@@ -208,56 +275,13 @@ namespace CopperBend.App
 
             //TODO:  Keep some things scheduled
             //  so plants keep growing, et c...
-            _schedule.Clear();
+            Schedule.Clear();
             GameWindow.ClearMessagePause();
-        }
-
-        public void QueueCommand(GameCommand command)
-        {
-            CommandQueue.Enqueue(command);
         }
 
         //0.1
         private bool MapLoaded { get; set; } = false;
 
-        private void onRender(object sender, UpdateEventArgs e)
-        {
-            //0.1
-            if (!MapLoaded)
-            {
-                MapLoaded = true;
-                foreach (var text in GameState.Map.FirstSightMessage)
-                {
-                    GameWindow.AddMessage(text);
-                }
-            }
-
-            GameWindow.Render(GameState.Map);
-        }
-
-        private void onUpdate(object sender, UpdateEventArgs e)
-        {
-            ReadInput();
-            WorkCommandQueue();
-            ActOnMode();
-        }
-
-        private void ReadInput()
-        {
-            //  For now, only checking the keyboard for input
-            RLKeyPress key = GameWindow.GetKeyPress();
-            while (key != null)
-            {
-                if (key.Alt && key.Key == RLKey.F4)
-                {
-                    CommandQueue.Enqueue(GameCommand.Quit);
-                    return;
-                }
-
-                InputQueue.Enqueue(key);
-                key = GameWindow.GetKeyPress();
-            }
-        }
 
         private void WorkCommandQueue()
         {
@@ -309,7 +333,7 @@ namespace CopperBend.App
 
         private void MessagePanelFull(object sender, EventArgs args)
         {
-            PushMode(GameMode.MessagesPending);
+            EnterMode(EngineMode.MessagesPending);
         }
 
         private void AllMessagesSent(object sender, EventArgs args)

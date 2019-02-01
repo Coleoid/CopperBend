@@ -39,6 +39,6 @@ namespace CopperBend.App
         IItem RemoveFromInventory(IItem item);
 
         IEnumerable<IItem> ReachableItems();
-
+        void Command(Command command);
     }
 }

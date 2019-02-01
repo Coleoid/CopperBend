@@ -30,7 +30,7 @@ namespace CopperBend.App
         public void PlayerBusyFor(int ticks)
         {
             //Schedule.Add(Player, ticks);
-            //GameState.Mode = GameMode.Schedule;
+            //GameState.Mode = EngineMode.Schedule;
         }
 
         private Point PointInDirection(Point start, Direction direction)

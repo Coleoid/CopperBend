@@ -9,7 +9,7 @@ namespace CopperBend.App
     public partial class CommandDispatcher
     {
         private Schedule Schedule { get; set; }
-        private GameWindow Window { get; set; }
+        private IGameWindow Window { get; set; }
 
         private IGameState GameState { get; set; }
         private IActor Player { get => GameState.Player; }
@@ -23,7 +23,7 @@ namespace CopperBend.App
 
         public CommandDispatcher(
             Schedule schedule, 
-            GameWindow window, 
+            IGameWindow window, 
             IGameState gameState, 
             Describer describer,
             Queue<GameCommand> commandQueue)
@@ -37,7 +37,7 @@ namespace CopperBend.App
 
         public void HandlePlayerCommands()
         {
-            var key = Window.GetNextKeyPress();
+            var key = default(RLKeyPress);// Window.GetNextKeyPress();
             if (key == null) return;
 
             if (InMultiStepCommand)  //  Drop, throw, wield, etc.
@@ -179,8 +179,8 @@ namespace CopperBend.App
         private void Command_DirectionAttack(IActor targetActor)
         {
             //0.1
-            var conflictSystem = new ConflictSystem(Window, Map, Schedule);
-            conflictSystem.Attack("Wah!", 2, targetActor);
+            //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
+            //conflictSystem.Attack("Wah!", 2, targetActor);
 
             PlayerBusyFor(12);
         }

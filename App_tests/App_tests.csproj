@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DamageSystemTests.cs" />
+    <Compile Include="EngineTests.cs" />
     <Compile Include="InputCommandSourceTests.cs" />
     <Compile Include="InputCommandSourceTestsBase.cs" />
     <Compile Include="InputCommandSourceUseTests.cs" />

@@ -9,6 +9,10 @@ namespace CopperBend.App.Model
     public class Actor : IActor
     {
         public ICommandSource CommandSource { get; set; }
+
+        public Actor()
+            : this(new Point(0, 0))
+        {}
         public Actor(Point point)
         {
             Point = point;
@@ -41,9 +45,9 @@ namespace CopperBend.App.Model
         public void Hurt(int amount) => Health -= amount;
         public IDefenseAspect DefenseAspect { get; set; }
 
-        public void NextAction(IControlPanel controls)
+        public void NextAction()
         {
-            CommandSource.GiveCommand(controls, this);
+            CommandSource.GiveCommand(this);
         }
 
         public void Command(Command command)
@@ -70,7 +74,7 @@ namespace CopperBend.App.Model
                 var name = Enum.GetName(typeof(Command), command.Action);
                 throw new Exception($"An actor should never receive command [{name}].");
             }
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public IItem WieldedTool { get; internal set; }
@@ -126,6 +130,11 @@ namespace CopperBend.App.Model
         public IEnumerable<IItem> ReachableItems()
         {
             return Map.Items.Where(i => i.Point.Equals(Point));
+        }
+
+        public void NextAction(IControlPanel controls)
+        {
+            throw new NotImplementedException();
         }
     }
 }

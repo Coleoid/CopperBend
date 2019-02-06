@@ -8,7 +8,9 @@ namespace CopperBend.App
 {
     public class GameEngine
     {
-        private IGameWindow GameWindow;
+        public bool Config_AutoLoad_new_game { get; set; }
+
+        public IGameWindow GameWindow;
         private Queue<GameCommand> CommandQueue;
         private Queue<RLKeyPress> InputQueue;
         private Schedule Schedule;
@@ -44,7 +46,7 @@ namespace CopperBend.App
 
         public void Run()
         {
-            LoadNewGame();
+            if (Config_AutoLoad_new_game) LoadNewGame();
             GameWindow.Run(onUpdate, onRender);
         }
 
@@ -58,9 +60,8 @@ namespace CopperBend.App
 
             var ics = new InputCommandSource(InputQueue, new Describer(), GameWindow);
             player.CommandSource = ics;
-            ics.SetActor(player);
 
-            BindInputToFunc(ics.InputUntilCommandGenerated);
+            //BindInputToFunc(ics.InputUntilCommandGenerated);
             //EnterMode(EngineMode.InputBound);
         }
 
@@ -146,18 +147,18 @@ namespace CopperBend.App
         private void QueueInput()
         {
             //  For now, only checking the keyboard for input
-            RLKeyPress key = GameWindow.GetKeyPress();
-            while (key != null)
+            RLKeyPress press = GameWindow.GetKeyPress();
+            while (press != null)
             {
-                if (key.Alt && key.Key == RLKey.F4)
+                if (press.Alt && press.Key == RLKey.F4)
                 {
                     //CommandQueue.Enqueue(GameCommand.Quit);
                     QuitGame();
                     return;
                 }
 
-                InputQueue.Enqueue(key);
-                key = GameWindow.GetKeyPress();
+                InputQueue.Enqueue(press);
+                press = GameWindow.GetKeyPress();
             }
         }
 

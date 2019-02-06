@@ -46,7 +46,8 @@ namespace CopperBend.App.tests
         public void Directional_keypress_becomes_Move(RLKey key, CmdDirection direction)
         {
             Queue(key);
-            Cmd = Source.GetCommand();
+            var actor = Substitute.For<IActor>();
+            Cmd = Source.GetCommand(actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Move));
             Assert.That(Cmd.Direction, Is.EqualTo(direction));
         }
@@ -54,7 +55,8 @@ namespace CopperBend.App.tests
         [Test]
         public void No_input_no_command()
         {
-            Cmd = Source.GetCommand();
+            var actor = Substitute.For<IActor>();
+            Cmd = Source.GetCommand(actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.None));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
         }
@@ -67,13 +69,13 @@ namespace CopperBend.App.tests
             Assert.That(Source.InMultiStepCommand, Is.False);
 
             Queue(RLKey.C);
-            var cmd = Source.GetCommand();
+            var cmd = Source.GetCommand(Actor);
             Assert.That(Source.InMultiStepCommand, "In process of choosing what to consume");
             Assert.That(cmd.Action, Is.EqualTo(CmdAction.None));
             Window.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
 
             Queue(RLKey.A);
-            cmd = Source.GetCommand();
+            cmd = Source.GetCommand(Actor);
             Assert.That(Source.InMultiStepCommand, Is.False, "Picked item to consume");
             Assert.That(cmd.Action, Is.EqualTo(CmdAction.Consume));
             Assert.That(cmd.Direction, Is.EqualTo(CmdDirection.None));
@@ -88,7 +90,7 @@ namespace CopperBend.App.tests
 
             Queue(RLKey.C);
             Queue(RLKey.A);
-            var cmd = Source.GetCommand();
+            var cmd = Source.GetCommand(Actor);
             Assert.That(cmd.Action, Is.EqualTo(CmdAction.Consume));
             Assert.That(cmd.Item, Is.EqualTo(fruit));
 
@@ -104,7 +106,7 @@ namespace CopperBend.App.tests
 
             Queue(RLKey.C);
             Queue(KP_Question);
-            var cmd = Source.GetCommand();
+            var cmd = Source.GetCommand(Actor);
             Assert.That(cmd, Is.EqualTo(CommandNone));
 
             Window.Received().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
@@ -117,7 +119,7 @@ namespace CopperBend.App.tests
             var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
             Actor.ReachableItems().Returns(new List<IItem> { fruit });
             Queue(RLKey.Comma);
-            Cmd = Source.GetCommand();
+            Cmd = Source.GetCommand(Actor);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
             Assert.That(Cmd.Item, Is.EqualTo(fruit));
@@ -128,7 +130,7 @@ namespace CopperBend.App.tests
         {
             Actor.ReachableItems().Returns(new List<IItem> { });
             Queue(RLKey.Comma);
-            Cmd = Source.GetCommand();
+            Cmd = Source.GetCommand(Actor);
 
             Assert.That(Cmd, Is.EqualTo(CommandNone));
             Window.Received().WriteLine("Nothing to pick up here.");

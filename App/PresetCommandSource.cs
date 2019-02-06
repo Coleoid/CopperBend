@@ -8,7 +8,7 @@ namespace CopperBend.App
     {
         public Queue<Command> CmdQ = new Queue<Command>();
 
-        public void GiveCommand(IControlPanel controls, IActor actor)
+        public void GiveCommand(IActor actor)
         {
         }
 

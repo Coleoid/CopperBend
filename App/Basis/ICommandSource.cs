@@ -5,7 +5,7 @@ namespace CopperBend.App
     public interface ICommandSource
     {
         //Command GetCommand();
-        void GiveCommand(IControlPanel controls, IActor actor);
+        void GiveCommand(IActor actor);
     }
 
     public enum CmdAction

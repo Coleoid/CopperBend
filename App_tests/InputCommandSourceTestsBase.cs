@@ -25,7 +25,6 @@ namespace CopperBend.App.tests
             Source = new InputCommandSource(InQ, new Describer(), Window);
 
             Actor = Substitute.For<IActor>();
-            Source.SetActor(Actor);
         }
 
         protected static RLKeyPress KeyPressFrom(RLKey key, bool alt = false, bool shift = false, bool control = false, bool repeating = false, bool numLock = false, bool capsLock = false, bool scrollLock = false)

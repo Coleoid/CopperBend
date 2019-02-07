@@ -13,9 +13,9 @@ namespace CopperBend.App
         bool IsDisplayDirty { get; set; }
 
         Dictionary<Point, List<string>> LocationMessages { get; }
-        Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; }
+        //Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; }
         bool HasEventAtPoint(Point point);
-        void AddEventAtLocation(Point point, CommandEntry entry);
+        //void AddEventAtLocation(Point point, CommandEntry entry);
         List<string> FirstSightMessage { get; set; }
 
         List<IItem> Items { get; set; }

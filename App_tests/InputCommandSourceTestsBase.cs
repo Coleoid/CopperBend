@@ -8,24 +8,32 @@ namespace CopperBend.App.tests
     [TestFixture]
     public class InputCommandSourceTestsBase
     {
-        protected Queue<RLKeyPress> InQ;
-        protected IGameWindow Window;
-        protected InputCommandSource Source;
-        protected IActor Actor;
+        protected Queue<RLKeyPress> _inQ;
+        protected IGameWindow _gameWindow;
+        protected InputCommandSource _source;
+        protected IActor _actor;
+
+        [SetUp]
+        public virtual void SetUp()
+        {
+            _inQ = new Queue<RLKeyPress>();
+            _gameWindow = Substitute.For<IGameWindow>();
+            _source = new InputCommandSource(_inQ, new Describer(), _gameWindow);
+            _actor = Substitute.For<IActor>();
+        }
+
+        [TearDown]
+        public virtual void TearDown()
+        {
+            _inQ = null;
+            _gameWindow = null;
+            _source = null;
+            _actor = null;
+        }
+
         protected Command Cmd = new Command(CmdAction.Unset, CmdDirection.None);
         protected static readonly Command CommandNone = new Command(CmdAction.None, CmdDirection.None);
         protected static readonly RLKeyPress KP_Question = KeyPressFrom(RLKey.Slash, shift: true);
-
-        [SetUp]
-        public void SetUp()
-        {
-            InQ = new Queue<RLKeyPress>();
-            Window = Substitute.For<IGameWindow>();
-
-            Source = new InputCommandSource(InQ, new Describer(), Window);
-
-            Actor = Substitute.For<IActor>();
-        }
 
         protected static RLKeyPress KeyPressFrom(RLKey key, bool alt = false, bool shift = false, bool control = false, bool repeating = false, bool numLock = false, bool capsLock = false, bool scrollLock = false)
         {
@@ -39,7 +47,7 @@ namespace CopperBend.App.tests
         }
         protected void Queue(RLKeyPress press)
         {
-            InQ.Enqueue(press);
+            _inQ.Enqueue(press);
         }
     }
 }

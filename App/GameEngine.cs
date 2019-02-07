@@ -11,7 +11,6 @@ namespace CopperBend.App
         public bool Config_AutoLoad_new_game { get; set; }
 
         public IGameWindow GameWindow;
-        private Queue<GameCommand> CommandQueue;
         private Queue<RLKeyPress> InputQueue;
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
@@ -24,7 +23,6 @@ namespace CopperBend.App
             EventBus bus, 
             Schedule schedule, 
             IGameWindow gameWindow, 
-            Queue<GameCommand> commandQueue, 
             Queue<RLKeyPress> inputQueue, 
             MapLoader mapLoader, 
             IGameState gameState, 
@@ -33,12 +31,12 @@ namespace CopperBend.App
             Bus = bus;
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
+            Bus.EnterEngineModeSubscribers += (s, a) => EnterMode(a.Mode);  //0.1
 
             Schedule = schedule;
             GameWindow = gameWindow;
             Dispatcher = commandDispatcher;
 
-            CommandQueue = commandQueue;
             InputQueue = inputQueue;
             MapLoader = mapLoader;
             GameState = (GameState)gameState;  // not great, but working...
@@ -184,6 +182,10 @@ namespace CopperBend.App
         {
             switch (Mode)
             {
+            //  Update does nothing when paused
+            case EngineMode.Pause:
+                return;
+
             //  A game menu will block even pending messages 
             case EngineMode.MenuOpen:
                 HandleMenus();
@@ -235,8 +237,11 @@ namespace CopperBend.App
 
         public void DoNextScheduled()
         {
-            var nextAction = Schedule.GetNextAction();
-            nextAction?.Invoke(Dispatcher);
+            while (Mode == EngineMode.Schedule)
+            {
+                var nextAction = Schedule.GetNextAction();
+                nextAction?.Invoke(Dispatcher);
+            }
         }
 
 
@@ -282,38 +287,6 @@ namespace CopperBend.App
 
         //0.1
         private bool MapLoaded { get; set; } = false;
-
-
-        private void WorkCommandQueue()
-        {
-            while (CommandQueue.Count > 0)
-            {
-                var command = CommandQueue.Dequeue();
-                switch (command)
-                {
-                case GameCommand.Quit:
-                    QuitGame();
-                    break;
-
-                //0.1
-                case GameCommand.GoToFarmhouse:
-                    LoadMap("Farmhouse");
-                    break;
-
-                //0.1
-                case GameCommand.NotReadyToLeave:
-                    GameState.Player.MoveTo(new Point(7, 17));
-                    GameWindow.AddMessage("At the gate... and... I don't want to leave.  Some important jobs here, first.");
-                    break;
-
-                case GameCommand.Unset:
-                    throw new Exception("Dev error:  Unset command on the queue--preparation missed.");
-
-                default:
-                    throw new Exception($"Dev error:  Don't know how to work the [{command}] command yet.");
-                }
-            }
-        }
 
         private void HandleMenus()
         {

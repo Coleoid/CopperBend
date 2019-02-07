@@ -20,7 +20,6 @@ namespace CopperBend.App
                 c.Register<Describer, Describer>();
                 c.Register<Schedule, Schedule>();
                 c.Register<IGameWindow, GameWindow>();
-                c.Register<Queue<GameCommand>, Queue<GameCommand>>(Made.Of(() => new Queue<GameCommand>()));
                 c.Register<Queue<RLKeyPress>, Queue<RLKeyPress>>(Made.Of(() => new Queue<RLKeyPress>()));
                 c.Register<MapLoader, MapLoader>();
                 c.Register<IGameState, GameState>();

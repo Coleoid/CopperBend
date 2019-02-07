@@ -2,50 +2,58 @@
 using NUnit.Framework;
 using RLNET;
 using System.Collections.Generic;
-using CopperBend.App.Model;
-using CopperBend.MapUtil;
 
 namespace CopperBend.App.tests
 {
     [TestFixture]
-    public class EngineTests
+    public class EngineTests : InputCommandSourceTestsBase
     {
-        private IGameWindow _gameWindow = null;
-        private GameState _gameState = null;
-
-        private Queue<RLKeyPress> _inQ = null;
-        private Queue<GameCommand> _cmdQ = null;
-        private MapLoader _mapLoader = null;
-        private CommandDispatcher _dispatcher = null;
-        private GameEngine _engine = null;
         private Schedule _schedule = null;
+        private GameState _gameState = null;
+        private MapLoader _mapLoader = null;
         private Describer _describer = null;
         private EventBus _bus = null;
+        private CommandDispatcher _dispatcher = null;
+        private GameEngine _engine = null;
+
         private UpdateEventHandler _onUpdate = null;
         private UpdateEventHandler _onRender = null;
-        private IActor _player = null;
 
         [SetUp]
-        public void SetUp()
+        public override void SetUp()
         {
-            _gameWindow = Substitute.For<IGameWindow>();
+            base.SetUp();
+
             _gameWindow.Run(Arg.Do<UpdateEventHandler>(x => _onUpdate = x), Arg.Do<UpdateEventHandler>(x => _onRender = x));
 
-            _gameState = new GameState();
-            _player = Substitute.For<IActor>();
-            _gameState.Player = _player;
-
-            _inQ = new Queue<RLKeyPress>();
-            _cmdQ = new Queue<GameCommand>();
-            _mapLoader = new MapLoader();
             _schedule = new Schedule();
+            _gameState = new GameState { Player = _actor };
             _describer = new Describer();
             _bus = new EventBus();
-            _dispatcher = new CommandDispatcher(_schedule, _gameWindow, _gameState, _describer, _cmdQ);
-            _engine = new GameEngine(_bus, _schedule, _gameWindow, _cmdQ, _inQ, _mapLoader, _gameState, _dispatcher);
+            _mapLoader = new MapLoader();
+
+            _dispatcher = new CommandDispatcher(_schedule, _gameWindow, _gameState, _describer, _bus);
+            _engine = new GameEngine(_bus, _schedule, _gameWindow, _inQ, _mapLoader, _gameState, _dispatcher);
             //  Ai yi yi.
         }
-        
+
+        [TearDown]
+        public override void TearDown()
+        {
+            base.TearDown();
+
+            _schedule = null;
+            _gameState = null;
+            _mapLoader = null;
+            _describer = null;
+            _bus = null;
+            _dispatcher = null;
+            _engine = null;
+
+            _onUpdate = null;
+            _onRender = null;
+        }
+
         [Test]
         public void CreateEngine()
         {
@@ -55,54 +63,44 @@ namespace CopperBend.App.tests
         [Test]
         public void Run_connects_update_and_render_to_GameWindow()
         {
+            Assert.That(_onUpdate, Is.Null);
+            Assert.That(_onRender, Is.Null);
+
             _engine.Run();
 
             Assert.That(_onUpdate, Is.Not.Null);
             Assert.That(_onRender, Is.Not.Null);
-
             //  So now I can do _onUpdate(foo, bar) to send events "from the GameWindow"
         }
 
-        RLKeyPress QuickKey(RLKey key)
-        {
-            return  new RLKeyPress(key, false, false, false, false, false, false, false);
-        }
-
         [Test]
-        public void OnUpdate_queues_input()
+        public void OnUpdate_queues_all_input()
         {
-            bool calledBack = false;
-            _schedule.Add(icp => calledBack = true, 10);
             _engine.EnterMode(EngineMode.Schedule);
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 999);
+            _gameWindow.GetKeyPress().Returns(KeyPressFrom(RLKey.Left), KeyPressFrom(RLKey.Up), (RLKeyPress)null);
 
             _engine.Run();
-
-            Command cmd = default(Command);
-            _player.Command(Arg.Do<Command>(c => cmd = c));
-
-            //_gameWindow.GetKeyPress().Returns(QuickKey(RLKey.Left), (RLKeyPress)null);
-
             _onUpdate(null, null);
 
-            _player.Received().Command(Arg.Any<Command>());
-            Assert.That(cmd.Action, Is.EqualTo(CmdAction.Move));
-
-            Assert.That(_inQ.Count, Is.EqualTo(0)); // pause mode to see queued input?
+            Assert.That(_inQ.Count, Is.EqualTo(2));
         }
 
         [Test]
-        public void ActorBuild()
+        public void OnUpdate_runs_actions_until_mode_blocks()
         {
-            IActor actor = Substitute.For<IActor>();
+            _engine.EnterMode(EngineMode.Schedule);
 
-            var ics = new InputCommandSource(_inQ, _describer, _gameWindow);
-            //actor.CommandSource = ics;
+            int scheduledActionsCalled = 0;
+            _schedule.Add(icp => scheduledActionsCalled++, 12);
+            _schedule.Add(icp => scheduledActionsCalled++, 12);
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 12);
 
-            Assert.That(actor.CommandSource, Is.Not.Null);
-            _inQ.Enqueue(QuickKey(RLKey.Left));
-            ics.GiveCommand(actor);
+            _engine.Run();
+            _onUpdate(null, null);
 
-            actor.Received().Command(Arg.Any<Command>());
+            Assert.That(scheduledActionsCalled, Is.EqualTo(2));
+            Assert.That(_engine.Mode, Is.EqualTo(EngineMode.Pause));
         }
     }
 }

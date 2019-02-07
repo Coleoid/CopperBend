@@ -25,6 +25,10 @@ namespace CopperBend.App
 
         public Point PlayerPoint => Player.Point;
 
+        public void EnterMode(object sender, EngineMode mode)
+        {
+            EventBus.EnterMode(sender, new EnterModeEventArgs(mode));
+        }
 
         //>>> elim
         public void PlayerBusyFor(int ticks)

@@ -36,6 +36,7 @@ namespace CopperBend.App
         void Till(ITile tile);
 
         void Experience(PlantType plant, Exp experience);
+        void EnterMode(object sender, EngineMode mode);
     }
 
     public enum EngineMode
@@ -46,14 +47,7 @@ namespace CopperBend.App
         MessagesPending,
         InputBound,
         Schedule,
-    }
-
-    public enum GameCommand
-    {
-        Unset = 0,
-        Quit,
-        GoToFarmhouse,  //0.1
-        NotReadyToLeave,
+        Pause,
     }
 
     //  Categories of experience

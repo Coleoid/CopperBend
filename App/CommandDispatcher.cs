@@ -16,7 +16,8 @@ namespace CopperBend.App
         private IAreaMap Map { get => GameState.Map; }
 
         private Describer Describer;
-        private Queue<GameCommand> CommandQueue;
+        //private Queue<GameCommand> CommandQueue;
+        private EventBus EventBus;
 
         private Action<RLKeyPress> NextStep = null;
         private bool InMultiStepCommand => NextStep != null;
@@ -26,13 +27,15 @@ namespace CopperBend.App
             IGameWindow window, 
             IGameState gameState, 
             Describer describer,
-            Queue<GameCommand> commandQueue)
+            EventBus bus
+            //Queue<GameCommand> commandQueue
+            )
         {
             Schedule = schedule;
             Window = window;
             GameState = gameState;
             Describer = describer;
-            CommandQueue = commandQueue;
+            EventBus = bus;
         }
 
         public void HandlePlayerCommands()
@@ -164,15 +167,15 @@ namespace CopperBend.App
                 Map.LocationMessages.Remove(tile.Point);
             }
 
-            //0.2
-            if (Map.LocationEventEntries.ContainsKey(tile.Point))
-            {
-                var entries = Map.LocationEventEntries[tile.Point];
-                foreach (var entry in entries)
-                {
-                    CommandQueue.Enqueue(entry.Command);
-                }
-            }
+            ////0.2
+            //if (Map.LocationEventEntries.ContainsKey(tile.Point))
+            //{
+            //    var entries = Map.LocationEventEntries[tile.Point];
+            //    foreach (var entry in entries)
+            //    {
+            //        //CommandQueue.Enqueue(entry.Command);
+            //    }
+            //}
 
             //0.3 may unify those collections and loops, may restructure flow
         }

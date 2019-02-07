@@ -16,7 +16,7 @@ namespace CopperBend.App.tests
         public void DirectionOf_nondirectional_is_None(RLKey key)
         {
             RLKeyPress press = KeyPressFrom(key);
-            var dir = Source.DirectionOf(press);
+            var dir = _source.DirectionOf(press);
 
             Assert.That(dir, Is.EqualTo(CmdDirection.None));
         }
@@ -36,7 +36,7 @@ namespace CopperBend.App.tests
         public void DirectionOf_directional_is_correct(RLKey key, CmdDirection expectedDir)
         {
             RLKeyPress press = KeyPressFrom(key);
-            var dir = Source.DirectionOf(press);
+            var dir = _source.DirectionOf(press);
 
             Assert.That(dir, Is.EqualTo(expectedDir));
         }
@@ -47,7 +47,7 @@ namespace CopperBend.App.tests
         {
             Queue(key);
             var actor = Substitute.For<IActor>();
-            Cmd = Source.GetCommand(actor);
+            Cmd = _source.GetCommand(actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Move));
             Assert.That(Cmd.Direction, Is.EqualTo(direction));
         }
@@ -56,7 +56,7 @@ namespace CopperBend.App.tests
         public void No_input_no_command()
         {
             var actor = Substitute.For<IActor>();
-            Cmd = Source.GetCommand(actor);
+            Cmd = _source.GetCommand(actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.None));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
         }
@@ -65,18 +65,18 @@ namespace CopperBend.App.tests
         public void MultiKey_Command_flow()
         {
             var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            Actor.Inventory.Returns(new List<IItem> { fruit });
-            Assert.That(Source.InMultiStepCommand, Is.False);
+            _actor.Inventory.Returns(new List<IItem> { fruit });
+            Assert.That(_source.InMultiStepCommand, Is.False);
 
             Queue(RLKey.C);
-            var cmd = Source.GetCommand(Actor);
-            Assert.That(Source.InMultiStepCommand, "In process of choosing what to consume");
+            var cmd = _source.GetCommand(_actor);
+            Assert.That(_source.InMultiStepCommand, "In process of choosing what to consume");
             Assert.That(cmd.Action, Is.EqualTo(CmdAction.None));
-            Window.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+            _gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
 
             Queue(RLKey.A);
-            cmd = Source.GetCommand(Actor);
-            Assert.That(Source.InMultiStepCommand, Is.False, "Picked item to consume");
+            cmd = _source.GetCommand(_actor);
+            Assert.That(_source.InMultiStepCommand, Is.False, "Picked item to consume");
             Assert.That(cmd.Action, Is.EqualTo(CmdAction.Consume));
             Assert.That(cmd.Direction, Is.EqualTo(CmdDirection.None));
             Assert.That(cmd.Item, Is.EqualTo(fruit));
@@ -86,40 +86,40 @@ namespace CopperBend.App.tests
         public void Prequeued_input_skips_prompts()
         {
             var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            Actor.Inventory.Returns(new List<IItem> { fruit });
+            _actor.Inventory.Returns(new List<IItem> { fruit });
 
             Queue(RLKey.C);
             Queue(RLKey.A);
-            var cmd = Source.GetCommand(Actor);
+            var cmd = _source.GetCommand(_actor);
             Assert.That(cmd.Action, Is.EqualTo(CmdAction.Consume));
             Assert.That(cmd.Item, Is.EqualTo(fruit));
 
-            Window.DidNotReceive().Prompt(Arg.Any<string>());
-            Window.DidNotReceive().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
+            _gameWindow.DidNotReceive().Prompt(Arg.Any<string>());
+            _gameWindow.DidNotReceive().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
         }
 
         [Test]
         public void Can_check_Inventory_mid_command()
         {
             var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            Actor.Inventory.Returns(new List<IItem> { fruit });
+            _actor.Inventory.Returns(new List<IItem> { fruit });
 
             Queue(RLKey.C);
             Queue(KP_Question);
-            var cmd = Source.GetCommand(Actor);
+            var cmd = _source.GetCommand(_actor);
             Assert.That(cmd, Is.EqualTo(CommandNone));
 
-            Window.Received().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
-            Assert.That(Source.InMultiStepCommand, "Displaying inventory does not abort command");
+            _gameWindow.Received().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
+            Assert.That(_source.InMultiStepCommand, "Displaying inventory does not abort command");
         }
 
         [Test]
         public void PickUp_flow()
         {
             var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            Actor.ReachableItems().Returns(new List<IItem> { fruit });
+            _actor.ReachableItems().Returns(new List<IItem> { fruit });
             Queue(RLKey.Comma);
-            Cmd = Source.GetCommand(Actor);
+            Cmd = _source.GetCommand(_actor);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
             Assert.That(Cmd.Item, Is.EqualTo(fruit));
@@ -128,12 +128,21 @@ namespace CopperBend.App.tests
         [Test]
         public void PickUp_nothing()
         {
-            Actor.ReachableItems().Returns(new List<IItem> { });
+            _actor.ReachableItems().Returns(new List<IItem> { });
             Queue(RLKey.Comma);
-            Cmd = Source.GetCommand(Actor);
+            Cmd = _source.GetCommand(_actor);
 
             Assert.That(Cmd, Is.EqualTo(CommandNone));
-            Window.Received().WriteLine("Nothing to pick up here.");
+            _gameWindow.Received().WriteLine("Nothing to pick up here.");
+        }
+
+        [Test]
+        public void ActorBuild()
+        {
+            Queue(RLKey.Left);
+            _source.GiveCommand(_actor);
+
+            _actor.Received().Command(Arg.Any<Command>());
         }
     }
 }

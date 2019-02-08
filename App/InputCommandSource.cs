@@ -75,6 +75,17 @@ namespace CopperBend.App
             }
         }
 
+        private Command NextWhenReady(Func<RLKeyPress, IActor, Command> nextStep, string prompt, IActor actor)
+        {
+            NextStep = nextStep;
+            if (QueueIsEmpty)
+            {
+                Prompt(prompt);
+                return CommandNone;
+            }
+            return NextStep(InQ.Dequeue(), actor);
+        }
+
         public Command Consume(IActor actor)
         {
             return NextWhenReady( Consume_main, "Consume (inventory letter or ? to show inventory): ", actor);
@@ -240,17 +251,6 @@ namespace CopperBend.App
             string rep = press.Char.ToString();
             if (string.IsNullOrEmpty(rep)) rep = press.Key.ToString();
             return rep;
-        }
-
-        private Command NextWhenReady(Func<RLKeyPress, IActor, Command> nextStep, string prompt, IActor actor)
-        {
-            NextStep = nextStep;
-            if (QueueIsEmpty)
-            {
-                Prompt(prompt);
-                return CommandNone;
-            }
-            return NextStep(InQ.Dequeue(), actor);
         }
 
         public CmdDirection DirectionOf(RLKeyPress press)

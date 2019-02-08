@@ -24,7 +24,9 @@ namespace CopperBend.App.tests
         {
             base.SetUp();
 
-            _gameWindow.Run(Arg.Do<UpdateEventHandler>(x => _onUpdate = x), Arg.Do<UpdateEventHandler>(x => _onRender = x));
+            _gameWindow.Run(
+                Arg.Do<UpdateEventHandler>(x => _onUpdate = x), 
+                Arg.Do<UpdateEventHandler>(x => _onRender = x));
 
             _schedule = new Schedule();
             _gameState = new GameState { Player = _actor };
@@ -101,6 +103,41 @@ namespace CopperBend.App.tests
 
             Assert.That(scheduledActionsCalled, Is.EqualTo(2));
             Assert.That(_engine.Mode, Is.EqualTo(EngineMode.Pause));
+        }
+
+        [Test]
+        public void PauseMode_stops_engine_from_running_further_actions()
+        {
+            _engine.EnterMode(EngineMode.Schedule);
+
+            int scheduledActionsCalled = 0;
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 11);
+            _schedule.Add(icp => scheduledActionsCalled++, 12);
+
+            _engine.Run();
+            _onUpdate(null, null);
+
+            Assert.That(scheduledActionsCalled, Is.EqualTo(0));
+            Assert.That(_engine.Mode, Is.EqualTo(EngineMode.Pause));
+        }
+
+        [Test]
+        public void Leaving_PauseMode_will_not_run_schedule_until_next_update()
+        {
+            _engine.EnterMode(EngineMode.Schedule);
+            _engine.EnterMode(EngineMode.Pause);
+
+            int scheduledActionsCalled = 0;
+            _schedule.Add(icp => scheduledActionsCalled++, 12);
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 999);
+
+            _engine.Run();
+            _onUpdate(null, null);
+            _engine.LeaveMode();
+            Assert.That(scheduledActionsCalled, Is.EqualTo(0));
+
+            _onUpdate(null, null);
+            Assert.That(scheduledActionsCalled, Is.EqualTo(1));
         }
     }
 }

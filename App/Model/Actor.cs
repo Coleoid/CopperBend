@@ -74,7 +74,6 @@ namespace CopperBend.App.Model
                 var name = Enum.GetName(typeof(Command), command.Action);
                 throw new Exception($"An actor should never receive command [{name}].");
             }
-            //throw new NotImplementedException();
         }
 
         public IItem WieldedTool { get; internal set; }
@@ -89,7 +88,7 @@ namespace CopperBend.App.Model
 
         public void AddToInventory(IItem item)
         {
-            //0.1 everything stacks
+            //0.1 everything stacks without quantity limit
             var existingItem = Inventory
                 .FirstOrDefault(i => i.SameThingAs(item));
             if (existingItem == null)

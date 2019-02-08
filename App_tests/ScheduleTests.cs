@@ -21,19 +21,6 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void Schedule_calls_action_in_entry()
-        {
-            bool calledFromSchedule = false;
-
-            void call(IControlPanel cp) { calledFromSchedule = true; }
-
-            schedule.Add(call, 3);
-            schedule.DoNext(nullControlPanel);
-
-            Assert.That(calledFromSchedule);
-        }
-
-        [Test]
         public void Schedule_Add_null_Entry_throws_clear()
         {
             var ex = Assert.Throws<Exception>(() => schedule.Add(null, 0));
@@ -44,22 +31,6 @@ namespace CopperBend.App.tests
         {
             var nextAction = schedule.GetNextAction();
             Assert.IsNull(nextAction);
-        }
-
-        [Test]
-        public void Schedule_passes_ControlPanel_to_action()
-        {
-            var icp = Substitute.For<IControlPanel>();
-
-            void write_foo(IControlPanel cp)
-            {
-                cp.WriteLine("foo");
-            }
-
-            schedule.Add(write_foo, 3);
-            schedule.DoNext(icp);
-
-            icp.Received().WriteLine("foo");
         }
 
         [Test]
@@ -80,7 +51,8 @@ namespace CopperBend.App.tests
                 check_actor_and_targets(icp, actor, targets);
 
             schedule.Add(wrapper, 2);
-            schedule.DoNext(nullControlPanel);
+            var nextAction = schedule.GetNextAction();
+            nextAction(nullControlPanel);
 
             Assert.That(passedActor, Is.SameAs(actor));
             Assert.That(passedTargets, Is.SameAs(targets));

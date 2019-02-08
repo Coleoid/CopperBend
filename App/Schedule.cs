@@ -38,12 +38,6 @@ namespace CopperBend.App
             return nextAction;
         }
 
-        public void DoNext(IControlPanel controls)
-        {
-            var nextAction = GetNextAction();
-            nextAction?.Invoke(controls);
-        }
-
         //  Action scheduled at CurrentTick plus offset
         public void Add(Action<IControlPanel> action, int offset)
         {

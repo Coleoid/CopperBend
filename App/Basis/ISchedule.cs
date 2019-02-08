@@ -8,7 +8,6 @@ namespace CopperBend.App
 
         void Add(Action<IControlPanel> action, int offset);
         void Clear();
-        void DoNext(IControlPanel controls);
         Action<IControlPanel> GetNextAction();
     }
 }

@@ -201,6 +201,30 @@ namespace CopperBend.App
         }
 
 
+        public IAreaMap LoadDevMap(string mapName, GameState state)
+        {
+            IAreaMap map;
+            if (mapName == "Farm")
+                map = FarmMap();
+            else if (mapName == "Farmhouse")
+                map = FarmhouseMap();
+            else
+                map = DemoMap();
+
+            Attach(map, state);
+
+            return map;
+        }
+
+        public void Attach(IAreaMap map, GameState state)
+        {
+            map.ViewpointActor = state.Player;
+            map.Actors.Add(state.Player);
+            state.Player.MoveTo(map.PlayerStartsAt);
+            map.UpdatePlayerFieldOfView(state.Player);
+            state.Map = map;
+        }
+
         public IAreaMap LoadMap(string mapName)
         {
             return MapFromFile(mapName);
@@ -325,7 +349,6 @@ namespace CopperBend.App
 
             return deserializer.Deserialize<MapData>(reader);
         }
-
 
         internal IAreaMap DemoMap()
         {

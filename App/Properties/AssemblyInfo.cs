@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using log4net.Config;
 
@@ -38,3 +39,4 @@ using log4net.Config;
 //  Sets log4net to get its configuration from CopperBend.log.config
 //  and refresh during runtime if that file is updated
 [assembly: XmlConfigurator(ConfigFile = "CopperBend.log.config", Watch = true)]
+[assembly: InternalsVisibleTo("App_tests")]

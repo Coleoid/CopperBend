@@ -1,7 +1,7 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
 using RLNET;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace CopperBend.App.tests
 {
@@ -72,7 +72,14 @@ namespace CopperBend.App.tests
 
             Assert.That(_onUpdate, Is.Not.Null);
             Assert.That(_onRender, Is.Not.Null);
-            //  So now I can do _onUpdate(foo, bar) to send events "from the GameWindow"
+
+            var calls = _gameWindow.ReceivedCalls();
+            var args = calls.Single(c => c.GetMethodInfo().Name == "Run").GetArguments();
+            Assert.That(args[0], Is.SameAs(_onUpdate));
+            Assert.That(args[1], Is.SameAs(_onRender));
+
+            //  So after SetUp(), calling _onUpdate(foo, bar)
+            // will look like a callback "from the GameWindow"
         }
 
         [Test]

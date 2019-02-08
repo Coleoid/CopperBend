@@ -68,9 +68,10 @@
   <ItemGroup>
     <Compile Include="DamageSystemTests.cs" />
     <Compile Include="EngineTests.cs" />
-    <Compile Include="InputCommandSourceTests.cs" />
     <Compile Include="InputCommandSourceTestsBase.cs" />
-    <Compile Include="InputCommandSourceUseTests.cs" />
+    <Compile Include="InputCS_command_Tests.cs" />
+    <Compile Include="InputCS_command_use_Tests.cs" />
+    <Compile Include="InputCS_utility_Tests.cs" />
     <Compile Include="PresetCommandSourceTests.cs" />
     <Compile Include="ScheduleTests.cs" />
     <Compile Include="VignetteTests.cs" />

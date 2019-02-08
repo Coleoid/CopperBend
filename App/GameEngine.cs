@@ -63,10 +63,23 @@ namespace CopperBend.App
             //EnterMode(EngineMode.InputBound);
         }
 
+        public void LoadMap(string mapName)
+        {
+            UnloadCurrentMap();
+
+            var map = MapLoader.LoadDevMap(mapName, GameState);
+
+            foreach (var actor in map.Actors)
+            {
+                Schedule.Add(actor.NextAction, 12);
+            }
+
+            Bus.SendLargeMessage(this, map.FirstSightMessage);
+        }
 
         private Actor InitPlayer()
         {
-            var player = new Actor(At(0, 0))
+            var player = new Actor()
             {
                 Name = "Our Dude",
                 Symbol = '@',
@@ -212,8 +225,8 @@ namespace CopperBend.App
 
             //  Waiting for player input blocks Schedule
             case EngineMode.InputBound:
-                bool stillInputBound = InputUsingCall((IControlPanel) Dispatcher);
-                if (!stillInputBound)
+                bool unbindInput = InputUsingCall((IControlPanel) Dispatcher);
+                if (unbindInput)
                 {
                     LeaveMode();
                     InputUsingCall = null;
@@ -244,36 +257,6 @@ namespace CopperBend.App
             }
         }
 
-
-        private void LoadMap(string mapName)
-        {
-            IAreaMap map;
-            if (mapName == "Farm")
-                map = MapLoader.FarmMap();
-            else if (mapName == "Farmhouse")
-                map = MapLoader.FarmhouseMap();
-            else
-                map = MapLoader.DemoMap();
-
-            LoadMap(map);
-        }
-
-        public void LoadMap(IAreaMap map)
-        {
-            UnloadCurrentMap();
-
-            foreach (var actor in map.Actors)
-            {
-                Schedule.Add(actor.NextAction, 12);
-            }
-
-            map.ViewpointActor = GameState.Player;
-            map.Actors.Add(GameState.Player);
-            GameState.Player.MoveTo(map.PlayerStartsAt);
-            map.UpdatePlayerFieldOfView(GameState.Player);
-            Bus.SendLargeMessage(this, map.FirstSightMessage);
-            GameState.Map = map;
-        }
 
         public void UnloadCurrentMap()
         {

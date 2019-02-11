@@ -31,7 +31,7 @@ namespace CopperBend.App
             Bus = bus;
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
-            Bus.EnterEngineModeSubscribers += (s, a) => EnterMode(a.Mode);  //0.1
+            Bus.EnterEngineModeSubscribers += (s, a) => EnterMode(a);  //0.1
 
             Schedule = schedule;
             GameWindow = gameWindow;
@@ -56,10 +56,10 @@ namespace CopperBend.App
             var player = InitPlayer();
             GameState.Player = player;
 
-            var ics = new InputCommandSource(InputQueue, new Describer(), GameWindow);
+            var ics = new InputCommandSource(InputQueue, new Describer(), GameWindow, Bus);
             player.CommandSource = ics;
 
-            //BindInputToFunc(ics.InputUntilCommandGenerated);
+            //BindInputToCallback(ics.InputUntilCommandGenerated);
             //EnterMode(EngineMode.InputBound);
         }
 
@@ -75,60 +75,6 @@ namespace CopperBend.App
             }
 
             Bus.SendLargeMessage(this, map.FirstSightMessage);
-        }
-
-        private Actor InitPlayer()
-        {
-            var player = new Actor()
-            {
-                Name = "Our Dude",
-                Symbol = '@',
-                ColorForeground = Palette.DbLight,
-                Awareness = 222,
-                Health = 23
-            };
-
-            var hoe = new Hoe(At(0, 0))
-            {
-                Name = "hoe",
-                ColorForeground = RLColor.Brown,
-                Symbol = '/',
-                IsUsable = true,
-            };
-
-            var rock = new Item(At(0, 0))
-            {
-                Name = "rock",
-                ColorForeground = RLColor.Gray,
-                Symbol = '*'
-            };
-
-            var seed = new Seed(At(0, 0), 1, PlantType.Boomer)
-            {
-                Name = "seed",
-                ColorForeground = RLColor.LightGreen,
-                Symbol = '.'
-            };
-
-            var seed_2 = new HealerSeed(At(0, 0), 2)
-            {
-                Name = "seed",
-                ColorForeground = RLColor.LightGreen,
-                Symbol = '.'
-            };
-
-            player.AddToInventory(hoe);
-            player.AddToInventory(rock);
-            player.AddToInventory(seed);
-            player.AddToInventory(seed_2);
-            player.WieldedTool = hoe;
-
-            return player;
-        }
-
-        private static Point At(int x, int y)
-        {
-            return new Point(x, y);
         }
 
         #endregion
@@ -174,29 +120,56 @@ namespace CopperBend.App
         }
 
         private Stack<EngineMode> ModeStack = new Stack<EngineMode>();
+        private Stack<Func<IControlPanel, bool>> CallbackStack = new Stack<Func<IControlPanel, bool>>();
         public EngineMode Mode { get => ModeStack.Peek(); }
-        public void EnterMode(EngineMode newMode)
+
+        public void EnterMode(EnterModeEventArgs args)
         {
-            ModeStack.Push(newMode);
+            EnterMode(args.Mode, args.Callback);
+        }
+
+        public void EnterMode(EngineMode newMode, Func<IControlPanel, bool> callback)
+        {
+            switch (newMode)
+            {
+            case EngineMode.InputBound:
+            case EngineMode.Pause:
+                ModeCallback = callback;
+                ModeStack.Push(newMode);
+                CallbackStack.Push(callback);
+                break;
+
+            case EngineMode.Schedule:
+                ModeCallback = null;
+                ModeStack.Push(newMode);
+                CallbackStack.Push(null);
+                break;
+
+            case EngineMode.Unknown:
+                throw new Exception($"Should never EnterMode({newMode}).");
+            default:
+                throw new Exception($"Received EnterMode({newMode}) event, need code.");
+            }
         }
         public void LeaveMode()
         {
             ModeStack.Pop();
         }
 
-        private Func<IControlPanel, bool> InputUsingCall { get; set; }
-        public void BindInputToFunc(Func<IControlPanel, bool> func)
-        {
-            InputUsingCall = func;
-            EnterMode(EngineMode.InputBound);
-        }
+        internal Func<IControlPanel, bool> ModeCallback { get; set; }
 
-        private void ActOnMode()
+        internal void ActOnMode()
         {
             switch (Mode)
             {
             //  Update does nothing when paused
             case EngineMode.Pause:
+                bool unPause = ModeCallback(Dispatcher);
+                if (unPause)
+                {
+                    LeaveMode();
+                    ModeCallback = null;
+                }
                 return;
 
             //  A game menu will block even pending messages 
@@ -225,11 +198,11 @@ namespace CopperBend.App
 
             //  Waiting for player input blocks Schedule
             case EngineMode.InputBound:
-                bool unbindInput = InputUsingCall((IControlPanel) Dispatcher);
+                bool unbindInput = ModeCallback(Dispatcher);
                 if (unbindInput)
                 {
                     LeaveMode();
-                    InputUsingCall = null;
+                    ModeCallback = null;
                 }
                 //GameWindow.ClearMessagePause();
                 //Dispatcher.HandlePlayerCommands();
@@ -290,7 +263,7 @@ namespace CopperBend.App
 
         private void MessagePanelFull(object sender, EventArgs args)
         {
-            EnterMode(EngineMode.MessagesPending);
+            EnterMode(EngineMode.MessagesPending, null);
         }
 
         private void AllMessagesSent(object sender, EventArgs args)
@@ -298,6 +271,62 @@ namespace CopperBend.App
             ModeStack.Pop();
         }
 
+        #endregion
+
+        #region Crappy first draft leftovers
+        private Actor InitPlayer()
+        {
+            var player = new Actor()
+            {
+                Name = "Our Dude",
+                Symbol = '@',
+                ColorForeground = Palette.DbLight,
+                Awareness = 222,
+                Health = 23
+            };
+
+            var hoe = new Hoe(At(0, 0))
+            {
+                Name = "hoe",
+                ColorForeground = RLColor.Brown,
+                Symbol = '/',
+                IsUsable = true,
+            };
+
+            var rock = new Item(At(0, 0))
+            {
+                Name = "rock",
+                ColorForeground = RLColor.Gray,
+                Symbol = '*'
+            };
+
+            var seed = new Seed(At(0, 0), 1, PlantType.Boomer)
+            {
+                Name = "seed",
+                ColorForeground = RLColor.LightGreen,
+                Symbol = '.'
+            };
+
+            var seed_2 = new HealerSeed(At(0, 0), 2)
+            {
+                Name = "seed",
+                ColorForeground = RLColor.LightGreen,
+                Symbol = '.'
+            };
+
+            player.AddToInventory(hoe);
+            player.AddToInventory(rock);
+            player.AddToInventory(seed);
+            player.AddToInventory(seed_2);
+            player.WieldedTool = hoe;
+
+            return player;
+        }
+
+        private static Point At(int x, int y)
+        {
+            return new Point(x, y);
+        }
         #endregion
     }
 }

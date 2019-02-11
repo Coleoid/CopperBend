@@ -1,7 +1,10 @@
-﻿using NSubstitute;
+﻿using System.Collections.Generic;
+using NSubstitute;
 using NUnit.Framework;
 using RLNET;
 using System.Linq;
+using CopperBend.App.Model;
+using CopperBend.MapUtil;
 
 namespace CopperBend.App.tests
 {
@@ -12,7 +15,6 @@ namespace CopperBend.App.tests
         private GameState _gameState = null;
         private MapLoader _mapLoader = null;
         private Describer _describer = null;
-        private EventBus _bus = null;
         private CommandDispatcher _dispatcher = null;
         private GameEngine _engine = null;
 
@@ -31,7 +33,6 @@ namespace CopperBend.App.tests
             _schedule = new Schedule();
             _gameState = new GameState { Player = _actor };
             _describer = new Describer();
-            _bus = new EventBus();
             _mapLoader = new MapLoader();
 
             _dispatcher = new CommandDispatcher(_schedule, _gameWindow, _gameState, _describer, _bus);
@@ -85,8 +86,8 @@ namespace CopperBend.App.tests
         [Test]
         public void OnUpdate_queues_all_input()
         {
-            _engine.EnterMode(EngineMode.Schedule);
-            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 999);
+            _engine.EnterMode(EngineMode.Schedule, null);
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause, null), 999);
             _gameWindow.GetKeyPress().Returns(KeyPressFrom(RLKey.Left), KeyPressFrom(RLKey.Up), (RLKeyPress)null);
 
             _engine.Run();
@@ -98,12 +99,12 @@ namespace CopperBend.App.tests
         [Test]
         public void OnUpdate_runs_actions_until_mode_blocks()
         {
-            _engine.EnterMode(EngineMode.Schedule);
+            _engine.EnterMode(EngineMode.Schedule, null);
 
             int scheduledActionsCalled = 0;
             _schedule.Add(icp => scheduledActionsCalled++, 12);
             _schedule.Add(icp => scheduledActionsCalled++, 12);
-            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 12);
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause, null), 12);
 
             _engine.Run();
             _onUpdate(null, null);
@@ -115,10 +116,10 @@ namespace CopperBend.App.tests
         [Test]
         public void PauseMode_stops_engine_from_running_further_actions()
         {
-            _engine.EnterMode(EngineMode.Schedule);
+            _engine.EnterMode(EngineMode.Schedule, null);
 
             int scheduledActionsCalled = 0;
-            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 11);
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause, null), 11);
             _schedule.Add(icp => scheduledActionsCalled++, 12);
 
             _engine.Run();
@@ -131,12 +132,12 @@ namespace CopperBend.App.tests
         [Test]
         public void Leaving_PauseMode_will_not_run_schedule_until_next_update()
         {
-            _engine.EnterMode(EngineMode.Schedule);
-            _engine.EnterMode(EngineMode.Pause);
+            _engine.EnterMode(EngineMode.Schedule, null);
+            _engine.EnterMode(EngineMode.Pause, null);
 
             int scheduledActionsCalled = 0;
             _schedule.Add(icp => scheduledActionsCalled++, 12);
-            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause), 999);
+            _schedule.Add(icp => icp.EnterMode(null, EngineMode.Pause, null), 999);
 
             _engine.Run();
             _onUpdate(null, null);
@@ -146,5 +147,43 @@ namespace CopperBend.App.tests
             _onUpdate(null, null);
             Assert.That(scheduledActionsCalled, Is.EqualTo(1));
         }
+
+
+        [Test]
+        public void ICS_changes_engine_mode_and_sets_callback_when_command_unfinished()
+        {
+            _engine.EnterMode(EngineMode.Schedule, null);
+            Queue(RLKey.D);
+            var ics = new InputCommandSource(_inQ, _describer, _gameWindow, _bus);
+            ics.GiveCommand(_actor);
+
+            Assert.That(_engine.Mode, Is.EqualTo(EngineMode.InputBound));
+            Assert.That(_engine.ModeCallback, Is.Not.Null);
+
+            // this half may be a later test...
+            _actor.Inventory.Returns(new List<IItem> {new Fruit(new Point(0, 0), 1, PlantType.Boomer)});
+            _actor.DidNotReceive().Command(Arg.Any<Command>());
+
+            Queue(RLKey.A);
+            _engine.ActOnMode();
+
+            _actor.Received().Command(Arg.Any<Command>());
+            Assert.That(_engine.Mode, Is.EqualTo(EngineMode.Schedule));
+            Assert.That(_engine.ModeCallback, Is.Null);
+        }
+
+        [Test]
+        public void ICS_does_not_change_engine_mode_or_set_callback_when_command_completed()
+        {
+            _engine.EnterMode(EngineMode.Schedule, null);
+            Queue(RLKey.Left);
+            var ics = new InputCommandSource(_inQ, _describer, _gameWindow, _bus);
+            ics.GiveCommand(_actor);
+
+            _actor.Received().Command(Arg.Any<Command>());
+            Assert.That(_engine.Mode, Is.EqualTo(EngineMode.Schedule));
+            Assert.That(_engine.ModeCallback, Is.Null);
+        }
+
     }
 }

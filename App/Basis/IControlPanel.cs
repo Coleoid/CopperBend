@@ -1,5 +1,6 @@
 ﻿using CopperBend.App.Model;
 using CopperBend.MapUtil;
+using System;
 using System.Collections.Generic;
 
 //  Some methods to communicate and control, in junk drawer mode.
@@ -36,7 +37,7 @@ namespace CopperBend.App
         void Till(ITile tile);
 
         void Experience(PlantType plant, Exp experience);
-        void EnterMode(object sender, EngineMode mode);
+        void EnterMode(object sender, EngineMode mode, Func<IControlPanel, bool> callback);
     }
 
     public enum EngineMode

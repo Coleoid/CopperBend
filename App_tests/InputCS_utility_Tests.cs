@@ -38,7 +38,7 @@ namespace CopperBend.App.tests
         }
 
         [TestCase(RLKey.Up, CmdDirection.North)]
-        [TestCase(RLKey.Keypad1, CmdDirection.West | CmdDirection.South)]
+        [TestCase(RLKey.Keypad1, CmdDirection.South | CmdDirection.West)]
         public void Directional_keypress_becomes_Move(RLKey key, CmdDirection direction)
         {
             Queue(key);
@@ -60,11 +60,6 @@ namespace CopperBend.App.tests
 
 
         [Test]
-        public void ICS_changes_engine_mode_and_sets_callback()
-        {
-        }
-
-        [Test]
         public void Callback_returns_false_until_command_completes()
         {
         }
@@ -75,7 +70,7 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void Queued_input_not_needed_to_complete_command_remains()
+        public void Queued_input_not_needed_to_complete_command_remain_on_queue()
         {
         }
     }

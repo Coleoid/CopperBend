@@ -12,14 +12,16 @@ namespace CopperBend.App.tests
         protected IGameWindow _gameWindow;
         protected InputCommandSource _source;
         protected IActor _actor;
+        protected EventBus _bus;
 
         [SetUp]
         public virtual void SetUp()
         {
             _inQ = new Queue<RLKeyPress>();
             _gameWindow = Substitute.For<IGameWindow>();
-            _source = new InputCommandSource(_inQ, new Describer(), _gameWindow);
+            _source = new InputCommandSource(_inQ, new Describer(), _gameWindow, _bus);
             _actor = Substitute.For<IActor>();
+            _bus = new EventBus();
         }
 
         [TearDown]

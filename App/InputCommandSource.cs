@@ -11,13 +11,15 @@ namespace CopperBend.App
         private Queue<RLKeyPress> InQ { get; set; }
         private Describer Describer { get; set; }
         private IGameWindow Window { get; set; }
+        private readonly EventBus Bus;
         private readonly ILog log;
 
-        public InputCommandSource(Queue<RLKeyPress> inQ, Describer describer, IGameWindow window)
+        public InputCommandSource(Queue<RLKeyPress> inQ, Describer describer, IGameWindow window, EventBus bus)
         {
             InQ = inQ;
             Describer = describer;
             Window = window;
+            Bus = bus;
             log = LogManager.GetLogger("CB.InputCommandSource");
         }
         
@@ -33,20 +35,28 @@ namespace CopperBend.App
 
         public void GiveCommand(IActor actor)
         {
-            InputUntilCommandGenerated(actor);
-        }
-
-        internal void InputUntilCommandGenerated(IActor actor)
-        {
-            var command = GetCommand(actor);
-            if (command.Action != CmdAction.None)
+            bool callback(IControlPanel icp)
             {
-                actor.Command(command);
-                NextStep = null;
+                var cmd = GetCommand(actor);
+                bool gotCommand = cmd.Action != CmdAction.None;
+                if (gotCommand)
+                {
+                    actor.Command(cmd);
+                    NextStep = null;
+                }
+
+                return gotCommand;
+            }
+
+            var startedInMSC = InMultiStepCommand;
+            var gaveCommand = callback(null);
+            if (!gaveCommand)
+            {
+                Bus.EnterMode(EngineMode.InputBound, callback);
             }
         }
 
-        public Command GetCommand(IActor actor)
+        internal Command GetCommand(IActor actor)
         {
             if (QueueIsEmpty) return CommandNone;
 

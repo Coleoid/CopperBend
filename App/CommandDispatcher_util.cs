@@ -25,9 +25,9 @@ namespace CopperBend.App
 
         public Point PlayerPoint => Player.Point;
 
-        public void EnterMode(object sender, EngineMode mode)
+        public void EnterMode(object sender, EngineMode mode, Func<IControlPanel, bool> callback)
         {
-            EventBus.EnterMode(sender, new EnterModeEventArgs(mode));
+            EventBus.EnterMode(mode, callback);
         }
 
         //>>> elim

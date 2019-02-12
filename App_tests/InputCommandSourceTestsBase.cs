@@ -19,9 +19,9 @@ namespace CopperBend.App.tests
         {
             _inQ = new Queue<RLKeyPress>();
             _gameWindow = Substitute.For<IGameWindow>();
+            _bus = new EventBus();
             _source = new InputCommandSource(_inQ, new Describer(), _gameWindow, _bus);
             _actor = Substitute.For<IActor>();
-            _bus = new EventBus();
         }
 
         [TearDown]

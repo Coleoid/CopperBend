@@ -1,6 +1,10 @@
-﻿using NSubstitute;
+﻿using CopperBend.App.Model;
+using CopperBend.MapUtil;
+using NSubstitute;
 using NUnit.Framework;
 using RLNET;
+using System;
+using System.Collections.Generic;
 
 namespace CopperBend.App.tests
 {
@@ -42,8 +46,7 @@ namespace CopperBend.App.tests
         public void Directional_keypress_becomes_Move(RLKey key, CmdDirection direction)
         {
             Queue(key);
-            var actor = Substitute.For<IActor>();
-            Cmd = _source.GetCommand(actor);
+            Cmd = _source.GetCommand(_actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Move));
             Assert.That(Cmd.Direction, Is.EqualTo(direction));
         }
@@ -51,27 +54,81 @@ namespace CopperBend.App.tests
         [Test]
         public void No_input_no_command()
         {
-            var actor = Substitute.For<IActor>();
-            Cmd = _source.GetCommand(actor);
+            Cmd = _source.GetCommand(_actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.None));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
-            actor.DidNotReceive().Command(Arg.Any<Command>());
-        }
-
-
-        [Test]
-        public void Callback_returns_false_until_command_completes()
-        {
+            _actor.DidNotReceive().Command(Arg.Any<Command>());
         }
 
         [Test]
         public void Callback_sends_command_to_actor_on_completion()
         {
+            bool enteredNewMode = false;
+            EngineMode newMode = EngineMode.Unknown;
+            Func<IControlPanel, bool> callback = null;
+            void captureModeDetails(object s, EnterModeEventArgs a)
+            {
+                enteredNewMode = true;
+                newMode = a.Mode;
+                callback = a.Callback;
+            }
+            _bus.EnterEngineModeSubscribers += captureModeDetails;
+
+            _actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
+            Queue(RLKey.D);
+
+            _source.GiveCommand(_actor);
+
+            Assert.That(enteredNewMode);
+            Assert.That(newMode, Is.EqualTo(EngineMode.InputBound));
+            Assert.That(callback, Is.Not.Null);
+
+            callback(null);
+            _actor.DidNotReceive().Command(Arg.Any<Command>());
+
+            Queue(RLKey.A);
+            callback(null);
+            _actor.Received().Command(Arg.Any<Command>());
         }
 
         [Test]
         public void Queued_input_not_needed_to_complete_command_remain_on_queue()
         {
+            bool enteredNewMode = false;
+            _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
+
+            Queue(RLKey.Down);
+            Queue(RLKey.D);
+            Queue(RLKey.A);
+
+            _source.GiveCommand(_actor);
+
+            Assert.That(_inQ.Count, Is.EqualTo(2));
+            _actor.Received().Command(Arg.Any<Command>());
+            Assert.That(enteredNewMode, Is.False);
         }
+
+        [Test]
+        public void Does_not_change_engine_mode_when_command_completed_in_single_call()
+        {
+            bool enteredNewMode = false;
+            _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
+
+            _actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
+
+            Queue(RLKey.D);
+            Queue(RLKey.A);
+
+            Assert.That(_inQ.Count, Is.EqualTo(2));
+            _actor.DidNotReceive().Command(Arg.Any<Command>());
+            Assert.That(enteredNewMode, Is.False);
+
+            _source.GiveCommand(_actor);
+
+            Assert.That(_inQ.Count, Is.EqualTo(0));
+            _actor.Received().Command(Arg.Any<Command>());
+            Assert.That(enteredNewMode, Is.False);
+        }
+
     }
 }

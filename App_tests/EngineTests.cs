@@ -5,6 +5,7 @@ using RLNET;
 using System.Linq;
 using CopperBend.App.Model;
 using CopperBend.MapUtil;
+using System;
 
 namespace CopperBend.App.tests
 {
@@ -132,8 +133,9 @@ namespace CopperBend.App.tests
         [Test]
         public void Leaving_PauseMode_will_not_run_schedule_until_next_update()
         {
+            Func<IControlPanel, bool> pauseForever = (icp) => false;
             _engine.EnterMode(EngineMode.Schedule, null);
-            _engine.EnterMode(EngineMode.Pause, null);
+            _engine.EnterMode(EngineMode.Pause, pauseForever);
 
             int scheduledActionsCalled = 0;
             _schedule.Add(icp => scheduledActionsCalled++, 12);

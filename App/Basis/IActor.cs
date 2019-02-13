@@ -4,11 +4,13 @@ using CopperBend.MapUtil;
 
 namespace CopperBend.App
 {
+    //0.0?
     public interface IComponent
     {
         IActor Entity { get; }
     }
 
+    //0.1
     public interface IHealAndHurt : IComponent
     {
         int Health { get; }
@@ -18,16 +20,19 @@ namespace CopperBend.App
 
     public interface ICanAct
     {
-        void NextAction(IControlPanel controls);
+        Action<IControlPanel> GetNextAction();
     }
 
     public interface IActor : IDrawable, IHealAndHurt, ICanAct
     {
-        ICommandSource CommandSource { get; set; }
         Point Point { get; }
         string Name { get; set; }
         int Awareness { get; set; }
         IAreaMap Map { get; set; }
+
+        ICommandSource CommandSource { get; set; }
+        bool Command(Command command);
+
         IDefenseAspect DefenseAspect { get; set; }
         void MoveTo(Point point);
         IItem WieldedTool { get; }
@@ -39,6 +44,5 @@ namespace CopperBend.App
         IItem RemoveFromInventory(IItem item);
 
         IEnumerable<IItem> ReachableItems();
-        void Command(Command command);
     }
 }

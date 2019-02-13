@@ -52,7 +52,7 @@ namespace CopperBend.App
             ClearLargeMessageSubscribers?.Invoke(sender, args);
         }
 
-        internal void EnterMode(EngineMode mode, Func<IControlPanel, bool> callback)
+        internal void EnterMode(EngineMode mode, Func<bool> callback)
         {
             log.Debug($"Enter mode: {mode}");
             var args = new EnterModeEventArgs(mode, callback);
@@ -63,9 +63,9 @@ namespace CopperBend.App
     public class EnterModeEventArgs : EventArgs
     {
         public EngineMode Mode;
-        public Func<IControlPanel, bool> Callback;
+        public Func<bool> Callback;
 
-        public EnterModeEventArgs(EngineMode mode, Func<IControlPanel, bool> callback)
+        public EnterModeEventArgs(EngineMode mode, Func<bool> callback)
         {
             Mode = mode;
             Callback = callback;

@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using CopperBend.MapUtil;
+using log4net;
 using RLNET;
 
 namespace CopperBend.App.Model
 {
     public class Actor : IActor
     {
-        public ICommandSource CommandSource { get; set; }
-
+        internal ILog log;
+        internal IControlPanel Controls { get; set; }
         public Actor()
             : this(new Point(0, 0))
         {}
@@ -20,6 +21,8 @@ namespace CopperBend.App.Model
             Awareness = 6;
 
             InventoryList = new List<IItem>();
+
+            log = LogManager.GetLogger("CB.Actor");
         }
 
         //  IComponent
@@ -45,13 +48,10 @@ namespace CopperBend.App.Model
         public void Hurt(int amount) => Health -= amount;
         public IDefenseAspect DefenseAspect { get; set; }
 
-        public void NextAction()
+        public ICommandSource CommandSource { get; set; }
+        public bool Command(Command command)
         {
-            CommandSource.GiveCommand(this);
-        }
-
-        public void Command(Command command)
-        {
+            bool finishedTurn = true;
             switch (command.Action)
             {
             case CmdAction.Consume:
@@ -59,6 +59,7 @@ namespace CopperBend.App.Model
             case CmdAction.Unset:
                 break;
             case CmdAction.Move:
+                CmdDirection(command.Direction);
                 break;
             case CmdAction.PickUp:
                 break;
@@ -71,9 +72,11 @@ namespace CopperBend.App.Model
 
             case CmdAction.None:
             case CmdAction.Unknown:
-                var name = Enum.GetName(typeof(Command), command.Action);
+                var name = Enum.GetName(typeof(CmdAction), command.Action);
                 throw new Exception($"An actor should never receive command [{name}].");
             }
+
+            return finishedTurn;
         }
 
         public IItem WieldedTool { get; internal set; }
@@ -84,6 +87,11 @@ namespace CopperBend.App.Model
         public IEnumerable<IItem> Inventory
         {
             get => InventoryList;
+        }
+        internal void CmdDirection(CmdDirection direction)
+        {
+            log.Debug($"got CmdDirection({direction})");
+            Controls.AddToSchedule(this, 12); //0.0
         }
 
         public void AddToInventory(IItem item)
@@ -131,9 +139,9 @@ namespace CopperBend.App.Model
             return Map.Items.Where(i => i.Point.Equals(Point));
         }
 
-        public void NextAction(IControlPanel controls)
+        public virtual Action<IControlPanel> GetNextAction()
         {
-            throw new NotImplementedException();
+            return (icp) => { CommandSource.GiveCommand(this); };
         }
     }
 }

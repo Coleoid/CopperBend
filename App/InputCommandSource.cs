@@ -11,15 +11,17 @@ namespace CopperBend.App
         private Queue<RLKeyPress> InQ { get; set; }
         private Describer Describer { get; set; }
         private IGameWindow Window { get; set; }
+        private IControlPanel Controls { get; set; }
         private readonly EventBus Bus;
         private readonly ILog log;
 
-        public InputCommandSource(Queue<RLKeyPress> inQ, Describer describer, IGameWindow window, EventBus bus)
+        public InputCommandSource(Queue<RLKeyPress> inQ, Describer describer, IGameWindow window, EventBus bus, IControlPanel controls)
         {
             InQ = inQ;
             Describer = describer;
             Window = window;
             Bus = bus;
+            Controls = controls;
             log = LogManager.GetLogger("CB.InputCommandSource");
         }
         
@@ -35,21 +37,22 @@ namespace CopperBend.App
 
         public void GiveCommand(IActor actor)
         {
-            bool callback(IControlPanel icp)
+            bool callback()
             {
                 var cmd = GetCommand(actor);
+                bool finishedTurn = false;
                 bool gotCommand = cmd.Action != CmdAction.None;
                 if (gotCommand)
                 {
-                    actor.Command(cmd);
-                    NextStep = null;
+                    finishedTurn = actor.Command(cmd);
+                    if (finishedTurn)
+                        NextStep = null;
                 }
 
-                return gotCommand;
+                return gotCommand && finishedTurn;
             }
 
-            var startedInMSC = InMultiStepCommand;
-            var gaveCommand = callback(null);
+            var gaveCommand = callback();
             if (!gaveCommand)
             {
                 Bus.EnterMode(EngineMode.InputBound, callback);

@@ -21,14 +21,18 @@ namespace CopperBend.App
         //  Ordered by tick of occurrence, then FIFO per tick
         public Action<IControlPanel> GetNextAction()
         {
-            log.DebugFormat("GetNext at CurrentTick {0}", CurrentTick);
-            if (TickEntries.Count() == 0) return null;
+            log.DebugFormat("GetNextAction, tick {0}", CurrentTick);
+            if (TickEntries.Count() == 0)
+                throw new Exception("The Schedule should never empty out");
+                //return null;
 
             var busyTick = TickEntries.First();
             while (busyTick.Value.Count() == 0)
             {
                 TickEntries.Remove(busyTick.Key);
-                if (TickEntries.Count() == 0) return null;
+                if (TickEntries.Count() == 0)
+                    throw new Exception("The Schedule should never empty out");
+                    //return null;
                 busyTick = TickEntries.First();
             }
             CurrentTick = busyTick.Key;
@@ -49,6 +53,11 @@ namespace CopperBend.App
                 TickEntries.Add(actionTick, new List<Action<IControlPanel>>());
             }
             TickEntries[actionTick].Add(action);
+        }
+
+        public void AddActor(IActor actor, int offset)
+        {
+            Add(actor.GetNextAction(), offset);
         }
 
         public void Clear()

@@ -9,28 +9,30 @@ namespace CopperBend.App.tests
     public class InputCommandSourceTestsBase
     {
         protected Queue<RLKeyPress> _inQ;
-        protected IGameWindow _gameWindow;
+        protected IGameWindow __gameWindow;
         protected InputCommandSource _source;
-        protected IActor _actor;
+        protected IActor __actor;
         protected EventBus _bus;
+        protected IControlPanel __controls;
 
         [SetUp]
         public virtual void SetUp()
         {
             _inQ = new Queue<RLKeyPress>();
-            _gameWindow = Substitute.For<IGameWindow>();
+            __gameWindow = Substitute.For<IGameWindow>();
             _bus = new EventBus();
-            _source = new InputCommandSource(_inQ, new Describer(), _gameWindow, _bus);
-            _actor = Substitute.For<IActor>();
+            __controls = Substitute.For<IControlPanel>();
+            _source = new InputCommandSource(_inQ, new Describer(), __gameWindow, _bus, __controls);
+            __actor = Substitute.For<IActor>();
         }
 
         [TearDown]
         public virtual void TearDown()
         {
             _inQ = null;
-            _gameWindow = null;
+            __gameWindow = null;
             _source = null;
-            _actor = null;
+            __actor = null;
         }
 
         protected Command Cmd = new Command(CmdAction.Unset, CmdDirection.None);

@@ -37,7 +37,7 @@ namespace CopperBend.App
         void Till(ITile tile);
 
         void Experience(PlantType plant, Exp experience);
-        void EnterMode(object sender, EngineMode mode, Func<IControlPanel, bool> callback);
+        void EnterMode(object sender, EngineMode mode, Func<bool> callback);
     }
 
     public enum EngineMode

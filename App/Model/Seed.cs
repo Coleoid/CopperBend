@@ -60,10 +60,9 @@ namespace CopperBend.App.Model
 
         private int growthRound = 0;
 
-        public void NextAction(IControlPanel controls)
+        public virtual Action<IControlPanel> GetNextAction()
         {
             throw new NotImplementedException();
-            //return CommandNone
         }
 
         private void SeedGrows(IControlPanel controls)

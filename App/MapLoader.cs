@@ -222,7 +222,6 @@ namespace CopperBend.App
             map.Actors.Add(state.Player);
             state.Player.MoveTo(map.PlayerStartsAt);
             map.UpdatePlayerFieldOfView(state.Player);
-            state.Map = map;
         }
 
         public IAreaMap LoadMap(string mapName)

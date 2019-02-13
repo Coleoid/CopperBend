@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using CopperBend.App.Model;
 using CopperBend.MapUtil;
+using log4net;
 using RLNET;
 
 namespace CopperBend.App
 {
     public class GameEngine
     {
-        public bool Config_AutoLoad_new_game { get; set; }
+        private readonly ILog log;
+        public bool Config_AutoLoad_new_game { get; set; } = true;
 
         public IGameWindow GameWindow;
         private Queue<RLKeyPress> InputQueue;
@@ -28,10 +30,12 @@ namespace CopperBend.App
             IGameState gameState, 
             CommandDispatcher commandDispatcher)
         {
+            log = LogManager.GetLogger("CB.Engine");
+
             Bus = bus;
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
-            Bus.EnterEngineModeSubscribers += (s, a) => EnterMode(a);  //0.1
+            Bus.EnterEngineModeSubscribers += (s, a) => PushMode(a.Mode, a.Callback);  //0.1
 
             Schedule = schedule;
             GameWindow = gameWindow;
@@ -40,41 +44,44 @@ namespace CopperBend.App
             InputQueue = inputQueue;
             MapLoader = mapLoader;
             GameState = (GameState)gameState;  // not great, but working...
+
+            ModeStack.Push(EngineMode.Unknown);
+            CallbackStack.Push(null);
+            PushMode(EngineMode.Schedule, null);
         }
 
         public void Run()
         {
             if (Config_AutoLoad_new_game) LoadNewGame();
+            //else throw new Exception("Time to develop some menu flow");
+
             GameWindow.Run(onUpdate, onRender);
         }
 
         public void LoadNewGame()
         {
-            // recreate or clear existing game objects?
-            LoadMap("Farm");
-
             var player = InitPlayer();
             GameState.Player = player;
 
-            var ics = new InputCommandSource(InputQueue, new Describer(), GameWindow, Bus);
-            player.CommandSource = ics;
+            LoadDevMap("Farm");  //0.1
 
-            //BindInputToCallback(ics.InputUntilCommandGenerated);
-            //EnterMode(EngineMode.InputBound);
+            var ics = new InputCommandSource(InputQueue, new Describer(), GameWindow, Bus, Dispatcher);
+            player.CommandSource = ics;
+            player.Controls = Dispatcher;
         }
 
-        public void LoadMap(string mapName)
+        public void LoadDevMap(string mapName)
         {
             UnloadCurrentMap();
 
-            var map = MapLoader.LoadDevMap(mapName, GameState);
+            GameState.Map = MapLoader.LoadDevMap(mapName, GameState);
 
-            foreach (var actor in map.Actors)
+            foreach (var actor in GameState.Map.Actors)
             {
-                Schedule.Add(actor.NextAction, 12);
+                Schedule.AddActor(actor, 12);
             }
 
-            Bus.SendLargeMessage(this, map.FirstSightMessage);
+            Bus.SendLargeMessage(this, GameState.Map.FirstSightMessage);
         }
 
         #endregion
@@ -97,7 +104,6 @@ namespace CopperBend.App
         private void onUpdate(object sender, UpdateEventArgs e)
         {
             QueueInput();
-            //WorkCommandQueue();
             ActOnMode();
         }
 
@@ -109,7 +115,6 @@ namespace CopperBend.App
             {
                 if (press.Alt && press.Key == RLKey.F4)
                 {
-                    //CommandQueue.Enqueue(GameCommand.Quit);
                     QuitGame();
                     return;
                 }
@@ -119,58 +124,36 @@ namespace CopperBend.App
             }
         }
 
+        #region Mode
         private Stack<EngineMode> ModeStack = new Stack<EngineMode>();
-        private Stack<Func<IControlPanel, bool>> CallbackStack = new Stack<Func<IControlPanel, bool>>();
-        public EngineMode Mode { get => ModeStack.Peek(); }
+        private Stack<Func<bool>> CallbackStack = new Stack<Func<bool>>();
+        internal EngineMode CurrentMode { get => ModeStack.Peek(); }
+        internal Func<bool> CurrentCallback { get => CallbackStack.Peek(); }
 
-        public void EnterMode(EnterModeEventArgs args)
+        internal void PushMode(EngineMode newMode, Func<bool> callback)
         {
-            EnterMode(args.Mode, args.Callback);
-        }
-
-        public void EnterMode(EngineMode newMode, Func<IControlPanel, bool> callback)
-        {
-            switch (newMode)
-            {
-            case EngineMode.InputBound:
-            case EngineMode.Pause:
-                ModeCallback = callback;
-                ModeStack.Push(newMode);
-                CallbackStack.Push(callback);
-                break;
-
-            case EngineMode.Schedule:
-                ModeCallback = null;
-                ModeStack.Push(newMode);
-                CallbackStack.Push(null);
-                break;
-
-            case EngineMode.Unknown:
+            if (newMode == EngineMode.Unknown)
                 throw new Exception($"Should never EnterMode({newMode}).");
-            default:
-                throw new Exception($"Received EnterMode({newMode}) event, need code.");
-            }
-        }
-        public void LeaveMode()
-        {
-            ModeStack.Pop();
-        }
 
-        internal Func<IControlPanel, bool> ModeCallback { get; set; }
+            var oldMode = CurrentMode;
+            ModeStack.Push(newMode);
+            CallbackStack.Push(callback);
+
+            log.Debug($"PushMode, left {oldMode} and now in {CurrentMode}.");
+        }
+        internal void PopMode()
+        {
+            var oldMode = ModeStack.Pop();
+            CallbackStack.Pop();
+
+            log.Debug($"PopMode, left {oldMode} and back to {CurrentMode}.");
+        }
+        #endregion
 
         internal void ActOnMode()
         {
-            switch (Mode)
+            switch (CurrentMode)
             {
-            //  Update does nothing when paused
-            case EngineMode.Pause:
-                bool unPause = ModeCallback(Dispatcher);
-                if (unPause)
-                {
-                    LeaveMode();
-                    ModeCallback = null;
-                }
-                return;
 
             //  A game menu will block even pending messages 
             case EngineMode.MenuOpen:
@@ -187,22 +170,15 @@ namespace CopperBend.App
                 GameWindow.HandlePendingMessages();
                 break;
 
-            //MAYBE:  A "cinematic" mode for story scenes
-            // Player input not routed as normal commands, though it
-            //   still handles message pauses, escape-to-menu, or choices
-            //   presented by the scene.
-            // NPC/Creature/world effects advance at dramatic (slow) pacing.
-            //case EngineMode.Cinematic:
-            //    GameWindow.MuchScene();
-            //    break;
-
+            //  Pause and InputBound have developed the same API.
+            //  Update does nothing when paused
             //  Waiting for player input blocks Schedule
+            case EngineMode.Pause:
             case EngineMode.InputBound:
-                bool unbindInput = ModeCallback(Dispatcher);
-                if (unbindInput)
+                bool exitMode = CurrentCallback();
+                if (exitMode)
                 {
-                    LeaveMode();
-                    ModeCallback = null;
+                    PopMode();
                 }
                 //GameWindow.ClearMessagePause();
                 //Dispatcher.HandlePlayerCommands();
@@ -217,13 +193,13 @@ namespace CopperBend.App
                 throw new Exception("Game mode unknown, perhaps Init() was missed.");
 
             default:
-                throw new Exception($"Game mode [{Mode}] not written yet.");
+                throw new Exception($"Game mode [{CurrentMode}] not written yet.");
             }
         }
 
         public void DoNextScheduled()
         {
-            while (Mode == EngineMode.Schedule)
+            while (CurrentMode == EngineMode.Schedule)
             {
                 var nextAction = Schedule.GetNextAction();
                 nextAction?.Invoke(Dispatcher);
@@ -237,8 +213,8 @@ namespace CopperBend.App
 
             //TODO:  Keep some things scheduled
             //  so plants keep growing, et c...
-            Schedule.Clear();
-            GameWindow.ClearMessagePause();
+            //Schedule.Clear();
+            //GameWindow.ClearMessagePause();
         }
 
         //0.1
@@ -263,12 +239,12 @@ namespace CopperBend.App
 
         private void MessagePanelFull(object sender, EventArgs args)
         {
-            EnterMode(EngineMode.MessagesPending, null);
+            PushMode(EngineMode.MessagesPending, null);
         }
 
         private void AllMessagesSent(object sender, EventArgs args)
         {
-            ModeStack.Pop();
+            PopMode();
         }
 
         #endregion

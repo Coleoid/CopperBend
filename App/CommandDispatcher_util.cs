@@ -25,7 +25,7 @@ namespace CopperBend.App
 
         public Point PlayerPoint => Player.Point;
 
-        public void EnterMode(object sender, EngineMode mode, Func<IControlPanel, bool> callback)
+        public void EnterMode(object sender, EngineMode mode, Func<bool> callback)
         {
             EventBus.EnterMode(mode, callback);
         }
@@ -90,11 +90,6 @@ namespace CopperBend.App
                 keyPress.Key == RLKey.Keypad8 ? Direction.Up :
                 keyPress.Key == RLKey.Keypad9 ? Direction.UpRight :
                 Direction.None;
-        }
-
-        public void AddToSchedule(IActor actor, int offset)
-        {
-            Schedule.Add(actor.NextAction, offset);
         }
 
         public void SetMapDirty()
@@ -190,7 +185,7 @@ namespace CopperBend.App
 
         public void AddToSchedule(ICanAct actor, int offset)
         {
-            throw new NotImplementedException();
+            Schedule.AddActor(actor as IActor, offset);//0.1
         }
     }
 }

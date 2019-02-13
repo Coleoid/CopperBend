@@ -27,10 +27,10 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void Empty_Schedule_GetNext_returns_null()
+        public void Empty_Schedule_GetNext_should_never_happen()
         {
-            var nextAction = schedule.GetNextAction();
-            Assert.IsNull(nextAction);
+            var ex = Assert.Throws<Exception>(() => schedule.GetNextAction());
+            Assert.That(ex.Message, Contains.Substring("should never"));
         }
 
         [Test]

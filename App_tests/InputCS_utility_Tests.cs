@@ -46,7 +46,7 @@ namespace CopperBend.App.tests
         public void Directional_keypress_becomes_Move(RLKey key, CmdDirection direction)
         {
             Queue(key);
-            Cmd = _source.GetCommand(_actor);
+            Cmd = _source.GetCommand(__actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Move));
             Assert.That(Cmd.Direction, Is.EqualTo(direction));
         }
@@ -54,10 +54,10 @@ namespace CopperBend.App.tests
         [Test]
         public void No_input_no_command()
         {
-            Cmd = _source.GetCommand(_actor);
+            Cmd = _source.GetCommand(__actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.None));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
-            _actor.DidNotReceive().Command(Arg.Any<Command>());
+            __actor.DidNotReceive().Command(Arg.Any<Command>());
         }
 
         [Test]
@@ -65,7 +65,7 @@ namespace CopperBend.App.tests
         {
             bool enteredNewMode = false;
             EngineMode newMode = EngineMode.Unknown;
-            Func<IControlPanel, bool> callback = null;
+            Func<bool> callback = null;
             void captureModeDetails(object s, EnterModeEventArgs a)
             {
                 enteredNewMode = true;
@@ -74,21 +74,21 @@ namespace CopperBend.App.tests
             }
             _bus.EnterEngineModeSubscribers += captureModeDetails;
 
-            _actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
+            __actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
             Queue(RLKey.D);
 
-            _source.GiveCommand(_actor);
+            _source.GiveCommand(__actor);
 
             Assert.That(enteredNewMode);
             Assert.That(newMode, Is.EqualTo(EngineMode.InputBound));
             Assert.That(callback, Is.Not.Null);
 
-            callback(null);
-            _actor.DidNotReceive().Command(Arg.Any<Command>());
+            callback();
+            __actor.DidNotReceive().Command(Arg.Any<Command>());
 
             Queue(RLKey.A);
-            callback(null);
-            _actor.Received().Command(Arg.Any<Command>());
+            callback();
+            __actor.Received().Command(Arg.Any<Command>());
         }
 
         [Test]
@@ -96,15 +96,16 @@ namespace CopperBend.App.tests
         {
             bool enteredNewMode = false;
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
+            __actor.Command(CommandNone).ReturnsForAnyArgs(true);
 
             Queue(RLKey.Down);
             Queue(RLKey.D);
             Queue(RLKey.A);
 
-            _source.GiveCommand(_actor);
+            _source.GiveCommand(__actor);
 
             Assert.That(_inQ.Count, Is.EqualTo(2));
-            _actor.Received().Command(Arg.Any<Command>());
+            __actor.Received().Command(Arg.Any<Command>());
             Assert.That(enteredNewMode, Is.False);
         }
 
@@ -114,19 +115,20 @@ namespace CopperBend.App.tests
             bool enteredNewMode = false;
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
 
-            _actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
+            __actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
+            __actor.Command(CommandNone).ReturnsForAnyArgs(true);
 
             Queue(RLKey.D);
             Queue(RLKey.A);
 
             Assert.That(_inQ.Count, Is.EqualTo(2));
-            _actor.DidNotReceive().Command(Arg.Any<Command>());
+            __actor.DidNotReceive().Command(Arg.Any<Command>());
             Assert.That(enteredNewMode, Is.False);
 
-            _source.GiveCommand(_actor);
+            _source.GiveCommand(__actor);
 
             Assert.That(_inQ.Count, Is.EqualTo(0));
-            _actor.Received().Command(Arg.Any<Command>());
+            __actor.Received().Command(Arg.Any<Command>());
             Assert.That(enteredNewMode, Is.False);
         }
 

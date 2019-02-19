@@ -28,7 +28,6 @@ namespace CopperBend.App
             IGameState gameState, 
             Describer describer,
             EventBus bus
-            //Queue<GameCommand> commandQueue
             )
         {
             Schedule = schedule;
@@ -38,59 +37,86 @@ namespace CopperBend.App
             EventBus = bus;
         }
 
-        public void HandlePlayerCommands()
+        //public void HandlePlayerCommands()
+        //{
+        //    var key = default(RLKeyPress);// Window.GetNextKeyPress();
+        //    if (key == null) return;
+
+        //    if (InMultiStepCommand)  //  Drop, throw, wield, etc.
+        //    {
+        //        NextStep(key);
+        //        return;
+        //    }
+
+        //    var direction = DirectionOfKey(key);
+        //    if (direction != Direction.None)
+        //    {
+        //        Command_Direction(Player, direction);
+        //    }
+        //    else if (key.Key == RLKey.C)
+        //    {
+        //        Consume_Prompt(key);
+        //    }
+        //    else if (key.Key == RLKey.D)
+        //    {
+        //        Drop_Prompt(key);
+        //    }
+        //    else if (key.Key == RLKey.H || key.Key == RLKey.Slash && key.Shift)
+        //    {
+        //        Command_Help();
+        //    }
+        //    else if (key.Key == RLKey.I)
+        //    {
+        //        Command_Inventory();
+        //    }
+        //    else if (key.Key == RLKey.U)
+        //    {
+        //        Use_Prompt(key);
+        //    }
+        //    else if (key.Key == RLKey.W)
+        //    {
+        //        Wield_Prompt(key);
+        //    }
+        //    else if (key.Key == RLKey.Comma)
+        //    {
+        //        Command_PickUp();
+        //    }
+
+        //    //TODO: close door
+        //    //TODO: [l, direction, direction, ...] -> look around the map
+        //    //TODO: [l, ?, a-z] -> look at inventory item
+        //    //TODO: ...
+        //}
+
+        public void CommandActor(IActor actor, Command command)
         {
-            var key = default(RLKeyPress);// Window.GetNextKeyPress();
-            if (key == null) return;
+            switch (command.Action)
+            {
+            case CmdAction.Move:
+                Command_Direction(actor, command.Direction);
+                break;
+            case CmdAction.PickUp:
+                break;
+            case CmdAction.Consume:
+                break;
+            case CmdAction.Drop:
+                break;
+            case CmdAction.Use:
+                break;
+            case CmdAction.Wait:
+                break;
 
-            if (InMultiStepCommand)  //  Drop, throw, wield, etc.
-            {
-                NextStep(key);
-                return;
+            case CmdAction.Unknown:
+            case CmdAction.Unset:
+            case CmdAction.None:
+            default:
+                throw new Exception($"Bad action {command.Action}.");
             }
-
-            var direction = DirectionOfKey(key);
-            if (direction != Direction.None)
-            {
-                Command_Direction(Player, direction);
-            }
-            else if (key.Key == RLKey.C)
-            {
-                Consume_Prompt(key);
-            }
-            else if (key.Key == RLKey.D)
-            {
-                Drop_Prompt(key);
-            }
-            else if (key.Key == RLKey.H || key.Key == RLKey.Slash && key.Shift)
-            {
-                Command_Help();
-            }
-            else if (key.Key == RLKey.I)
-            {
-                Command_Inventory();
-            }
-            else if (key.Key == RLKey.U)
-            {
-                Use_Prompt(key);
-            }
-            else if (key.Key == RLKey.W)
-            {
-                Wield_Prompt(key);
-            }
-            else if (key.Key == RLKey.Comma)
-            {
-                Command_PickUp();
-            }
-
-            //TODO: close door
-            //TODO: [l, direction, direction, ...] -> look around the map
-            //TODO: [l, ?, a-z] -> look at inventory item
-            //TODO: ...
         }
 
         #region Direction
-        private void Command_Direction(IActor player, Direction direction)
+
+        private void Command_Direction(IActor player, CmdDirection direction)
         {
             var point = PointInDirection(player.Point, direction);
 

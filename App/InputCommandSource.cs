@@ -30,21 +30,22 @@ namespace CopperBend.App
         private Func<RLKeyPress, IActor, Command> NextStep = null;
         private bool QueueIsEmpty => InQ.Count == 0;
 
-        private readonly Command CommandNone = new Command(CmdAction.None, CmdDirection.None);
+        private readonly Command CommandIncomplete = new Command(CmdAction.None, CmdDirection.None);
         private readonly Command CommandUnknown = new Command(CmdAction.Unknown, CmdDirection.None);
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
 
         public void GiveCommand(IActor actor)
         {
-            bool callback()
+            bool consume_input_until_command_given()
             {
                 var cmd = GetCommand(actor);
                 bool finishedTurn = false;
                 bool gotCommand = cmd.Action != CmdAction.None;
                 if (gotCommand)
                 {
-                    finishedTurn = actor.Command(cmd);
+                    //finishedTurn = actor.Command(cmd);
+                    //finishedTurn = ((CommandDispatcher) Controls).HandlePlayerCommands(A);
                     if (finishedTurn)
                         NextStep = null;
                 }
@@ -52,16 +53,16 @@ namespace CopperBend.App
                 return gotCommand && finishedTurn;
             }
 
-            var gaveCommand = callback();
+            var gaveCommand = consume_input_until_command_given();
             if (!gaveCommand)
             {
-                Bus.EnterMode(EngineMode.InputBound, callback);
+                Bus.EnterMode(EngineMode.InputBound, consume_input_until_command_given);
             }
         }
 
         internal Command GetCommand(IActor actor)
         {
-            if (QueueIsEmpty) return CommandNone;
+            if (QueueIsEmpty) return CommandIncomplete;
 
             var press = InQ.Dequeue();
             if (InMultiStepCommand)  //  Drop, throw, wield, etc.
@@ -88,27 +89,16 @@ namespace CopperBend.App
             }
         }
 
-        private Command NextWhenReady(Func<RLKeyPress, IActor, Command> nextStep, string prompt, IActor actor)
-        {
-            NextStep = nextStep;
-            if (QueueIsEmpty)
-            {
-                Prompt(prompt);
-                return CommandNone;
-            }
-            return NextStep(InQ.Dequeue(), actor);
-        }
-
         public Command Consume(IActor actor)
         {
-            return NextWhenReady( Consume_main, "Consume (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt( Consume_main, "Consume (inventory letter or ? to show inventory): ", actor);
         }
         public Command Consume_main(RLKeyPress press, IActor actor)
         {
             if (press.Key == RLKey.Slash && press.Shift)
             {
                 ShowInventory(actor, i => i.IsConsumable);
-                return CommandNone;
+                return CommandIncomplete;
             }
 
             var item = ItemInInventoryLocation(press, actor);
@@ -118,19 +108,19 @@ namespace CopperBend.App
                 return new Command(CmdAction.Consume, CmdDirection.None, item);
             }
 
-            return CommandNone;
+            return CommandIncomplete;
         }
 
         public Command Drop(IActor actor)
         {
-            return NextWhenReady( Drop_main, "Drop (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt( Drop_main, "Drop (inventory letter or ? to show inventory): ", actor);
         }
         public Command Drop_main(RLKeyPress press, IActor actor)
         {
             if (press.Key == RLKey.Slash && press.Shift)
             {
                 ShowInventory(actor, i => true);
-                return CommandNone;
+                return CommandIncomplete;
             }
 
             var item = ItemInInventoryLocation(press, actor);
@@ -140,7 +130,7 @@ namespace CopperBend.App
                 return new Command(CmdAction.Drop, CmdDirection.None, item);
             }
 
-            return CommandNone;
+            return CommandIncomplete;
         }
         //HMMM:  Consume_main and Drop_main differ only in CmdAction and inventory filter
 
@@ -154,13 +144,13 @@ namespace CopperBend.App
             WriteLine("i)nventory");
             WriteLine("w)ield a tool");
             WriteLine(",) Pick up object");
-            return CommandNone;
+            return CommandIncomplete;
         }
 
         public Command Inventory(IActor actor)
         {
             ShowInventory(actor, i => true);
-            return CommandNone;
+            return CommandIncomplete;
         }
 
         #region Use
@@ -172,10 +162,10 @@ namespace CopperBend.App
             if (ThisUsedItem == null)
             {
                 ShowInventory(actor, i => i.IsUsable);
-                return NextWhenReady(Use_Pick_Item, "Use item: ", actor);
+                return FFwdOrPrompt(Use_Pick_Item, "Use item: ", actor);
             }
 
-            return NextWhenReady(Use_Has_Item, 
+            return FFwdOrPrompt(Use_Has_Item, 
                 $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", actor);
         }
         public Command Use_Pick_Item(RLKeyPress press, IActor actor)
@@ -184,26 +174,26 @@ namespace CopperBend.App
             {
                 WriteLine("cancelled.");
                 NextStep = null;
-                return CommandNone;
+                return CommandIncomplete;
             }
 
             var selectedIndex = AlphaIndexOfKeyPress(press);
             if (selectedIndex < 0 || actor.Inventory.Count() <= selectedIndex)
             {
                 WriteLine($"The key [{PressRep(press)}] does not match an inventory item.  Pick another.");
-                return CommandNone;
+                return CommandIncomplete;
             }
 
             var item = actor.Inventory.ElementAt(selectedIndex);
             if (!item.IsUsable)
             {
                 WriteLine($"The {Describer.Describe(item)} is not a usable item.  Pick another.");
-                return CommandNone;
+                return CommandIncomplete;
             }
 
             ThisUsedItem = item;
 
-            return NextWhenReady( Use_Has_Item, 
+            return FFwdOrPrompt( Use_Has_Item, 
                 $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", actor);
         }
         private Command Use_Has_Item(RLKeyPress press, IActor actor)
@@ -234,7 +224,7 @@ namespace CopperBend.App
             }
 
             WriteLine($"The key [{PressRep(press)}] does not match an inventory item or a direction.  Pick another.");
-            return CommandNone;
+            return CommandIncomplete;
 
             //  Some of this needs to end up in Action system
             //    var targetPoint = PointInDirection(Player.Point, direction);
@@ -243,7 +233,7 @@ namespace CopperBend.App
         }
 #endregion
 
-        public Command Wield(IActor actor) { return CommandNone; }
+        public Command Wield(IActor actor) { return CommandIncomplete; }
 
         public Command PickUp(IActor actor)
         {
@@ -253,7 +243,7 @@ namespace CopperBend.App
             if (topItem == null)
             {
                 WriteLine("Nothing to pick up here.");
-                return CommandNone;
+                return CommandIncomplete;
             }
             return new Command(CmdAction.PickUp, CmdDirection.None, topItem);
         }
@@ -308,6 +298,17 @@ namespace CopperBend.App
         {
             log.InfoFormat("Prompt:  [{0}]", text);
             Window.Prompt(text);
+        }
+
+        private Command FFwdOrPrompt(Func<RLKeyPress, IActor, Command> nextStep, string prompt, IActor actor)
+        {
+            NextStep = nextStep;
+            if (QueueIsEmpty)
+            {
+                Prompt(prompt);
+                return CommandIncomplete;
+            }
+            return NextStep(InQ.Dequeue(), actor);
         }
 
         public void ShowInventory(IActor actor, Func<IItem, bool> filter = null)

@@ -37,6 +37,35 @@ namespace CopperBend.App
             //GameState.Mode = EngineMode.Schedule;
         }
 
+        private Point PointInDirection(Point start, CmdDirection direction)
+        {
+            int newX = start.X;
+            int newY = start.Y;
+
+            if ((direction | CmdDirection.North) == CmdDirection.North)
+            {
+                newY--;
+            }
+
+            if ((direction | CmdDirection.South) == CmdDirection.South)
+            {
+                newY++;
+            }
+
+            if ((direction | CmdDirection.West) == CmdDirection.West)
+            {
+                newX--;
+            }
+
+            if ((direction | CmdDirection.East) == CmdDirection.East)
+            {
+                newX++;
+            }
+
+            return new Point(newX, newY);
+        }
+
+
         private Point PointInDirection(Point start, Direction direction)
         {
             int newX = start.X;

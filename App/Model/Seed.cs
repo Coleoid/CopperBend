@@ -54,7 +54,7 @@ namespace CopperBend.App.Model
 
             controls.AddToSchedule(this, 100);
             controls.SetMapDirty();
-            controls.PlayerBusyFor(15);
+            //controls.ScheduleActor(15);
             controls.Experience(sownSeed.PlantType, Exp.PlantSeed);
         }
 

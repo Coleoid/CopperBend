@@ -7,18 +7,6 @@ namespace CopperBend.App.tests
     [TestFixture]
     public class MapLoaderTests
     {
-        [Test, Ignore("Not currently loading maps from disk")]
-        public void LoadMap_returns_something()
-        {
-            var loader = new MapLoader();
-
-            var map = loader.LoadMap("test:block");
-
-            Assert.That(map, Is.Not.Null);
-            Assert.That(map.Tiles[0, 0].TileType.Name, Is.EqualTo("StoneWall"));
-        }
-
-
         [Test]
         public void YAML_to_DTO()
         {
@@ -57,6 +45,17 @@ namespace CopperBend.App.tests
                 Terrain = new List<string> { "#" }
             };
         }
+
+        //[Test, Ignore("Not currently loading maps from disk")]
+        //public void LoadMap_returns_something()
+        //{
+        //    var loader = new MapLoader();
+
+        //    var map = loader.LoadMap("test:block");
+
+        //    Assert.That(map, Is.Not.Null);
+        //    Assert.That(map.Tiles[0, 0].TileType.Name, Is.EqualTo("StoneWall"));
+        //}
 
         private const string RoundRoomYaml = @"---
 name:  The Round Room

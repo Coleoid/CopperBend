@@ -12,7 +12,7 @@ namespace CopperBend.App
 {
     public interface IControlPanel
     {
-        void PlayerBusyFor(int ticks);
+        void ScheduleActor(IActor actor, int tickOff);
         Point PlayerPoint { get; }
 
         void AttackPlayer(IActor actor);

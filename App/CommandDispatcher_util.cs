@@ -29,11 +29,9 @@ namespace CopperBend.App
             EventBus.EnterMode(mode, callback);
         }
 
-        //>>> eliminate, in favor of ScheduleActor(actor, tickOff)
-        public void PlayerBusyFor(int ticks)
+        public void ScheduleActor(IActor actor, int tickOff)
         {
-            //Schedule.Add(Player, ticks);
-            //GameState.Mode = EngineMode.Schedule;
+            Schedule.AddActor(actor, tickOff);
         }
 
         private Point PointInDirection(Point start, CmdDirection direction)

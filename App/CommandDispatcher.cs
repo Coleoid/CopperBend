@@ -46,6 +46,9 @@ namespace CopperBend.App
             case CmdAction.Consume:
                 break;
             case CmdAction.Drop:
+                command.Item.MoveTo(actor.Point);
+                Map.Items.Add(command.Item);
+                ScheduleActor(actor, 1);
                 break;
             case CmdAction.Use:
                 break;
@@ -64,26 +67,26 @@ namespace CopperBend.App
 
         #region Direction
 
-        private bool Command_Direction(IActor player, CmdDirection direction)
+        private bool Command_Direction(IActor actor, CmdDirection direction)
         {
-            var point = PointInDirection(player.Point, direction);
+            var point = PointInDirection(actor.Point, direction);
 
             IActor targetActor = Map.GetActorAtPoint(point);
             if (targetActor == null)
             {
-                return Command_DirectionMove(player, point);
+                return Command_DirectionMove(actor, point);
             }
              
-            return Command_DirectionAttack(targetActor);
+            return Command_DirectionAttack(actor, targetActor);
         }
 
-        private bool Command_DirectionMove(IActor player, Point point)
+        private bool Command_DirectionMove(IActor actor, Point point)
         {
             ITile tile = Map[point];
             if (tile.TileType.Name == "closed door")
             {
                 Map.OpenDoor(tile);
-                PlayerBusyFor(4);
+                ScheduleActor(actor, 4);
             }
             else if (!Map.IsWalkable(point))
             {
@@ -93,18 +96,17 @@ namespace CopperBend.App
             }
             else
             {
-                if (Map.HasEventAtPoint(tile.Point))
-                    RunEvent(tile);
+                CheckActorAtCoordEvent(actor, tile);
 
-                if (!Map.MoveActor(player, point))
+                if (!Map.MoveActor(actor, point))
                     throw new Exception($"Somehow failed to move onto {point}, a walkable tile.");
 
-                Map.UpdatePlayerFieldOfView(player);
+                Map.UpdatePlayerFieldOfView(actor);
                 Map.IsDisplayDirty = true;
-                if (player.Point.X != point.X && player.Point.Y != point.Y)
-                    PlayerBusyFor(17);
+                if (actor.Point.X != point.X && actor.Point.Y != point.Y)
+                    ScheduleActor(actor, 17);
                 else
-                    PlayerBusyFor(12);
+                    ScheduleActor(actor, 12);
 
                 var itemsHere = Map.Items.Where(i => i.Point == point);
                 if (itemsHere.Count() > 7)
@@ -128,8 +130,17 @@ namespace CopperBend.App
             return true;
         }
 
+        private bool Command_DirectionAttack(IActor actor, IActor target)
+        {
+            //0.1
+            //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
+            //conflictSystem.Attack("Wah!", 2, targetActor);
 
-        public void RunEvent(ITile tile)
+            ScheduleActor(actor, 12);
+            return true;
+        }
+
+        public void CheckActorAtCoordEvent(IActor actor, ITile tile)
         {
             if (Map.LocationMessages.ContainsKey(tile.Point))
             {
@@ -151,15 +162,6 @@ namespace CopperBend.App
             //}
 
             //0.3 may unify those collections and loops, may restructure flow
-        }
-        private bool Command_DirectionAttack(IActor targetActor)
-        {
-            //0.1
-            //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
-            //conflictSystem.Attack("Wah!", 2, targetActor);
-
-            PlayerBusyFor(12);
-            return true;
         }
         #endregion
 
@@ -205,56 +207,6 @@ namespace CopperBend.App
         }
         #endregion
 
-        #region Drop
-        private void Drop_Prompt(RLKeyPress key)
-        {
-            Output.Prompt("Drop (inventory letter or ? to show inventory): ");
-            NextStep = Drop_Main;
-
-        }
-
-        private void Drop_Main(RLKeyPress key)
-        {
-            //  Bail out
-            if (key.Key == RLKey.Escape)
-            {
-                Output.WriteLine("nothing.");
-                NextStep = null;
-                return;
-            }
-
-            //  Show inventory, re-prompt, wait for selection
-            if (key.Key == RLKey.Slash && key.Shift)
-            {
-                Command_Inventory();
-                Drop_Prompt(null);
-                return;
-            }
-
-            int inventorySlot = AlphaIndexOfKeyPress(key);
-            if (inventorySlot == -1) return;
-
-            var wieldedItem = Player.WieldedTool;
-            IItem item = Player.RemoveFromInventory(inventorySlot);
-
-            if (item == null)
-            {
-                Output.WriteLine($"No item labelled '{key.Char.Value}'.");
-                Drop_Prompt(null);
-                return;
-            }
-
-            Output.WriteLine(item.Name);
-            if (wieldedItem == item)
-                Output.WriteLine($"Note:  No longer wielding the {item.Name}.");
-
-            item.MoveTo(Player.Point);
-            Map.Items.Add(item);
-            PlayerBusyFor(1);
-
-            NextStep = null;
-        }
-        #endregion
 
         private void Command_Help()
         {
@@ -342,6 +294,8 @@ namespace CopperBend.App
                 Output.WriteLine(direction.ToString());
 
                 _usingItem.ApplyTo(Map[targetPoint], this, Output, direction);  // the magic
+                //int tickOff = TimeCostToApply(_usingItem, actor.Skills);
+                //ScheduleActor(actor, tickOff);
                 NextStep = null;
             }
         }
@@ -427,7 +381,7 @@ namespace CopperBend.App
 
             Player.Wield(item);
             Output.WriteLine(item.Name);
-            PlayerBusyFor(4);
+            //ScheduleActor(4);
             NextStep = null;
         }
         #endregion
@@ -447,7 +401,7 @@ namespace CopperBend.App
             Map.Items.Remove(topItem);
             Player.AddToInventory(topItem);
             Output.WriteLine($"Picked up {topItem.Name}");
-            PlayerBusyFor(2);
+            //ScheduleActor(2);
         }
     }
 }

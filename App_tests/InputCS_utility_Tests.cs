@@ -41,16 +41,6 @@ namespace CopperBend.App.tests
             Assert.That(dir, Is.EqualTo(expectedDir));
         }
 
-        [TestCase(RLKey.Up, CmdDirection.North)]
-        [TestCase(RLKey.Keypad1, CmdDirection.South | CmdDirection.West)]
-        public void Directional_keypress_becomes_Move(RLKey key, CmdDirection direction)
-        {
-            Queue(key);
-            Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Move));
-            Assert.That(Cmd.Direction, Is.EqualTo(direction));
-        }
-
         [Test]
         public void No_input_no_command()
         {
@@ -91,7 +81,7 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void Queued_input_not_needed_to_complete_command_remain_on_queue()
+        public void Queued_inputs_not_needed_to_complete_command_will_remain_on_queue()
         {
             bool enteredNewMode = false;
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
@@ -109,7 +99,7 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void Does_not_change_engine_mode_when_command_completed_in_single_call()
+        public void When_command_completed_in_single_call_engine_mode_will_not_change()
         {
             bool enteredNewMode = false;
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
@@ -131,5 +121,56 @@ namespace CopperBend.App.tests
             Assert.That(enteredNewMode, Is.False);
         }
 
+        [Test]
+        public void MultiKey_Command_flow()
+        {
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.Inventory.Returns(new List<IItem> { fruit });
+            Assert.That(_source.InMultiStepCommand, Is.False);
+
+            Queue(RLKey.C);
+            var cmd = _source.GetCommand(__actor);
+            Assert.That(_source.InMultiStepCommand, "In process of choosing what to consume");
+            Assert.That(cmd.Action, Is.EqualTo(CmdAction.None));
+            __gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+
+            Queue(RLKey.A);
+            cmd = _source.GetCommand(__actor);
+            Assert.That(_source.InMultiStepCommand, Is.False, "Picked item to consume");
+            Assert.That(cmd.Action, Is.EqualTo(CmdAction.Consume));
+            Assert.That(cmd.Direction, Is.EqualTo(CmdDirection.None));
+            Assert.That(cmd.Item, Is.EqualTo(fruit));
+        }
+
+        [Test]
+        public void Prequeued_input_skips_prompts()
+        {
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.Inventory.Returns(new List<IItem> { fruit });
+
+            Queue(RLKey.C);
+            Queue(RLKey.A);
+            var cmd = _source.GetCommand(__actor);
+            Assert.That(cmd.Action, Is.EqualTo(CmdAction.Consume));
+            Assert.That(cmd.Item, Is.EqualTo(fruit));
+
+            __gameWindow.DidNotReceive().Prompt(Arg.Any<string>());
+            __gameWindow.DidNotReceive().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
+        }
+
+        [Test]
+        public void Can_check_Inventory_mid_command()
+        {
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.Inventory.Returns(new List<IItem> { fruit });
+
+            Queue(RLKey.C);
+            Queue(KP_Question);
+            var cmd = _source.GetCommand(__actor);
+            Assert.That(cmd, Is.EqualTo(CommandNone));
+
+            __gameWindow.Received().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
+            Assert.That(_source.InMultiStepCommand, "Displaying inventory does not abort command");
+        }
     }
 }

@@ -17,17 +17,17 @@ namespace CopperBend.App.Model
             {
                 if (tile.IsTilled)
                 {
-                    //EventBus.WriteLine("Already tilled.");
+                    output.WriteLine("Already tilled.");
                     return;
                 }
 
                 controls.Till(tile);
                 controls.SetMapDirty();
-                controls.PlayerBusyFor(15);
+                //controls.ScheduleActor(15);
             }
             else
             {
-                //controls.WriteLine($"Cannot hoe {tile.TileType.Name}.");
+                output.WriteLine($"Cannot hoe {tile.TileType.Name}.");
             }
         }
     }

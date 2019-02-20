@@ -23,6 +23,12 @@ namespace CopperBend.App.tests
             Assert.That(_source.InMultiStepCommand, Is.False);
         }
 
+
+        [Test]
+        public void Use_nothing_in_inventory()
+        {
+        }
+
         [Test]
         public void Use_wielded_item_West()
         {

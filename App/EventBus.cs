@@ -12,6 +12,7 @@ namespace CopperBend.App
         public event EventHandler AllMessagesSentSubscribers;
         public event EventHandler<LargeMessageEventArgs> SendLargeMessageSubscribers;
         public event EventHandler ClearLargeMessageSubscribers;
+        public event EventHandler ClearPendingInputSubscribers;
         public event EventHandler<EnterModeEventArgs> EnterEngineModeSubscribers;
 
         public EventBus()
@@ -50,6 +51,12 @@ namespace CopperBend.App
         {
             log.Debug("ClearLargeMessage");
             ClearLargeMessageSubscribers?.Invoke(sender, args);
+        }
+
+        internal void ClearPendingInput(object sender, EventArgs args)
+        {
+            log.Debug("ClearPendingInput");
+            ClearPendingInputSubscribers?.Invoke(sender, args);
         }
 
         internal void EnterMode(EngineMode mode, Func<bool> callback)

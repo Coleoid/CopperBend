@@ -28,18 +28,18 @@ namespace CopperBend.App.Model
             PlantType = type;
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls, Direction direction)
+        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, Direction direction)
         {
             if (!tile.IsTilled)
             {
                 string qualifier = tile.IsTillable ? "untilled " : "";
-                controls.WriteLine($"Cannot sow {qualifier}{tile.TileType.Name}.");
+                output.WriteLine($"Cannot sow {qualifier}{tile.TileType.Name}.");
                 return;
             }
 
             if (tile.IsSown)
             {
-                controls.WriteLine($"The ground to my {direction} is already sown with a seed.");
+                output.WriteLine($"The ground to my {direction} is already sown with a seed.");
                 return;
             }
 
@@ -65,9 +65,9 @@ namespace CopperBend.App.Model
             throw new NotImplementedException();
         }
 
-        private void SeedGrows(IControlPanel controls)
+        private void SeedGrows(IControlPanel controls, IMessageOutput output)
         {
-            controls.WriteLine($"The seed is growing... Round {growthRound++}");
+            output.WriteLine($"The seed is growing... Round {growthRound++}");
             controls.AddToSchedule(this, growthRound > 2 ? 10 : 100);
         }
 

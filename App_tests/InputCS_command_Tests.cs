@@ -88,16 +88,18 @@ namespace CopperBend.App.tests
         }
 
         [Test]
-        public void ActorBuild()
+        public void Directional_commands()
         {
             Queue(RLKey.Left);
             _source.GiveCommand(__actor);
 
-            __actor.Received().Command(Arg.Any<Command>());
-            var cmdSent = (Command)__actor.ReceivedCalls().Single().GetArguments()[0];
+            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            var cmdSent = (Command)__controls.ReceivedCalls().Single().GetArguments()[0];
             Assert.That(cmdSent.Action, Is.EqualTo(CmdAction.Move));
             Assert.That(cmdSent.Direction, Is.EqualTo(CmdDirection.West));
             Assert.That(cmdSent.Item, Is.Null);
+            var actor = (IActor)__controls.ReceivedCalls().Single().GetArguments()[1];
+            Assert.That(actor, Is.SameAs(__actor));
         }
     }
 }

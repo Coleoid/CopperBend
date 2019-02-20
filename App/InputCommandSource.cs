@@ -45,7 +45,7 @@ namespace CopperBend.App
                 if (gotCommand)
                 {
                     //finishedTurn = actor.Command(cmd);
-                    //finishedTurn = ((CommandDispatcher) Controls).HandlePlayerCommands(A);
+                    finishedTurn = Controls.CommandActor(cmd, actor);
                     if (finishedTurn)
                         NextStep = null;
                 }

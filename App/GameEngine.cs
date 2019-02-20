@@ -36,6 +36,7 @@ namespace CopperBend.App
             Bus.AllMessagesSentSubscribers += AllMessagesSent;
             Bus.MessagePanelFullSubscribers += MessagePanelFull;
             Bus.EnterEngineModeSubscribers += (s, a) => PushMode(a.Mode, a.Callback);  //0.1
+            Bus.ClearPendingInputSubscribers += (s, a) => InputQueue.Clear();//0.1
 
             Schedule = schedule;
             GameWindow = gameWindow;

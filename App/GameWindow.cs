@@ -5,7 +5,13 @@ using RLNET;
 
 namespace CopperBend.App
 {
-    public class GameWindow : IGameWindow
+    public interface IMessageOutput
+    {
+        void Prompt(string text);
+        void WriteLine(string text);
+    }
+
+    public class GameWindow : IGameWindow, IMessageOutput
     {
         private RLRootConsole RootConsole { get; set; }
 
@@ -64,7 +70,6 @@ namespace CopperBend.App
 
             MessageQueue = new Queue<string>();
             EventBus.SendLargeMessageSubscribers += LargeMessage;
-
         }
 
         public void Render(IAreaMap map)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using CopperBend.MapUtil;
 using RLNET;
@@ -9,92 +8,39 @@ namespace CopperBend.App
     public partial class CommandDispatcher
     {
         private Schedule Schedule { get; set; }
-        private IGameWindow Window { get; set; }
 
         private IGameState GameState { get; set; }
         private IActor Player { get => GameState.Player; }
         private IAreaMap Map { get => GameState.Map; }
 
         private Describer Describer;
-        //private Queue<GameCommand> CommandQueue;
         private EventBus EventBus;
+        private IMessageOutput Output;
 
         private Action<RLKeyPress> NextStep = null;
         private bool InMultiStepCommand => NextStep != null;
 
         public CommandDispatcher(
             Schedule schedule, 
-            IGameWindow window, 
             IGameState gameState, 
             Describer describer,
-            EventBus bus
+            EventBus bus,
+            IMessageOutput messageOutput
             )
         {
             Schedule = schedule;
-            Window = window;
             GameState = gameState;
             Describer = describer;
             EventBus = bus;
+            Output = messageOutput;
         }
 
-        //public void HandlePlayerCommands()
-        //{
-        //    var key = default(RLKeyPress);// Window.GetNextKeyPress();
-        //    if (key == null) return;
-
-        //    if (InMultiStepCommand)  //  Drop, throw, wield, etc.
-        //    {
-        //        NextStep(key);
-        //        return;
-        //    }
-
-        //    var direction = DirectionOfKey(key);
-        //    if (direction != Direction.None)
-        //    {
-        //        Command_Direction(Player, direction);
-        //    }
-        //    else if (key.Key == RLKey.C)
-        //    {
-        //        Consume_Prompt(key);
-        //    }
-        //    else if (key.Key == RLKey.D)
-        //    {
-        //        Drop_Prompt(key);
-        //    }
-        //    else if (key.Key == RLKey.H || key.Key == RLKey.Slash && key.Shift)
-        //    {
-        //        Command_Help();
-        //    }
-        //    else if (key.Key == RLKey.I)
-        //    {
-        //        Command_Inventory();
-        //    }
-        //    else if (key.Key == RLKey.U)
-        //    {
-        //        Use_Prompt(key);
-        //    }
-        //    else if (key.Key == RLKey.W)
-        //    {
-        //        Wield_Prompt(key);
-        //    }
-        //    else if (key.Key == RLKey.Comma)
-        //    {
-        //        Command_PickUp();
-        //    }
-
-        //    //TODO: close door
-        //    //TODO: [l, direction, direction, ...] -> look around the map
-        //    //TODO: [l, ?, a-z] -> look at inventory item
-        //    //TODO: ...
-        //}
-
-        public void CommandActor(IActor actor, Command command)
+        public bool CommandActor(Command command, IActor actor)
         {
             switch (command.Action)
             {
             case CmdAction.Move:
-                Command_Direction(actor, command.Direction);
-                break;
+                return Command_Direction(actor, command.Direction);
             case CmdAction.PickUp:
                 break;
             case CmdAction.Consume:
@@ -112,26 +58,26 @@ namespace CopperBend.App
             default:
                 throw new Exception($"Bad action {command.Action}.");
             }
+
+            return false;
         }
 
         #region Direction
 
-        private void Command_Direction(IActor player, CmdDirection direction)
+        private bool Command_Direction(IActor player, CmdDirection direction)
         {
             var point = PointInDirection(player.Point, direction);
 
             IActor targetActor = Map.GetActorAtPoint(point);
             if (targetActor == null)
             {
-                Command_DirectionMove(player, point);
+                return Command_DirectionMove(player, point);
             }
-            else
-            {
-                Command_DirectionAttack(targetActor);
-            }
+             
+            return Command_DirectionAttack(targetActor);
         }
 
-        private void Command_DirectionMove(IActor player, Point point)
+        private bool Command_DirectionMove(IActor player, Point point)
         {
             ITile tile = Map[point];
             if (tile.TileType.Name == "closed door")
@@ -142,8 +88,8 @@ namespace CopperBend.App
             else if (!Map.IsWalkable(point))
             {
                 var np = Describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
-                WriteLine($"I can't walk through {np}.");
-                Window.EmptyInputQueue();
+                Output.WriteLine($"I can't walk through {np}.");
+                EventBus.ClearPendingInput(this, new EventArgs());
             }
             else
             {
@@ -163,22 +109,23 @@ namespace CopperBend.App
                 var itemsHere = Map.Items.Where(i => i.Point == point);
                 if (itemsHere.Count() > 7)
                 {
-                    WriteLine("There are many items here.");
+                    Output.WriteLine("There are many items here.");
                 }
                 else if (itemsHere.Count() > 1)
                 {
-                    WriteLine("There are several items here.");
+                    Output.WriteLine("There are several items here.");
                 }
                 else if (itemsHere.Count() == 1)
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
                     var np = Describer.Describe(item, DescMods.Quantity);
-                    WriteLine($"There {beVerb} {np} here.");
+                    Output.WriteLine($"There {beVerb} {np} here.");
                 }
                 else {}  //  Nothing here, report nothing
-
             }
+
+            return true;
         }
 
 
@@ -188,7 +135,7 @@ namespace CopperBend.App
             {
                 var message = Map.LocationMessages[tile.Point];
                 foreach (var line in message)
-                    WriteLine(line);
+                    Output.WriteLine(line);
 
                 Map.LocationMessages.Remove(tile.Point);
             }
@@ -205,20 +152,21 @@ namespace CopperBend.App
 
             //0.3 may unify those collections and loops, may restructure flow
         }
-        private void Command_DirectionAttack(IActor targetActor)
+        private bool Command_DirectionAttack(IActor targetActor)
         {
             //0.1
             //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
             //conflictSystem.Attack("Wah!", 2, targetActor);
 
             PlayerBusyFor(12);
+            return true;
         }
         #endregion
 
         #region Consume
         private void Consume_Prompt(RLKeyPress key)
         {
-            Prompt("Consume (inventory letter or ? to show inventory): ");
+            Output.Prompt("Consume (inventory letter or ? to show inventory): ");
             NextStep = Consume_Main;
         }
 
@@ -227,7 +175,7 @@ namespace CopperBend.App
             //  Bail out
             if (key.Key == RLKey.Escape)
             {
-                WriteLine("nothing.");
+                Output.WriteLine("nothing.");
                 NextStep = null;
                 return;
             }
@@ -246,7 +194,7 @@ namespace CopperBend.App
             var item = Player.Inventory.ElementAt(inventorySlot);
             if (!item.IsConsumable)
             {
-                WriteLine($"I can't {item.ConsumeVerb} {Describer.Describe(item, DescMods.IndefiniteArticle)}.");
+                Output.WriteLine($"I can't {item.ConsumeVerb} {Describer.Describe(item, DescMods.IndefiniteArticle)}.");
                 Consume_Prompt(null);
                 return;
             }
@@ -260,7 +208,7 @@ namespace CopperBend.App
         #region Drop
         private void Drop_Prompt(RLKeyPress key)
         {
-            Prompt("Drop (inventory letter or ? to show inventory): ");
+            Output.Prompt("Drop (inventory letter or ? to show inventory): ");
             NextStep = Drop_Main;
 
         }
@@ -270,7 +218,7 @@ namespace CopperBend.App
             //  Bail out
             if (key.Key == RLKey.Escape)
             {
-                WriteLine("nothing.");
+                Output.WriteLine("nothing.");
                 NextStep = null;
                 return;
             }
@@ -291,14 +239,14 @@ namespace CopperBend.App
 
             if (item == null)
             {
-                WriteLine($"No item labelled '{key.Char.Value}'.");
+                Output.WriteLine($"No item labelled '{key.Char.Value}'.");
                 Drop_Prompt(null);
                 return;
             }
 
-            WriteLine(item.Name);
+            Output.WriteLine(item.Name);
             if (wieldedItem == item)
-                WriteLine($"Note:  No longer wielding the {item.Name}.");
+                Output.WriteLine($"Note:  No longer wielding the {item.Name}.");
 
             item.MoveTo(Player.Point);
             Map.Items.Add(item);
@@ -310,22 +258,22 @@ namespace CopperBend.App
 
         private void Command_Help()
         {
-            WriteLine("Help:");
-            WriteLine("Arrow or numpad keys to move and attack");
-            WriteLine("a)pply wielded tool");
-            WriteLine("d)rop an item");
-            WriteLine("h)elp (or ?) shows this message");
-            WriteLine("i)nventory");
-            WriteLine("w)ield a tool");
-            WriteLine(",) Pick up object");
+            Output.WriteLine("Help:");
+            Output.WriteLine("Arrow or numpad keys to move and attack");
+            Output.WriteLine("a)pply wielded tool");
+            Output.WriteLine("d)rop an item");
+            Output.WriteLine("h)elp (or ?) shows this message");
+            Output.WriteLine("i)nventory");
+            Output.WriteLine("w)ield a tool");
+            Output.WriteLine(",) Pick up object");
         }
 
         private void Command_Inventory()
         {
-            WriteLine("Inventory:");
+            Output.WriteLine("Inventory:");
             if (Player.Inventory.Count() == 0)
             {
-                WriteLine("empty.");
+                Output.WriteLine("empty.");
             }
             else if (Player.Inventory.Count() < 8)
             {
@@ -354,14 +302,14 @@ namespace CopperBend.App
                 return;
             }
 
-            Prompt($"Pick direction to use {_usingItem.Name}, or pick another item with a-z or ?: ");
+            Output.Prompt($"Pick direction to use {_usingItem.Name}, or pick another item with a-z or ?: ");
             NextStep = Use_in_Direction;
         }
 
         private void Use_Prompt_Choose(RLKeyPress key)
         {
             Command_Inventory();
-            Prompt("Pick an item to use: ");
+            Output.Prompt("Pick an item to use: ");
             NextStep = Use_Choose_item;
         }
 
@@ -370,7 +318,7 @@ namespace CopperBend.App
         {
             if (key.Key == RLKey.Escape)
             {
-                WriteLine("cancelled.");
+                Output.WriteLine("cancelled.");
                 NextStep = null;
                 return;
             }
@@ -391,9 +339,9 @@ namespace CopperBend.App
             if (direction != Direction.None)
             {
                 var targetPoint = PointInDirection(Player.Point, direction);
-                WriteLine(direction.ToString());
+                Output.WriteLine(direction.ToString());
 
-                _usingItem.ApplyTo(Map[targetPoint], this, direction);  // the magic
+                _usingItem.ApplyTo(Map[targetPoint], this, Output, direction);  // the magic
                 NextStep = null;
             }
         }
@@ -402,7 +350,7 @@ namespace CopperBend.App
         {
             if (key.Key == RLKey.Escape)
             {
-                WriteLine("cancelled.");
+                Output.WriteLine("cancelled.");
                 NextStep = null;
                 return;
             }
@@ -410,19 +358,19 @@ namespace CopperBend.App
             var selectedIndex = AlphaIndexOfKeyPress(key);
             if (selectedIndex < 0 || Player.Inventory.Count() <= selectedIndex)
             {
-                WriteLine($"The key [{key.Char}] does not match an inventory item.  Pick another.");
+                Output.WriteLine($"The key [{key.Char}] does not match an inventory item.  Pick another.");
                 return;
             }
 
             var item = Player.Inventory.ElementAt(selectedIndex);
             if (!item.IsUsable)
             {
-                WriteLine($"The [{item.Name}] is not a usable item.  Pick another.");
+                Output.WriteLine($"The [{item.Name}] is not a usable item.  Pick another.");
                 return;
             }
 
             _usingItem = item;
-            WriteLine($"Using {item.Name} in what direction: ");
+            Output.WriteLine($"Using {item.Name} in what direction: ");
             NextStep = Use_in_Direction;
         }
         #endregion
@@ -430,7 +378,7 @@ namespace CopperBend.App
         #region Wield
         private void Wield_Prompt(RLKeyPress key)
         {
-            Prompt("Wield ('?' to show inventory, '.' to empty hands): ");
+            Output.Prompt("Wield ('?' to show inventory, '.' to empty hands): ");
             NextStep = Wield_Choose;
         }
 
@@ -442,7 +390,7 @@ namespace CopperBend.App
                 var name = Player.WieldedTool == null
                     ? "bare hands"
                     : Player.WieldedTool.Name;
-                WriteLine($"unchanged, {name}.");
+                Output.WriteLine($"unchanged, {name}.");
                 NextStep = null;
                 return;
             }
@@ -450,7 +398,7 @@ namespace CopperBend.App
             //  Period:  Wield empty hands, done
             if (key.Key == RLKey.Period)
             {
-                WriteLine("bare hands");
+                Output.WriteLine("bare hands");
                 Player.Wield(null);
                 NextStep = null;
                 return;
@@ -469,7 +417,7 @@ namespace CopperBend.App
             if (inventorySlot == -1) return;
             if (inventorySlot >= Player.Inventory.Count())
             {
-                WriteLine($"nothing in slot '{key.Char.Value}'.");
+                Output.WriteLine($"nothing in slot '{key.Char.Value}'.");
                 Wield_Prompt(null);
                 return;
             }
@@ -478,7 +426,7 @@ namespace CopperBend.App
             var item = Player.Inventory.ElementAt(inventorySlot);
 
             Player.Wield(item);
-            WriteLine(item.Name);
+            Output.WriteLine(item.Name);
             PlayerBusyFor(4);
             NextStep = null;
         }
@@ -492,13 +440,13 @@ namespace CopperBend.App
 
             if (topItem == null)
             {
-                WriteLine("Nothing to pick up here.");
+                Output.WriteLine("Nothing to pick up here.");
                 return;
             }
 
             Map.Items.Remove(topItem);
             Player.AddToInventory(topItem);
-            WriteLine($"Picked up {topItem.Name}");
+            Output.WriteLine($"Picked up {topItem.Name}");
             PlayerBusyFor(2);
         }
     }

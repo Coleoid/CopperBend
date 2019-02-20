@@ -29,15 +29,14 @@ namespace CopperBend.App
         void Learn(Fruit fruit);
         void SetMapDirty();
 
-        void WriteLine(string text);
-        void Prompt(string text);
-
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Point point);
         void Till(ITile tile);
 
         void Experience(PlantType plant, Exp experience);
         void EnterMode(object sender, EngineMode mode, Func<bool> callback);
+
+        bool CommandActor(Command command, IActor actor);
     }
 
     public enum EngineMode

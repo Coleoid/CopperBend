@@ -11,13 +11,13 @@ namespace CopperBend.App.Model
         {
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls, Direction direction)
+        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, Direction direction)
         {
             if (tile.IsTillable)
             {
                 if (tile.IsTilled)
                 {
-                    controls.WriteLine("Already tilled.");
+                    //EventBus.WriteLine("Already tilled.");
                     return;
                 }
 
@@ -27,7 +27,7 @@ namespace CopperBend.App.Model
             }
             else
             {
-                controls.WriteLine($"Cannot hoe {tile.TileType.Name}.");
+                //controls.WriteLine($"Cannot hoe {tile.TileType.Name}.");
             }
         }
     }

@@ -22,6 +22,8 @@ namespace CopperBend.App.tests
         private UpdateEventHandler _onUpdate = null;
         private UpdateEventHandler _onRender = null;
 
+        private IMessageOutput __output = null;
+
         [SetUp]
         public override void SetUp()
         {
@@ -36,7 +38,9 @@ namespace CopperBend.App.tests
             _describer = new Describer();
             _mapLoader = new MapLoader();
 
-            _dispatcher = new CommandDispatcher(_schedule, __gameWindow, _gameState, _describer, _bus);
+            __output = Substitute.For<IMessageOutput>();
+
+            _dispatcher = new CommandDispatcher(_schedule, _gameState, _describer, _bus, __output);
             _engine = new GameEngine(_bus, _schedule, __gameWindow, _inQ, _mapLoader, _gameState, _dispatcher);
             //  Those are some chunky boys.
             //  Perhaps more of these (InputQueue, Describer, Schedule) belong in GameState
@@ -167,13 +171,12 @@ namespace CopperBend.App.tests
 
             // this half may be a later test...
             __actor.Inventory.Returns(new List<IItem> {new Fruit(new Point(0, 0), 1, PlantType.Boomer)});
-            __actor.Command(CommandNone).ReturnsForAnyArgs(true);
-            __actor.DidNotReceive().Command(Arg.Any<Command>());
-
+            __controls.CommandActor(CommandNone, null).ReturnsForAnyArgs(true);
+            __controls.DidNotReceive().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
             Queue(RLKey.A);
             _engine.ActOnMode();
 
-            __actor.Received().Command(Arg.Any<Command>());
+            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
             Assert.That(_engine.CurrentMode, Is.EqualTo(EngineMode.Schedule));
             Assert.That(_engine.CurrentCallback, Is.Null);
         }
@@ -184,10 +187,10 @@ namespace CopperBend.App.tests
             _engine.PushMode(EngineMode.Schedule, null);
             Queue(RLKey.Left);
             var ics = new InputCommandSource(_inQ, _describer, __gameWindow, _bus, __controls);
-            __actor.Command(CommandNone).ReturnsForAnyArgs(true);
+            __controls.CommandActor(CommandNone, null).ReturnsForAnyArgs(true);
             ics.GiveCommand(__actor);
 
-            __actor.Received().Command(Arg.Any<Command>());
+            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
             Assert.That(_engine.CurrentMode, Is.EqualTo(EngineMode.Schedule));
             Assert.That(_engine.CurrentCallback, Is.Null);
         }

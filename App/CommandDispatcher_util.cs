@@ -11,9 +11,8 @@ namespace CopperBend.App
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
 
-        public void WriteLine(string text) => Window.WriteLine(text);
-
-        public void Prompt(string text) => Window.Prompt(text);
+        //public void WriteLine(string text) => Window.WriteLine(text);
+        //public void Prompt(string text) => Window.Prompt(text);
 
         private int AlphaIndexOfKeyPress(RLKeyPress key)
         {
@@ -30,7 +29,7 @@ namespace CopperBend.App
             EventBus.EnterMode(mode, callback);
         }
 
-        //>>> elim
+        //>>> eliminate, in favor of ScheduleActor(actor, tickOff)
         public void PlayerBusyFor(int ticks)
         {
             //Schedule.Add(Player, ticks);
@@ -138,17 +137,17 @@ namespace CopperBend.App
         {
             //0.1
             int damage = 2;
-            WriteLine($"The {actor.Name} hit me for {damage}.");
+            Output.WriteLine($"The {actor.Name} hit me for {damage}.");
             Player.Hurt(-damage);
 
             if (damage > 0)
-                WriteLine($"Ow.  Down to {Player.Health}.");
+                Output.WriteLine($"Ow.  Down to {Player.Health}.");
         }
 
         public void HealPlayer(int amount)
         {
             Player.Hurt(amount);
-            WriteLine($"So nice.  Up to {Player.Health}.");
+            Output.WriteLine($"So nice.  Up to {Player.Health}.");
         }
 
         public List<Point> GetPathTo(Point start, Point target)

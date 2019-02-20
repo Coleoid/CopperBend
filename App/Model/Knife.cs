@@ -12,7 +12,7 @@ namespace CopperBend.App.Model
         {
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls, Direction direction)
+        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, Direction direction)
         {
             throw new NotImplementedException();
         }

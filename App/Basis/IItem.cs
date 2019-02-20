@@ -10,7 +10,7 @@ namespace CopperBend.App
         void MoveTo(Point point);
 
         bool IsUsable { get; }
-        void ApplyTo(ITile tile, IControlPanel controls, Direction direction);
+        void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, Direction direction);
 
         bool IsConsumable { get; }
         string ConsumeVerb { get; }

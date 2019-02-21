@@ -91,10 +91,24 @@ namespace CopperBend.App
 
         public Command Consume(IActor actor)
         {
+            var inv_consumables = actor.Inventory.Where(i => i.IsConsumable).ToList();
+            //var reach_consumables = actor.ReachableItems().Where(i => i.IsConsumable).ToList();
+            if (inv_consumables.Count() == 0) /*+ reach_consumables.Count()*/
+            {
+                WriteLine("Nothing to eat or drink.");
+                return CommandIncomplete;
+            }
             return FFwdOrPrompt( Consume_main, "Consume (inventory letter or ? to show inventory): ", actor);
         }
         public Command Consume_main(RLKeyPress press, IActor actor)
         {
+            if (press.Key == RLKey.Escape)
+            {
+                WriteLine("Consume cancelled.");
+                NextStep = null;
+                return CommandIncomplete;
+            }
+
             if (press.Key == RLKey.Slash && press.Shift)
             {
                 ShowInventory(actor, i => i.IsConsumable);
@@ -104,19 +118,41 @@ namespace CopperBend.App
             var item = ItemInInventoryLocation(press, actor);
             if (item != null)
             {
-                NextStep = null;
-                return new Command(CmdAction.Consume, CmdDirection.None, item);
+                if (item.IsConsumable)
+                {
+                    NextStep = null;
+                    return new Command(CmdAction.Consume, CmdDirection.None, item);
+                }
+                else
+                {
+                    WriteLine($"I can't eat or drink {Describer.Describe(item, DescMods.IndefiniteArticle)}.");
+                }
             }
-
+            else
+            {
+                WriteLine($"Nothing in inventory slot {press.Char}.");
+            }
             return CommandIncomplete;
         }
 
         public Command Drop(IActor actor)
         {
+            if (actor.Inventory.Count() == 0)
+            {
+                WriteLine("Nothing to drop.");
+                return CommandIncomplete;
+            }
             return FFwdOrPrompt( Drop_main, "Drop (inventory letter or ? to show inventory): ", actor);
         }
         public Command Drop_main(RLKeyPress press, IActor actor)
         {
+            if (press.Key == RLKey.Escape)
+            {
+                WriteLine("Drop cancelled.");
+                NextStep = null;
+                return CommandIncomplete;
+            }
+
             if (press.Key == RLKey.Slash && press.Shift)
             {
                 ShowInventory(actor, i => true);
@@ -128,6 +164,10 @@ namespace CopperBend.App
             {
                 NextStep = null;
                 return new Command(CmdAction.Drop, CmdDirection.None, item);
+            }
+            else
+            {
+                WriteLine($"Nothing in inventory slot {press.Char}.");
             }
 
             return CommandIncomplete;

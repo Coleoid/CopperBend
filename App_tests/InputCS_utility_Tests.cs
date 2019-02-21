@@ -85,7 +85,7 @@ namespace CopperBend.App.tests
         {
             bool enteredNewMode = false;
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
-            __controls.CommandActor(CommandNone, null).ReturnsForAnyArgs(true);
+            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
 
             Queue(RLKey.Down);
             Queue(RLKey.D);
@@ -105,7 +105,7 @@ namespace CopperBend.App.tests
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
 
             __actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
-            __controls.CommandActor(CommandNone, null).ReturnsForAnyArgs(true);
+            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
 
             Queue(RLKey.D);
             Queue(RLKey.A);
@@ -167,7 +167,7 @@ namespace CopperBend.App.tests
             Queue(RLKey.C);
             Queue(KP_Question);
             var cmd = _source.GetCommand(__actor);
-            Assert.That(cmd, Is.EqualTo(CommandNone));
+            Assert.That(cmd, Is.EqualTo(CommandIncomplete));
 
             __gameWindow.Received().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
             Assert.That(_source.InMultiStepCommand, "Displaying inventory does not abort command");

@@ -17,7 +17,7 @@ namespace CopperBend.App.tests
             Queue(RLKey.Escape);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
 
             __gameWindow.Received().WriteLine("cancelled.");
             Assert.That(_source.InMultiStepCommand, Is.False);
@@ -56,13 +56,13 @@ namespace CopperBend.App.tests
             Queue(RLKey.U);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().Prompt("Use item: ");
 
             Queue(RLKey.B);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
 
@@ -128,13 +128,13 @@ namespace CopperBend.App.tests
             Queue(RLKey.U);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().Prompt("Direction to use the knife, or [a-z?] to choose item: ");
 
             Queue(RLKey.B);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
 
@@ -158,32 +158,32 @@ namespace CopperBend.App.tests
             Queue(RLKey.U);
             Queue(RLKey.C);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().WriteLine("The key [c] does not match an inventory item.  Pick another.");
 
             Queue(RLKey.A);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().WriteLine("The smooth fruit is not a usable item.  Pick another.");
 
             Queue(RLKey.Period);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().WriteLine("The key [.] does not match an inventory item.  Pick another.");
 
             Queue(RLKey.Right);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().WriteLine("The key [Right] does not match an inventory item.  Pick another.");
 
             Queue(RLKey.B);
             Queue(RLKey.Period);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __gameWindow.Received().WriteLine("The key [.] does not match an inventory item or a direction.  Pick another.");
             __gameWindow.ClearReceivedCalls();

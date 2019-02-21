@@ -171,7 +171,7 @@ namespace CopperBend.App.tests
 
             // this half may be a later test...
             __actor.Inventory.Returns(new List<IItem> {new Fruit(new Point(0, 0), 1, PlantType.Boomer)});
-            __controls.CommandActor(CommandNone, null).ReturnsForAnyArgs(true);
+            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
             __controls.DidNotReceive().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
             Queue(RLKey.A);
             _engine.ActOnMode();
@@ -187,7 +187,7 @@ namespace CopperBend.App.tests
             _engine.PushMode(EngineMode.Schedule, null);
             Queue(RLKey.Left);
             var ics = new InputCommandSource(_inQ, _describer, __gameWindow, _bus, __controls);
-            __controls.CommandActor(CommandNone, null).ReturnsForAnyArgs(true);
+            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
             ics.GiveCommand(__actor);
 
             __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());

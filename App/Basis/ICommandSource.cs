@@ -48,5 +48,12 @@ namespace CopperBend.App
         public CmdAction Action { get; }
         public CmdDirection Direction { get; }
         public IItem Item { get; set; }
+
+        public override string ToString()
+        {
+            var itemStr = Item == null ? string.Empty : " " + Item.Name;
+            var dirStr = Direction == CmdDirection.None ? string.Empty : " in " + Direction.ToString();
+            return $"{Action}{itemStr}{dirStr}";
+        }
     }
 }

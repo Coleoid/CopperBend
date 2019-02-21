@@ -43,32 +43,105 @@ namespace CopperBend.App.tests
         //Consume();
 
         [Test]
-        public void Consume_nothing()
+        public void Consume_nothing_available()
         {
-            __actor.ReachableItems().Returns(new List<IItem> { });
+            var knife = new Knife(new Point(0, 0));
+            __actor.Inventory.Returns(new List<IItem> { knife });
             Queue(RLKey.C);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __gameWindow.Received().WriteLine("Nothing to eat or drink.");
+            Assert.IsFalse(_source.InMultiStepCommand);
+        }
+
+        [Test]
+        public void Consume_cancel()
+        {
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.Inventory.Returns(new List<IItem> { fruit });
+            Queue(RLKey.C);
+            Queue(RLKey.Escape);
+            Cmd = _source.GetCommand(__actor);
+
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __gameWindow.Received().WriteLine("Consume cancelled.");
+            Assert.IsFalse(_source.InMultiStepCommand);
         }
 
         [Test]
         public void Consume_inventory()
         {
+            var knife = new Knife(new Point(0, 0));
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.ReachableItems().Returns(new List<IItem> { });
+            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+
+            Queue(RLKey.C);
+            Cmd = _source.GetCommand(__actor);
+
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+            Assert.That(_source.InMultiStepCommand);
+
+            Queue(RLKey.B);
+            Cmd = _source.GetCommand(__actor);
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Consume));
+            Assert.That(Cmd.Item, Is.SameAs(fruit));
+            Assert.IsFalse(_source.InMultiStepCommand);
         }
 
         [Test]
-        public void Consume_reachable()
+        public void Consume_unqualified_inventory()
+        {
+            var knife = new Knife(new Point(0, 0));
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.ReachableItems().Returns(new List<IItem> { });
+            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+
+            Queue(RLKey.C);
+            Cmd = _source.GetCommand(__actor);
+
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+
+            Queue(RLKey.A);
+            Cmd = _source.GetCommand(__actor);
+
+            __gameWindow.Received().WriteLine("I can't eat or drink a knife.");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+        }
+
+        [Test]
+        public void Consume_unfilled_inventory_letter()
+        {
+            var knife = new Knife(new Point(0, 0));
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.ReachableItems().Returns(new List<IItem> { });
+            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+
+            Queue(RLKey.C);
+            Queue(RLKey.C);
+            Cmd = _source.GetCommand(__actor);
+
+            __gameWindow.Received().WriteLine("Nothing in inventory slot c.");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+        }
+
+        //[Test]  // not until I care more, and work out the UI flow
+        private void Consume_reachable()
         {
             var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
             __actor.ReachableItems().Returns(new List<IItem> { fruit });
             Queue(RLKey.C);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
-            __gameWindow.Received().Prompt("Eat Healer fruit?");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __gameWindow.Received().Prompt("Eat Healer fruit?");  //or something
             Queue(RLKey.Y);
+            Cmd = _source.GetCommand(__actor);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Consume));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
@@ -79,28 +152,67 @@ namespace CopperBend.App.tests
         //Drop();
 
         [Test]
-        public void Drop_nothing()
+        public void Drop_nothing_available()
         {
+            __actor.Inventory.Returns(new List<IItem> { });
             Queue(RLKey.D);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __gameWindow.Received().WriteLine("Nothing to drop.");
+            Assert.IsFalse(_source.InMultiStepCommand);
+        }
+
+        [Test]
+        public void Drop_cancel()
+        {
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.Inventory.Returns(new List<IItem> { fruit });
+            Queue(RLKey.D);
+            Queue(RLKey.Escape);
+            Cmd = _source.GetCommand(__actor);
+
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __gameWindow.Received().WriteLine("Drop cancelled.");
+            Assert.IsFalse(_source.InMultiStepCommand);
         }
 
         [Test]
         public void Drop_inventory()
         {
-            var knife = new Knife(new Point(0,0));
+            var knife = new Knife(new Point(0, 0));
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
 
-            __actor.Inventory.Returns(new List<IItem> {knife});
             Queue(RLKey.D);
-            Queue(RLKey.A);
+            Cmd = _source.GetCommand(__actor);
+
+            __gameWindow.Received().Prompt("Drop (inventory letter or ? to show inventory): ");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+
+            Queue(RLKey.B);
             Cmd = _source.GetCommand(__actor);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Drop));
-            Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
-            Assert.That(Cmd.Item, Is.SameAs(knife));
+            Assert.That(Cmd.Item, Is.SameAs(fruit));
+            Assert.IsFalse(_source.InMultiStepCommand);
+        }
+
+        [Test]
+        public void Drop_unfilled_inventory_letter()
+        {
+            var knife = new Knife(new Point(0, 0));
+            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+
+            Queue(RLKey.D);
+            Queue(RLKey.C);
+            Cmd = _source.GetCommand(__actor);
+
+            __gameWindow.Received().WriteLine("Nothing in inventory slot c.");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
         }
 
 
@@ -140,7 +252,7 @@ namespace CopperBend.App.tests
             Queue(RLKey.Comma);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __gameWindow.Received().WriteLine("Nothing to pick up here.");
         }
 
@@ -166,7 +278,7 @@ namespace CopperBend.App.tests
             Queue(RLKey.Comma);
             Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandNone));
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __gameWindow.Received().Prompt("Pick up a-b or ? to see items in range: ");
             Queue(RLKey.A);
             Cmd = _source.GetCommand(__actor);

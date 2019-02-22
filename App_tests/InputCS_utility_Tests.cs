@@ -45,7 +45,7 @@ namespace CopperBend.App.tests
         public void No_input_no_command()
         {
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.None));
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
             __actor.DidNotReceive().Command(Arg.Any<Command>());
         }
@@ -131,7 +131,7 @@ namespace CopperBend.App.tests
             Queue(RLKey.C);
             var cmd = _source.GetCommand(__actor);
             Assert.That(_source.InMultiStepCommand, "In process of choosing what to consume");
-            Assert.That(cmd.Action, Is.EqualTo(CmdAction.None));
+            Assert.That(cmd.Action, Is.EqualTo(CmdAction.Incomplete));
             __gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
 
             Queue(RLKey.A);

@@ -28,7 +28,7 @@ namespace CopperBend.App.Model
             PlantType = type;
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, Direction direction)
+        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, CmdDirection direction)
         {
             if (!tile.IsTilled)
             {

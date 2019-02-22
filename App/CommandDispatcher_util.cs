@@ -171,8 +171,6 @@ namespace CopperBend.App
         public void RemoveFromInventory(IItem item)
         {
             Player.RemoveFromInventory(item);
-            if (_usingItem == item)
-                _usingItem = null;
         }
 
         public void GiveToPlayer(IItem item)

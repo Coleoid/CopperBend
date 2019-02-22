@@ -36,7 +36,7 @@ namespace CopperBend.App.tests
         }
 
         protected Command Cmd = new Command(CmdAction.Unset, CmdDirection.None);
-        protected static readonly Command CommandIncomplete = new Command(CmdAction.None, CmdDirection.None);
+        protected static readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
         protected static readonly RLKeyPress KP_Question = KeyPressFrom(RLKey.Slash, shift: true);
 
         protected static RLKeyPress KeyPressFrom(RLKey key, bool alt = false, bool shift = false, bool control = false, bool repeating = false, bool numLock = false, bool capsLock = false, bool scrollLock = false)

@@ -6006,7 +6006,7 @@ namespace DryIoc
             && Equals(other.MetadataKey, MetadataKey)
             && Equals(other.Metadata, Metadata)
 
-            // todo: Move to Reuse?
+            // todo: Direction to Reuse?
             && other.Reuse?.GetType() == Reuse?.GetType()
             && other.Reuse?.Lifespan == Reuse?.Lifespan
             && Equals(other.Reuse?.Name, Reuse?.Name);

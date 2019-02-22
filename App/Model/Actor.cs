@@ -58,7 +58,7 @@ namespace CopperBend.App.Model
                 break;
             case CmdAction.Unset:
                 break;
-            case CmdAction.Move:
+            case CmdAction.Direction:
                 CmdDirection(command.Direction);
                 break;
             case CmdAction.PickUp:
@@ -70,7 +70,7 @@ namespace CopperBend.App.Model
             case CmdAction.Wait:
                 break;
 
-            case CmdAction.None:
+            case CmdAction.Incomplete:
             case CmdAction.Unknown:
                 var name = Enum.GetName(typeof(CmdAction), command.Action);
                 throw new Exception($"An actor should never receive command [{name}].");

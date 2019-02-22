@@ -39,25 +39,33 @@ namespace CopperBend.App
         {
             switch (command.Action)
             {
-            case CmdAction.Move:
-                return Command_Direction(actor, command.Direction);
-            case CmdAction.PickUp:
-                break;
             case CmdAction.Consume:
+                command.Item.Consume((IControlPanel)this);
                 break;
+
             case CmdAction.Drop:
                 command.Item.MoveTo(actor.Point);
                 Map.Items.Add(command.Item);
                 ScheduleActor(actor, 1);
                 break;
-            case CmdAction.Use:
+            
+            case CmdAction.Direction:
+                return Command_Direction(actor, command.Direction);
+            
+            case CmdAction.PickUp:
                 break;
+            
+            case CmdAction.Use:
+                var targetPoint = PointInDirection(Player.Point, command.Direction);
+                command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);  // the magic
+                break;
+            
             case CmdAction.Wait:
                 break;
 
             case CmdAction.Unknown:
             case CmdAction.Unset:
-            case CmdAction.None:
+            case CmdAction.Incomplete:
             default:
                 throw new Exception($"Bad action {command.Action}.");
             }
@@ -165,49 +173,6 @@ namespace CopperBend.App
         }
         #endregion
 
-        #region Consume
-        private void Consume_Prompt(RLKeyPress key)
-        {
-            Output.Prompt("Consume (inventory letter or ? to show inventory): ");
-            NextStep = Consume_Main;
-        }
-
-        private void Consume_Main(RLKeyPress key)
-        {
-            //  Bail out
-            if (key.Key == RLKey.Escape)
-            {
-                Output.WriteLine("nothing.");
-                NextStep = null;
-                return;
-            }
-
-            //  Show inventory, re-prompt, wait for selection
-            if (key.Key == RLKey.Slash && key.Shift)
-            {
-                Command_Inventory();
-                Consume_Prompt(null);
-                return;
-            }
-
-            int inventorySlot = AlphaIndexOfKeyPress(key);
-            if (inventorySlot == -1) return;
-
-            var item = Player.Inventory.ElementAt(inventorySlot);
-            if (!item.IsConsumable)
-            {
-                Output.WriteLine($"I can't {item.ConsumeVerb} {Describer.Describe(item, DescMods.IndefiniteArticle)}.");
-                Consume_Prompt(null);
-                return;
-            }
-
-            item.Consume((IControlPanel)this);
-
-            NextStep = null;
-        }
-        #endregion
-
-
         private void Command_Help()
         {
             Output.WriteLine("Help:");
@@ -219,115 +184,6 @@ namespace CopperBend.App
             Output.WriteLine("w)ield a tool");
             Output.WriteLine(",) Pick up object");
         }
-
-        private void Command_Inventory()
-        {
-            Output.WriteLine("Inventory:");
-            if (Player.Inventory.Count() == 0)
-            {
-                Output.WriteLine("empty.");
-            }
-            else if (Player.Inventory.Count() < 8)
-            {
-                int asciiSlot = lowercase_a;
-                foreach (var item in Player.Inventory)
-                {
-                    var description = Describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);
-                    Console.WriteLine($"{(char)asciiSlot})  {description}");
-                    asciiSlot++;
-                }
-            }
-            else
-            {
-                //  Bring up an inventory console
-                throw new Exception("I really need an inventory console now.");
-            }
-        }
-
-        #region Use Item
-        private void Use_Prompt(RLKeyPress key)
-        {
-            if (_usingItem == null) _usingItem = Player.WieldedTool;
-            if (_usingItem == null)
-            {
-                Use_Prompt_Choose(null);
-                return;
-            }
-
-            Output.Prompt($"Pick direction to use {_usingItem.Name}, or pick another item with a-z or ?: ");
-            NextStep = Use_in_Direction;
-        }
-
-        private void Use_Prompt_Choose(RLKeyPress key)
-        {
-            Command_Inventory();
-            Output.Prompt("Pick an item to use: ");
-            NextStep = Use_Choose_item;
-        }
-
-        private IItem _usingItem;
-        private void Use_in_Direction(RLKeyPress key)
-        {
-            if (key.Key == RLKey.Escape)
-            {
-                Output.WriteLine("cancelled.");
-                NextStep = null;
-                return;
-            }
-
-            if (key.Key == RLKey.Slash && key.Shift)
-            {
-                Use_Prompt_Choose(null);
-                return;
-            }
-
-            if (key.Char >= 'a' && key.Char <= 'z')
-            {
-                Use_Choose_item(key);
-                return;
-            }
-
-            var direction = DirectionOfKey(key);
-            if (direction != Direction.None)
-            {
-                var targetPoint = PointInDirection(Player.Point, direction);
-                Output.WriteLine(direction.ToString());
-
-                _usingItem.ApplyTo(Map[targetPoint], this, Output, direction);  // the magic
-                //int tickOff = TimeCostToApply(_usingItem, actor.Skills);
-                //ScheduleActor(actor, tickOff);
-                NextStep = null;
-            }
-        }
-
-        private void Use_Choose_item(RLKeyPress key)
-        {
-            if (key.Key == RLKey.Escape)
-            {
-                Output.WriteLine("cancelled.");
-                NextStep = null;
-                return;
-            }
-
-            var selectedIndex = AlphaIndexOfKeyPress(key);
-            if (selectedIndex < 0 || Player.Inventory.Count() <= selectedIndex)
-            {
-                Output.WriteLine($"The key [{key.Char}] does not match an inventory item.  Pick another.");
-                return;
-            }
-
-            var item = Player.Inventory.ElementAt(selectedIndex);
-            if (!item.IsUsable)
-            {
-                Output.WriteLine($"The [{item.Name}] is not a usable item.  Pick another.");
-                return;
-            }
-
-            _usingItem = item;
-            Output.WriteLine($"Using {item.Name} in what direction: ");
-            NextStep = Use_in_Direction;
-        }
-        #endregion
 
         #region Wield
         private void Wield_Prompt(RLKeyPress key)
@@ -361,7 +217,7 @@ namespace CopperBend.App
             //  Question mark:  Show inventory, reprompt
             if (key.Key == RLKey.Slash && key.Shift)
             {
-                Command_Inventory();
+                //Command_Inventory();
                 Wield_Prompt(null);
                 return;
             }

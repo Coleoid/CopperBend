@@ -11,12 +11,13 @@ namespace CopperBend.App
     public enum CmdAction
     {
         Unset = 0,
-        None,
-        Move,
+        Incomplete,
         Unknown,
-        PickUp,
         Consume,
+        Direction,
         Drop,
+        PickUp,
+        Throw,
         Use,
         Wait,
     }

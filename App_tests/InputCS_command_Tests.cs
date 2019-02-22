@@ -20,7 +20,7 @@ namespace CopperBend.App.tests
         {
             Queue(key);
             Cmd = _source.GetCommand(__actor);
-            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Move));
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Direction));
             Assert.That(Cmd.Direction, Is.EqualTo(direction));
         }
 
@@ -32,7 +32,7 @@ namespace CopperBend.App.tests
 
             __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
             var cmdGiven = (Command)__controls.ReceivedCalls().Single().GetArguments()[0];
-            Assert.That(cmdGiven.Action, Is.EqualTo(CmdAction.Move));
+            Assert.That(cmdGiven.Action, Is.EqualTo(CmdAction.Direction));
             Assert.That(cmdGiven.Direction, Is.EqualTo(CmdDirection.West));
             Assert.That(cmdGiven.Item, Is.Null);
             var actor = (IActor)__controls.ReceivedCalls().Single().GetArguments()[1];
@@ -130,7 +130,7 @@ namespace CopperBend.App.tests
             Assert.That(_source.InMultiStepCommand);
         }
 
-        //[Test]  // not until I care more, and work out the UI flow
+        //[Test]  // not until I care more AND work out the UI flow
         private void Consume_reachable()
         {
             var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
@@ -221,6 +221,11 @@ namespace CopperBend.App.tests
         [Test]
         public void Help()
         {
+            Queue(RLKey.H);
+            Cmd = _source.GetCommand(__actor);
+
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __gameWindow.Received().WriteLine("Help:");
         }
 
 

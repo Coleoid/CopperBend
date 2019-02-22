@@ -30,8 +30,7 @@ namespace CopperBend.App
         private Func<RLKeyPress, IActor, Command> NextStep = null;
         private bool QueueIsEmpty => InQ.Count == 0;
 
-        private readonly Command CommandIncomplete = new Command(CmdAction.None, CmdDirection.None);
-        private readonly Command CommandUnknown = new Command(CmdAction.Unknown, CmdDirection.None);
+        private readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
 
@@ -40,21 +39,16 @@ namespace CopperBend.App
             bool consume_input_until_command_given()
             {
                 var cmd = GetCommand(actor);
-                bool finishedTurn = false;
-                bool gotCommand = cmd.Action != CmdAction.None;
-                if (gotCommand)
-                {
-                    //finishedTurn = actor.Command(cmd);
-                    finishedTurn = Controls.CommandActor(cmd, actor);
-                    if (finishedTurn)
-                        NextStep = null;
-                }
+                if (cmd.Action == CmdAction.Incomplete) return false;
 
-                return gotCommand && finishedTurn;
+                var commandWasGiven = Controls.CommandActor(cmd, actor);
+                if (commandWasGiven) NextStep = null;
+
+                return commandWasGiven;
             }
 
-            var gaveCommand = consume_input_until_command_given();
-            if (!gaveCommand)
+            var commandGiven = consume_input_until_command_given();
+            if (!commandGiven)
             {
                 Bus.EnterMode(EngineMode.InputBound, consume_input_until_command_given);
             }
@@ -73,7 +67,7 @@ namespace CopperBend.App
             var dir = DirectionOf(press);
             if (dir != CmdDirection.None)
             {
-                return new Command(CmdAction.Move, dir);
+                return new Command(CmdAction.Direction, dir);
             }
 
             switch (press.Key)
@@ -85,7 +79,10 @@ namespace CopperBend.App
             case RLKey.U: return Use(actor);
             case RLKey.W: return Wield(actor);
             case RLKey.Comma: return PickUp(actor);
-            default: return CommandUnknown;
+
+            default:
+                WriteLine($"Command [{press.Char}] is unknown.");
+                return CommandIncomplete;
             }
         }
 

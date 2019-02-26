@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CopperBend.App.Model;
 using CopperBend.MapUtil;
 using RLNET;
 
@@ -40,7 +41,8 @@ namespace CopperBend.App
             switch (command.Action)
             {
             case CmdAction.Consume:
-                command.Item.Consume((IControlPanel)this);
+                //command.Item.Consume((IControlPanel)this);
+                Consume(actor, command.Item);
                 break;
 
             case CmdAction.Drop:
@@ -57,10 +59,13 @@ namespace CopperBend.App
             
             case CmdAction.Use:
                 var targetPoint = PointInDirection(Player.Point, command.Direction);
-                command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);  // the magic
+                command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);
                 break;
             
             case CmdAction.Wait:
+                break;
+
+            case CmdAction.Wield:
                 break;
 
             case CmdAction.Unknown:
@@ -72,6 +77,34 @@ namespace CopperBend.App
 
             return false;
         }
+
+        public void Consume(IActor actor, IItem item)
+        {
+            Guard.Against(!item.IsConsumable);
+
+            if (item is Fruit fruit)
+            {
+                switch (fruit.PlantType)
+                {
+                case PlantType.Healer:
+                    HealActor(actor, 4);
+                    FeedActor(actor, 400);
+                    break;
+
+                default:
+                    throw new Exception($"Don't have eating written for fruit of {fruit.PlantType}.");
+                }
+                GiveToPlayer(new Seed(new Point(0, 0), 2, fruit.PlantType));
+                Learn(fruit);
+                Experience(fruit.PlantType, Exp.EatFruit);
+
+                return;
+            }
+
+            //0.0
+            item.Consume(this);
+        }
+
 
         #region Direction
 

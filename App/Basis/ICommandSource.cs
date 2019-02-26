@@ -20,6 +20,7 @@ namespace CopperBend.App
         Throw,
         Use,
         Wait,
+        Wield,
     }
 
     [Flags]

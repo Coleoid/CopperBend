@@ -271,26 +271,25 @@ namespace CopperBend.App.tests
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
             Assert.That(Cmd.Item, Is.SameAs(fruit));
-            __gameWindow.Received().WriteLine("Picked up a Healer fruit.");
         }
 
-        [Test]
-        public void PickUp_multiple()
-        {
-            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            var knife = new Knife(new Point(0,0));
-            __actor.ReachableItems().Returns(new List<IItem> { fruit, knife });
-            Queue(RLKey.Comma);
-            Cmd = _source.GetCommand(__actor);
+        //[Test]
+        //public void PickUp_multiple()
+        //{
+        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+        //    var knife = new Knife(new Point(0,0));
+        //    __actor.ReachableItems().Returns(new List<IItem> { fruit, knife });
+        //    Queue(RLKey.Comma);
+        //    Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __gameWindow.Received().Prompt("Pick up a-b or ? to see items in range: ");
-            Queue(RLKey.A);
-            Cmd = _source.GetCommand(__actor);
+        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+        //    __gameWindow.Received().Prompt("Pick up a-b or ? to see items in range: ");
+        //    Queue(RLKey.A);
+        //    Cmd = _source.GetCommand(__actor);
 
-            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
-            Assert.That(Cmd.Item, Is.SameAs(fruit));
-            //TODO:  put multiple items on player tile, expect prompt and choice
-        }
+        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
+        //    Assert.That(Cmd.Item, Is.SameAs(fruit));
+        //    //TODO:  put multiple items on player tile, expect prompt and choice
+        //}
     }
 }

@@ -142,10 +142,21 @@ namespace CopperBend.App
                 Output.WriteLine($"Ow.  Down to {Player.Health}.");
         }
 
-        public void HealPlayer(int amount)
+        //public void HealPlayer(int amount)
+        //{
+        //    HealActor(Player, amount);
+        //    Output.WriteLine($"So nice.  Up to {Player.Health}.");
+        //}
+
+        public void HealActor(IActor actor, int amount)
         {
-            Player.Hurt(amount);
-            Output.WriteLine($"So nice.  Up to {Player.Health}.");
+            actor.Heal(amount);
+        }
+
+        public void FeedActor(IActor actor, int amount)
+        {
+            //0.0
+            //actor.Feed(amount);
         }
 
         public List<Point> GetPathTo(Point start, Point target)

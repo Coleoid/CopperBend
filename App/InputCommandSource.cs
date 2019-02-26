@@ -95,7 +95,7 @@ namespace CopperBend.App
                 WriteLine("Nothing to eat or drink.");
                 return CommandIncomplete;
             }
-            return FFwdOrPrompt( Consume_main, "Consume (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt(Consume_main, "Consume (inventory letter or ? to show inventory): ", actor);
         }
         public Command Consume_main(RLKeyPress press, IActor actor)
         {
@@ -139,7 +139,7 @@ namespace CopperBend.App
                 WriteLine("Nothing to drop.");
                 return CommandIncomplete;
             }
-            return FFwdOrPrompt( Drop_main, "Drop (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt(Drop_main, "Drop (inventory letter or ? to show inventory): ", actor);
         }
         public Command Drop_main(RLKeyPress press, IActor actor)
         {
@@ -270,10 +270,14 @@ namespace CopperBend.App
         }
 #endregion
 
-        public Command Wield(IActor actor) { return CommandIncomplete; }
-
-        public Command PickUp(IActor actor)
+        public Command Wield(IActor actor)
         {
+            return CommandIncomplete;
+        }
+
+        public Command PickUp(IActor actor) //0.2
+        {
+            //  Right now, simply grabs the topmost
             var topItem = actor.ReachableItems()
                 .LastOrDefault();
 
@@ -337,6 +341,7 @@ namespace CopperBend.App
             Window.Prompt(text);
         }
 
+        /// <summary> If more input is queued, the prompt will not be sent /// 
         private Command FFwdOrPrompt(Func<RLKeyPress, IActor, Command> nextStep, string prompt, IActor actor)
         {
             NextStep = nextStep;

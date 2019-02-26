@@ -22,6 +22,11 @@ namespace CopperBend.App.Model
             return false;
         }
 
+        public Seed()
+            : base()
+        {
+        }
+
         public Seed(Point point, int quantity, PlantType type)
             : base(point, quantity, true)
         {
@@ -43,20 +48,25 @@ namespace CopperBend.App.Model
                 return;
             }
 
-            //PROBLEM:  Splitting stacks in a base class, creating a new subclass instance...
-            var sownSeed = new HealerSeed(tile.Point, 1);  // bug
-            tile.Sow(sownSeed);
+            var seedToSow = GetSeedFromStack();
+            tile.Sow(seedToSow);
+            controls.AddToSchedule(seedToSow, 100);
 
             if (--Quantity == 0)
             {
                 controls.RemoveFromInventory(this);
             }
 
-            controls.AddToSchedule(this, 100);
             controls.SetMapDirty();
-            //controls.ScheduleActor(15);
-            controls.Experience(sownSeed.PlantType, Exp.PlantSeed);
+            controls.Experience(seedToSow.PlantType, Exp.PlantSeed);
         }
+
+        internal Seed GetSeedFromStack()
+        {
+            Guard.Against(Quantity < 1, "Somehow there's no seed here");
+            return new Seed(this.Point, 1, this.PlantType);
+        }
+
 
         private int growthRound = 0;
 

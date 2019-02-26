@@ -24,6 +24,11 @@ namespace CopperBend.App.Model
             Quantity = 1;
         }
 
+        public Item()
+        {
+            Quantity = 1;
+        }
+
         public Item(Point point, int quantity, bool isUsable)
         {
             Point = point;

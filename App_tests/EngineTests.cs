@@ -162,6 +162,7 @@ namespace CopperBend.App.tests
         public void ICS_changes_engine_mode_and_sets_callback_when_command_unfinished()
         {
             _engine.PushMode(EngineMode.Schedule, null);
+            __actor.Inventory.Returns(new List<IItem> {new Fruit(new Point(0, 0), 1, PlantType.Boomer)});
             Queue(RLKey.D);
             var ics = new InputCommandSource(_inQ, _describer, __gameWindow, _bus, __controls);
             ics.GiveCommand(__actor);
@@ -170,7 +171,6 @@ namespace CopperBend.App.tests
             Assert.That(_engine.CurrentCallback, Is.Not.Null);
 
             // this half may be a later test...
-            __actor.Inventory.Returns(new List<IItem> {new Fruit(new Point(0, 0), 1, PlantType.Boomer)});
             __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
             __controls.DidNotReceive().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
             Queue(RLKey.A);

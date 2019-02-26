@@ -16,7 +16,6 @@ namespace CopperBend.App
         Point PlayerPoint { get; }
 
         void AttackPlayer(IActor actor);
-        void HealPlayer(int amount);
 
         void RemoveFromInventory(IItem item);
         void GiveToPlayer(IItem item);

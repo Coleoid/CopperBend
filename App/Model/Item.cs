@@ -58,13 +58,5 @@ namespace CopperBend.App.Model
         {
             //output.WriteLine($"Can't use a {Name} on {tile.TileType} to my {direction}.");
         }
-
-        public virtual void Consume(IControlPanel controls)
-        {
-            if (--Quantity < 1)
-            {
-                controls.RemoveFromInventory(this);
-            }
-        }
     }
 }

@@ -2,6 +2,7 @@
 using System.Linq;
 using CopperBend.App.Model;
 using CopperBend.MapUtil;
+using log4net;
 using RLNET;
 
 namespace CopperBend.App
@@ -11,12 +12,12 @@ namespace CopperBend.App
         private Schedule Schedule { get; set; }
 
         private IGameState GameState { get; set; }
-        private IActor Player { get => GameState.Player; }
         private IAreaMap Map { get => GameState.Map; }
 
         private Describer Describer;
         private EventBus EventBus;
         private IMessageOutput Output;
+        private ILog log;
 
         private Action<RLKeyPress> NextStep = null;
         private bool InMultiStepCommand => NextStep != null;
@@ -34,9 +35,10 @@ namespace CopperBend.App
             Describer = describer;
             EventBus = bus;
             Output = messageOutput;
+            log = LogManager.GetLogger("CB");
         }
 
-        public bool CommandActor(Command command, IActor actor)
+        public bool CommandActor(IActor actor, Command command)
         {
             switch (command.Action)
             {
@@ -58,7 +60,7 @@ namespace CopperBend.App
                 break;
             
             case CmdAction.Use:
-                var targetPoint = PointInDirection(Player.Point, command.Direction);
+                var targetPoint = PointInDirection(actor.Point, command.Direction);
                 command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);
                 break;
             
@@ -94,15 +96,20 @@ namespace CopperBend.App
                 default:
                     throw new Exception($"Don't have eating written for fruit of {fruit.PlantType}.");
                 }
-                GiveToPlayer(new Seed(new Point(0, 0), 2, fruit.PlantType));
+                actor.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
                 Learn(fruit);
                 Experience(fruit.PlantType, Exp.EatFruit);
 
                 return;
             }
 
-            //0.0
-            item.Consume(this);
+            //0.1
+            if (item.Quantity < 1)
+                throw new Exception($"Not enough {item.Name} to {item.ConsumeVerb}, somehow.");
+            item.Quantity--;
+            if (item.Quantity == 0)
+                actor.RemoveFromInventory(item);
+            log.Info($"Consumed {item.Name} to no effect.  Needmorecode.");
         }
 
 
@@ -120,7 +127,6 @@ namespace CopperBend.App
              
             return Command_DirectionAttack(actor, targetActor);
         }
-
         private bool Command_DirectionMove(IActor actor, Point point)
         {
             ITile tile = Map[point];
@@ -170,7 +176,6 @@ namespace CopperBend.App
 
             return true;
         }
-
         private bool Command_DirectionAttack(IActor actor, IActor target)
         {
             //0.1
@@ -180,105 +185,19 @@ namespace CopperBend.App
             ScheduleActor(actor, 12);
             return true;
         }
-
-        public void CheckActorAtCoordEvent(IActor actor, ITile tile)
-        {
-            if (Map.LocationMessages.ContainsKey(tile.Point))
-            {
-                var message = Map.LocationMessages[tile.Point];
-                foreach (var line in message)
-                    Output.WriteLine(line);
-
-                Map.LocationMessages.Remove(tile.Point);
-            }
-
-            ////0.2
-            //if (Map.LocationEventEntries.ContainsKey(tile.Point))
-            //{
-            //    var entries = Map.LocationEventEntries[tile.Point];
-            //    foreach (var entry in entries)
-            //    {
-            //        //CommandQueue.Enqueue(entry.Command);
-            //    }
-            //}
-
-            //0.3 may unify those collections and loops, may restructure flow
-        }
         #endregion
 
-        private void Command_Help()
+        private void Command_Wield(IActor actor, IItem item)
         {
-            Output.WriteLine("Help:");
-            Output.WriteLine("Arrow or numpad keys to move and attack");
-            Output.WriteLine("a)pply wielded tool");
-            Output.WriteLine("d)rop an item");
-            Output.WriteLine("h)elp (or ?) shows this message");
-            Output.WriteLine("i)nventory");
-            Output.WriteLine("w)ield a tool");
-            Output.WriteLine(",) Pick up object");
-        }
-
-        #region Wield
-        private void Wield_Prompt(RLKeyPress key)
-        {
-            Output.Prompt("Wield ('?' to show inventory, '.' to empty hands): ");
-            NextStep = Wield_Choose;
-        }
-
-        private void Wield_Choose(RLKeyPress key)
-        {
-            //  Escape:  Bail out unchanged
-            if (key.Key == RLKey.Escape)
-            {
-                var name = Player.WieldedTool == null
-                    ? "bare hands"
-                    : Player.WieldedTool.Name;
-                Output.WriteLine($"unchanged, {name}.");
-                NextStep = null;
-                return;
-            }
-
-            //  Period:  Wield empty hands, done
-            if (key.Key == RLKey.Period)
-            {
-                Output.WriteLine("bare hands");
-                Player.Wield(null);
-                NextStep = null;
-                return;
-            }
-
-            //  Question mark:  Show inventory, reprompt
-            if (key.Key == RLKey.Slash && key.Shift)
-            {
-                //Command_Inventory();
-                Wield_Prompt(null);
-                return;
-            }
-
-            //  If not a good inventory choice, warn and reprompt
-            int inventorySlot = AlphaIndexOfKeyPress(key);
-            if (inventorySlot == -1) return;
-            if (inventorySlot >= Player.Inventory.Count())
-            {
-                Output.WriteLine($"nothing in slot '{key.Char.Value}'.");
-                Wield_Prompt(null);
-                return;
-            }
-
-            // we can wield even silly stuff, until it's a problem.
-            var item = Player.Inventory.ElementAt(inventorySlot);
-
-            Player.Wield(item);
+            actor.Wield(item);
             Output.WriteLine(item.Name);
-            //ScheduleActor(4);
-            NextStep = null;
+            ScheduleActor(actor, 6);
         }
-        #endregion
 
-        private void Command_PickUp()
+        private void Command_PickUp(IActor actor)
         {
             var topItem = Map.Items
-                .Where(i => i.Point.Equals(Player.Point))
+                .Where(i => i.Point.Equals(actor.Point))
                 .LastOrDefault();
 
             if (topItem == null)
@@ -288,9 +207,9 @@ namespace CopperBend.App
             }
 
             Map.Items.Remove(topItem);
-            Player.AddToInventory(topItem);
+            actor.AddToInventory(topItem);
             Output.WriteLine($"Picked up {topItem.Name}");
-            //ScheduleActor(2);
+            ScheduleActor(actor, 4);
         }
     }
 }

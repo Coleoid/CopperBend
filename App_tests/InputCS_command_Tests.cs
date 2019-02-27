@@ -30,7 +30,7 @@ namespace CopperBend.App.tests
             Queue(RLKey.Left);
             _source.GiveCommand(__actor);
 
-            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            __controls.Received().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
             var cmdGiven = (Command)__controls.ReceivedCalls().Single().GetArguments()[0];
             Assert.That(cmdGiven.Action, Is.EqualTo(CmdAction.Direction));
             Assert.That(cmdGiven.Direction, Is.EqualTo(CmdDirection.West));

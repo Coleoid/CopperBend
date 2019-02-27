@@ -8,13 +8,13 @@ namespace CopperBend.App.tests
     public class VignetteTests
     {
         private Schedule schedule;
-        private IControlPanel nullControlPanel;
+        //private IControlPanel nullControlPanel;
 
         [SetUp]
         public void SetUp()
         {
             schedule = new Schedule();
-            nullControlPanel = null;
+            //nullControlPanel = null;
         }
 
 

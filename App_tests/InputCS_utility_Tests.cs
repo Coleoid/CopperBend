@@ -77,7 +77,7 @@ namespace CopperBend.App.tests
 
             Queue(RLKey.A);
             callback();
-            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            __controls.Received().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace CopperBend.App.tests
         {
             bool enteredNewMode = false;
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
-            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
+            __controls.CommandActor(null, CommandIncomplete).ReturnsForAnyArgs(true);
 
             Queue(RLKey.Down);
             Queue(RLKey.D);
@@ -94,7 +94,7 @@ namespace CopperBend.App.tests
             _source.GiveCommand(__actor);
 
             Assert.That(_inQ.Count, Is.EqualTo(2));
-            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            __controls.Received().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
             Assert.That(enteredNewMode, Is.False);
         }
 
@@ -105,7 +105,7 @@ namespace CopperBend.App.tests
             _bus.EnterEngineModeSubscribers += (s, a) => enteredNewMode = true;
 
             __actor.Inventory.Returns(new List<IItem> { new Hoe(new Point(0, 0)) });
-            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
+            __controls.CommandActor(null, CommandIncomplete).ReturnsForAnyArgs(true);
 
             Queue(RLKey.D);
             Queue(RLKey.A);
@@ -117,7 +117,7 @@ namespace CopperBend.App.tests
             _source.GiveCommand(__actor);
 
             Assert.That(_inQ.Count, Is.EqualTo(0));
-            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            __controls.Received().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
             Assert.That(enteredNewMode, Is.False);
         }
 

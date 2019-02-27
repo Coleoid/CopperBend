@@ -171,12 +171,12 @@ namespace CopperBend.App.tests
             Assert.That(_engine.CurrentCallback, Is.Not.Null);
 
             // this half may be a later test...
-            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
-            __controls.DidNotReceive().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            __controls.CommandActor(null, CommandIncomplete).ReturnsForAnyArgs(true);
+            __controls.DidNotReceive().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
             Queue(RLKey.A);
             _engine.ActOnMode();
 
-            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            __controls.Received().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
             Assert.That(_engine.CurrentMode, Is.EqualTo(EngineMode.Schedule));
             Assert.That(_engine.CurrentCallback, Is.Null);
         }
@@ -187,10 +187,10 @@ namespace CopperBend.App.tests
             _engine.PushMode(EngineMode.Schedule, null);
             Queue(RLKey.Left);
             var ics = new InputCommandSource(_inQ, _describer, __gameWindow, _bus, __controls);
-            __controls.CommandActor(CommandIncomplete, null).ReturnsForAnyArgs(true);
+            __controls.CommandActor(null, CommandIncomplete).ReturnsForAnyArgs(true);
             ics.GiveCommand(__actor);
 
-            __controls.Received().CommandActor(Arg.Any<Command>(), Arg.Any<IActor>());
+            __controls.Received().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
             Assert.That(_engine.CurrentMode, Is.EqualTo(EngineMode.Schedule));
             Assert.That(_engine.CurrentCallback, Is.Null);
         }

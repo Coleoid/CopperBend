@@ -41,7 +41,7 @@ namespace CopperBend.App
                 var cmd = GetCommand(actor);
                 if (cmd.Action == CmdAction.Incomplete) return false;
 
-                var commandWasGiven = Controls.CommandActor(cmd, actor);
+                var commandWasGiven = Controls.CommandActor(actor, cmd);
                 if (commandWasGiven) NextStep = null;
 
                 return commandWasGiven;
@@ -57,13 +57,14 @@ namespace CopperBend.App
         internal Command GetCommand(IActor actor)
         {
             if (QueueIsEmpty) return CommandIncomplete;
-
             var press = InQ.Dequeue();
-            if (InMultiStepCommand)  //  Drop, throw, wield, etc.
+
+            if (InMultiStepCommand)  //  Most of them
             {
                 return NextStep(press, actor);
             }
 
+            //  Going somewhere?
             var dir = DirectionOf(press);
             if (dir != CmdDirection.None)
             {
@@ -74,7 +75,7 @@ namespace CopperBend.App
             {
             case RLKey.C: return Consume(actor);
             case RLKey.D: return Drop(actor);
-            case RLKey.H: return Help(actor);
+            case RLKey.H: return Help();
             case RLKey.I: return Inventory(actor);
             case RLKey.U: return Use(actor);
             case RLKey.W: return Wield(actor);
@@ -171,7 +172,7 @@ namespace CopperBend.App
         }
         //HMMM:  Consume_main and Drop_main differ only in CmdAction and inventory filter
 
-        public Command Help(IActor actor)
+        public Command Help()
         {
             WriteLine("Help:");
             WriteLine("Arrow or numpad keys to move and attack");
@@ -272,6 +273,40 @@ namespace CopperBend.App
 
         public Command Wield(IActor actor)
         {
+            var wieldables = actor.Inventory.ToList();
+            if (wieldables.Count() == 0)
+            {
+                WriteLine("Nothing to wield.");
+                return CommandIncomplete;
+            }
+            return FFwdOrPrompt(Wield_main, "Wield (inventory letter or ? to show inventory): ", actor);
+        }
+
+        public Command Wield_main(RLKeyPress press, IActor actor)
+        {
+            if (press.Key == RLKey.Escape)
+            {
+                WriteLine("Wield cancelled.");
+                NextStep = null;
+                return CommandIncomplete;
+            }
+
+            if (press.Key == RLKey.Slash && press.Shift)
+            {
+                ShowInventory(actor, i => true);
+                return CommandIncomplete;
+            }
+
+            var item = ItemInInventoryLocation(press, actor);
+            if (item != null)
+            {
+                NextStep = null;
+                return new Command(CmdAction.Wield, CmdDirection.None, item);
+            }
+            else
+            {
+                WriteLine($"Nothing in inventory slot {press.Char}.");
+            }
             return CommandIncomplete;
         }
 

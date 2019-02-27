@@ -11,9 +11,6 @@ namespace CopperBend.App
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
 
-        //public void WriteLine(string text) => Window.WriteLine(text);
-        //public void Prompt(string text) => Window.Prompt(text);
-
         private int AlphaIndexOfKeyPress(RLKeyPress key)
         {
             if (!key.Char.HasValue) return -1;
@@ -21,8 +18,6 @@ namespace CopperBend.App
             if (asciiNum < lowercase_a || lowercase_z < asciiNum) return -1;
             return asciiNum - lowercase_a;
         }
-
-        public Point PlayerPoint => Player.Point;
 
         public void EnterMode(object sender, EngineMode mode, Func<bool> callback)
         {
@@ -136,17 +131,11 @@ namespace CopperBend.App
             //0.1
             int damage = 2;
             Output.WriteLine($"The {actor.Name} hit me for {damage}.");
-            Player.Hurt(-damage);
+            actor.Hurt(damage);
 
             if (damage > 0)
-                Output.WriteLine($"Ow.  Down to {Player.Health}.");
+                Output.WriteLine($"Ow.  Down to {actor.Health}.");
         }
-
-        //public void HealPlayer(int amount)
-        //{
-        //    HealActor(Player, amount);
-        //    Output.WriteLine($"So nice.  Up to {Player.Health}.");
-        //}
 
         public void HealActor(IActor actor, int amount)
         {
@@ -177,16 +166,6 @@ namespace CopperBend.App
         public bool MoveActorTo(IActor actor, Point step)
         {
             return Map.MoveActor(actor, step);
-        }
-
-        public void RemoveFromInventory(IItem item)
-        {
-            Player.RemoveFromInventory(item);
-        }
-
-        public void GiveToPlayer(IItem item)
-        {
-            Player.AddToInventory(item);
         }
 
         public void PutItemOnMap(IItem item)
@@ -221,6 +200,30 @@ namespace CopperBend.App
         public void AddToSchedule(ICanAct actor, int offset)
         {
             Schedule.AddActor(actor as IActor, offset);//0.1
+        }
+
+        public void CheckActorAtCoordEvent(IActor actor, ITile tile)
+        {
+            if (Map.LocationMessages.ContainsKey(tile.Point))
+            {
+                var message = Map.LocationMessages[tile.Point];
+                foreach (var line in message)
+                    Output.WriteLine(line);
+
+                Map.LocationMessages.Remove(tile.Point);
+            }
+
+            ////0.2
+            //if (Map.LocationEventEntries.ContainsKey(tile.Point))
+            //{
+            //    var entries = Map.LocationEventEntries[tile.Point];
+            //    foreach (var entry in entries)
+            //    {
+            //        //CommandQueue.Enqueue(entry.Command);
+            //    }
+            //}
+
+            //0.3 may unify those collections and loops, may restructure flow
         }
     }
 }

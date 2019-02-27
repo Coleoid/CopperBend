@@ -13,12 +13,8 @@ namespace CopperBend.App
     public interface IControlPanel
     {
         void ScheduleActor(IActor actor, int tickOff);
-        Point PlayerPoint { get; }
 
         void AttackPlayer(IActor actor);
-
-        void RemoveFromInventory(IItem item);
-        void GiveToPlayer(IItem item);
 
         bool MoveActorTo(IActor actor, Point step);
         bool CanActorSeeTarget(IActor actor, Point target);
@@ -35,7 +31,7 @@ namespace CopperBend.App
         void Experience(PlantType plant, Exp experience);
         void EnterMode(object sender, EngineMode mode, Func<bool> callback);
 
-        bool CommandActor(Command command, IActor actor);
+        bool CommandActor(IActor actor, Command command);
     }
 
     public enum EngineMode

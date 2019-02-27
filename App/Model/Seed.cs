@@ -54,7 +54,8 @@ namespace CopperBend.App.Model
 
             if (--Quantity == 0)
             {
-                controls.RemoveFromInventory(this);
+                //0.0
+                //controls.RemoveFromInventory(this);
             }
 
             controls.SetMapDirty();

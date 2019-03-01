@@ -132,7 +132,7 @@ namespace CopperBend.App.tests
             var cmd = _source.GetCommand(__actor);
             Assert.That(_source.InMultiStepCommand, "In process of choosing what to consume");
             Assert.That(cmd.Action, Is.EqualTo(CmdAction.Incomplete));
-            __gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+            __gameWindow.Received().Prompt("Do_Consume (inventory letter or ? to show inventory): ");
 
             Queue(RLKey.A);
             cmd = _source.GetCommand(__actor);

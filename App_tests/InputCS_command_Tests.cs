@@ -40,7 +40,7 @@ namespace CopperBend.App.tests
         }
 
 
-        //Consume();
+        //Do_Consume();
 
         [Test]
         public void Consume_nothing_available()
@@ -65,7 +65,7 @@ namespace CopperBend.App.tests
             Cmd = _source.GetCommand(__actor);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __gameWindow.Received().WriteLine("Consume cancelled.");
+            __gameWindow.Received().WriteLine("Do_Consume cancelled.");
             Assert.IsFalse(_source.InMultiStepCommand);
         }
 
@@ -81,7 +81,7 @@ namespace CopperBend.App.tests
             Cmd = _source.GetCommand(__actor);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+            __gameWindow.Received().Prompt("Do_Consume (inventory letter or ? to show inventory): ");
             Assert.That(_source.InMultiStepCommand);
 
             Queue(RLKey.B);
@@ -103,7 +103,7 @@ namespace CopperBend.App.tests
             Cmd = _source.GetCommand(__actor);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __gameWindow.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+            __gameWindow.Received().Prompt("Do_Consume (inventory letter or ? to show inventory): ");
 
             Queue(RLKey.A);
             Cmd = _source.GetCommand(__actor);

@@ -12,7 +12,11 @@ namespace CopperBend.App
         private Schedule Schedule { get; set; }
 
         private IGameState GameState { get; set; }
-        private IAreaMap Map { get => GameState.Map; }
+
+        private IAreaMap Map
+        {
+            get => GameState.Map;
+        }
 
         private Describer Describer;
         private EventBus EventBus;
@@ -23,12 +27,12 @@ namespace CopperBend.App
         private bool InMultiStepCommand => NextStep != null;
 
         public CommandDispatcher(
-            Schedule schedule, 
-            IGameState gameState, 
+            Schedule schedule,
+            IGameState gameState,
             Describer describer,
             EventBus bus,
             IMessageOutput messageOutput
-            )
+        )
         {
             Schedule = schedule;
             GameState = gameState;
@@ -43,31 +47,30 @@ namespace CopperBend.App
             switch (command.Action)
             {
             case CmdAction.Consume:
-                //command.Item.Consume((IControlPanel)this);
-                Consume(actor, command.Item);
+                Do_Consume(actor, command.Item);
                 break;
 
-            case CmdAction.Drop:
-                command.Item.MoveTo(actor.Point);
-                Map.Items.Add(command.Item);
-                ScheduleActor(actor, 1);
-                break;
-            
             case CmdAction.Direction:
-                return Command_Direction(actor, command.Direction);
-            
+                return Do_Direction(actor, command.Direction);
+
+            case CmdAction.Drop:
+                Do_Drop(actor, command);
+                break;
+
             case CmdAction.PickUp:
+                Do_PickUp(actor, command);
                 break;
-            
+
             case CmdAction.Use:
-                var targetPoint = PointInDirection(actor.Point, command.Direction);
-                command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);
+                Do_Use(actor, command);
                 break;
-            
+
             case CmdAction.Wait:
+                Schedule.AddActor(actor, 6);
                 break;
 
             case CmdAction.Wield:
+                Do_Wield(actor, command.Item);
                 break;
 
             case CmdAction.Unknown:
@@ -80,7 +83,8 @@ namespace CopperBend.App
             return false;
         }
 
-        public void Consume(IActor actor, IItem item)
+
+        public void Do_Consume(IActor actor, IItem item)
         {
             Guard.Against(!item.IsConsumable);
 
@@ -96,6 +100,7 @@ namespace CopperBend.App
                 default:
                     throw new Exception($"Don't have eating written for fruit of {fruit.PlantType}.");
                 }
+
                 actor.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
                 Learn(fruit);
                 Experience(fruit.PlantType, Exp.EatFruit);
@@ -107,7 +112,7 @@ namespace CopperBend.App
             if (item.Quantity < 1)
                 throw new Exception($"Not enough {item.Name} to {item.ConsumeVerb}, somehow.");
             item.Quantity--;
-            if (item.Quantity == 0)
+            if (item.Quantity < 1)
                 actor.RemoveFromInventory(item);
             log.Info($"Consumed {item.Name} to no effect.  Needmorecode.");
         }
@@ -115,19 +120,20 @@ namespace CopperBend.App
 
         #region Direction
 
-        private bool Command_Direction(IActor actor, CmdDirection direction)
+        private bool Do_Direction(IActor actor, CmdDirection direction)
         {
             var point = PointInDirection(actor.Point, direction);
 
             IActor targetActor = Map.GetActorAtPoint(point);
             if (targetActor == null)
             {
-                return Command_DirectionMove(actor, point);
+                return Do_DirectionMove(actor, point);
             }
-             
-            return Command_DirectionAttack(actor, targetActor);
+
+            return Do_DirectionAttack(actor, targetActor);
         }
-        private bool Command_DirectionMove(IActor actor, Point point)
+
+        private bool Do_DirectionMove(IActor actor, Point point)
         {
             ITile tile = Map[point];
             if (tile.TileType.Name == "closed door")
@@ -171,30 +177,33 @@ namespace CopperBend.App
                     var np = Describer.Describe(item, DescMods.Quantity);
                     Output.WriteLine($"There {beVerb} {np} here.");
                 }
-                else {}  //  Nothing here, report nothing
+                else
+                {
+                } //  Nothing here, report nothing
             }
 
             return true;
         }
-        private bool Command_DirectionAttack(IActor actor, IActor target)
+
+        private bool Do_DirectionAttack(IActor actor, IActor target)
         {
             //0.1
             //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
             //conflictSystem.Attack("Wah!", 2, targetActor);
-
+            target.Hurt(2);
             ScheduleActor(actor, 12);
             return true;
         }
         #endregion
 
-        private void Command_Wield(IActor actor, IItem item)
+        private void Do_Drop(IActor actor, Command command)
         {
-            actor.Wield(item);
-            Output.WriteLine(item.Name);
-            ScheduleActor(actor, 6);
+            command.Item.MoveTo(actor.Point);
+            Map.Items.Add(command.Item);
+            ScheduleActor(actor, 1);
         }
 
-        private void Command_PickUp(IActor actor)
+        private void Do_PickUp(IActor actor, Command command)
         {
             var topItem = Map.Items
                 .Where(i => i.Point.Equals(actor.Point))
@@ -210,6 +219,19 @@ namespace CopperBend.App
             actor.AddToInventory(topItem);
             Output.WriteLine($"Picked up {topItem.Name}");
             ScheduleActor(actor, 4);
+        }
+
+        private void Do_Use(IActor actor, Command command)
+        {
+            var targetPoint = PointInDirection(actor.Point, command.Direction);
+            command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);
+        }
+        
+        private void Do_Wield(IActor actor, IItem item)
+        {
+            actor.Wield(item);
+            Output.WriteLine(item.Name);
+            ScheduleActor(actor, 6);
         }
     }
 }

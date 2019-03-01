@@ -96,13 +96,13 @@ namespace CopperBend.App
                 WriteLine("Nothing to eat or drink.");
                 return CommandIncomplete;
             }
-            return FFwdOrPrompt(Consume_main, "Consume (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt(Consume_main, "Do_Consume (inventory letter or ? to show inventory): ", actor);
         }
         public Command Consume_main(RLKeyPress press, IActor actor)
         {
             if (press.Key == RLKey.Escape)
             {
-                WriteLine("Consume cancelled.");
+                WriteLine("Do_Consume cancelled.");
                 NextStep = null;
                 return CommandIncomplete;
             }

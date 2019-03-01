@@ -49,37 +49,17 @@ namespace CopperBend.App.Model
         public IDefenseAspect DefenseAspect { get; set; }
 
         public ICommandSource CommandSource { get; set; }
-        public bool Command(Command command)
-        {
-            bool finishedTurn = true;
-            switch (command.Action)
-            {
-            case CmdAction.Consume:
-                break;
-            case CmdAction.Unset:
-                break;
-            case CmdAction.Direction:
-                CmdDirection(command.Direction);
-                break;
-            case CmdAction.PickUp:
-                break;
-            case CmdAction.Drop:
-                break;
-            case CmdAction.Use:
-                break;
-            case CmdAction.Wait:
-                break;
-
-            case CmdAction.Incomplete:
-            case CmdAction.Unknown:
-                var name = Enum.GetName(typeof(CmdAction), command.Action);
-                throw new Exception($"An actor should never receive command [{name}].");
-            }
-
-            return finishedTurn;
-        }
 
         public IItem WieldedTool { get; internal set; }
+
+        public bool IsPlayer { get; set; }
+
+        internal void CmdDirection(CmdDirection direction)
+        {
+            log.Debug($"got CmdDirection({direction})");
+            Controls.AddToSchedule(this, 12); //0.0
+        }
+
 
         //  Inventory has extra game effects, so I want to be sure I
         //  don't casually add/remove directly from the list, from outside.
@@ -88,12 +68,6 @@ namespace CopperBend.App.Model
         {
             get => InventoryList;
         }
-        internal void CmdDirection(CmdDirection direction)
-        {
-            log.Debug($"got CmdDirection({direction})");
-            Controls.AddToSchedule(this, 12); //0.0
-        }
-
         public void AddToInventory(IItem item)
         {
             //0.1 everything stacks without quantity limit

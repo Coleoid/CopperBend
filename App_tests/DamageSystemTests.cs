@@ -1,5 +1,4 @@
-﻿using System;
-using CopperBend.App.Model;
+﻿using CopperBend.App.Model;
 using CopperBend.MapUtil;
 using NUnit.Framework;
 

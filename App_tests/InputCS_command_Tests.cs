@@ -31,11 +31,11 @@ namespace CopperBend.App.tests
             _source.GiveCommand(__actor);
 
             __controls.Received().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
-            var cmdGiven = (Command)__controls.ReceivedCalls().Single().GetArguments()[0];
+            var cmdGiven = (Command)__controls.ReceivedCalls().Single().GetArguments()[1];
             Assert.That(cmdGiven.Action, Is.EqualTo(CmdAction.Direction));
             Assert.That(cmdGiven.Direction, Is.EqualTo(CmdDirection.West));
             Assert.That(cmdGiven.Item, Is.Null);
-            var actor = (IActor)__controls.ReceivedCalls().Single().GetArguments()[1];
+            var actor = (IActor)__controls.ReceivedCalls().Single().GetArguments()[0];
             Assert.That(actor, Is.SameAs(__actor));
         }
 

@@ -10,7 +10,6 @@ namespace CopperBend.App
     public partial class CommandDispatcher
     {
         private Schedule Schedule { get; set; }
-
         private IGameState GameState { get; set; }
 
         private IAreaMap Map
@@ -46,45 +45,24 @@ namespace CopperBend.App
         {
             switch (command.Action)
             {
-            case CmdAction.Consume:
-                Do_Consume(actor, command.Item);
-                break;
-
-            case CmdAction.Direction:
-                return Do_Direction(actor, command.Direction);
-
-            case CmdAction.Drop:
-                Do_Drop(actor, command);
-                break;
-
-            case CmdAction.PickUp:
-                Do_PickUp(actor, command);
-                break;
-
-            case CmdAction.Use:
-                Do_Use(actor, command);
-                break;
-
-            case CmdAction.Wait:
-                Schedule.AddActor(actor, 6);
-                break;
-
-            case CmdAction.Wield:
-                Do_Wield(actor, command.Item);
-                break;
+            case CmdAction.Consume:   return Do_Consume(actor, command.Item);
+            case CmdAction.Direction: return Do_Direction(actor, command.Direction);
+            case CmdAction.Drop:      return Do_Drop(actor, command);
+            case CmdAction.PickUp:    return Do_PickUp(actor, command);
+            case CmdAction.Use:       return Do_Use(actor, command);
+            case CmdAction.Wait:      return Do_Wait(actor, command);
+            case CmdAction.Wield:     return Do_Wield(actor, command.Item);
 
             case CmdAction.Unknown:
             case CmdAction.Unset:
             case CmdAction.Incomplete:
             default:
-                throw new Exception($"Bad action {command.Action}.");
+                throw new Exception($"Not ready to do {command.Action}.");
             }
-
-            return false;
         }
 
 
-        public void Do_Consume(IActor actor, IItem item)
+        public bool Do_Consume(IActor actor, IItem item)
         {
             Guard.Against(!item.IsConsumable);
 
@@ -105,7 +83,7 @@ namespace CopperBend.App
                 Learn(fruit);
                 Experience(fruit.PlantType, Exp.EatFruit);
 
-                return;
+                return true;
             }
 
             //0.1
@@ -115,11 +93,11 @@ namespace CopperBend.App
             if (item.Quantity < 1)
                 actor.RemoveFromInventory(item);
             log.Info($"Consumed {item.Name} to no effect.  Needmorecode.");
+
+            return true;
         }
 
-
         #region Direction
-
         private bool Do_Direction(IActor actor, CmdDirection direction)
         {
             var point = PointInDirection(actor.Point, direction);
@@ -152,7 +130,10 @@ namespace CopperBend.App
                 CheckActorAtCoordEvent(actor, tile);
 
                 if (!Map.MoveActor(actor, point))
-                    throw new Exception($"Somehow failed to move onto {point}, a walkable tile.");
+                {
+                    log.Error($"{actor.Name} somehow failed to move onto {point}, a walkable tile.");
+                    return false;
+                }
 
                 Map.UpdatePlayerFieldOfView(actor);
                 Map.IsDisplayDirty = true;
@@ -161,25 +142,28 @@ namespace CopperBend.App
                 else
                     ScheduleActor(actor, 12);
 
-                var itemsHere = Map.Items.Where(i => i.Point == point);
-                if (itemsHere.Count() > 7)
+                if (actor.IsPlayer)
                 {
-                    Output.WriteLine("There are many items here.");
+                    var itemsHere = Map.Items.Where(i => i.Point == point);
+                    if (itemsHere.Count() > 7)
+                    {
+                        Output.WriteLine("There are many items here.");
+                    }
+                    else if (itemsHere.Count() > 1)
+                    {
+                        Output.WriteLine("There are several items here.");
+                    }
+                    else if (itemsHere.Count() == 1)
+                    {
+                        var item = itemsHere.ElementAt(0);
+                        var beVerb = item.Quantity == 1 ? "is" : "are";
+                        var np = Describer.Describe(item, DescMods.Quantity);
+                        Output.WriteLine($"There {beVerb} {np} here.");
+                    }
+                    else
+                    {
+                    } //  Nothing here, report nothing
                 }
-                else if (itemsHere.Count() > 1)
-                {
-                    Output.WriteLine("There are several items here.");
-                }
-                else if (itemsHere.Count() == 1)
-                {
-                    var item = itemsHere.ElementAt(0);
-                    var beVerb = item.Quantity == 1 ? "is" : "are";
-                    var np = Describer.Describe(item, DescMods.Quantity);
-                    Output.WriteLine($"There {beVerb} {np} here.");
-                }
-                else
-                {
-                } //  Nothing here, report nothing
             }
 
             return true;
@@ -188,22 +172,27 @@ namespace CopperBend.App
         private bool Do_DirectionAttack(IActor actor, IActor target)
         {
             //0.1
-            //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
-            //conflictSystem.Attack("Wah!", 2, targetActor);
             target.Hurt(2);
             ScheduleActor(actor, 12);
+            //0.2
+            //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
+            //conflictSystem.Attack("Wah!", 2, targetActor);
             return true;
         }
         #endregion
 
-        private void Do_Drop(IActor actor, Command command)
+        private bool Do_Drop(IActor actor, Command command)
         {
-            command.Item.MoveTo(actor.Point);
-            Map.Items.Add(command.Item);
+            var item = actor.RemoveFromInventory(command.Item);
+            Guard.AgainstNullArgument(item);
+
+            item.MoveTo(actor.Point);
+            Map.Items.Add(item);
             ScheduleActor(actor, 1);
+            return true;
         }
 
-        private void Do_PickUp(IActor actor, Command command)
+        private bool Do_PickUp(IActor actor, Command command)
         {
             var topItem = Map.Items
                 .Where(i => i.Point.Equals(actor.Point))
@@ -212,26 +201,35 @@ namespace CopperBend.App
             if (topItem == null)
             {
                 Output.WriteLine("Nothing to pick up here.");
-                return;
+                return false;
             }
 
             Map.Items.Remove(topItem);
             actor.AddToInventory(topItem);
             Output.WriteLine($"Picked up {topItem.Name}");
             ScheduleActor(actor, 4);
+            return true;
         }
 
-        private void Do_Use(IActor actor, Command command)
+        private bool Do_Use(IActor actor, Command command)
         {
             var targetPoint = PointInDirection(actor.Point, command.Direction);
             command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);
+            return true;
         }
-        
-        private void Do_Wield(IActor actor, IItem item)
+
+        private bool Do_Wait(IActor actor, Command command)
+        {
+            Schedule.AddActor(actor, 6);
+            return true;
+        }
+
+        private bool Do_Wield(IActor actor, IItem item)
         {
             actor.Wield(item);
             Output.WriteLine(item.Name);
             ScheduleActor(actor, 6);
+            return true;
         }
     }
 }

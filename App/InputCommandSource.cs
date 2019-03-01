@@ -41,10 +41,10 @@ namespace CopperBend.App
                 var cmd = GetCommand(actor);
                 if (cmd.Action == CmdAction.Incomplete) return false;
 
-                var commandWasGiven = Controls.CommandActor(actor, cmd);
-                if (commandWasGiven) NextStep = null;
+                var actionWasTaken = Controls.CommandActor(actor, cmd);
+                if (actionWasTaken) NextStep = null;
 
-                return commandWasGiven;
+                return actionWasTaken;
             }
 
             var commandGiven = consume_input_until_command_given();

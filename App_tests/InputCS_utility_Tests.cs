@@ -47,7 +47,6 @@ namespace CopperBend.App.tests
             Cmd = _source.GetCommand(__actor);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.None));
-            __actor.DidNotReceive().Command(Arg.Any<Command>());
         }
 
         [Test]
@@ -111,7 +110,7 @@ namespace CopperBend.App.tests
             Queue(RLKey.A);
 
             Assert.That(_inQ.Count, Is.EqualTo(2));
-            __actor.DidNotReceive().Command(Arg.Any<Command>());
+            __controls.DidNotReceive().CommandActor(Arg.Any<IActor>(), Arg.Any<Command>());
             Assert.That(enteredNewMode, Is.False);
 
             _source.GiveCommand(__actor);

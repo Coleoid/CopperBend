@@ -31,7 +31,6 @@ namespace CopperBend.App
         IAreaMap Map { get; set; }
 
         ICommandSource CommandSource { get; set; }
-        bool Command(Command command);
 
         IDefenseAspect DefenseAspect { get; set; }
         void MoveTo(Point point);
@@ -39,6 +38,8 @@ namespace CopperBend.App
         void Wield(IItem item);
 
         IEnumerable<IItem> Inventory { get; }
+        bool IsPlayer { get; set; }
+
         void AddToInventory(IItem item);
         IItem RemoveFromInventory(int inventorySlot);
         IItem RemoveFromInventory(IItem item);

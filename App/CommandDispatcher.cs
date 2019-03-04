@@ -9,7 +9,7 @@ namespace CopperBend.App
 {
     public partial class CommandDispatcher
     {
-        private Schedule Schedule { get; set; }
+        private ISchedule Schedule { get; set; }
         private IGameState GameState { get; set; }
 
         private IAreaMap Map
@@ -26,7 +26,7 @@ namespace CopperBend.App
         private bool InMultiStepCommand => NextStep != null;
 
         public CommandDispatcher(
-            Schedule schedule,
+            ISchedule schedule,
             IGameState gameState,
             Describer describer,
             EventBus bus,
@@ -64,7 +64,10 @@ namespace CopperBend.App
 
         public bool Do_Consume(IActor actor, IItem item)
         {
-            Guard.Against(!item.IsConsumable);
+            Guard.AgainstNullArgument(item, "No item in consume command");
+            var invItem = actor.RemoveFromInventory(item);
+            Guard.AgainstNullArgument(invItem, "Item to consume not found in inventory");
+            Guard.Against(!item.IsConsumable, "Item is not consumeable");
 
             if (item is Fruit fruit)
             {
@@ -82,8 +85,6 @@ namespace CopperBend.App
                 actor.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
                 Learn(fruit);
                 Experience(fruit.PlantType, Exp.EatFruit);
-
-                return true;
             }
 
             //0.1
@@ -183,8 +184,9 @@ namespace CopperBend.App
 
         private bool Do_Drop(IActor actor, Command command)
         {
+            Guard.AgainstNullArgument(command.Item, "No item in drop command");
             var item = actor.RemoveFromInventory(command.Item);
-            Guard.AgainstNullArgument(item);
+            Guard.AgainstNullArgument(item, "Item to drop not found in inventory");
 
             item.MoveTo(actor.Point);
             Map.Items.Add(item);

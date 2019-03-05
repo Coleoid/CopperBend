@@ -82,6 +82,44 @@ namespace CopperBend.App.tests
         #endregion
 
         #region Direction
+        [TestCase(CmdDirection.East, 12)]
+        [TestCase(CmdDirection.Northeast, 17)]
+        public void Direction_commands_take_time(CmdDirection direction, int tickOff)
+        {
+            var areaMap = CreateSmallTestMap();
+            _gameState.Map = areaMap;
+            var actor = new Actor(new Point(2,2));
+            var item = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            actor.AddToInventory(item);
+
+            var cmd = new Command(CmdAction.Direction, direction, item);
+            _dispatcher.CommandActor(actor, cmd);
+            __schedule.Received().AddActor(actor, tickOff);
+        }
+
+        public AreaMap CreateSmallTestMap()
+        {
+            AreaMap areaMap = new AreaMap(5, 5);
+            for (int x = 0; x < 5; x++)
+            {
+                for (int y = 0; y < 5; y++)
+                {
+                    bool isEdge = (x == 0 || y == 0) || (x == 4 || y == 4);
+                    var tt = new TileType
+                    {
+                        IsTransparent = !isEdge,
+                        IsWalkable = !isEdge,
+                        Symbol = isEdge ? '#' : '.'
+                    };
+                    var t = new Tile(x, y, tt);
+                    areaMap.Tiles[x, y] = t;
+                }
+            }
+
+            return areaMap;
+        }
+
+
         #endregion
 
         #region Drop
@@ -165,6 +203,23 @@ namespace CopperBend.App.tests
             Assert.That(item.Quantity, Is.EqualTo(2));
         }
         #endregion
+
+        [TestCase(CmdAction.Consume, CmdDirection.None, 2)]
+        [TestCase(CmdAction.Drop, CmdDirection.None, 1)]
+        [TestCase(CmdAction.Wait, CmdDirection.None, 6)]
+        [TestCase(CmdAction.Direction, CmdDirection.East, 12)]
+        [TestCase(CmdAction.Direction, CmdDirection.Northeast, 17)]
+        public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
+        {
+            _gameState.Map = new AreaMap(5, 5);
+            var actor = new Actor();
+            var item = new Fruit(new Point(0, 0), 1, PlantType.Healer);
+            actor.AddToInventory(item);
+
+            var cmd = new Command(action, direction, item);
+            _dispatcher.CommandActor(actor, cmd);
+            __schedule.Received().AddActor(actor, tickOff);
+        }
 
         #region Pick Up
         #endregion

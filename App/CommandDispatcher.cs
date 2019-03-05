@@ -85,6 +85,7 @@ namespace CopperBend.App
                 actor.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
                 Learn(fruit);
                 Experience(fruit.PlantType, Exp.EatFruit);
+                Schedule.AddActor(actor, 2);
             }
 
             //0.1

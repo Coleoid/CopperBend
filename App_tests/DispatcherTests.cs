@@ -89,10 +89,8 @@ namespace CopperBend.App.tests
             var areaMap = CreateSmallTestMap();
             _gameState.Map = areaMap;
             var actor = new Actor(new Point(2,2));
-            var item = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            actor.AddToInventory(item);
 
-            var cmd = new Command(CmdAction.Direction, direction, item);
+            var cmd = new Command(CmdAction.Direction, direction, null);
             _dispatcher.CommandActor(actor, cmd);
             __schedule.Received().AddActor(actor, tickOff);
         }
@@ -104,15 +102,16 @@ namespace CopperBend.App.tests
             {
                 for (int y = 0; y < 5; y++)
                 {
-                    bool isEdge = (x == 0 || y == 0) || (x == 4 || y == 4);
+                    bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
                     var tt = new TileType
                     {
                         IsTransparent = !isEdge,
                         IsWalkable = !isEdge,
-                        Symbol = isEdge ? '#' : '.'
+                        Symbol = isEdge ? '#' : '.',
+                        Name = isEdge ? "wall" : "floor"
                     };
                     var t = new Tile(x, y, tt);
-                    areaMap.Tiles[x, y] = t;
+                    areaMap.SetTile(t);
                 }
             }
 
@@ -207,8 +206,6 @@ namespace CopperBend.App.tests
         [TestCase(CmdAction.Consume, CmdDirection.None, 2)]
         [TestCase(CmdAction.Drop, CmdDirection.None, 1)]
         [TestCase(CmdAction.Wait, CmdDirection.None, 6)]
-        [TestCase(CmdAction.Direction, CmdDirection.East, 12)]
-        [TestCase(CmdAction.Direction, CmdDirection.Northeast, 17)]
         public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
         {
             _gameState.Map = new AreaMap(5, 5);

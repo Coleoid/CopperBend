@@ -3,6 +3,7 @@ using System.Linq;
 using RLNET;
 using CopperBend.MapUtil;
 using System;
+using CopperBend.App.Model;
 
 namespace CopperBend.App
 {
@@ -147,5 +148,12 @@ namespace CopperBend.App
         }
 
          public Point PlayerStartsAt { get; set; }
+
+        public void SetTile(ITile tile)
+        {
+            Tiles[tile.Point.X, tile.Point.Y] = tile;
+            SetTransparent(tile.Point, tile.TileType.IsTransparent);
+            SetWalkable(tile.Point, tile.TileType.IsWalkable);
+        }
     }
 }

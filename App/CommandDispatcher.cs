@@ -126,10 +126,15 @@ namespace CopperBend.App
                 var np = Describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
                 Output.WriteLine($"I can't walk through {np}.");
                 EventBus.ClearPendingInput(this, new EventArgs());
+                return false;
             }
             else
             {
                 CheckActorAtCoordEvent(actor, tile);
+
+                int directionsMoved = 0;
+                if (actor.Point.X != point.X) directionsMoved++;
+                if (actor.Point.Y != point.Y) directionsMoved++;
 
                 if (!Map.MoveActor(actor, point))
                 {
@@ -139,10 +144,13 @@ namespace CopperBend.App
 
                 Map.UpdatePlayerFieldOfView(actor);
                 Map.IsDisplayDirty = true;
-                if (actor.Point.X != point.X && actor.Point.Y != point.Y)
-                    ScheduleActor(actor, 17);
-                else
+
+                if (directionsMoved == 0)
+                    throw new Exception("Moved nowhere?");
+                else if (directionsMoved == 1)
                     ScheduleActor(actor, 12);
+                else
+                    ScheduleActor(actor, 17);
 
                 if (actor.IsPlayer)
                 {

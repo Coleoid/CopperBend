@@ -34,22 +34,22 @@ namespace CopperBend.App
             int newX = start.X;
             int newY = start.Y;
 
-            if ((direction | CmdDirection.North) == CmdDirection.North)
+            if ((direction & CmdDirection.North) == CmdDirection.North)
             {
                 newY--;
             }
 
-            if ((direction | CmdDirection.South) == CmdDirection.South)
+            if ((direction & CmdDirection.South) == CmdDirection.South)
             {
                 newY++;
             }
 
-            if ((direction | CmdDirection.West) == CmdDirection.West)
+            if ((direction & CmdDirection.West) == CmdDirection.West)
             {
                 newX--;
             }
 
-            if ((direction | CmdDirection.East) == CmdDirection.East)
+            if ((direction & CmdDirection.East) == CmdDirection.East)
             {
                 newX++;
             }

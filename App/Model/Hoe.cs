@@ -27,7 +27,7 @@ namespace CopperBend.App.Model
             }
             else
             {
-                output.WriteLine($"Cannot hoe {tile.TileType.Name}.");
+                output.WriteLine($"Cannot till the {tile.TileType.Name}.");
             }
         }
     }

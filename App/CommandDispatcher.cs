@@ -220,10 +220,34 @@ namespace CopperBend.App
 
         private bool Do_Use(IActor actor, Command command)
         {
+            if (command.Item is Hoe)
+                return Use_Hoe(actor, command);
+
+            return false;
+        }
+
+        private bool Use_Hoe(IActor actor, Command command)
+        {
             var targetPoint = PointInDirection(actor.Point, command.Direction);
-            command.Item.ApplyTo(Map[targetPoint], this, Output, command.Direction);
+            var tile = Map.Tiles[targetPoint.X, targetPoint.Y];
+            if (!tile.IsTillable)
+            {
+                Output.WriteLine($"Cannot till the {tile.TileType.Name}.");
+                return false;
+            }
+
+            if (tile.IsTilled)
+            {
+                Output.WriteLine("Already tilled.");
+                return false;
+            }
+
+            Till(tile);
+            SetMapDirty();
+            ScheduleActor(actor, 15);
             return true;
         }
+
 
         private bool Do_Wait(IActor actor, Command command)
         {

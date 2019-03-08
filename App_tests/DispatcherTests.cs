@@ -7,6 +7,7 @@ using CopperBend.MapUtil;
 
 namespace CopperBend.App.tests
 {
+
     [TestFixture]
     public class DispatcherTests
     {
@@ -29,6 +30,36 @@ namespace CopperBend.App.tests
             _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __eventBus, __messageOutput);
             _gameState.Map = CreateSmallTestMap();
         }
+        public AreaMap CreateSmallTestMap()
+        {
+            var ttWall = new TileType
+            {
+                IsTransparent = false,
+                IsWalkable = false,
+                Symbol = '#',
+                Name = "wall"
+            };
+            var ttFloor = new TileType
+            {
+                IsTransparent = true,
+                IsWalkable = true,
+                Symbol = '.',
+                Name = "floor"
+            };
+            AreaMap areaMap = new AreaMap(5, 5);
+            for (int x = 0; x < 5; x++)
+            {
+                for (int y = 0; y < 5; y++)
+                {
+                    bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
+                    var t = new Tile(x, y, isEdge ? ttWall : ttFloor);
+                    areaMap.SetTile(t);
+                }
+            }
+
+            return areaMap;
+        }
+
 
         #region Consume
         [Test]
@@ -165,37 +196,6 @@ namespace CopperBend.App.tests
                 : __messageOutput.DidNotReceive;
             outputOrNot().WriteLine("There is a knife here.");
         }
-
-        public AreaMap CreateSmallTestMap()
-        {
-            var ttWall = new TileType
-            {
-                IsTransparent = false,
-                IsWalkable = false,
-                Symbol = '#',
-                Name = "wall"
-            };
-            var ttFloor = new TileType
-            {
-                IsTransparent = true,
-                IsWalkable = true,
-                Symbol = '.',
-                Name = "floor"
-            };
-            AreaMap areaMap = new AreaMap(5, 5);
-            for (int x = 0; x < 5; x++)
-            {
-                for (int y = 0; y < 5; y++)
-                {
-                    bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
-                    var t = new Tile(x, y, isEdge? ttWall : ttFloor);
-                    areaMap.SetTile(t);
-                }
-            }
-
-            return areaMap;
-        }
-
         #endregion
 
         #region Drop
@@ -318,9 +318,6 @@ namespace CopperBend.App.tests
             Assert.That(_gameState.Map.Items, Does.Not.Contain(thisFruit));
             Assert.That(actor.Inventory, Does.Contain(thisFruit));
         }
-        #endregion
-
-        #region Use
         #endregion
 
         #region Wield

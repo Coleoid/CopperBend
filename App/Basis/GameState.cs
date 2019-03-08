@@ -6,13 +6,11 @@ namespace CopperBend.App
     {
         IAreaMap Map { get; }
         IActor Player { get; }
-        EngineMode Mode { get; set; }
     }
 
     public class GameState : IGameState
     {
         public IAreaMap Map { get; set; }
         public IActor Player { get; set; }
-        public EngineMode Mode { get; set; }
     }
 }

@@ -12,6 +12,8 @@ namespace CopperBend.App
         Dictionary<string, TileType> TileTypes { get; set; }
         bool IsDisplayDirty { get; set; }
 
+        void SetTile(ITile tile);
+
         Dictionary<Point, List<string>> LocationMessages { get; }
         //Dictionary<Point, List<CommandEntry>> LocationEventEntries { get; }
         bool HasEventAtPoint(Point point);

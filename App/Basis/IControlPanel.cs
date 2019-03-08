@@ -16,7 +16,6 @@ namespace CopperBend.App
 
         void AttackPlayer(IActor actor);
 
-        bool MoveActorTo(IActor actor, Point step);
         bool CanActorSeeTarget(IActor actor, Point target);
         List<Point> GetPathTo(Point start, Point target);
 

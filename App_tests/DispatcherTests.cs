@@ -95,29 +95,115 @@ namespace CopperBend.App.tests
             __schedule.Received().AddActor(actor, tickOff);
         }
 
+        [TestCase(CmdDirection.East, 3, 2)]
+        [TestCase(CmdDirection.Northeast, 3, 1)]
+        public void Direction_commands_change_location(CmdDirection direction, int newX, int newY)
+        {
+            var areaMap = CreateSmallTestMap();
+            _gameState.Map = areaMap;
+            var actor = new Actor(new Point(2, 2));
+
+            var cmd = new Command(CmdAction.Direction, direction, null);
+            _dispatcher.CommandActor(actor, cmd);
+            Assert.That(actor.Point, Is.EqualTo(new Point(newX, newY)));
+        }
+
+        [TestCase(CmdDirection.East, true)]
+        [TestCase(CmdDirection.Northeast, false)]
+        public void Moving_to_unwalkable_tile_does_nothing(CmdDirection direction, bool isPlayer)
+        {
+            var areaMap = CreateSmallTestMap();
+            _gameState.Map = areaMap;
+            var actor = new Actor(new Point(3, 2));
+            actor.IsPlayer = isPlayer;
+
+            var cmd = new Command(CmdAction.Direction, direction, null);
+            _dispatcher.CommandActor(actor, cmd);
+            Assert.That(actor.Point, Is.EqualTo(new Point(3, 2)));
+            __schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
+
+            var outputOrNot = isPlayer
+                ? (Func<IMessageOutput>)__messageOutput.Received
+                : __messageOutput.DidNotReceive;
+            outputOrNot().WriteLine("I can't walk through a wall.");
+        }
+
+        [Test]
+        public void Moving_to_closed_door_opens_door_without_moving()
+        {
+            var areaMap = CreateSmallTestMap();
+            var tile = new Tile(2, 1, new TileType { Name = "closed door", Symbol = '+' });
+            areaMap.SetTile(tile);
+            areaMap.TileTypes["open door"] = new TileType  //WART: map should preload tile types req'd by code
+            {
+                Name = "open door",
+                Symbol = '=',
+                IsTransparent = true,
+                IsWalkable = true
+            };
+            _gameState.Map = areaMap;
+            Point startingPoint = new Point(2, 2);
+            var actor = new Actor(startingPoint);
+            areaMap.ViewpointActor = actor;  //WART: shouldn't need this, should just mark dirty
+
+            var cmd = new Command(CmdAction.Direction, CmdDirection.North, null);
+            _dispatcher.CommandActor(actor, cmd);
+
+            Assert.That(actor.Point, Is.EqualTo(startingPoint));
+            __schedule.Received().AddActor(actor, 4);
+        }
+        
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Moving_onto_item_notifies_if_player(bool isPlayer)
+        {
+            var areaMap = CreateSmallTestMap();
+            _gameState.Map = areaMap;
+            Point startingPoint = new Point(2, 2);
+            var actor = new Actor(startingPoint);
+            actor.IsPlayer = isPlayer;
+
+            var item = new Knife(new Point(2, 1));
+            areaMap.Items.Add(item);
+
+            var cmd = new Command(CmdAction.Direction, CmdDirection.North, null);
+            _dispatcher.CommandActor(actor, cmd);
+
+            var outputOrNot = isPlayer 
+                ? (Func<IMessageOutput>) __messageOutput.Received 
+                : __messageOutput.DidNotReceive;
+            outputOrNot().WriteLine("There is a knife here.");
+        }
+
         public AreaMap CreateSmallTestMap()
         {
+            var ttWall = new TileType
+            {
+                IsTransparent = false,
+                IsWalkable = false,
+                Symbol = '#',
+                Name = "wall"
+            };
+            var ttFloor = new TileType
+            {
+                IsTransparent = true,
+                IsWalkable = true,
+                Symbol = '.',
+                Name = "floor"
+            };
             AreaMap areaMap = new AreaMap(5, 5);
             for (int x = 0; x < 5; x++)
             {
                 for (int y = 0; y < 5; y++)
                 {
                     bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
-                    var tt = new TileType
-                    {
-                        IsTransparent = !isEdge,
-                        IsWalkable = !isEdge,
-                        Symbol = isEdge ? '#' : '.',
-                        Name = isEdge ? "wall" : "floor"
-                    };
-                    var t = new Tile(x, y, tt);
+                    var t = new Tile(x, y, isEdge? ttWall : ttFloor);
                     areaMap.SetTile(t);
                 }
             }
 
             return areaMap;
         }
-
 
         #endregion
 
@@ -219,6 +305,47 @@ namespace CopperBend.App.tests
         }
 
         #region Pick Up
+
+        [Test]
+        public void PickUp_nothing_takes_no_time()
+        {
+            _gameState.Map = new AreaMap(5, 5);
+            Point startingPoint = new Point(2, 2);
+            var actor = new Actor(startingPoint);
+
+            var cmd = new Command(CmdAction.PickUp, CmdDirection.None, null);
+            _dispatcher.CommandActor(actor, cmd);
+
+            __schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
+        }
+
+        [Test]
+        public void PickUp_takes_time()
+        {
+            _gameState.Map = new AreaMap(5, 5);
+            Point startingPoint = new Point(2, 2);
+            var actor = new Actor(startingPoint);
+            _gameState.Map.Items.Add(new Fruit(startingPoint, 1, PlantType.Healer));
+            var cmd = new Command(CmdAction.PickUp, CmdDirection.None, null);
+            _dispatcher.CommandActor(actor, cmd);
+
+            __schedule.Received().AddActor(actor, 4);
+        }
+
+        [Test]
+        public void PickUp_moves_item_from_map_to_actor()
+        {
+            _gameState.Map = new AreaMap(5, 5);
+            Point startingPoint = new Point(2, 2);
+            var actor = new Actor(startingPoint);
+            Fruit thisFruit = new Fruit(startingPoint, 1, PlantType.Healer);
+            _gameState.Map.Items.Add(thisFruit);
+            var cmd = new Command(CmdAction.PickUp, CmdDirection.None, null);
+            _dispatcher.CommandActor(actor, cmd);
+
+            Assert.That(_gameState.Map.Items, Does.Not.Contain(thisFruit));
+            Assert.That(actor.Inventory, Does.Contain(thisFruit));
+        }
         #endregion
 
         #region Use

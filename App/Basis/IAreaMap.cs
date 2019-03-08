@@ -25,7 +25,7 @@ namespace CopperBend.App
         //  0.1.  0.2 ~ how we came from our prior location affects start point
 
         //  These likely leave AreaMap
-        bool MoveActor(IActor actor, Point point);
+        void MoveActor(IActor actor, Point point);
         void UpdatePlayerFieldOfView(IActor player);
         void DrawMap(RLConsole mapConsole);
         IActor GetActorAtPoint(Point point);

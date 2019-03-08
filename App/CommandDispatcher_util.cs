@@ -163,11 +163,6 @@ namespace CopperBend.App
             return pathList;
         }
 
-        public bool MoveActorTo(IActor actor, Point step)
-        {
-            return Map.MoveActor(actor, step);
-        }
-
         public void PutItemOnMap(IItem item)
         {
             Map.Items.Add(item);

@@ -2,8 +2,6 @@
 using System.Linq;
 using RLNET;
 using CopperBend.MapUtil;
-using System;
-using CopperBend.App.Model;
 
 namespace CopperBend.App
 {
@@ -13,6 +11,7 @@ namespace CopperBend.App
             : base(xWidth, yHeight)
         {
             Tiles = new ITile[xWidth, yHeight];
+            TileTypes = new Dictionary<string, TileType>();
             Actors = new List<IActor>();
             Items = new List<IItem>();
             FirstSightMessage = new List<string>();
@@ -98,19 +97,16 @@ namespace CopperBend.App
         }
 
 
-        // Returns true when target cell is walkable and move succeeds
-        public bool MoveActor(IActor actor, Point targetPoint)
+        public void MoveActor(IActor actor, Point targetPoint)
         {
-            // Only allow actor movement if the cell is walkable
-            if (!GetCell(targetPoint).IsWalkable) return false;
+            Guard.Against(!GetCell(targetPoint).IsWalkable, 
+                "Must only move onto walkable locations");
 
             var startPoint = actor.Point;
             SetWalkable(startPoint, true);
             actor.MoveTo(targetPoint);
             SetWalkable(targetPoint, false);
             IsDisplayDirty = true;
-
-            return true;
         }
 
         //  Player field of view changes whenever player moves
@@ -154,6 +150,11 @@ namespace CopperBend.App
             Tiles[tile.Point.X, tile.Point.Y] = tile;
             SetTransparent(tile.Point, tile.TileType.IsTransparent);
             SetWalkable(tile.Point, tile.TileType.IsWalkable);
+
+            if (!TileTypes.ContainsKey(tile.TileType.Name))
+            {
+                TileTypes[tile.TileType.Name] = tile.TileType;
+            }
         }
     }
 }

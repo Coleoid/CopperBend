@@ -113,67 +113,63 @@ namespace CopperBend.App
             return Do_DirectionAttack(actor, targetActor);
         }
 
-        private bool Do_DirectionMove(IActor actor, Point point)
+        private bool Do_DirectionMove(IActor actor, Point newPoint)
         {
-            ITile tile = Map[point];
+            ITile tile = Map[newPoint];
             if (tile.TileType.Name == "closed door")
             {
                 Map.OpenDoor(tile);
                 ScheduleActor(actor, 4);
+                return true;
             }
-            else if (!Map.IsWalkable(point))
+
+            if (!Map.IsWalkable(newPoint))
             {
                 var np = Describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
-                Output.WriteLine($"I can't walk through {np}.");
+                if (actor.IsPlayer)
+                    Output.WriteLine($"I can't walk through {np}.");
                 EventBus.ClearPendingInput(this, new EventArgs());
                 return false;
             }
+
+            CheckActorAtCoordEvent(actor, tile);
+
+            var startingPoint = actor.Point;
+            Map.MoveActor(actor, newPoint);
+            Map.UpdatePlayerFieldOfView(actor);
+            Map.IsDisplayDirty = true;
+
+            int directionsMoved = 0;
+            if (actor.Point.X != startingPoint.X) directionsMoved++;
+            if (actor.Point.Y != startingPoint.Y) directionsMoved++;
+            if (directionsMoved == 0)
+                throw new Exception("Moved nowhere?  Up/Down not yet handled.");
+            else if (directionsMoved == 1)
+                ScheduleActor(actor, 12);
             else
+                ScheduleActor(actor, 17);
+
+            if (actor.IsPlayer)
             {
-                CheckActorAtCoordEvent(actor, tile);
-
-                int directionsMoved = 0;
-                if (actor.Point.X != point.X) directionsMoved++;
-                if (actor.Point.Y != point.Y) directionsMoved++;
-
-                if (!Map.MoveActor(actor, point))
+                var itemsHere = Map.Items.Where(i => i.Point == newPoint);
+                if (itemsHere.Count() > 7)
                 {
-                    log.Error($"{actor.Name} somehow failed to move onto {point}, a walkable tile.");
-                    return false;
+                    Output.WriteLine("There are many items here.");
                 }
-
-                Map.UpdatePlayerFieldOfView(actor);
-                Map.IsDisplayDirty = true;
-
-                if (directionsMoved == 0)
-                    throw new Exception("Moved nowhere?");
-                else if (directionsMoved == 1)
-                    ScheduleActor(actor, 12);
+                else if (itemsHere.Count() > 1)
+                {
+                    Output.WriteLine("There are several items here.");
+                }
+                else if (itemsHere.Count() == 1)
+                {
+                    var item = itemsHere.ElementAt(0);
+                    var beVerb = item.Quantity == 1 ? "is" : "are";
+                    var np = Describer.Describe(item, DescMods.IndefiniteArticle);
+                    Output.WriteLine($"There {beVerb} {np} here.");
+                }
                 else
-                    ScheduleActor(actor, 17);
-
-                if (actor.IsPlayer)
                 {
-                    var itemsHere = Map.Items.Where(i => i.Point == point);
-                    if (itemsHere.Count() > 7)
-                    {
-                        Output.WriteLine("There are many items here.");
-                    }
-                    else if (itemsHere.Count() > 1)
-                    {
-                        Output.WriteLine("There are several items here.");
-                    }
-                    else if (itemsHere.Count() == 1)
-                    {
-                        var item = itemsHere.ElementAt(0);
-                        var beVerb = item.Quantity == 1 ? "is" : "are";
-                        var np = Describer.Describe(item, DescMods.Quantity);
-                        Output.WriteLine($"There {beVerb} {np} here.");
-                    }
-                    else
-                    {
-                    } //  Nothing here, report nothing
-                }
+                } //  Nothing here, report nothing
             }
 
             return true;

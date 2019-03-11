@@ -164,7 +164,7 @@ namespace CopperBend.App
 
             //  The large message pane overlays most of the game
             case EngineMode.LargeMessagePending:
-                GameWindow.HandleLargeMessage();
+                HandleLargeMessage();
                 break;
 
             //  Messages waiting for the player block player input and scheduled events
@@ -203,7 +203,12 @@ namespace CopperBend.App
         public void HandleLargeMessage()
         {
             RLKeyPress press =  GameWindow.GetNextKeyPress();
-            while (press != null && press.Key != RLKey.Escape)
+            while (press != null 
+                && press.Key != RLKey.Escape
+                && press.Key != RLKey.Enter
+                && press.Key != RLKey.KeypadEnter
+                && press.Key != RLKey.Space
+            )
             {
                 press = GameWindow.GetNextKeyPress();
             }
@@ -211,8 +216,12 @@ namespace CopperBend.App
             if (press == null) return;
 
             //EventBus.ClearLargeMessage(this, new EventArgs());
-            GameWindow.HideLargeMessage();
+            HideLargeMessage();
+        }
 
+        private void HideLargeMessage()
+        {
+            throw new NotImplementedException();
         }
 
         public void DoNextScheduled()

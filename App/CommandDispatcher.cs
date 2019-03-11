@@ -220,10 +220,16 @@ namespace CopperBend.App
 
         private bool Do_Use(IActor actor, Command command)
         {
-            if (command.Item is Hoe)
+            switch (command.Item)
+            {
+            case Hoe h:
                 return Use_Hoe(actor, command);
+            case Seed s:
+                return Use_Seed(actor, command);
 
-            return false;
+            default:
+                throw new Exception($"Don't know how to use a {command.Item.GetType().Name} yet.");
+            }
         }
 
         private bool Use_Hoe(IActor actor, Command command)
@@ -232,13 +238,11 @@ namespace CopperBend.App
             var tile = Map.Tiles[targetPoint.X, targetPoint.Y];
             if (!tile.IsTillable)
             {
-                Output.WriteLine($"Cannot till the {tile.TileType.Name}.");
-                return false;
-            }
+                var msg = tile.IsTilled
+                    ? "Already tilled."
+                    : $"Cannot till the {tile.TileType.Name}.";
 
-            if (tile.IsTilled)
-            {
-                Output.WriteLine("Already tilled.");
+                Output.WriteLine(msg);
                 return false;
             }
 
@@ -255,7 +259,7 @@ namespace CopperBend.App
             return true;
         }
 
-        private bool Use_Seed(Actor actor, Command command)
+        private bool Use_Seed(IActor actor, Command command)
         {
             var targetPoint = PointInDirection(actor.Point, command.Direction);
             var tile = Map.Tiles[targetPoint.X, targetPoint.Y];

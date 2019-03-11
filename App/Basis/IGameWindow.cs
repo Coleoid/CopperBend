@@ -12,17 +12,20 @@ namespace CopperBend.App
 
         void Run(UpdateEventHandler onUpdate, UpdateEventHandler onRender);
         void Render(IAreaMap map);
-        void AddMessage(string newMessage);
+        void Close();
+
+        RLKeyPress GetKeyPress();
+        RLKeyPress GetNextKeyPress();
         void EmptyInputQueue();
-        //RLKeyPress GetNextKeyPress();
-        void HandleLargeMessage();
-        void HandlePendingMessages();
         void Prompt(string text);
+        void WriteLine(string text);
+
+        void AddMessage(string newMessage);
+        //void HandleLargeMessage();
+        //void HideLargeMessage();
+        void HandlePendingMessages();
         void ClearMessagePause();
         void ShowMessages();
-        void WriteLine(string text);
         void ShowInventory(IEnumerable<IItem> inventory, Func<IItem, bool> filter);
-        RLKeyPress GetKeyPress();
-        void Close();
     }
 }

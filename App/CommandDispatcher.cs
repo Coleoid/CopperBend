@@ -242,9 +242,51 @@ namespace CopperBend.App
                 return false;
             }
 
+            int tillTime = 15;
+            if (actor.WieldedTool != command.Item)
+            {
+                actor.Wield(command.Item);
+                tillTime += 6;
+            }
+
             Till(tile);
             SetMapDirty();
-            ScheduleActor(actor, 15);
+            ScheduleActor(actor, tillTime);
+            return true;
+        }
+
+        private bool Use_Seed(Actor actor, Command command)
+        {
+            var targetPoint = PointInDirection(actor.Point, command.Direction);
+            var tile = Map.Tiles[targetPoint.X, targetPoint.Y];
+
+            if (!tile.IsTilled)
+            {
+                string qualifier = tile.IsTillable ? "untilled " : "";
+                Output.WriteLine($"Cannot sow {qualifier}{tile.TileType.Name}.");
+                return false;
+            }
+
+            if (tile.IsSown)
+            {
+                Output.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
+                return false;
+            }
+
+            var seedStock = (Seed)command.Item;
+            var seedToSow = seedStock.GetSeedFromStack();
+            tile.Sow(seedToSow);
+
+            AddToSchedule(seedToSow, 100);
+
+            if (--seedStock.Quantity < 1)
+            {
+                actor.RemoveFromInventory(seedStock);
+            }
+
+            SetMapDirty();
+            Experience(seedToSow.PlantType, Exp.PlantSeed);
+
             return true;
         }
 
@@ -258,7 +300,6 @@ namespace CopperBend.App
         private bool Do_Wield(IActor actor, IItem item)
         {
             actor.Wield(item);
-            Output.WriteLine(item.Name);
             ScheduleActor(actor, 6);
             return true;
         }

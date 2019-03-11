@@ -19,6 +19,7 @@ namespace CopperBend.App
                 c.Register<EventBus, EventBus>();
                 c.Register<Describer, Describer>();
                 c.Register<Schedule, Schedule>();
+                c.Register<ISchedule, Schedule>();
                 c.Register<IGameWindow, GameWindow>();
                 c.Register<IMessageOutput, GameWindow>();
                 c.Register<Queue<RLKeyPress>, Queue<RLKeyPress>>(Made.Of(() => new Queue<RLKeyPress>()));

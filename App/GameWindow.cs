@@ -30,7 +30,7 @@ namespace CopperBend.App
         public RLConsole LargePane { get; set; }
         private readonly int LargeWidth = 60;
         private readonly int LargeHeight = 60;
-        private readonly bool LargePaneVisible;
+        private bool LargePaneVisible;
 
         private Queue<RLKeyPress> InputQueue;
         public Queue<string> MessageQueue;
@@ -41,7 +41,7 @@ namespace CopperBend.App
         public bool DisplayDirty { get; set; } = false;
         private int ShownMessages = 0;
 
-
+        #region Ctor, Run, Render, Close
         public GameWindow(Queue<RLKeyPress> inputQueue, EventBus eventBus, Describer describer)
         {
             InputQueue = inputQueue;
@@ -69,12 +69,20 @@ namespace CopperBend.App
 
 
             MessageQueue = new Queue<string>();
-            EventBus.SendLargeMessageSubscribers += LargeMessage;
+            //EventBus.SendLargeMessageSubscribers += LargeMessage;
+        }
+
+        public void Run(UpdateEventHandler onUpdate, UpdateEventHandler onRender)
+        {
+            RootConsole.Update += onUpdate;
+            RootConsole.Render += onRender;
+            RootConsole.Run();
         }
 
         public void Render(IAreaMap map)
         {
             //FUTURE:  real-time (background) animation around here
+            //  so, water ripple, flames
 
             bool rootDirty = false;
 
@@ -101,32 +109,96 @@ namespace CopperBend.App
             //    rootDirty = true;
             //}
 
-            //if (GameWindow.IsDisplayDirty)
+            //if (TextPane.IsDisplayDirty)
             //{
             RLConsole.Blit(TextPane, 0, 0, TextWidth, TextHeight, RootConsole, 0, MapHeight);
             rootDirty = true;
-            //GameWindow.IsDisplayDirty = false;
+            //IsDisplayDirty = false;
             //}
 
             //  Large messages blitted last since they overlay the rest of the panes
             if (LargePaneVisible)
             {
                 RLConsole.Blit(LargePane, 0, 0, LargeWidth, LargeHeight, RootConsole, 10, 10);
+                rootDirty = true;
             }
 
             if (rootDirty)
             {
-                //RootConsole.Clear();  //  por que?
+                //RootConsole.Clear();  //  If I'm keeping it together, won't need this.
                 RootConsole.Draw();
                 rootDirty = false;
             }
         }
 
-        public void Run(UpdateEventHandler onUpdate, UpdateEventHandler onRender)
+        public void Close()
         {
-            RootConsole.Update += onUpdate;
-            RootConsole.Render += onRender;
-            RootConsole.Run();
+            RootConsole.Close();
+        }
+        #endregion
+
+        #region Input
+        public RLKeyPress GetKeyPress()
+        {
+            return RootConsole.Keyboard.GetKeyPress();
+        }
+
+        public RLKeyPress GetNextKeyPress()
+        {
+            return InputQueue.Any() ? InputQueue.Dequeue() : null;
+        }
+
+        public void EmptyInputQueue()
+        {
+            InputQueue.Clear();
+        }
+        #endregion
+
+
+        private string promptText = string.Empty;
+        public void Prompt(string text)
+        {
+            promptText += text;
+            TextPane.Print(1, CursorY, 5, promptText, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+            CursorX += promptText.Length;
+        }
+
+        public void WriteLine(string text)
+        {
+            if (promptText != string.Empty)
+            {
+                text = promptText + text;
+                promptText = string.Empty;
+            }
+
+            int maxLinesWritable = textConsoleHeight - CursorY - 1;
+            int linesWritten = TextPane.Print(CursorX, CursorY, maxLinesWritable, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+
+            var newMessage = new MessageLine { Text = text, Lines = linesWritten };
+            MessageLines.Enqueue(newMessage);
+            CursorY += linesWritten;
+            CursorX = 1;
+
+            //  Time to scroll?
+            bool scrollTime = CursorY == textConsoleHeight;
+            while (scrollTime)
+            {
+                TextPane.Clear();
+                MessageLines.Dequeue();
+                CursorY = 1;
+                foreach (var msg in MessageLines)
+                {
+                    linesWritten = TextPane.Print(CursorX, CursorY, maxLinesWritable, msg.Text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
+                    CursorY += linesWritten;
+                }
+
+                //  Were we cutting off some of the latest message?  Then scroll more...
+                scrollTime = linesWritten != newMessage.Lines;
+                //  ...unless that single message is now filling the text console.
+                scrollTime = scrollTime && MessageLines.Count() > 1;
+            }
+            //  This works fine, though does significantly more graphic work
+            //  than necessary--if this shows slowness, we can get wins here.
         }
 
         public void AddMessage(string newMessage)
@@ -161,16 +233,6 @@ namespace CopperBend.App
             //0.1
             ShownMessages = 0;
             WaitingAtMorePrompt = false;
-        }
-
-        public RLKeyPress GetNextKeyPress()
-        {
-            return InputQueue.Any() ? InputQueue.Dequeue() : null;
-        }
-
-        public void EmptyInputQueue()
-        {
-            InputQueue.Clear();
         }
 
         public void HandlePendingMessages()
@@ -211,66 +273,6 @@ namespace CopperBend.App
         }
         private Queue<MessageLine> MessageLines = new Queue<MessageLine>();
 
-        public void WriteLine(string text)
-        {
-            if (promptText != string.Empty)
-            {
-                text = promptText + text;
-                promptText = string.Empty;
-            }
-
-            int maxLinesWritable = textConsoleHeight - CursorY - 1;
-            int linesWritten = TextPane.Print(CursorX, CursorY, maxLinesWritable, text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
-
-            var newMessage = new MessageLine { Text = text, Lines = linesWritten };
-            MessageLines.Enqueue(newMessage);
-            CursorY += linesWritten;
-            CursorX = 1;
-
-            //  Time to scroll?
-            bool scrollTime = CursorY == textConsoleHeight;
-            while (scrollTime)
-            {
-                TextPane.Clear();
-                MessageLines.Dequeue();
-                CursorY = 1;
-                foreach (var msg in MessageLines)
-                {
-                    linesWritten = TextPane.Print(CursorX, CursorY, maxLinesWritable, msg.Text, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
-                    CursorY += linesWritten;
-                }
-
-                //  Were we cutting off some of the latest message?  Then scroll more...
-                scrollTime = linesWritten != newMessage.Lines;
-                //  ...unless that single message is now filling the text console.
-                scrollTime = scrollTime && MessageLines.Count() > 1;
-            }
-            //  This works fine, though does significantly more graphic work
-            //  than necessary--if this shows slowness, we can get wins here.
-        }
-
-        private string promptText = string.Empty;
-        public void Prompt(string text)
-        {
-            promptText += text;
-            TextPane.Print(1, CursorY, 5, promptText, Palette.PrimaryLighter, new RLColor(0, 0, 0), 78, 1);
-            CursorX += promptText.Length;
-        }
-
-        //  The engine calls here when we're in EngineMode.LargeMessagePending
-        public void HandleLargeMessage()
-        {
-            RLKeyPress press = GetNextKeyPress();
-            while (press != null && press.Key != RLKey.Escape)
-            {
-                press = GetNextKeyPress();
-            }
-
-            if (press == null) return;
-
-            EventBus.ClearLargeMessage(this, new EventArgs());
-        }
-
         internal void LargeMessage(object sender, LargeMessageEventArgs args)
         {
             var lines = args.Lines.ToList();
@@ -279,17 +281,28 @@ namespace CopperBend.App
 
             foreach (var line in lines)
             {
-                int linesWritten = LargePane.Print(1, cY, 0, line, Palette.PrimaryLighter, new RLColor(0, 0, 0), 58, 1);                cY += linesWritten;
+                int linesWritten = LargePane.Print(
+                    1, cY, 0, line, 
+                    Palette.PrimaryLighter, new RLColor(0, 0, 0), 58, 1);
+                cY += linesWritten;
             }
+
+            LargePaneVisible = true;
         }
 
+        //  This boi probably moves
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
         public void ShowInventory(IEnumerable<IItem> inventory, Func<IItem, bool> filter = null)
         {
             if (filter == null) filter = i => true;
-            bool showedAnItem = false;
             WriteLine("Inventory:");
+
+            if (inventory.Count() == 0)
+            {
+                WriteLine("Nothing");
+                return;
+            }
 
             int asciiSlot = lowercase_a - 1;
             foreach (var item in inventory)
@@ -299,21 +312,7 @@ namespace CopperBend.App
 
                 var description = Describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);
                 WriteLine($"{(char)asciiSlot})  {description}");
-                showedAnItem = true;
             }
-
-            if (!showedAnItem)
-                WriteLine("Nothing");
-        }
-
-        public RLKeyPress GetKeyPress()
-        {
-            return RootConsole.Keyboard.GetKeyPress();
-        }
-
-        public void Close()
-        {
-            RootConsole.Close();
         }
     }
 }

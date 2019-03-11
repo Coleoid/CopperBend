@@ -62,7 +62,8 @@ namespace CopperBend.App
         public void LoadNewGame()
         {
             var player = InitPlayer();
-            GameState.Player = player;
+            player.IsPlayer = true;
+            GameState.Player = player; // leaving?
 
             LoadDevMap("Farm");  //0.1
 
@@ -125,7 +126,7 @@ namespace CopperBend.App
             }
         }
 
-        #region Mode
+        #region Mode mechanics
         private Stack<EngineMode> ModeStack = new Stack<EngineMode>();
         private Stack<Func<bool>> CallbackStack = new Stack<Func<bool>>();
         internal EngineMode CurrentMode { get => ModeStack.Peek(); }
@@ -196,6 +197,22 @@ namespace CopperBend.App
             default:
                 throw new Exception($"Game mode [{CurrentMode}] not written yet.");
             }
+        }
+
+        //  The engine calls here when we're in EngineMode.LargeMessagePending
+        public void HandleLargeMessage()
+        {
+            RLKeyPress press =  GameWindow.GetNextKeyPress();
+            while (press != null && press.Key != RLKey.Escape)
+            {
+                press = GameWindow.GetNextKeyPress();
+            }
+
+            if (press == null) return;
+
+            //EventBus.ClearLargeMessage(this, new EventArgs());
+            GameWindow.HideLargeMessage();
+
         }
 
         public void DoNextScheduled()

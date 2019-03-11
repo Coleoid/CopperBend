@@ -61,11 +61,18 @@ namespace CopperBend.App.tests
             return areaMap;
         }
 
+        private (Actor, Point) SU_actor_at_point(int x, int y)
+        {
+            Point startingPoint = new Point(x, y);
+            var actor = new Actor(startingPoint);
+            return (actor, startingPoint);
+        }
+
+        #region Hoe/Tilling
         [Test]
         public void Use_hoe_on_untillable_tile()
         {
-            Point startingPoint = new Point(2, 2);
-            var actor = new Actor(startingPoint);
+            (var actor, var startingPoint) = SU_actor_at_point(2, 2);
             var hoe = new Hoe(startingPoint);
             actor.AddToInventory(hoe);
             actor.WieldedTool = hoe;
@@ -78,10 +85,28 @@ namespace CopperBend.App.tests
         }
 
         [Test]
+        public void Use_hoe_on_tilled_tile()
+        {
+            (var actor, var startingPoint) = SU_actor_at_point(2, 2);
+            var hoe = new Hoe(startingPoint);
+            actor.AddToInventory(hoe);
+            actor.WieldedTool = hoe;
+
+            Tile soil = new Tile(2, 1, new TileType { IsTillable = true, IsTransparent = true, IsWalkable = true, Name = "soil", Symbol = '.' });
+            _dispatcher.Till(soil);
+            _gameState.Map.SetTile(soil);
+
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
+            _dispatcher.CommandActor(actor, cmd);
+
+            __schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
+            __messageOutput.Received().WriteLine("Already tilled.");
+        }
+
+        [Test]
         public void Use_hoe_tills_ground_in_direction()
         {
-            Point startingPoint = new Point(2, 2);
-            var actor = new Actor(startingPoint);
+            (var actor, var startingPoint) = SU_actor_at_point(2, 2);
             var hoe = new Hoe(startingPoint);
             actor.AddToInventory(hoe);
             actor.WieldedTool = hoe;
@@ -93,7 +118,44 @@ namespace CopperBend.App.tests
             _dispatcher.CommandActor(actor, cmd);
 
             Assert.That(soil.IsTilled);
-            __schedule.Received().AddActor(actor, 15);
         }
+
+        [TestCase(true, 15)]
+        [TestCase(false, 21)]
+        public void Use_unwielded_hoe_takes_longer_and_wields_it(bool startsWielded, int tickOff)
+        {
+            (var actor, var startingPoint) = SU_actor_at_point(2, 2);
+            var hoe = new Hoe(startingPoint);
+            actor.AddToInventory(hoe);
+            if (startsWielded)
+                actor.WieldedTool = hoe;
+
+            Tile soil = new Tile(2, 1, new TileType { IsTillable = true, IsTransparent = true, IsWalkable = true, Name = "soil", Symbol = '.' });
+            _gameState.Map.SetTile(soil);
+
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
+            _dispatcher.CommandActor(actor, cmd);
+
+            Assert.That(soil.IsTilled);
+            Assert.That(actor.WieldedTool, Is.SameAs(hoe));
+            __schedule.Received().AddActor(actor, tickOff);
+        }
+        #endregion
+
+        #region Seed/Planting
+        [Test]
+        public void Use_seed_on_untilled_tile()
+        {
+            (var actor, var startingPoint) = SU_actor_at_point(2, 2);
+            var seed = new HealerSeed(startingPoint, 1);
+            actor.AddToInventory(seed);
+
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, seed);
+            _dispatcher.CommandActor(actor, cmd);
+
+            __schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
+            __messageOutput.Received().WriteLine("Cannot sow floor.");
+        }
+        #endregion
     }
 }

@@ -11,6 +11,7 @@ namespace CopperBend.App
         static void Main(string[] args)
         {
             var log = LogManager.GetLogger("CB");
+            log.Info("\n======================================");
             log.Info("Run started");
             try
             {

@@ -36,7 +36,7 @@ namespace CopperBend.App
 
         public void GiveCommand(IActor actor)
         {
-            bool consume_input_until_command_given()
+            bool deliverCommandFromInput()
             {
                 var cmd = GetCommand(actor);
                 if (cmd.Action == CmdAction.Incomplete) return false;
@@ -47,10 +47,10 @@ namespace CopperBend.App
                 return actionWasTaken;
             }
 
-            var commandGiven = consume_input_until_command_given();
+            var commandGiven = deliverCommandFromInput();
             if (!commandGiven)
             {
-                Bus.EnterMode(EngineMode.InputBound, consume_input_until_command_given);
+                Bus.EnterMode(EngineMode.InputBound, deliverCommandFromInput);
             }
         }
 

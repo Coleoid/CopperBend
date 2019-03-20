@@ -96,7 +96,6 @@ namespace CopperBend.App
             }
         }
 
-
         public void MoveActor(IActor actor, Point targetPoint)
         {
             Guard.Against(!GetCell(targetPoint).IsWalkable, 
@@ -106,7 +105,8 @@ namespace CopperBend.App
             SetWalkable(startPoint, true);
             actor.MoveTo(targetPoint);
             SetWalkable(targetPoint, false);
-            IsDisplayDirty = true;
+
+            IsDisplayDirty = true;  //0.1 later can check if start or target are in FoV
         }
 
         //  Player field of view changes whenever player moves
@@ -115,10 +115,12 @@ namespace CopperBend.App
         {
             var fovCells = ComputeFov(actor.Point, actor.Awareness, true);
 
-            foreach (Cell cell in fovCells)
+            foreach (Cell cell in fovCells.Where(c => !c.IsExplored))
             {
                 SetExplored(cell.Point, true);
             }
+
+            IsDisplayDirty = true;  //0.1 later can compare to prior FoV
         }
 
         public IActor GetActorAtPoint(Point point)

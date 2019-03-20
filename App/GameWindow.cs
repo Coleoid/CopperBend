@@ -82,7 +82,10 @@ namespace CopperBend.App
         public void Render(IAreaMap map)
         {
             //FUTURE:  real-time (background) animation around here
-            //  so, water ripple, flames
+            //  Environment:  water ripple, flames, rain, sparkle
+            //  NPC names stretched along T axis?
+            //  Pulse highlight for actor getting command from input
+            //  Target point
 
             bool rootDirty = false;
 

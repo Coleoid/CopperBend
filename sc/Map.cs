@@ -9,6 +9,7 @@ namespace CbRework
         public TileBase[] Tiles { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
+        public Point PlayerStartPoint { get; set; }
 
         //Build a new map with a specified width and height
         public Map(int width, int height)

@@ -53,12 +53,9 @@ namespace CbRework
                 }
             }
 
-            return _map;
-        }
+            _map.PlayerStartPoint = Rooms[0].Center;
 
-        public Point RoomCenter(int roomIndex)
-        {
-            return Rooms[roomIndex].Center;
+            return _map;
         }
 
         private void CreateHorizontalTunnel(int x1, int x2, int y)

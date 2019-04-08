@@ -6,15 +6,16 @@ namespace CbRework
     {
         static void Main()
         {
-            Game.Create(80, 40);
-
-            var engine = new Engine();
-            Game.OnInitialize = engine.Init;
-            Game.OnUpdate = engine.Update;
+            int windowWidth = 80;
+            int windowHeight = 40;
+            Game.Create(windowWidth, windowHeight);
+            Game.OnInitialize = () => new Engine(windowWidth, windowHeight);
+            //  Cannot create a Console until Game.Init time, after the
+            //  .Run below.
 
             Game.Instance.Run();
+            
             Game.Instance.Dispose();
         }
-
     }
 }

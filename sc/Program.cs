@@ -6,7 +6,7 @@ namespace CbRework
     {
         static void Main()
         {
-            Game.Create(60, 30);
+            Game.Create(80, 40);
 
             var engine = new Engine();
             Game.OnInitialize = engine.Init;

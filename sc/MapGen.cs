@@ -13,6 +13,7 @@ namespace CbRework
         }
 
         Map _map; // Temporarily store the map currently worked on
+        List<Rectangle> Rooms;
 
         public Map GenerateMap(int mapWidth, int mapHeight, int maxRooms, int minRoomSize, int maxRoomSize)
         {
@@ -22,7 +23,7 @@ namespace CbRework
             FillWalls();
 
             // add up to maxRooms non-overlapping rooms to map
-            var Rooms = new List<Rectangle>();
+            Rooms = new List<Rectangle>();
             for (int i = 0; i < maxRooms; i++)
             {
                 int newRoomWidth = randNum.Next(minRoomSize, maxRoomSize);
@@ -34,13 +35,46 @@ namespace CbRework
                 Rectangle newRoom = new Rectangle(newRoomX, newRoomY, newRoomWidth, newRoomHeight);
 
                 // skip overlapping rooms
-                if (Rooms.Any(r => newRoom.Intersects(r))) continue;
+                var borderedRoom = new Rectangle(newRoom.Location, newRoom.Size);
+                borderedRoom.Inflate(4, 4);
+                if (Rooms.Any(r => borderedRoom.Intersects(r))) continue;
 
                 Rooms.Add(newRoom);
                 CreateRoom(newRoom);
+
+                for (int r = 1; r < Rooms.Count; r++)
+                {
+                    //for all remaining rooms get the center of the room and the previous room
+                    Point previousRoomCenter = Rooms[r - 1].Center;
+                    Point currentRoomCenter = Rooms[r].Center;
+
+                    CreateHorizontalTunnel(previousRoomCenter.X, currentRoomCenter.X, previousRoomCenter.Y);
+                    CreateVerticalTunnel(previousRoomCenter.Y, currentRoomCenter.Y, currentRoomCenter.X);
+                }
             }
 
             return _map;
+        }
+
+        public Point RoomCenter(int roomIndex)
+        {
+            return Rooms[roomIndex].Center;
+        }
+
+        private void CreateHorizontalTunnel(int x1, int x2, int y)
+        {
+            int lowX = Math.Min(x1, x2);
+            int highX = Math.Max(x1, x2);
+            for (int x = lowX; x <= highX; x++)
+                SetTile(x, y, new TileFloor());
+        }
+
+        private void CreateVerticalTunnel(int y1, int y2, int x)
+        {
+            int lowY = Math.Min(y1, y2);
+            int highY = Math.Max(y1, y2);
+            for (int y = lowY; y <= highY; y++)
+                SetTile(x, y, new TileFloor());
         }
 
         public void FillWalls()
@@ -62,10 +96,14 @@ namespace CbRework
             {
                 for (int y = yStart; y <= yEnd; y++)
                 {
-                    _map.Tiles[y * _map.Width + x] = new TileFloor();
+                    SetTile(x, y, new TileFloor());
                 }
             }
         }
 
+        private void SetTile(int x, int y, TileBase tile)
+        {
+            _map.Tiles[x + (y * _map.Width)] = tile;
+        }
     }
 }

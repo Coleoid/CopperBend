@@ -4,13 +4,13 @@ using SadConsole.Entities;
 using GameState = SadConsole.Global;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using log4net;
-//using System;
+using SadConsole.Components;
 
 namespace CbRework
 {
     public class Engine
     {
-        public Console StartingConsole;
+        private ScrollingConsole StartingConsole;
         private SadConsole.Input.Keyboard Kbd;
         private Entity Player;
 
@@ -24,41 +24,35 @@ namespace CbRework
             Kbd = GameState.KeyboardState;
         }
 
-        public int Width = 200;
-        public int Height = 130;
+        public int mapWidth = 200;
+        public int mapHeight = 130;
 
         public void Init()
         {
             var gen = new MapGen();
-            var map = gen.GenerateMap(Width, Height, 500, 5, 15);
-            StartingConsole = new ScrollingConsole(Width, Height, Global.FontDefault, new Rectangle(0, 0, Width, Height), map.Tiles);
+            var map = gen.GenerateMap(mapWidth, mapHeight, 100, 5, 15);
+            var roomCenter = gen.RoomCenter(0);
+            StartingConsole = new ScrollingConsole(mapWidth, mapHeight, Global.FontDefault, new Rectangle(0, 0, 80, 40), map.Tiles);
 
-            Player = CreatePlayer();
+            Player = CreatePlayer(roomCenter);
             StartingConsole.Children.Add(Player);
-
+            Player.Components.Add(new EntityViewSyncComponent());
 
             GameState.CurrentScreen = StartingConsole;
         }
 
-        // Create a player using SadConsole's Entity class
-        private Entity CreatePlayer()
+        private Entity CreatePlayer(Point playerLocation)
         {
-            var player = new SadConsole.Entities.Entity(1, 1);
+            var player = new Entity(1, 1);
             player.Animation.CurrentFrame[0].Glyph = '@';
-            player.Animation.CurrentFrame[0].Foreground = Color.HotPink;
-            player.Position = new Point(15, 15);
+            player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
+            player.Position = playerLocation;
 
             return player;
         }
 
         public void Update(GameTime time)
         {
-            if (GameState.KeyboardState.IsKeyReleased(Keys.F5))
-            {
-                StartingConsole.Fill(new Rectangle(3, 3, 23, 3), Color.Violet, Color.Black, 0, 0);
-                StartingConsole.Print(4, 4, "Again from SadConsole");
-            }
-
             int xOff = 0;
             int yOff = 0;
             if (Kbd.IsKeyPressed(Keys.Left)) xOff = -1;
@@ -66,6 +60,7 @@ namespace CbRework
             if (Kbd.IsKeyPressed(Keys.Up)) yOff = -1;
             if (Kbd.IsKeyPressed(Keys.Down)) yOff = 1;
             Player.Position += new Point(xOff, yOff);
+            StartingConsole.CenterViewPortOnPoint(Player.Position);
         }
     }
 }

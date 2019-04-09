@@ -16,6 +16,8 @@ namespace CbRework
         private ILog log;
         public Window MapWindow;
         private ScrollingConsole MapConsole;
+        public MessageLogWindow MessageLog;
+
         private SadConsole.Input.Keyboard Kbd;
         private Entity Player;
 
@@ -56,6 +58,20 @@ namespace CbRework
             CreateMapWindow(WindowWidth / 2, WindowHeight / 2, "Game Map");
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
+
+            MessageLog = new MessageLogWindow(WindowWidth, 8, "Message Log");
+            Children.Add(MessageLog);
+            MessageLog.Show();
+            MessageLog.Position = new Point(0, WindowHeight - 8);
+
+
+            MessageLog.Add("Testing");
+            MessageLog.Add("Testing 122");
+            MessageLog.Add("Testing 51");
+            MessageLog.Add("Testing");
+            MessageLog.Add("Testing 162");
+            MessageLog.Add("Testing 16");
+            MessageLog.Add("Testing Last");
         }
 
         public void CreateConsoles()

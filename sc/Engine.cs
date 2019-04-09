@@ -144,5 +144,58 @@ namespace CbRework
             Player.Position += new Point(xOff, yOff);
             MapConsole.CenterViewPortOnPoint(Player.Position);
         }
+
+        // Adds the entire list of entities found in the
+        // World.CurrentMap's Entities SpatialMap to the
+        // MapConsole, so they can be seen onscreen
+        private void SyncMapEntities(Map map)
+        {
+            // remove all Entities from the console first
+            MapConsole.Children.Clear();
+
+            // Now pull all of the entities into the MapConsole in bulk
+            foreach (CbEntity entity in map.Entities.Items)
+            {
+                MapConsole.Children.Add(entity);
+            }
+
+            // Subscribe to the Entities ItemAdded listener, so we can keep our MapConsole entities in sync
+            map.Entities.ItemAdded += OnMapEntityAdded;
+
+            // Subscribe to the Entities ItemRemoved listener, so we can keep our MapConsole entities in sync
+            map.Entities.ItemRemoved += OnMapEntityRemoved;
+        }
+
+        // Add an Entity to the MapConsole every time the Map's Entity collection changes
+        public void OnMapEntityAdded(object sender, GoRogue.ItemEventArgs<CbEntity> args)
+        {
+            MapConsole.Children.Add(args.Item);
+        }
+
+        // Remove an Entity from the MapConsole every time the Map's Entity collection changes
+        public void OnMapEntityRemoved(object sender, GoRogue.ItemEventArgs<CbEntity> args)
+        {
+            MapConsole.Children.Remove(args.Item);
+        }
+    }
+
+
+    public abstract class Actor : CbEntity
+    {
+        public int Health { get; set; } // current health
+        public int MaxHealth { get; set; } // maximum health
+        //public int Attack { get; set; } // attack strength
+        //public int AttackChance { get; set; } // percent chance of successful hit
+        //public int Defense { get; set; } // defensive strength
+        //public int DefenseChance { get; set; } // percent chance of successfully blocking a hit
+        //public int Gold { get; set; } // amount of gold carried
+
+        protected Actor(Color foreground, Color background, int glyph, int width = 1, int height = 1) 
+            : base(width, height)
+        {
+            Animation.CurrentFrame[0].Foreground = foreground;
+            Animation.CurrentFrame[0].Background = background;
+            Animation.CurrentFrame[0].Glyph = glyph;
+        }
     }
 }

@@ -190,8 +190,8 @@ namespace CbRework
         //public int DefenseChance { get; set; } // percent chance of successfully blocking a hit
         //public int Gold { get; set; } // amount of gold carried
 
-        protected Actor(Color foreground, Color background, int glyph, int width = 1, int height = 1) 
-            : base(width, height)
+        protected Actor(Color foreground, Color background, int glyph, int width = 1, int height = 1)
+            : base(foreground, background, 'x')
         {
             Animation.CurrentFrame[0].Foreground = foreground;
             Animation.CurrentFrame[0].Background = background;

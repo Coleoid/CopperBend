@@ -13,7 +13,6 @@ namespace CbRework
         public Point PlayerStartPoint { get; set; }
 
         public GoRogue.MultiSpatialMap<CbEntity> Entities; // Keeps track of all the Entities on the map
-        public static GoRogue.IDGenerator IDGenerator = new GoRogue.IDGenerator(); // A static IDGenerator that all Entities can access
 
         //Build a new map with a specified width and height
         public Map(int width, int height)

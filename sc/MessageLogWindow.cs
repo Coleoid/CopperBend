@@ -1,6 +1,4 @@
-﻿//using System;
-
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using SadConsole;
 using System;
 using System.Collections.Generic;
@@ -23,22 +21,15 @@ namespace CbRework
 
         public MessageLogWindow(int width, int height, string title) : base(width, height)
         {
+            DefaultBackground = Color.DarkGreen;
             // Ensure that the window background is the correct colour
             Theme.WindowTheme.FillStyle.Background = DefaultBackground;
             _lines = new Queue<string>();
             CanDrag = true;
             Title = title.Align(HorizontalAlignment.Center, Width);
 
-
-            //// add the message console, reposition, and add it to the window
-            //_messageConsole = new ScrollingConsole(width - 1, height - 1)
-            //{
-            //    Position = new Point(1, 1)
-            //};
-            //Children.Add(_messageConsole);
-
             // add the message console, reposition, enable the viewport, and add it to the window
-            _messageConsole = new SadConsole.ScrollingConsole(width - _windowBorderThickness, _maxLines);
+            _messageConsole = new ScrollingConsole(width - _windowBorderThickness, _maxLines);
             _messageConsole.Position = new Point(1, 1);
             _messageConsole.ViewPort = new Rectangle(0, 0, width - 1, height - _windowBorderThickness);
 
@@ -61,7 +52,6 @@ namespace CbRework
             _messageConsole.ViewPort = new Rectangle(0, _messageScrollBar.Value + _windowBorderThickness, _messageConsole.Width, _messageConsole.ViewPort.Height);
         }
 
-        //Remember to draw the window!
         public override void Draw(TimeSpan drawTime)
         {
             base.Draw(drawTime);
@@ -98,11 +88,8 @@ namespace CbRework
         public void Add(string message)
         {
             _lines.Enqueue(message);
-            // when exceeding the max number of lines remove the oldest one
-            if (_lines.Count > _maxLines)
-            {
-                _lines.Dequeue();
-            }
+            while (_lines.Count > _maxLines) { _lines.Dequeue(); }
+
             // Move the cursor to the last line and print the message.
             _messageConsole.Cursor.Position = new Point(1, _lines.Count);
             _messageConsole.Cursor.Print(message + "\n");

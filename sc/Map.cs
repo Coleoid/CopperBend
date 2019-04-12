@@ -1,7 +1,7 @@
-﻿//using System;
-
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System.Linq;
+using GoRogue;
+using System.Collections.Generic;
 
 namespace CbRework
 {
@@ -12,19 +12,19 @@ namespace CbRework
         public int Height { get; set; }
         public Point PlayerStartPoint { get; set; }
 
-        public GoRogue.MultiSpatialMap<CbEntity> Entities; // Keeps track of all the Entities on the map
+        public MultiSpatialMap<CbEntity> Entities { get; set; }
 
-        //Build a new map with a specified width and height
         public Map(int width, int height)
         {
             Width = width;
             Height = height;
             Tiles = new TileBase[width * height];
+            Entities = new MultiSpatialMap<CbEntity>();
         }
 
         public bool IsTileWalkable(Point location)
         {
-            // off the map is disallowed
+            // off the map is not walkable
             if (location.X < 0 || location.X >= Width
              || location.Y < 0 || location.Y >= Height)
                 return false;
@@ -32,21 +32,21 @@ namespace CbRework
             return Tiles[location.Y * Width + location.X].AllowsMove;
         }
 
-        // Checking whether a certain type of
-        // entity is at a specified location the manager's list of entities
-        // and if it exists, return that Entity
-        public T GetEntityAt<T>(Point location) where T : CbEntity
+        // SpatialMap allows only one at a location.  MultiSpatial allows a collection.
+        // Efficiently get the entities of this type at this point
+        public IEnumerable<T> GetEntitiesAt<T>(Point location) where T : CbEntity
         {
-            return Entities.GetItems(location).OfType<T>().FirstOrDefault();
+            return Entities.GetItems(location).OfType<T>();
         }
 
-        // Removes an Entity from the MultiSpatialMap
+        /// <summary> Remove this entity from this Map </summary>
+        /// <param name="entity"></param>
         public void Remove(CbEntity entity)
         {
-            // remove from SpatialMap
+            // remove from the GoRogue MultiSpatialMap
             Entities.Remove(entity);
 
-            // Link up the entity's Moved event to a new handler
+            // No longer notify this map when this entity moves
             entity.Moved -= OnEntityMoved;
         }
 
@@ -56,12 +56,10 @@ namespace CbRework
             // add entity to the SpatialMap
             Entities.Add(entity, entity.Position);
 
-            // Link up the entity's Moved event to a new handler
+            // Notify the map when the entity moves, so the map can synch the MultiSpatialMap
             entity.Moved += OnEntityMoved;
         }
 
-        // When the Entity's .Moved value changes, it triggers this event handler
-        // which updates the Entity's current position in the SpatialMap
         private void OnEntityMoved(object sender, CbEntity.EntityMovedEventArgs args)
         {
             Entities.Move(args.Entity as CbEntity, args.Entity.Position);

@@ -7,6 +7,8 @@ using log4net;
 using SadConsole.Components;
 using System;
 using SadConsole.Controls;
+using System.Collections.Generic;
+using SadConsole.Input;
 
 namespace CbRework
 {
@@ -26,6 +28,7 @@ namespace CbRework
         public int MapWidth = 200;
         public int MapHeight = 130;
 
+        public Queue<AsciiKey> InuptQueue;
 
         public Engine(int windowWidth, int windowHeight)
             : base()
@@ -39,6 +42,7 @@ namespace CbRework
             log = LogManager.GetLogger("CB", "CB.NewEngine");
 
             Kbd = GameState.KeyboardState;
+            InuptQueue = new Queue<AsciiKey>();
 
             Init();
         }
@@ -129,6 +133,11 @@ namespace CbRework
 
         public void CheckKeyboard()
         {
+            foreach (var key in Kbd.KeysPressed)
+            {
+                InuptQueue.Enqueue(key);
+            }
+
             int xOff = 0;
             int yOff = 0;
             if (Kbd.IsKeyPressed(Keys.Left)) xOff = -1;

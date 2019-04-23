@@ -7,19 +7,21 @@ namespace CbRework
 {
     public class MapGen
     {
+        protected internal List<Rectangle> Rooms;
+        protected TileBase[] _tiles;
+        protected int _width;
 
         public MapGen()
         {
         }
 
-        Map _map; // Temporarily store the map currently worked on
-        List<Rectangle> Rooms;
-
         public Map GenerateMap(int mapWidth, int mapHeight, int maxRooms, int minRoomSize, int maxRoomSize)
         {
             Random randNum = new Random();
 
-            _map = new Map(mapWidth, mapHeight);
+            Map map = new Map(mapWidth, mapHeight);
+            _tiles = map.Tiles;
+            _width = mapWidth;
             FillWalls();
 
             // add up to maxRooms non-overlapping rooms to map
@@ -34,7 +36,7 @@ namespace CbRework
 
                 Rectangle newRoom = new Rectangle(newRoomX, newRoomY, newRoomWidth, newRoomHeight);
 
-                // skip overlapping rooms
+                // rooms which would overlap existing rooms are skipped
                 var borderedRoom = new Rectangle(newRoom.Location, newRoom.Size);
                 borderedRoom.Inflate(4, 4);
                 if (Rooms.Any(r => borderedRoom.Intersects(r))) continue;
@@ -53,9 +55,17 @@ namespace CbRework
                 }
             }
 
-            _map.PlayerStartPoint = Rooms[0].Center;
+            map.PlayerStartPoint = Rooms[0].Center;
 
-            return _map;
+            return map;
+        }
+
+        public void FillWalls()
+        {
+            for (int i = 0; i < _tiles.Length; i++)
+            {
+                _tiles[i] = new TileWall();
+            }
         }
 
         private void CreateHorizontalTunnel(int x1, int x2, int y)
@@ -72,14 +82,6 @@ namespace CbRework
             int highY = Math.Max(y1, y2);
             for (int y = lowY; y <= highY; y++)
                 SetTile(x, y, new TileFloor());
-        }
-
-        public void FillWalls()
-        {
-            for (int i = 0; i < _map.Tiles.Length; i++)
-            {
-                _map.Tiles[i] = new TileWall();
-            }
         }
 
         public void CreateRoom(Rectangle room)
@@ -100,7 +102,7 @@ namespace CbRework
 
         private void SetTile(int x, int y, TileBase tile)
         {
-            _map.Tiles[x + (y * _map.Width)] = tile;
+            _tiles[x + (y * _width)] = tile;
         }
     }
 }

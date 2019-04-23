@@ -24,7 +24,7 @@ namespace CbRework
             {
                 Game.Create(windowWidth, windowHeight);
 
-                //  Engine is a console, which cannot be created before .Run() below.
+                //  Engine is now a console, which cannot be created before .Run() below.
                 Game.OnInitialize = () => new Engine(windowWidth, windowHeight);
                 Game.Instance.Run();
             }

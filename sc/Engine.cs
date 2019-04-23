@@ -1,14 +1,14 @@
-﻿using SadConsole;
-using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using SadConsole;
+using SadConsole.Input;
+using SadConsole.Components;
+using SadConsole.Controls;
 using SadConsole.Entities;
 using GameState = SadConsole.Global;
+using Microsoft.Xna.Framework;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using log4net;
-using SadConsole.Components;
-using System;
-using SadConsole.Controls;
-using System.Collections.Generic;
-using SadConsole.Input;
 
 namespace CbRework
 {
@@ -16,65 +16,20 @@ namespace CbRework
     public class Engine : ContainerConsole
     {
         private ILog log;
-        public Window MapWindow;
-        private ScrollingConsole MapConsole;
-        public MessageLogWindow MessageLog;
 
-        private SadConsole.Input.Keyboard Kbd;
-        private Entity Player;
-
-        public int WindowWidth;
-        public int WindowHeight;
         public int MapWidth = 200;
         public int MapHeight = 130;
-
-        public Queue<AsciiKey> InuptQueue;
-
-        public Engine(int windowWidth, int windowHeight)
-            : base()
-        {
-            IsVisible = true;
-            IsFocused = true;
-            Parent = Global.CurrentScreen;
-
-            WindowWidth = windowWidth;
-            WindowHeight = windowHeight;
-            log = LogManager.GetLogger("CB", "CB.NewEngine");
-
-            Kbd = GameState.KeyboardState;
-            InuptQueue = new Queue<AsciiKey>();
-
-            Init();
-        }
-
+        public int WindowWidth;
+        public int WindowHeight;
+        private ScrollingConsole MapConsole;
+        public Window MapWindow;
+        public MessageLogWindow MessageLog;
+        
+        private Keyboard Kbd;
+        public Queue<AsciiKey> InputQueue;
         private Map Map;
+        private Entity Player;
 
-        public void Init()
-        {
-            var gen = new MapGen();
-            Map = gen.GenerateMap(MapWidth, MapHeight, 100, 5, 15);
-            Player = CreatePlayer(Map.PlayerStartPoint);
-
-            CreateConsoles();
-            CreateMapWindow(WindowWidth / 2, WindowHeight - 8, "Game Map");
-            Children.Add(MapWindow);
-
-            MapConsole.CenterViewPortOnPoint(Player.Position);
-
-            MessageLog = new MessageLogWindow(WindowWidth, 8, "Message Log");
-            Children.Add(MessageLog);
-            MessageLog.Show();
-            MessageLog.Position = new Point(0, WindowHeight - 8);
-
-
-            MessageLog.Add("Testing");
-            MessageLog.Add("Testing B");
-            MessageLog.Add("Testing three");
-            MessageLog.Add("Testing 4");
-            MessageLog.Add("Testing V");
-            MessageLog.Add("Testing x6");
-            MessageLog.Add("Testing Seventh");
-        }
 
         public override void Update(TimeSpan timeElapsed)
         {
@@ -82,41 +37,92 @@ namespace CbRework
             base.Update(timeElapsed);
         }
 
-        public void CreateConsoles()
+        public Engine(int windowWidth, int windowHeight)
+            : base()
         {
-            MapConsole = new ScrollingConsole(MapWidth, MapHeight, Global.FontDefault, new Rectangle(0, 0, WindowWidth, WindowHeight), Map.Tiles);
-            log.Debug("Created map console.");
+            log = LogManager.GetLogger("CB", "CB.NewEngine");
+
+            IsVisible = true;
+            IsFocused = true;
+            WindowWidth = windowWidth;
+            WindowHeight = windowHeight;
+
+            Parent = GameState.CurrentScreen;
+            Kbd = GameState.KeyboardState;
+            InputQueue = new Queue<AsciiKey>();
+
+            Init();
         }
 
-        public void CreateMapWindow(int width, int height, string title)
+        public void Init()
         {
-            // Fit the MapConsole into the window
-            int mapConsoleWidth = width - 2;
-            int mapConsoleHeight = height - 2;
+            var gen = new MapGen();
+            Map = gen.GenerateMap(MapWidth, MapHeight, 100, 5, 15);
+            log.Debug("Generated map");
 
-            MapWindow = new Window(width, height)
+            Player = CreatePlayer(Map.PlayerStartPoint);
+
+            MapWindow = CreateMapWindow(WindowWidth / 2, WindowHeight - 8, "Game Map");
+            MapConsole.Children.Add(Player);
+            MapWindow.Children.Add(MapConsole);
+            Children.Add(MapWindow);
+            MapWindow.Show();
+
+            MapConsole.CenterViewPortOnPoint(Player.Position);
+
+            MessageLog = CreateMessageLog();
+            Children.Add(MessageLog);
+            MessageLog.Show();
+        }
+
+        public MessageLogWindow CreateMessageLog()
+        {
+            var messageLog = new MessageLogWindow(WindowWidth, 8, "Message Log");
+            MessageLog.Position = new Point(0, WindowHeight - 8);
+
+            ////  Rudimentary fill the window
+            //MessageLog.Add("Testing");
+            //MessageLog.Add("Testing B");
+            //MessageLog.Add("Testing three");
+            //MessageLog.Add("Testing 4");
+            //MessageLog.Add("Testing V");
+            //MessageLog.Add("Testing x6");
+            //MessageLog.Add("Testing Seventh");
+
+            return messageLog;
+        }
+
+        public Window CreateMapWindow(int width, int height, string title)
+        {
+            int consoleWidth = width - 2;
+            int consoleHeight = height - 2;
+
+            Window mapWindow = new Window(width, height)
             {
                 CanDrag = true,
-                Title = title.Align(HorizontalAlignment.Center, mapConsoleWidth)
+                Title = title.Align(HorizontalAlignment.Center, consoleWidth)
             };
 
             //TODO: make click do something
             Button closeButton = new Button(3, 1)
             {
-                Position = new Point(width-3, 0),
+                Position = new Point(width - 3, 0),
                 Text = "X"
             };
-            MapWindow.Add(closeButton);
+            mapWindow.Add(closeButton);
 
+            MapConsole = new ScrollingConsole(
+                MapWidth, MapHeight,
+                Global.FontDefault, new Rectangle(0, 0, WindowWidth, WindowHeight),
+                Map.Tiles);
+            log.Debug("Created map console.");
 
-            MapWindow.Children.Add(MapConsole);
-            MapConsole.ViewPort = new Rectangle(0, 0, mapConsoleWidth, mapConsoleHeight);
+            // Fit the MapConsole inside the border
+            MapConsole.ViewPort = new Rectangle(0, 0, consoleWidth, consoleHeight);
             MapConsole.Position = new Point(1, 1);
 
-            MapConsole.Children.Add(Player);
-
-            MapWindow.Show();
             log.Debug("Created map window.");
+            return mapWindow;
         }
 
         private CbEntity CreatePlayer(Point playerLocation)
@@ -135,7 +141,7 @@ namespace CbRework
         {
             foreach (var key in Kbd.KeysPressed)
             {
-                InuptQueue.Enqueue(key);
+                InputQueue.Enqueue(key);
             }
 
             int xOff = 0;
@@ -147,13 +153,12 @@ namespace CbRework
             if (xOff == 0 && yOff == 0) return;
 
             Player.Position += new Point(xOff, yOff);
-            MapConsole.CenterViewPortOnPoint(Player.Position);
         }
 
         // The entities in the given map will be the MapConsole's only entities
         private void SyncMapEntities(Map map)
         {
-            // update the MapConsole to hold only the Map's entities
+            // update the Map Console to hold only the Map's entities
             MapConsole.Children.Clear();
             foreach (var entity in map.Entities.Items)
             {

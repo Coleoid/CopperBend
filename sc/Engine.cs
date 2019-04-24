@@ -9,6 +9,7 @@ using GameState = SadConsole.Global;
 using Microsoft.Xna.Framework;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using log4net;
+using CopperBend.App;
 
 namespace CbRework
 {
@@ -21,7 +22,7 @@ namespace CbRework
         public int MapHeight = 130;
         public int WindowWidth;
         public int WindowHeight;
-        private ScrollingConsole MapConsole;
+        private ScrollingConsole MapConsole { get; set; }
         public Window MapWindow;
         public MessageLogWindow MessageLog;
         
@@ -30,12 +31,6 @@ namespace CbRework
         private Map Map;
         private Entity Player;
 
-
-        public override void Update(TimeSpan timeElapsed)
-        {
-            CheckKeyboard();
-            base.Update(timeElapsed);
-        }
 
         public Engine(int windowWidth, int windowHeight)
             : base()
@@ -62,7 +57,7 @@ namespace CbRework
 
             Player = CreatePlayer(Map.PlayerStartPoint);
 
-            MapWindow = CreateMapWindow(WindowWidth / 2, WindowHeight - 8, "Game Map");
+            MapWindow = CreateMapWindow(WindowWidth * 2 / 3, WindowHeight - 8, "Game Map");
             MapConsole.Children.Add(Player);
             MapWindow.Children.Add(MapConsole);
             Children.Add(MapWindow);
@@ -137,13 +132,23 @@ namespace CbRework
             return player;
         }
 
-        public void CheckKeyboard()
-        {
-            foreach (var key in Kbd.KeysPressed)
-            {
-                InputQueue.Enqueue(key);
-            }
+        //  End Init
 
+
+
+        public override void Update(TimeSpan timeElapsed)
+        {
+            CheckKeyboard();
+
+            QueueInput();
+            ActOnMode();
+
+
+            base.Update(timeElapsed);
+        }
+
+        public void CheckKeyboard()  // 0.1, remove once ActOnMode in.
+        {
             int xOff = 0;
             int yOff = 0;
             if (Kbd.IsKeyPressed(Keys.Left)) xOff = -1;
@@ -153,6 +158,158 @@ namespace CbRework
             if (xOff == 0 && yOff == 0) return;
 
             Player.Position += new Point(xOff, yOff);
+        }
+
+        public void QueueInput()
+        {
+            //  For now, only checking the keyboard for input
+
+            foreach (var key in Kbd.KeysPressed)
+            {
+                InputQueue.Enqueue(key);
+            }
+        }
+
+        #region Mode mechanics
+        private Stack<EngineMode> ModeStack = new Stack<EngineMode>();
+        private Stack<Func<bool>> CallbackStack = new Stack<Func<bool>>();
+        internal EngineMode CurrentMode { get => ModeStack.Peek(); }
+        internal Func<bool> CurrentCallback { get => CallbackStack.Peek(); }
+
+        internal void PushMode(EngineMode newMode, Func<bool> callback)
+        {
+            if (newMode == EngineMode.Unknown)
+                throw new Exception($"Should never EnterMode({newMode}).");
+
+            var oldMode = CurrentMode;
+            ModeStack.Push(newMode);
+            CallbackStack.Push(callback);
+
+            log.Debug($"PushMode, left {oldMode} and now in {CurrentMode}.");
+        }
+        internal void PopMode()
+        {
+            var oldMode = ModeStack.Pop();
+            CallbackStack.Pop();
+
+            log.Debug($"PopMode, left {oldMode} and back to {CurrentMode}.");
+        }
+        #endregion
+
+        internal void ActOnMode()
+        {
+            switch (CurrentMode)
+            {
+
+            //  A game menu will block even pending messages 
+            case EngineMode.MenuOpen:
+                HandleMenus();
+                break;
+
+            //  The large message pane overlays most of the game
+            case EngineMode.LargeMessagePending:
+                HandleLargeMessage();
+                break;
+
+            //  Messages waiting for the player block player input and scheduled events
+            case EngineMode.MessagesPending:
+                HandlePendingMessages();
+                break;
+
+            //  Pause and InputBound have developed the same API.
+            //  Update does nothing when paused
+            //  Waiting for player input blocks Schedule
+            case EngineMode.Pause:
+            case EngineMode.InputBound:
+                bool exitMode = CurrentCallback();
+                if (exitMode)
+                {
+                    PopMode();
+                }
+                //GameWindow.ClearMessagePause();
+                //Dispatcher.HandlePlayerCommands();
+                break;
+
+            //  When the player has committed to a slow action, time passes
+            case EngineMode.Schedule:
+                DoNextScheduled();
+                break;
+
+            case EngineMode.Unknown:
+                throw new Exception("Game mode unknown, perhaps Init() was missed.");
+
+            default:
+                throw new Exception($"Game mode [{CurrentMode}] not written yet.");
+            }
+        }
+
+
+        public void HandlePendingMessages()
+        {
+            //if (!WaitingAtMorePrompt) return;
+
+            //while (WaitingAtMorePrompt)
+            //{
+            //    //  Advance to next space keypress, if any
+            //    RLKeyPress key = GetNextKeyPress();
+            //    while (key != null && key.Key != RLKey.Space)
+            //    {
+            //        key = GetNextKeyPress();
+            //    }
+
+            //    //  If we run out of keypresses before we find a space,
+            //    // the rest of the messages remain pending
+            //    if (key?.Key != RLKey.Space) return;
+
+            //    //  Otherwise, show more messages
+            //    ClearMessagePause();
+            //    ShowMessages();
+            //}
+
+            ////  If we reach this point, we sent all messages
+            //EventBus.AllMessagesSent(this, new EventArgs());
+        }
+
+        public void DoNextScheduled()
+        {
+            while (CurrentMode == EngineMode.Schedule)
+            {
+                //var nextAction = Schedule.GetNextAction();
+                //nextAction?.Invoke(Dispatcher);
+            }
+        }
+
+        private void HandleMenus()
+        {
+            //TODO:  All these:
+            //  Start new game
+            //  Load game
+            //  Save and Quit
+        }
+
+        //  The engine calls here when we're in EngineMode.LargeMessagePending
+        public void HandleLargeMessage()
+        {
+            //RLKeyPress press = GameWindow.GetNextKeyPress();
+            //while (press != null
+            //       && press.Key != RLKey.Escape
+            //       && press.Key != RLKey.Enter
+            //       && press.Key != RLKey.KeypadEnter
+            //       && press.Key != RLKey.Space
+            //)
+            //{
+            //    press = GameWindow.GetNextKeyPress();
+            //}
+
+            //if (press == null) return;
+
+            //EventBus.ClearLargeMessage(this, new EventArgs());
+            HideLargeMessage();
+        }
+
+        private void HideLargeMessage()
+        {
+            throw new NotImplementedException();
         }
 
         // The entities in the given map will be the MapConsole's only entities

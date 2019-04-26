@@ -1,17 +1,16 @@
-﻿using CopperBend.MapUtil;
-using RLNET;
+﻿using CopperBend.Model;
+using Microsoft.Xna.Framework;
 
-namespace CopperBend.App
+namespace CopperBend.Contract
 {
     public interface ITile : IDrawable
     {
         Point Point { get; }
         TileType TileType { get; }
         void SetTileType(TileType tileType);
-
-        //RLColor ColorForeground { get; }
-        RLColor ColorBackground { get; }
-
+        //  Doesn't go in IDrawable, only tiles have backgrounds
+        Color ColorBackground { get; }
+        
         bool IsTillable { get; }
         bool IsTilled { get; }
         bool IsSown { get; }

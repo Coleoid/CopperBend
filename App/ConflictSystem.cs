@@ -15,21 +15,21 @@
             Schedule = schedule;
         }
 
-        public void Attack(string attack, int damage, IHealAndHurt target)
+        public void Attack(string attack, int damage, IDestroyable target)
         {
-            target.Hurt(damage);
-            WriteLine($"I hit the {target.Entity.Name} for {damage}.");
-            if (target.Health < 1)
-            {
-                WriteLine($"The {target.Entity.Name} dies.");
-                Map.Actors.Remove(target.Entity);
-                Map.SetWalkable(target.Entity.Point, true);
-                Map.IsDisplayDirty = true;
+            //target.Hurt(damage);
+            //WriteLine($"I hit the {target.Entity.Name} for {damage}.");
+            //if (target.Health < 1)
+            //{
+            //    WriteLine($"The {target.Entity.Name} dies.");
+            //    Map.Actors.Remove(target.Entity);
+            //    Map.SetWalkable(target.Entity.Point, true);
+            //    Map.IsDisplayDirty = true;
 
-                //TODO: drop items, body
+            //    //TODO: drop items, body
 
-                //Schedule.RemoveAction(target.Entity);
-            }
+            //    //Schedule.RemoveAction(target.Entity);
+            //}
         }
     }
 }

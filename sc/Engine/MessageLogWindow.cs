@@ -3,7 +3,7 @@ using SadConsole;
 using System;
 using System.Collections.Generic;
 
-namespace CbRework
+namespace CopperBend.Engine
 {
     public class MessageLogWindow : Window
     {

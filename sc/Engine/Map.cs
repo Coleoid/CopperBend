@@ -2,8 +2,9 @@
 using System.Linq;
 using GoRogue;
 using System.Collections.Generic;
+using CopperBend.Model;
 
-namespace CbRework
+namespace CopperBend.Engine
 {
     public class Map
     {

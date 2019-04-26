@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using log4net;
+using CopperBend.Contract;
+using CopperBend.Model;
 using SadConsole;
 using SadConsole.Input;
 using SadConsole.Components;
-using SadConsole.Controls;
-using SadConsole.Entities;
-using GameState = SadConsole.Global;
 using Microsoft.Xna.Framework;
+using GameState = SadConsole.Global;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
-using log4net;
-using CopperBend.App;
+using Size = System.Drawing.Size;
 
-namespace CbRework
+namespace CopperBend.Engine
 {
-
     public class Engine : ContainerConsole
     {
         private ILog log;
 
-        public int MapWidth = 200;
-        public int MapHeight = 130;
-        public int WindowWidth;
-        public int WindowHeight;
+        public Size GameSize;
+        public Size MapSize;
+        public Size MapWindowSize;
+
         private ScrollingConsole MapConsole { get; set; }
         public Window MapWindow;
         public MessageLogWindow MessageLog;
@@ -29,98 +28,77 @@ namespace CbRework
         private Keyboard Kbd;
         public Queue<AsciiKey> InputQueue;
         private Map Map;
-        private Entity Player;
+        private Actor Player;
 
+        private Schedule Schedule;
+        private CommandDispatcher Dispatcher;
 
-        public Engine(int windowWidth, int windowHeight)
+        private Stack<EngineMode> ModeStack;
+        private Stack<Func<bool>> CallbackStack;
+
+        internal EngineMode CurrentMode
+        {
+            get => (ModeStack?.Count == 0)
+                ? EngineMode.Unknown
+                : ModeStack.Peek();
+        }
+        internal Func<bool> CurrentCallback { get => CallbackStack.Peek(); }
+
+        #region Init
+        public Engine(int gameWidth, int gameHeight)
             : base()
         {
             log = LogManager.GetLogger("CB", "CB.NewEngine");
 
             IsVisible = true;
             IsFocused = true;
-            WindowWidth = windowWidth;
-            WindowHeight = windowHeight;
+
+            MapSize = new Size(200, 130);
+            GameSize = new Size(gameWidth, gameHeight);
+            MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
 
             Parent = GameState.CurrentScreen;
             Kbd = GameState.KeyboardState;
+
             InputQueue = new Queue<AsciiKey>();
+            ModeStack = new Stack<EngineMode>();
+            CallbackStack = new Stack<Func<bool>>();
 
             Init();
         }
 
         public void Init()
         {
+            PushMode(EngineMode.StartUp, null);
+
             var gen = new MapGen();
-            Map = gen.GenerateMap(MapWidth, MapHeight, 100, 5, 15);
+            Map = gen.GenerateMap(MapSize.Width, MapSize.Height, 100, 5, 15);
             log.Debug("Generated map");
 
+            Schedule = new Schedule();
             Player = CreatePlayer(Map.PlayerStartPoint);
+            Schedule.AddActor(Player, 12);
 
-            MapWindow = CreateMapWindow(WindowWidth * 2 / 3, WindowHeight - 8, "Game Map");
-            MapConsole.Children.Add(Player);
-            MapWindow.Children.Add(MapConsole);
+            Dispatcher = new CommandDispatcher(Schedule, null, new Describer(), new EventBus(), null );
+
+            var builder = new UIBuilder(GameSize);
+            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, MapSize, "Game Map", Map.Tiles);
             Children.Add(MapWindow);
+            MapConsole.Children.Add(Player);
             MapWindow.Show();
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
-            MessageLog = CreateMessageLog();
+            MessageLog = builder.CreateMessageLog();
             Children.Add(MessageLog);
             MessageLog.Show();
+
+            PushMode(EngineMode.Schedule, null);
         }
 
-        public MessageLogWindow CreateMessageLog()
-        {
-            var messageLog = new MessageLogWindow(WindowWidth, 8, "Message Log");
-            MessageLog.Position = new Point(0, WindowHeight - 8);
 
-            ////  Rudimentary fill the window
-            //MessageLog.Add("Testing");
-            //MessageLog.Add("Testing B");
-            //MessageLog.Add("Testing three");
-            //MessageLog.Add("Testing 4");
-            //MessageLog.Add("Testing V");
-            //MessageLog.Add("Testing x6");
-            //MessageLog.Add("Testing Seventh");
 
-            return messageLog;
-        }
-
-        public Window CreateMapWindow(int width, int height, string title)
-        {
-            int consoleWidth = width - 2;
-            int consoleHeight = height - 2;
-
-            Window mapWindow = new Window(width, height)
-            {
-                CanDrag = true,
-                Title = title.Align(HorizontalAlignment.Center, consoleWidth)
-            };
-
-            //TODO: make click do something
-            Button closeButton = new Button(3, 1)
-            {
-                Position = new Point(width - 3, 0),
-                Text = "X"
-            };
-            mapWindow.Add(closeButton);
-
-            MapConsole = new ScrollingConsole(
-                MapWidth, MapHeight,
-                Global.FontDefault, new Rectangle(0, 0, WindowWidth, WindowHeight),
-                Map.Tiles);
-            log.Debug("Created map console.");
-
-            // Fit the MapConsole inside the border
-            MapConsole.ViewPort = new Rectangle(0, 0, consoleWidth, consoleHeight);
-            MapConsole.Position = new Point(1, 1);
-
-            log.Debug("Created map window.");
-            return mapWindow;
-        }
-
-        private CbEntity CreatePlayer(Point playerLocation)
+        private Actor CreatePlayer(Point playerLocation)
         {
             var player = new Player(Color.AntiqueWhite, Color.Transparent);
             player.Animation.CurrentFrame[0].Glyph = '@';
@@ -131,20 +109,33 @@ namespace CbRework
             log.Debug("Created player entity.");
             return player;
         }
+        #endregion
 
-        //  End Init
-
-
+        private bool firstTimeInUpdate = true;
 
         public override void Update(TimeSpan timeElapsed)
         {
-            CheckKeyboard();
+            if (firstTimeInUpdate)
+            {
+                log.Debug("First time in update.");
+                firstTimeInUpdate = false;
+            }
 
             QueueInput();
             ActOnMode();
 
-
             base.Update(timeElapsed);
+        }
+
+        public void QueueInput()
+        {
+            //  0.5, later other sources of input
+            foreach (var key in Kbd.KeysPressed)
+            {
+                InputQueue.Enqueue(key);
+            }
+
+            CheckKeyboard();
         }
 
         public void CheckKeyboard()  // 0.1, remove once ActOnMode in.
@@ -160,21 +151,17 @@ namespace CbRework
             Player.Position += new Point(xOff, yOff);
         }
 
-        public void QueueInput()
-        {
-            //  For now, only checking the keyboard for input
-
-            foreach (var key in Kbd.KeysPressed)
-            {
-                InputQueue.Enqueue(key);
-            }
-        }
-
         #region Mode mechanics
-        private Stack<EngineMode> ModeStack = new Stack<EngineMode>();
-        private Stack<Func<bool>> CallbackStack = new Stack<Func<bool>>();
-        internal EngineMode CurrentMode { get => ModeStack.Peek(); }
-        internal Func<bool> CurrentCallback { get => CallbackStack.Peek(); }
+        //  We can nest states of the game to any level.
+        //  Say the schedule has reached the player, who is entering a command,
+        //  and inspecting their quest log:
+        //    Schedule < Input Bound < Large Message
+        //  Each state has a mode and a callback, so if, from the quest log,
+        //  we go into details of a quest, the states could be:
+        //    Schedule < Input Bound < Large Message < Large Message
+        //  ...and we could leave the quest details without confusing the app
+        //  about what we're doing.
+        //  0.2:  later, mode and callback go into a GameState object, one stack.
 
         internal void PushMode(EngineMode newMode, Func<bool> callback)
         {
@@ -201,7 +188,7 @@ namespace CbRework
             switch (CurrentMode)
             {
 
-            //  A game menu will block even pending messages 
+            //  A menu will block even pending messages 
             case EngineMode.MenuOpen:
                 HandleMenus();
                 break;
@@ -211,7 +198,7 @@ namespace CbRework
                 HandleLargeMessage();
                 break;
 
-            //  Messages waiting for the player block player input and scheduled events
+            //  Messages waiting for the user will block input and scheduled events
             case EngineMode.MessagesPending:
                 HandlePendingMessages();
                 break;
@@ -230,7 +217,8 @@ namespace CbRework
                 //Dispatcher.HandlePlayerCommands();
                 break;
 
-            //  When the player has committed to a slow action, time passes
+            //  When the player has chosen an action that keeps them busy for a while,
+            //  time passes and other actors act.
             case EngineMode.Schedule:
                 DoNextScheduled();
                 break;
@@ -274,8 +262,8 @@ namespace CbRework
         {
             while (CurrentMode == EngineMode.Schedule)
             {
-                //var nextAction = Schedule.GetNextAction();
-                //nextAction?.Invoke(Dispatcher);
+                var nextAction = Schedule.GetNextAction();
+                nextAction?.Invoke(Dispatcher);
             }
         }
 

@@ -1,13 +1,13 @@
-﻿using CopperBend.MapUtil;
-using RLNET;
+﻿using CopperBend.Contract;
+using Microsoft.Xna.Framework;
 
-namespace CopperBend.App.Model
+namespace CopperBend.Model
 {
     public class Item : IItem
     {
         //  IDrawable
         public Point Point { get; protected set; }
-        public RLColor ColorForeground { get; set; }
+        public Color ColorForeground { get; set; }
         public char Symbol { get; set; }
         public string Adjective { get; set; } = string.Empty;
 

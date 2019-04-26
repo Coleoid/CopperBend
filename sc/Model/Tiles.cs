@@ -1,7 +1,7 @@
 using SadConsole;
 using Microsoft.Xna.Framework;
 
-namespace CbRework
+namespace CopperBend.Model
 {
     public abstract class TileBase : Cell
     {

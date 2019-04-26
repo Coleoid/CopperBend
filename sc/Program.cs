@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using Game = SadConsole.Game;
 
-namespace CbRework
+namespace CopperBend.Application
 {
     public static class Program
     {
@@ -17,15 +17,15 @@ namespace CbRework
             log.Info("\n======================================");
             log.Info("Run started");
 
-            int windowWidth = 80;
-            int windowHeight = 40;
+            int gameWidth = 80;
+            int gameHeight = 40;
 
             try
             {
-                Game.Create(windowWidth, windowHeight);
+                Game.Create(gameWidth, gameHeight);
 
                 //  Engine is now a console, which cannot be created before .Run() below.
-                Game.OnInitialize = () => new Engine(windowWidth, windowHeight);
+                Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight);
                 Game.Instance.Run();
             }
             catch (Exception ex)

@@ -1,5 +1,4 @@
-﻿using CopperBend.App.Model;
-using CopperBend.MapUtil;
+﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 
@@ -8,7 +7,7 @@ using System.Collections.Generic;
 //  In other places I pass important domain bits as arguments.
 //  See the EventBus for another channel.
 
-namespace CopperBend.App
+namespace CopperBend.Contract
 {
     public interface IControlPanel
     {
@@ -20,7 +19,7 @@ namespace CopperBend.App
         List<Point> GetPathTo(Point start, Point target);
 
         void AddToSchedule(ICanAct actor, int offset);
-        void Learn(Fruit fruit);
+        //void Learn(Fruit fruit);
         void SetMapDirty();
 
         void PutItemOnMap(IItem item);

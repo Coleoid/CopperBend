@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using CopperBend.MapUtil;
+using Microsoft.Xna.Framework;
 
-namespace CopperBend.App
+namespace CopperBend.Contract
 {
     //0.1
     public interface IDestroyable
@@ -17,7 +17,7 @@ namespace CopperBend.App
         Action<IControlPanel> GetNextAction();
     }
 
-    public interface IActor : IDestroyable, ICanAct, IDrawable
+    public interface IActor : IDestroyable, ICanAct
     {
         Point Point { get; }
         string Name { get; set; }
@@ -26,7 +26,7 @@ namespace CopperBend.App
 
         ICommandSource CommandSource { get; set; }
 
-        IDefenseAspect DefenseAspect { get; set; }
+        //IDefenseAspect DefenseAspect { get; set; }
         void MoveTo(Point point);
         IItem WieldedTool { get; }
         void Wield(IItem item);

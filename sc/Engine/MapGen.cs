@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CopperBend.Model;
 using Microsoft.Xna.Framework;
 
-namespace CbRework
+namespace CopperBend.Engine
 {
+
     public class MapGen
     {
         protected internal List<Rectangle> Rooms;

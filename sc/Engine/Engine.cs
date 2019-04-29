@@ -76,16 +76,22 @@ namespace CopperBend.Engine
             log.Debug("Generated map");
 
             Schedule = new Schedule();
+            Describer describer = new Describer();
+            EventBus bus = new EventBus();
+            Dispatcher = new CommandDispatcher(Schedule, null, describer, bus, null );
+            
             Player = CreatePlayer(Map.PlayerStartPoint);
             Schedule.AddActor(Player, 12);
 
-            Dispatcher = new CommandDispatcher(Schedule, null, new Describer(), new EventBus(), null );
 
             var builder = new UIBuilder(GameSize);
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, MapSize, "Game Map", Map.Tiles);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player);
             MapWindow.Show();
+
+            Player.CommandSource = new InputCommandSource(InputQueue, describer, MapWindow, bus, Dispatcher);
+
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
@@ -105,6 +111,7 @@ namespace CopperBend.Engine
             player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
             player.Position = playerLocation;
             player.Components.Add(new EntityViewSyncComponent());
+            player.Name = "Suvail";
 
             log.Debug("Created player entity.");
             return player;

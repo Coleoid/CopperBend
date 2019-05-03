@@ -1,17 +1,13 @@
 ﻿using System;
+using CopperBend.Contract;
 using SadConsole;
 using SadConsole.Controls;
 using Microsoft.Xna.Framework;
 using Size = System.Drawing.Size;
-using CopperBend.Model;
+using System.Collections.Generic;
 
 namespace CopperBend.Engine
 {
-    //  Functional completeness levels:
-    //  0.1:  Works in a limited way, with lame code
-    //  0.2:  Meets current need
-    //  0.5:  Probably good enough for 1.0 release
-
     public class UIBuilder
     {
         public readonly Size GameSize;
@@ -44,7 +40,7 @@ namespace CopperBend.Engine
             Size windowSize, 
             Size mapSize, 
             string title,
-            TileBase[] tiles
+            CompoundMap fullMap
             )
         {
             int consoleWidth = windowSize.Width - 2;
@@ -65,10 +61,12 @@ namespace CopperBend.Engine
             };
             mapWindow.Add(closeButton);
 
+            Cell[] initialCells = GetCells(fullMap);
+
             var mapConsole = new ScrollingConsole(
                 mapSize.Width, mapSize.Height,
                 Global.FontDefault, new Rectangle(0, 0, GameSize.Width, GameSize.Height),
-                tiles)
+                initialCells)
             {
 
                 // Fit the MapConsole inside the border
@@ -80,6 +78,21 @@ namespace CopperBend.Engine
             mapWindow.Children.Add(mapConsole);
 
             return (mapConsole, mapWindow);
+        }
+
+        private Cell[] GetCells(CompoundMap fullMap)
+        {
+            List<Cell> cells = new List<Cell>();
+
+            for (int y = 0; y < fullMap.SpaceMap.Height; y++)
+            {
+                for (int x = 0; x < fullMap.SpaceMap.Width; x++)
+                {
+                    cells.Add(fullMap.SpaceMap.GetItem(x,y).Terrain.Looks);
+                }
+            }
+
+            return cells.ToArray();
         }
     }
 }

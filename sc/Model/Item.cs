@@ -1,10 +1,15 @@
 ﻿using CopperBend.Contract;
+using GoRogue;
 using Microsoft.Xna.Framework;
 
 namespace CopperBend.Model
 {
     public class Item : IItem
     {
+        // one IDGenerator for all Items
+        public static IDGenerator IDGenerator = new IDGenerator();
+        public uint ID { get; private set; } = IDGenerator.UseID();
+
         //  IDrawable
         public Point Point { get; protected set; }
         public Color ColorForeground { get; set; }

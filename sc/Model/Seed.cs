@@ -1,10 +1,11 @@
 ﻿using CopperBend.Contract;
+using CopperBend.Fabric;
 using Microsoft.Xna.Framework;
 using System;
 
 namespace CopperBend.Model
 {
-    public class Seed : Item, ISeed, ICanAct
+    public class Seed : Item, ISeed, IScheduleAgent
     {
         public PlantType PlantType;
 
@@ -51,7 +52,7 @@ namespace CopperBend.Model
 
             var seedToSow = GetSeedFromStack();
             tile.Sow(seedToSow);
-            controls.AddToSchedule(seedToSow, 100);
+            //controls.AddToSchedule(seedToSow, 100);
 
             if (--Quantity == 0)
             {
@@ -59,7 +60,7 @@ namespace CopperBend.Model
                 //controls.RemoveFromInventory(this);
             }
 
-            controls.SetMapDirty();
+            //controls.SetMapDirty();
             controls.Experience(seedToSow.PlantType, Exp.PlantSeed);
         }
 
@@ -80,12 +81,22 @@ namespace CopperBend.Model
         private void SeedGrows(IControlPanel controls, IMessageOutput output)
         {
             output.WriteLine($"The seed is growing... Round {growthRound++}");
-            controls.AddToSchedule(this, growthRound > 2 ? 10 : 100);
+            controls.ScheduleAgent(this, growthRound > 2 ? 10 : 100);
         }
 
         protected virtual void SeedMatures(IControlPanel controls)
         {
             throw new Exception("Override or come up with a default implementation");
+        }
+
+        public ScheduleEntry GetNextEntry()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ScheduleEntry GetNextEntry(int offset)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -101,7 +112,7 @@ namespace CopperBend.Model
             IItem fruit = new Fruit(this.Point, 2, this.PlantType);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this.Point);
-            controls.SetMapDirty();
+            //controls.SetMapDirty();
         }
     }
 }

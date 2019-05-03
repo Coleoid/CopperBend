@@ -22,16 +22,16 @@ namespace CopperBend.Contract
         List<string> FirstSightMessage { get; set; }
 
         List<IItem> Items { get; set; }
-        List<IActor> Actors { get; set; }
-        IActor ViewpointActor { get; set; }
+        List<IBeing> Actors { get; set; }
+        IBeing ViewpointBeing { get; set; }
         Point PlayerStartsAt { get; set; }
         //  0.1.  0.2 ~ how we came from our prior location affects start point
 
         //  These likely leave AreaMap
-        void MoveActor(IActor actor, Point point);
-        void UpdatePlayerFieldOfView(IActor player);
+        void MoveActor(IBeing being, Point point);
+        void UpdatePlayerFieldOfView(IBeing player);
         void DrawMap(Console mapConsole);
-        IActor GetActorAtPoint(Point point);
+        IBeing GetActorAtPoint(Point point);
         void OpenDoor(ITile tile);
     }
 }

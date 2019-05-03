@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
 using SadConsole.Input;
 using CopperBend.Model;
-using CopperBend.Fabric;
+using GoRogue;
+using Direction = CopperBend.Contract.Direction;
 
 namespace CopperBend.Engine
 {
@@ -13,6 +14,12 @@ namespace CopperBend.Engine
     {
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
+
+        private void MakeMaps()
+        {
+            MultiSpatialMap<IItem> MultiItemMap = new MultiSpatialMap<IItem>();
+
+        }
 
         private int AlphaIndexOfKeyPress(AsciiKey key)
         {
@@ -27,9 +34,9 @@ namespace CopperBend.Engine
             EventBus.EnterMode(mode, callback);
         }
 
-        public void ScheduleActor(IActor actor, int tickOff)
+        public void ScheduleAgent(IScheduleAgent agent, int tickOff)
         {
-            Schedule.AddActor(actor, tickOff);
+            Schedule.AddAgent(agent, tickOff);
         }
 
         private Point PointInDirection(Point start, CmdDirection direction)
@@ -116,36 +123,37 @@ namespace CopperBend.Engine
                 Direction.None;
         }
 
-        public void SetMapDirty()
-        {
-            Map.IsDisplayDirty = true;
-        }
+        //public void SetMapDirty()
+        //{
+        //    Map.IsDisplayDirty = true;
+        //}
 
-        public bool CanActorSeeTarget(IActor actor, Point target)
+        public bool CanActorSeeTarget(IBeing being, Point target)
         {
             //FINISH: one FOV and one Pathfinder per map
-            FieldOfView fov = new FieldOfView(Map);
-            fov.ComputeFov(actor.Point, actor.Awareness, true);
-            return fov.IsInFov(target);
+            //FieldOfView fov = new FieldOfView(Map);
+            //fov.ComputeFov(actor.Point, actor.Awareness, true);
+            //return fov.IsInFov(target);
+            return false;
         }
 
-        public void AttackPlayer(IActor actor)
+        public void AttackPlayer(IBeing being)
         {
             //0.1
             int damage = 2;
-            Output.WriteLine($"The {actor.Name} hit me for {damage}.");
-            actor.Hurt(damage);
+            Output.WriteLine($"The {being.Name} hit me for {damage}.");
+            being.Hurt(damage);
 
             if (damage > 0)
-                Output.WriteLine($"Ow.  Down to {actor.Health}.");
+                Output.WriteLine($"Ow.  Down to {being.Health}.");
         }
 
-        public void HealActor(IActor actor, int amount)
+        public void HealActor(IBeing being, int amount)
         {
-            actor.Heal(amount);
+            being.Heal(amount);
         }
 
-        public void FeedActor(IActor actor, int amount)
+        public void FeedActor(IBeing being, int amount)
         {
             //0.0
             //actor.Feed(amount);
@@ -153,33 +161,35 @@ namespace CopperBend.Engine
 
         public List<Point> GetPathTo(Point start, Point target)
         {
-            Map.SetWalkable(start, true);
-            Map.SetWalkable(target, true);
+            //Map.SetWalkable(start, true);
+            //Map.SetWalkable(target, true);
 
-            PathFinder pathFinder = new PathFinder(Map, 1.0, Math.Sqrt(2));
+            ////IMapView<bool> view = Map.sd
 
-            var pathList = pathFinder.ShortestPathList(start, target);
+            ////PathFinder pathFinder = new PathFinder(Map, 1.0, Math.Sqrt(2));
+            ////GoRogue.Pathing.AStar finder = new AStar(IMapView<bool> null, Distance.EUCLIDEAN);
+            //var pathList = pathFinder.ShortestPathList(start, target);
 
-            Map.SetWalkable(start, false);
-            Map.SetWalkable(target, false);
+            //Map.SetWalkable(start, false);
+            //Map.SetWalkable(target, false);
 
-            return pathList;
+            //return pathList;
+            throw new NotImplementedException();
         }
 
         public void PutItemOnMap(IItem item)
         {
-            Map.Items.Add(item);
+            //Map.Items.Add(item);
         }
 
         public void RemovePlantAt(Point point)
         {
-            Map.Tiles[point.X, point.Y].RemovePlant();
+            //Map.GetTileAt(point).RemovePlant();
         }
 
-        public void Till(ITile tile)
+        public void Till(Space space)
         {
-            tile.Till();
-            tile.SetTileType(Map.TileTypes["tilled dirt"]);
+            space.Till();
         }
 
         public void Learn(Fruit fruit)
@@ -195,21 +205,16 @@ namespace CopperBend.Engine
             XP += 20;
         }
 
-        public void AddToSchedule(ICanAct actor, int offset)
+        public void CheckActorAtCoordEvent(IBeing being, ITile tile)
         {
-            Schedule.AddActor(actor as IActor, offset);//0.1
-        }
+            //if (Map.LocationMessages.ContainsKey(tile.Point))
+            //{
+            //    var message = Map.LocationMessages[tile.Point];
+            //    foreach (var line in message)
+            //        Output.WriteLine(line);
 
-        public void CheckActorAtCoordEvent(IActor actor, ITile tile)
-        {
-            if (Map.LocationMessages.ContainsKey(tile.Point))
-            {
-                var message = Map.LocationMessages[tile.Point];
-                foreach (var line in message)
-                    Output.WriteLine(line);
-
-                Map.LocationMessages.Remove(tile.Point);
-            }
+            //    Map.LocationMessages.Remove(tile.Point);
+            //}
 
             ////0.2
             //if (Map.LocationEventEntries.ContainsKey(tile.Point))

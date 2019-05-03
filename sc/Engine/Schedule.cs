@@ -1,4 +1,6 @@
 ﻿using CopperBend.Contract;
+using CopperBend.Fabric;
+using CopperBend.Model;
 using log4net;
 using System;
 using System.Collections.Generic;
@@ -25,15 +27,14 @@ namespace CopperBend.Engine
             log.DebugFormat("GetNextAction, tick {0}", CurrentTick);
             if (TickEntries.Count() == 0)
                 throw new Exception("The Schedule should never empty out");
-                //return null;
 
             var busyTick = TickEntries.First();
             while (busyTick.Value.Count() == 0)
             {
                 TickEntries.Remove(busyTick.Key);
+                log.Debug($"Removed empty tick {busyTick.Key} from the schedule");
                 if (TickEntries.Count() == 0)
                     throw new Exception("The Schedule should never empty out");
-                    //return null;
                 busyTick = TickEntries.First();
             }
             CurrentTick = busyTick.Key;
@@ -44,26 +45,33 @@ namespace CopperBend.Engine
         }
 
         //  Action scheduled at CurrentTick plus offset
-        public void Add(Action<IControlPanel> action, int offset)
+        public void AddEntry(ScheduleEntry entry)
         {
-            Guard.AgainstNullArgument(action);
+            Guard.AgainstNullArgument(entry);
+            Guard.AgainstNullArgument(entry.Action);
 
-            int actionTick = CurrentTick + offset;
+            int actionTick = CurrentTick + entry.Offset;
             if (!TickEntries.ContainsKey(actionTick))
             {
                 TickEntries.Add(actionTick, new List<Action<IControlPanel>>());
             }
-            TickEntries[actionTick].Add(action);
-        }
-
-        public void AddActor(IActor actor, int offset)
-        {
-            Add(actor.GetNextAction(), offset);
+            TickEntries[actionTick].Add(entry.Action);
         }
 
         public void Clear()
         {
             TickEntries.Clear();
         }
+
+        public void AddAgent(IScheduleAgent agent)
+        {
+            AddEntry(agent.GetNextEntry());
+        }
+
+        public void AddAgent(IScheduleAgent agent, int offset)
+        {
+            AddEntry(agent.GetNextEntry(offset));
+        }
     }
+
 }

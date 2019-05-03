@@ -30,21 +30,21 @@ namespace CopperBend.Engine
         
 
         public bool InMultiStepCommand => NextStep != null;
-        private Func<AsciiKey, IActor, Command> NextStep = null;
+        private Func<AsciiKey, IBeing, Command> NextStep = null;
         private bool QueueIsEmpty => InQ.Count == 0;
 
         private readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
 
-        public void GiveCommand(IActor actor)
+        public void GiveCommand(IBeing being)
         {
             bool deliverCommandFromInput()
             {
-                var cmd = GetCommand(actor);
+                var cmd = GetCommand(being);
                 if (cmd.Action == CmdAction.Incomplete) return false;
 
-                var actionWasTaken = Controls.CommandActor(actor, cmd);
+                var actionWasTaken = Controls.CommandActor(being, cmd);
                 if (actionWasTaken) NextStep = null;
 
                 return actionWasTaken;
@@ -57,14 +57,14 @@ namespace CopperBend.Engine
             }
         }
 
-        internal Command GetCommand(IActor actor)
+        internal Command GetCommand(IBeing being)
         {
             if (QueueIsEmpty) return CommandIncomplete;
             var press = InQ.Dequeue();
 
             if (InMultiStepCommand)  //  Most of them
             {
-                return NextStep(press, actor);
+                return NextStep(press, being);
             }
 
             //  Going somewhere?
@@ -76,13 +76,13 @@ namespace CopperBend.Engine
 
             switch (press.Key)
             {
-            case Keys.C: return Consume(actor);
-            case Keys.D: return Drop(actor);
+            case Keys.C: return Consume(being);
+            case Keys.D: return Drop(being);
             case Keys.H: return Help();
-            case Keys.I: return Inventory(actor);
-            case Keys.U: return Use(actor);
-            case Keys.W: return Wield(actor);
-            case Keys.OemComma: return PickUp(actor);
+            case Keys.I: return Inventory(being);
+            case Keys.U: return Use(being);
+            case Keys.W: return Wield(being);
+            case Keys.OemComma: return PickUp(being);
 
             default:
                 WriteLine($"Command [{press.Character}] is unknown.");
@@ -90,18 +90,18 @@ namespace CopperBend.Engine
             }
         }
 
-        public Command Consume(IActor actor)
+        public Command Consume(IBeing being)
         {
-            var inv_consumables = actor.Inventory.Where(i => i.IsConsumable).ToList();
+            var inv_consumables = being.Inventory.Where(i => i.IsConsumable).ToList();
             //var reach_consumables = actor.ReachableItems().Where(i => i.IsConsumable).ToList();
             if (inv_consumables.Count() == 0) /*+ reach_consumables.Count()*/
             {
                 WriteLine("Nothing to eat or drink.");
                 return CommandIncomplete;
             }
-            return FFwdOrPrompt(Consume_main, "Do_Consume (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt(Consume_main, "Do_Consume (inventory letter or ? to show inventory): ", being);
         }
-        public Command Consume_main(AsciiKey press, IActor actor)
+        public Command Consume_main(AsciiKey press, IBeing being)
         {
             if (press.Key == Keys.Escape)
             {
@@ -113,11 +113,11 @@ namespace CopperBend.Engine
             if (press.Key == Keys.OemQuestion // INSTANT BUG BELOW, during conversion
                 && (press.Key == Keys.LeftShift || press.Key == Keys.RightShift))
             {
-                ShowInventory(actor, i => i.IsConsumable);
+                ShowInventory(being, i => i.IsConsumable);
                 return CommandIncomplete;
             }
 
-            var item = ItemInInventoryLocation(press, actor);
+            var item = ItemInInventoryLocation(press, being);
             if (item != null)
             {
                 if (item.IsConsumable)
@@ -137,16 +137,16 @@ namespace CopperBend.Engine
             return CommandIncomplete;
         }
 
-        public Command Drop(IActor actor)
+        public Command Drop(IBeing being)
         {
-            if (actor.Inventory.Count() == 0)
+            if (being.Inventory.Count() == 0)
             {
                 WriteLine("Nothing to drop.");
                 return CommandIncomplete;
             }
-            return FFwdOrPrompt(Drop_main, "Drop (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt(Drop_main, "Drop (inventory letter or ? to show inventory): ", being);
         }
-        public Command Drop_main(AsciiKey press, IActor actor)
+        public Command Drop_main(AsciiKey press, IBeing being)
         {
             if (press.Key == Keys.Escape)
             {
@@ -158,11 +158,11 @@ namespace CopperBend.Engine
             //0.0 omae wa shinderu
             if (press.Key == Keys.OemQuestion)
             {
-                ShowInventory(actor, i => true);
+                ShowInventory(being, i => true);
                 return CommandIncomplete;
             }
 
-            var item = ItemInInventoryLocation(press, actor);
+            var item = ItemInInventoryLocation(press, being);
             if (item != null)
             {
                 NextStep = null;
@@ -190,28 +190,28 @@ namespace CopperBend.Engine
             return CommandIncomplete;
         }
 
-        public Command Inventory(IActor actor)
+        public Command Inventory(IBeing being)
         {
-            ShowInventory(actor, i => true);
+            ShowInventory(being, i => true);
             return CommandIncomplete;
         }
 
         #region Use
         private IItem PriorUsedItem = null;
         private IItem ThisUsedItem = null;
-        public Command Use(IActor actor)
+        public Command Use(IBeing being)
         {
-            ThisUsedItem = ThisUsedItem ?? PriorUsedItem ?? actor.WieldedTool;
+            ThisUsedItem = ThisUsedItem ?? PriorUsedItem ?? being.WieldedTool;
             if (ThisUsedItem == null)
             {
-                ShowInventory(actor, i => i.IsUsable);
-                return FFwdOrPrompt(Use_Pick_Item, "Use item: ", actor);
+                ShowInventory(being, i => i.IsUsable);
+                return FFwdOrPrompt(Use_Pick_Item, "Use item: ", being);
             }
 
             return FFwdOrPrompt(Use_Has_Item, 
-                $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", actor);
+                $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", being);
         }
-        public Command Use_Pick_Item(AsciiKey press, IActor actor)
+        public Command Use_Pick_Item(AsciiKey press, IBeing being)
         {
             if (press.Key == Keys.Escape)
             {
@@ -221,13 +221,13 @@ namespace CopperBend.Engine
             }
 
             var selectedIndex = AlphaIndexOfKeyPress(press);
-            if (selectedIndex < 0 || actor.Inventory.Count() <= selectedIndex)
+            if (selectedIndex < 0 || being.Inventory.Count() <= selectedIndex)
             {
                 WriteLine($"The key [{PressRep(press)}] does not match an inventory item.  Pick another.");
                 return CommandIncomplete;
             }
 
-            var item = actor.Inventory.ElementAt(selectedIndex);
+            var item = being.Inventory.ElementAt(selectedIndex);
             if (!item.IsUsable)
             {
                 WriteLine($"The {Describer.Describe(item)} is not a usable item.  Pick another.");
@@ -237,9 +237,9 @@ namespace CopperBend.Engine
             ThisUsedItem = item;
 
             return FFwdOrPrompt( Use_Has_Item, 
-                $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", actor);
+                $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", being);
         }
-        private Command Use_Has_Item(AsciiKey press, IActor actor)
+        private Command Use_Has_Item(AsciiKey press, IBeing being)
         {
             var dir = DirectionOf(press);
             if (dir != CmdDirection.None)
@@ -253,12 +253,12 @@ namespace CopperBend.Engine
             //0.0
             if (press.Key == Keys.OemQuestion)
             {
-                ShowInventory(actor, i => i.IsUsable);
+                ShowInventory(being, i => i.IsUsable);
             }
 
             if ('a' <= press.Character && press.Character <= 'z')
             {
-                return Use_Pick_Item(press, actor);
+                return Use_Pick_Item(press, being);
             }
 
             if (press.Key == Keys.Escape)
@@ -277,18 +277,18 @@ namespace CopperBend.Engine
         }
 #endregion
 
-        public Command Wield(IActor actor)
+        public Command Wield(IBeing being)
         {
-            var wieldables = actor.Inventory.ToList();
+            var wieldables = being.Inventory.ToList();
             if (wieldables.Count() == 0)
             {
                 WriteLine("Nothing to wield.");
                 return CommandIncomplete;
             }
-            return FFwdOrPrompt(Wield_main, "Wield (inventory letter or ? to show inventory): ", actor);
+            return FFwdOrPrompt(Wield_main, "Wield (inventory letter or ? to show inventory): ", being);
         }
 
-        public Command Wield_main(AsciiKey press, IActor actor)
+        public Command Wield_main(AsciiKey press, IBeing being)
         {
             if (press.Key == Keys.Escape)
             {
@@ -300,11 +300,11 @@ namespace CopperBend.Engine
             //0.0
             if (press.Key == Keys.OemQuestion)
             {
-                ShowInventory(actor, i => true);
+                ShowInventory(being, i => true);
                 return CommandIncomplete;
             }
 
-            var item = ItemInInventoryLocation(press, actor);
+            var item = ItemInInventoryLocation(press, being);
             if (item != null)
             {
                 NextStep = null;
@@ -317,10 +317,10 @@ namespace CopperBend.Engine
             return CommandIncomplete;
         }
 
-        public Command PickUp(IActor actor) //0.2
+        public Command PickUp(IBeing being) //0.2
         {
             //  Right now, simply grabs the topmost
-            var topItem = actor.ReachableItems()
+            var topItem = being.ReachableItems()
                 .LastOrDefault();
 
             if (topItem == null)
@@ -359,12 +359,12 @@ namespace CopperBend.Engine
             }
         }
 
-        private IItem ItemInInventoryLocation(AsciiKey press, IActor actor)
+        private IItem ItemInInventoryLocation(AsciiKey press, IBeing being)
         {
             int inventorySlot = AlphaIndexOfKeyPress(press);
-            if (-1 < inventorySlot && inventorySlot < actor.Inventory.Count())
+            if (-1 < inventorySlot && inventorySlot < being.Inventory.Count())
             {
-                return actor.Inventory.ElementAt(inventorySlot);
+                return being.Inventory.ElementAt(inventorySlot);
             }
             return null;
         }
@@ -386,7 +386,7 @@ namespace CopperBend.Engine
         }
 
         /// <summary> If more input is queued, the prompt will not be sent </summary>
-        private Command FFwdOrPrompt(Func<AsciiKey, IActor, Command> nextStep, string prompt, IActor actor)
+        private Command FFwdOrPrompt(Func<AsciiKey, IBeing, Command> nextStep, string prompt, IBeing being)
         {
             NextStep = nextStep;
             if (QueueIsEmpty)
@@ -394,10 +394,10 @@ namespace CopperBend.Engine
                 Prompt(prompt);
                 return CommandIncomplete;
             }
-            return NextStep(InQ.Dequeue(), actor);
+            return NextStep(InQ.Dequeue(), being);
         }
 
-        public void ShowInventory(IActor actor, Func<IItem, bool> filter = null)
+        public void ShowInventory(IBeing being, Func<IItem, bool> filter = null)
         {
             //0.0 logwindow
             //Window.ShowInventory(actor.Inventory, filter);

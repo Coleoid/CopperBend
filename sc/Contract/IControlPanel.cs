@@ -11,25 +11,24 @@ namespace CopperBend.Contract
 {
     public interface IControlPanel
     {
-        void ScheduleActor(IActor actor, int tickOff);
+        void ScheduleAgent(IScheduleAgent being, int tickOff);
 
-        void AttackPlayer(IActor actor);
+        void AttackPlayer(IBeing being);
 
-        bool CanActorSeeTarget(IActor actor, Point target);
+        bool CanActorSeeTarget(IBeing being, Point target);
         List<Point> GetPathTo(Point start, Point target);
 
-        void AddToSchedule(ICanAct actor, int offset);
         //void Learn(Fruit fruit);
-        void SetMapDirty();
+        //void SetMapDirty();
 
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Point point);
-        void Till(ITile tile);
+        void Till(Space space);
 
         void Experience(PlantType plant, Exp experience);
         void EnterMode(object sender, EngineMode mode, Func<bool> callback);
 
-        bool CommandActor(IActor actor, Command command);
+        bool CommandActor(IBeing being, Command command);
     }
 
     public enum EngineMode

@@ -32,60 +32,60 @@ namespace CopperBend.Fabric
 
         public ReadOnlyCollection<Cell> AppendFov(Point origin, int radius, bool lightWalls)
         {
-            foreach (Cell borderCell in _map.GetBorderCellsInSquare(origin, radius))
-            {
-                foreach (Cell cell in _map.GetCellsAlongLine(origin, borderCell.Point))
-                {
-                    //var distance = origin.DistanceTo(cell.Point);
-                    var span = origin - cell.Point;
-                    var distance = Math.Sqrt(span.X * span.X + span.Y * span.Y);
-                    if (distance - .5 > radius) break;
+            //foreach (Cell borderCell in _map.GetBorderCellsInSquare(origin, radius))
+            //{
+            //    foreach (Cell cell in _map.GetCellsAlongLine(origin, borderCell.))
+            //    {
+            //        //var distance = origin.DistanceTo(cell.Point);
+            //        var span = origin - cell.Point;
+            //        var distance = Math.Sqrt(span.X * span.X + span.Y * span.Y);
+            //        if (distance - .5 > radius) break;
 
-                    if (cell.IsTransparent)
-                    {
-                        _inFov.Add(_map.GetIndex(cell.Point));
-                    }
-                    else
-                    {
-                        if (lightWalls)
-                        {
-                            _inFov.Add(_map.GetIndex(cell.Point));
-                        }
-                        break;
-                    }
-                }
-            }
+            //        if (cell.IsTransparent)
+            //        {
+            //            _inFov.Add(_map.GetIndex(cell.Point));
+            //        }
+            //        else
+            //        {
+            //            if (lightWalls)
+            //            {
+            //                _inFov.Add(_map.GetIndex(cell.Point));
+            //            }
+            //            break;
+            //        }
+            //    }
+            //}
 
-            if (lightWalls)
-            {
-                // Post processing step created based on the algorithm at this website:
-                // https://sites.google.com/site/jicenospam/visibilitydetermination
-                foreach (Point coord in _map.GetPointsInSquare(origin, radius))
-                {
-                    if (coord.X > origin.X)
-                    {
-                        if (coord.Y > origin.Y)
-                        {
-                            PostProcessFovQuadrant(coord, Quadrant.SE);
-                        }
-                        else if (coord.Y < origin.Y)
-                        {
-                            PostProcessFovQuadrant(coord, Quadrant.NE);
-                        }
-                    }
-                    else if (coord.X < origin.X)
-                    {
-                        if (coord.Y > origin.Y)
-                        {
-                            PostProcessFovQuadrant(coord, Quadrant.SW);
-                        }
-                        else if (coord.Y < origin.Y)
-                        {
-                            PostProcessFovQuadrant(coord, Quadrant.NW);
-                        }
-                    }
-                }
-            }
+            //if (lightWalls)
+            //{
+            //    // Post processing step created based on the algorithm at this website:
+            //    // https://sites.google.com/site/jicenospam/visibilitydetermination
+            //    foreach (Point coord in _map.GetPointsInSquare(origin, radius))
+            //    {
+            //        if (coord.X > origin.X)
+            //        {
+            //            if (coord.Y > origin.Y)
+            //            {
+            //                PostProcessFovQuadrant(coord, Quadrant.SE);
+            //            }
+            //            else if (coord.Y < origin.Y)
+            //            {
+            //                PostProcessFovQuadrant(coord, Quadrant.NE);
+            //            }
+            //        }
+            //        else if (coord.X < origin.X)
+            //        {
+            //            if (coord.Y > origin.Y)
+            //            {
+            //                PostProcessFovQuadrant(coord, Quadrant.SW);
+            //            }
+            //            else if (coord.Y < origin.Y)
+            //            {
+            //                PostProcessFovQuadrant(coord, Quadrant.NW);
+            //            }
+            //        }
+            //    }
+            //}
 
             return CellsInFov();
         }

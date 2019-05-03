@@ -1,16 +1,18 @@
-﻿//  Should grow to be complete, for save/load.
+﻿//0.2:  Later, collect everything which is saved/loaded, and stateful.
+
+using CopperBend.Engine;
 
 namespace CopperBend.Contract
 {
     public interface IGameState
     {
-        IAreaMap Map { get; }
-        IActor Player { get; }
+        ICompoundMap Map { get; }
+        IBeing Player { get; }
     }
 
     public class GameState : IGameState
     {
-        public IAreaMap Map { get; set; }
-        public IActor Player { get; set; }
+        public ICompoundMap Map { get; set; }
+        public IBeing Player { get; set; }
     }
 }

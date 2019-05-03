@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 using log4net;
 
 namespace CopperBend.Engine
@@ -9,7 +10,7 @@ namespace CopperBend.Engine
     public class EventBus
     {
         private ILog log;
-        public event EventHandler MessagePanelFullSubscribers;
+        //public event EventHandler MessagePanelFullSubscribers;
         public event EventHandler AllMessagesSentSubscribers;
         public event EventHandler<LargeMessageEventArgs> SendLargeMessageSubscribers;
         public event EventHandler ClearLargeMessageSubscribers;
@@ -25,7 +26,7 @@ namespace CopperBend.Engine
         public void MessagePanelFull(object sender, EventArgs args)
         {
             log.Debug("MessagePanelFull");
-            MessagePanelFullSubscribers?.Invoke(sender, args);
+            //MessagePanelFullSubscribers?.Invoke(sender, args);
         }
 
         public void AllMessagesSent(object sender, EventArgs args)

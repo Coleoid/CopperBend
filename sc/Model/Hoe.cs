@@ -12,24 +12,24 @@ namespace CopperBend.Model
         {
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, CmdDirection direction)
-        {
-            if (tile.IsTillable)
-            {
-                if (tile.IsTilled)
-                {
-                    output.WriteLine("Already tilled.");
-                    return;
-                }
+        //public override void ApplyTo(Space space, IControlPanel controls, IMessageOutput output, CmdDirection direction)
+        //{
+        //    if (space.IsTillable)
+        //    {
+        //        if (space.IsTilled)
+        //        {
+        //            output.WriteLine("Already tilled.");
+        //            return;
+        //        }
 
-                controls.Till(tile);
-                controls.SetMapDirty();
-                //controls.ScheduleActor(15);
-            }
-            else
-            {
-                output.WriteLine($"Cannot till the {tile.TileType.Name}.");
-            }
-        }
+        //        controls.Till(space);
+        //        //controls.SetMapDirty();
+        //        //controls.ScheduleActor(15);
+        //    }
+        //    else
+        //    {
+        //        output.WriteLine($"Cannot till the {space.Terrain.Name}.");
+        //    }
+        //}
     }
 }

@@ -13,8 +13,7 @@ namespace CopperBend.Model
     {
         // one IDGenerator for all Entities
         public static IDGenerator IDGenerator = new IDGenerator();
-
-        public uint ID { get; private set; }
+        public uint ID { get; private set; } = IDGenerator.UseID();
 
         protected CbEntity(Color foreground, Color background, int glyph, int width = 1, int height = 1) 
             : base(width, height)
@@ -22,19 +21,17 @@ namespace CopperBend.Model
             Animation.CurrentFrame[0].Foreground = foreground;
             Animation.CurrentFrame[0].Background = background;
             Animation.CurrentFrame[0].Glyph = glyph;
-
-            ID = IDGenerator.UseID();
         }
     }
 
-    public class Actor : CbEntity, IActor
+    public class Being : CbEntity, IBeing
     {
         public int Health { get; set; }
         public int MaxHealth { get; set; }
-        public Point Point { get; protected set; }
+        public Point Location { get; protected set; }
         public char Symbol { get; set; }
 
-        protected Actor(Color foreground, Color background, int glyph, int width = 1, int height = 1)
+        protected Being(Color foreground, Color background, int glyph, int width = 1, int height = 1)
             : base(foreground, background, glyph, width, height)
         {
             Health = MaxHealth = 6;
@@ -45,10 +42,10 @@ namespace CopperBend.Model
 
         //internal ILog log;
         internal IControlPanel Controls { get; set; }
-        //public Actor()
+        //public Being()
         //    : this(new Point(0, 0))
         //{ }
-        //public Actor(Point point)
+        //public Being(Point point)
         //{
         //    Point = point;
         //    Health = 6;
@@ -56,18 +53,15 @@ namespace CopperBend.Model
 
         //    InventoryList = new List<IItem>();
 
-        //    log = LogManager.GetLogger("CB.Actor");
+        //    log = LogManager.GetLogger("CB.Being");
         //}
-
-        //  IComponent
-        //public IActor Entity { get => this; }
 
         public void MoveTo(Point point)
         {
-            Point = point;
+            Location = point;
         }
 
-        //  IActor
+        //  IBeing
         public int Awareness { get; set; }
         public IAreaMap Map { get; set; }
 
@@ -84,7 +78,7 @@ namespace CopperBend.Model
         internal void CmdDirection(CmdDirection direction)
         {
             //log.Debug($"got CmdDirection({direction})");
-            Controls.AddToSchedule(this, 12); //0.0
+            Controls.ScheduleAgent(this, 12); //0.0
         }
 
 
@@ -141,13 +135,23 @@ namespace CopperBend.Model
             //return Map.Items.Where(i => i.Point.Equals(Point));
         }
 
-        public virtual Action<IControlPanel> GetNextAction()
+        public virtual ScheduleEntry GetNextEntry()
         {
-            return (icp) => { CommandSource.GiveCommand(this); };
+            return GetNextEntry(12);
+        }
+
+        public virtual ScheduleEntry GetNextEntry(int offset)
+        {
+            return new ScheduleEntry
+            {
+                Action = (icp) => { CommandSource.GiveCommand(this); },
+                Offset = offset,
+                Agent = this
+            };
         }
     }
 
-    public class Player : Actor
+    public class Player : Being
     {
         public Player(Color foreground, Color background, int glyph = '@', int width = 1, int height = 1)
             : base(foreground, background, glyph, width, height)
@@ -155,7 +159,7 @@ namespace CopperBend.Model
         }
     }
 
-    public class Monster : Actor
+    public class Monster : Being
     {
         public Monster(Color foreground, Color background) 
             : base(foreground, background, 'M')

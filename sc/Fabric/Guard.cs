@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CopperBend.Contract
+namespace CopperBend.Fabric
 {
     public class Guard
     {

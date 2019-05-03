@@ -1,8 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GoRogue;
+using Microsoft.Xna.Framework;
 
 namespace CopperBend.Contract
 {
-    public interface IItem
+    public interface IItem : IHasID
     {
         string Name { get; }
         int Quantity { get; set; }

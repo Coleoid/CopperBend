@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using GoRogue;
 using Microsoft.Xna.Framework;
 
 namespace CopperBend.Contract
@@ -7,26 +7,27 @@ namespace CopperBend.Contract
     //0.1
     public interface IDestroyable
     {
+        int MaxHealth { get; }
         int Health { get; }
         void Heal(int amount);
         void Hurt(int amount);
     }
 
-    public interface ICanAct
+    public interface IScheduleAgent
     {
-        Action<IControlPanel> GetNextAction();
+        ScheduleEntry GetNextEntry();
+        ScheduleEntry GetNextEntry(int offset);
     }
 
-    public interface IActor : IDestroyable, ICanAct
+    public interface IBeing : IDestroyable, IScheduleAgent, IHasID
     {
-        Point Point { get; }
+        Point Location { get; }
         string Name { get; set; }
         int Awareness { get; set; }
         IAreaMap Map { get; set; }
 
         ICommandSource CommandSource { get; set; }
 
-        //IDefenseAspect DefenseAspect { get; set; }
         void MoveTo(Point point);
         IItem WieldedTool { get; }
         void Wield(IItem item);

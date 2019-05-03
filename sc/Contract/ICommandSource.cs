@@ -1,11 +1,17 @@
 ﻿using System;
 
+//  Functional completeness levels:
+//  0.1:  Works in a limited way, with lame code
+//  0.2:  Meets current need
+//  0.5:  Probably good enough for 1.0 release
+
+
 namespace CopperBend.Contract
 {
     public interface ICommandSource
     {
         //Command GetCommand();
-        void GiveCommand(IActor actor);
+        void GiveCommand(IBeing being);
     }
 
     public enum CmdAction

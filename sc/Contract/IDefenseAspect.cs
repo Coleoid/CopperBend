@@ -2,7 +2,7 @@
 {
     public interface IDefenseAspect
     {
-        IActor Actor { get; set; }
+        IBeing Being { get; set; }
         void SetResistance(string damageType, double portionBlocked);
         int ApplyDamage(IDamage damage);
     }

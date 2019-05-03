@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 using CopperBend.Model;
+using GoRogue;
 using log4net;
 using Microsoft.Xna.Framework;
 using SadConsole.Input;
@@ -13,10 +15,9 @@ namespace CopperBend.Engine
         private ISchedule Schedule { get; set; }
         private IGameState GameState { get; set; }
 
-        private IAreaMap Map
-        {
-            get => GameState.Map;
-        }
+        private SpaceMap SpaceMap => GameState.Map.SpaceMap;
+        private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
+        private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
 
         private Describer Describer;
         private EventBus EventBus;
@@ -42,17 +43,17 @@ namespace CopperBend.Engine
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
 
-        public bool CommandActor(IActor actor, Command command)
+        public bool CommandActor(IBeing being, Command command)
         {
             switch (command.Action)
             {
-            case CmdAction.Consume:   return Do_Consume(actor, command.Item);
-            case CmdAction.Direction: return Do_Direction(actor, command.Direction);
-            case CmdAction.Drop:      return Do_Drop(actor, command);
-            case CmdAction.PickUp:    return Do_PickUp(actor, command);
-            case CmdAction.Use:       return Do_Use(actor, command);
-            case CmdAction.Wait:      return Do_Wait(actor, command);
-            case CmdAction.Wield:     return Do_Wield(actor, command.Item);
+            case CmdAction.Consume:   return Do_Consume(being, command.Item);
+            case CmdAction.Direction: return Do_Direction(being, command.Direction);
+            case CmdAction.Drop:      return Do_Drop(being, command);
+            case CmdAction.PickUp:    return Do_PickUp(being, command);
+            case CmdAction.Use:       return Do_Use(being, command);
+            case CmdAction.Wait:      return Do_Wait(being, command);
+            case CmdAction.Wield:     return Do_Wield(being, command.Item);
 
             case CmdAction.Unknown:
             case CmdAction.Unset:
@@ -63,10 +64,10 @@ namespace CopperBend.Engine
         }
 
 
-        public bool Do_Consume(IActor actor, IItem item)
+        public bool Do_Consume(IBeing being, IItem item)
         {
             Guard.AgainstNullArgument(item, "No item in consume command");
-            var invItem = actor.RemoveFromInventory(item);
+            var invItem = being.RemoveFromInventory(item);
             Guard.AgainstNullArgument(invItem, "Item to consume not found in inventory");
             Guard.Against(!item.IsConsumable, "Item is not consumeable");
 
@@ -75,18 +76,18 @@ namespace CopperBend.Engine
                 switch (fruit.PlantType)
                 {
                 case PlantType.Healer:
-                    HealActor(actor, 4);
-                    FeedActor(actor, 400);
+                    HealActor(being, 4);
+                    FeedActor(being, 400);
                     break;
 
                 default:
                     throw new Exception($"Don't have eating written for fruit of {fruit.PlantType}.");
                 }
 
-                actor.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
+                being.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
                 Learn(fruit);
                 Experience(fruit.PlantType, Exp.EatFruit);
-                Schedule.AddActor(actor, 2);
+                Schedule.AddAgent(being, 2);
             }
 
             //0.1
@@ -94,65 +95,66 @@ namespace CopperBend.Engine
                 throw new Exception($"Not enough {item.Name} to {item.ConsumeVerb}, somehow.");
             item.Quantity--;
             if (item.Quantity < 1)
-                actor.RemoveFromInventory(item);
+                being.RemoveFromInventory(item);
             log.Info($"Consumed {item.Name} to no effect.  Needmorecode.");
 
             return true;
         }
 
         #region Direction
-        private bool Do_Direction(IActor actor, CmdDirection direction)
+        private bool Do_Direction(IBeing being, CmdDirection direction)
         {
-            var point = PointInDirection(actor.Point, direction);
+            var point = PointInDirection(being.Location, direction);
 
-            IActor targetActor = Map.GetActorAtPoint(point);
-            if (targetActor == null)
+            IBeing targetBeing = BeingMap.GetItems(point).FirstOrDefault();
+            if (targetBeing == null)
             {
-                return Do_DirectionMove(actor, point);
+                return Do_DirectionMove(being, point);
             }
 
-            return Do_DirectionAttack(actor, targetActor);
+            return Do_DirectionAttack(being, targetBeing);
         }
 
-        private bool Do_DirectionMove(IActor actor, Point newPoint)
+        private bool Do_DirectionMove(IBeing being, Point newPoint)
         {
-            ITile tile = Map[newPoint];
-            if (tile.TileType.Name == "closed door")
+            Space tile = SpaceMap.GetItem(newPoint);
+
+            if (tile.Terrain.Name == "closed door")
             {
-                Map.OpenDoor(tile);
-                ScheduleActor(actor, 4);
+                //TODO:  Map.OpenDoor(tile);
+                ScheduleAgent(being, 4);
                 return true;
             }
 
-            if (!Map.IsWalkable(newPoint))
+            if (!SpaceMap.CanWalkThrough(newPoint))
             {
-                var np = Describer.Describe(tile.TileType.Name, DescMods.IndefiniteArticle);
-                if (actor.IsPlayer)
+                var np = Describer.Describe(tile.Terrain.Name, DescMods.IndefiniteArticle);
+                if (being.IsPlayer)
                     Output.WriteLine($"I can't walk through {np}.");
                 EventBus.ClearPendingInput(this, new EventArgs());
                 return false;
             }
 
-            CheckActorAtCoordEvent(actor, tile);
+            //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
 
-            var startingPoint = actor.Point;
-            Map.MoveActor(actor, newPoint);
-            Map.UpdatePlayerFieldOfView(actor);
-            Map.IsDisplayDirty = true;
+            var startingPoint = being.Location;
+            //Map.MoveActor(actor, newPoint);
+            //Map.UpdatePlayerFieldOfView(actor);
+            //Map.IsDisplayDirty = true;
 
             int directionsMoved = 0;
-            if (actor.Point.X != startingPoint.X) directionsMoved++;
-            if (actor.Point.Y != startingPoint.Y) directionsMoved++;
+            if (being.Location.X != startingPoint.X) directionsMoved++;
+            if (being.Location.Y != startingPoint.Y) directionsMoved++;
             if (directionsMoved == 0)
                 throw new Exception("Moved nowhere?  Up/Down not yet handled.");
             else if (directionsMoved == 1)
-                ScheduleActor(actor, 12);
+                ScheduleAgent(being, 12);
             else
-                ScheduleActor(actor, 17);
+                ScheduleAgent(being, 17);
 
-            if (actor.IsPlayer)
+            if (being.IsPlayer)
             {
-                var itemsHere = Map.Items.Where(i => i.Point == newPoint);
+                var itemsHere = ItemMap.GetItems(newPoint);
                 if (itemsHere.Count() > 7)
                 {
                     Output.WriteLine("There are many items here.");
@@ -176,11 +178,11 @@ namespace CopperBend.Engine
             return true;
         }
 
-        private bool Do_DirectionAttack(IActor actor, IActor target)
+        private bool Do_DirectionAttack(IBeing being, IBeing target)
         {
             //0.1
             target.Hurt(2);
-            ScheduleActor(actor, 12);
+            ScheduleAgent(being, 12);
             //0.2
             //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
             //conflictSystem.Attack("Wah!", 2, targetActor);
@@ -188,22 +190,21 @@ namespace CopperBend.Engine
         }
         #endregion
 
-        private bool Do_Drop(IActor actor, Command command)
+        private bool Do_Drop(IBeing being, Command command)
         {
             Guard.AgainstNullArgument(command.Item, "No item in drop command");
-            var item = actor.RemoveFromInventory(command.Item);
+            var item = being.RemoveFromInventory(command.Item);
             Guard.AgainstNullArgument(item, "Item to drop not found in inventory");
 
-            item.MoveTo(actor.Point);
-            Map.Items.Add(item);
-            ScheduleActor(actor, 1);
+            item.MoveTo(being.Location);
+            ItemMap.Add(item, item.Point);
+            ScheduleAgent(being, 1);
             return true;
         }
 
-        private bool Do_PickUp(IActor actor, Command command)
+        private bool Do_PickUp(IBeing being, Command command)
         {
-            var topItem = Map.Items
-                .Where(i => i.Point.Equals(actor.Point))
+            var topItem = ItemMap.GetItems(being.Location)
                 .LastOrDefault();
 
             if (topItem == null)
@@ -212,67 +213,70 @@ namespace CopperBend.Engine
                 return false;
             }
 
-            Map.Items.Remove(topItem);
-            actor.AddToInventory(topItem);
+            ItemMap.Remove(topItem);
+            being.AddToInventory(topItem);
             Output.WriteLine($"Picked up {topItem.Name}");
-            ScheduleActor(actor, 4);
+            ScheduleAgent(being, 4);
             return true;
         }
 
-        private bool Do_Use(IActor actor, Command command)
+        private bool Do_Use(IBeing being, Command command)
         {
             switch (command.Item)
             {
             case Hoe h:
-                return Use_Hoe(actor, command);
+                return Use_Hoe(being, command);
             case Seed s:
-                return Use_Seed(actor, command);
+                return Use_Seed(being, command);
 
             default:
                 throw new Exception($"Don't know how to use a {command.Item.GetType().Name} yet.");
             }
         }
 
-        private bool Use_Hoe(IActor actor, Command command)
+        private bool Use_Hoe(IBeing being, Command command)
         {
-            var targetPoint = PointInDirection(actor.Point, command.Direction);
-            var tile = Map.Tiles[targetPoint.X, targetPoint.Y];
-            if (!tile.IsTillable)
+            var targetPoint = PointInDirection(being.Location, command.Direction);
+            var space = SpaceMap.GetItem(targetPoint);
+            if (space.CanPlant)
             {
-                var msg = tile.IsTilled
-                    ? "Already tilled."
-                    : $"Cannot till the {tile.TileType.Name}.";
+                Output.WriteLine("All's ready to plant here, already.");
+                return false;
+            }
 
-                Output.WriteLine(msg);
+            if (!space.CanPreparePlanting)
+            {
+
+                Output.WriteLine($"Cannot till the {space.Terrain.Name}.");
                 return false;
             }
 
             int tillTime = 15;
-            if (actor.WieldedTool != command.Item)
+            if (being.WieldedTool != command.Item)
             {
-                actor.Wield(command.Item);
+                being.Wield(command.Item);
                 tillTime += 6;
             }
 
-            Till(tile);
-            SetMapDirty();
-            ScheduleActor(actor, tillTime);
+            Till(space);
+            //SetMapDirty();
+            ScheduleAgent(being, tillTime);
             return true;
         }
 
-        private bool Use_Seed(IActor actor, Command command)
+        private bool Use_Seed(IBeing being, Command command)
         {
-            var targetPoint = PointInDirection(actor.Point, command.Direction);
-            var tile = Map.Tiles[targetPoint.X, targetPoint.Y];
+            var targetPoint = PointInDirection(being.Location, command.Direction);
+            var space = SpaceMap.GetItem(targetPoint);
 
-            if (!tile.IsTilled)
+            if (!space.IsTilled)
             {
-                string qualifier = tile.IsTillable ? "untilled " : "";
-                Output.WriteLine($"Cannot sow {qualifier}{tile.TileType.Name}.");
+                string qualifier = space.IsTillable ? "untilled " : "";
+                Output.WriteLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
                 return false;
             }
 
-            if (tile.IsSown)
+            if (space.IsSown)
             {
                 Output.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
                 return false;
@@ -280,32 +284,32 @@ namespace CopperBend.Engine
 
             var seedStock = (Seed)command.Item;
             var seedToSow = seedStock.GetSeedFromStack();
-            tile.Sow(seedToSow);
+            space.Sow(seedToSow);
 
-            AddToSchedule(seedToSow, 100);
+            ScheduleAgent(seedToSow, 100);
 
             if (--seedStock.Quantity < 1)
             {
-                actor.RemoveFromInventory(seedStock);
+                being.RemoveFromInventory(seedStock);
             }
 
-            SetMapDirty();
+            //SetMapDirty();
             Experience(seedToSow.PlantType, Exp.PlantSeed);
 
             return true;
         }
 
 
-        private bool Do_Wait(IActor actor, Command command)
+        private bool Do_Wait(IBeing being, Command command)
         {
-            Schedule.AddActor(actor, 6);
+            Schedule.AddAgent(being, 6);
             return true;
         }
 
-        private bool Do_Wield(IActor actor, IItem item)
+        private bool Do_Wield(IBeing being, IItem item)
         {
-            actor.Wield(item);
-            ScheduleActor(actor, 6);
+            being.Wield(item);
+            ScheduleAgent(being, 6);
             return true;
         }
     }

@@ -1,7 +1,6 @@
-﻿using CopperBend.Engine;
-using CopperBend.Fabric;
+﻿//using CopperBend.Fabric;
 using Microsoft.Xna.Framework;
-using System;
+using SadConsole;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -66,43 +65,27 @@ namespace CopperBend.Contract
         Point GetPoint(int index);
     }
 
-    public class MapState
-    {
-        /// <summary>
-        /// Flags Enumeration of the possible properties for any Cell in the Map
-        /// </summary>
-        [Flags]
-        public enum CellProperties
-        {
-            /// <summary>
-            /// Not set
-            /// </summary>
-            None = 0,
-            /// <summary>
-            /// A character could normally walk across the Cell without difficulty
-            /// </summary>
-            Walkable = 1,
-            /// <summary>
-            /// There is a clear line-of-sight through this Cell
-            /// </summary>
-            Transparent = 2,
-            /// <summary>
-            /// The Cell is in the currently observable field-of-view
-            /// </summary>
-            Visible = 4,
-            /// <summary>
-            /// The Cell has been in the field-of-view in the player at some point during the game
-            /// </summary>
-            Explored = 8
-        }
+    //public class MapState
+    //{
+    //    [Flags]
+    //    public enum CellProperties
+    //    {
+    //        /// <summary> Nothing set </summary>
+    //        None = 0,
+    //        /// <summary> An actor can travel across this Cell without difficulty </summary>
+    //        Walkable = 1,
+    //        /// <summary> There is clear line-of-sight through this Cell </summary>
+    //        Transparent = 2,
+    //        /// <summary> The Cell is in the player's current field-of-view </summary>
+    //        Visible = 4,
+    //        /// <summary> The Cell has been in the player's field-of-view at some point </summary>
+    //        Explored = 8
+    //    }
 
-        public int Width { get; set; }
+    //    public int Width { get; set; }
 
-        public int Height { get; set; }
+    //    public int Height { get; set; }
 
-        public CellProperties[] Cells
-        {
-            get; set;
-        }
-    }
+    //    public CellProperties[] Cells { get; set; }
+    //}
 }

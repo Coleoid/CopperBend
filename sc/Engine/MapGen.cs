@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using CopperBend.Contract;
+using log4net;
 using Microsoft.Xna.Framework;
+using SadConsole;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace CopperBend.Engine
@@ -12,12 +14,17 @@ namespace CopperBend.Engine
     {
         protected internal List<Rectangle> Rooms;
         protected SpaceMap _map;
-
+        private ILog log;
+        private Cell _wallCell;
         private TerrainType _wall;
+        private Cell _floorCell;
         private TerrainType _floor;
 
         public MapGen()
         {
+            log = LogManager.GetLogger("CB", "CB.MapGen");
+            _wallCell = new Cell(Color.LightGray, Color.DarkGray, '#');
+            _floorCell = new Cell(Color.DarkGray, Color.Black, '.');
 
             _wall = new TerrainType
             {
@@ -25,7 +32,7 @@ namespace CopperBend.Engine
                 CanWalkThrough = false,
                 CanSeeThrough = false,
                 CanPlant = false,
-                Looks = null //_wallCell
+                Looks = _wallCell
             };
 
             _floor = new TerrainType
@@ -34,7 +41,7 @@ namespace CopperBend.Engine
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 CanPlant = true,
-                Looks = null //_floorCell
+                Looks = _floorCell
             };
 
         }
@@ -43,7 +50,6 @@ namespace CopperBend.Engine
         {
             Random randNum = new Random();
 
-            //Map map = new Map(mapWidth, mapHeight);
             _map = new SpaceMap(mapWidth, mapHeight);
             FillWalls(_map);
 
@@ -85,9 +91,9 @@ namespace CopperBend.Engine
 
         public void FillWalls(SpaceMap map)
         {
-            for (int x = 0; x < map.Width; x++)
+            for (int y = 0; y < map.Height; y++)
             {
-                for (int y = 0; y < map.Height; y++)
+                for (int x = 0; x < map.Width; x++)
                 {
                     map.Add(new Space {Terrain = _wall}, x, y);
                 }
@@ -112,11 +118,8 @@ namespace CopperBend.Engine
 
         private void SetFloorSpace(int x, int y)
         {
-            if (_map.GetItem(x, y).Terrain != _floor)
-            {
-                _map.Remove(x, y);
-                _map.Add(new Space {Terrain = _floor}, x, y);
-            }
+            var space = _map.GetItem(x, y);
+            space.Terrain = _floor;
         }
 
         public void CreateRoom(Rectangle room)
@@ -126,9 +129,10 @@ namespace CopperBend.Engine
 
         public void CreateRoom(int xStart, int yStart, int xEnd, int yEnd)
         {
-            for (int x = xStart; x <= xEnd; x++)
+            //log.Debug($"Creating room [({xStart}, {yStart})-({xEnd}, {yEnd})]");
+            for (int y = yStart; y <= yEnd; y++)
             {
-                for (int y = yStart; y <= yEnd; y++)
+                for (int x = xStart; x <= xEnd; x++)
                 {
                     SetFloorSpace(x, y);
                 }

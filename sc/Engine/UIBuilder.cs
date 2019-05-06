@@ -5,15 +5,19 @@ using SadConsole.Controls;
 using Microsoft.Xna.Framework;
 using Size = System.Drawing.Size;
 using System.Collections.Generic;
+using log4net;
 
 namespace CopperBend.Engine
 {
     public class UIBuilder
     {
+        private readonly ILog log;
         public readonly Size GameSize;
 
         public UIBuilder(Size gameSize)
         {
+            log = LogManager.GetLogger("CB", "CB.UIBuilder");
+
             GameSize = gameSize;
         }
 
@@ -43,15 +47,15 @@ namespace CopperBend.Engine
             CompoundMap fullMap
             )
         {
-            int consoleWidth = windowSize.Width - 2;
-            int consoleHeight = windowSize.Height - 2;
+            int viewWidth = windowSize.Width - 2;
+            int viewHeight = windowSize.Height - 2;
 
             Window mapWindow = new Window(windowSize.Width, windowSize.Height)
             {
                 CanDrag = true,
-                Title = title.Align(HorizontalAlignment.Center, consoleWidth)
+                Title = title.Align(HorizontalAlignment.Center, viewWidth)
             };
-            //log.Debug("Created map window.");
+            log.DebugFormat("Created map window, [{0}].", mapWindow.AbsoluteArea);
 
             //TODO: make click do something
             Button closeButton = new Button(3, 1)
@@ -61,37 +65,36 @@ namespace CopperBend.Engine
             };
             mapWindow.Add(closeButton);
 
-            Cell[] initialCells = GetCells(fullMap);
+            Cell[] initialCells = GetCells(fullMap.SpaceMap);
 
             var mapConsole = new ScrollingConsole(
                 mapSize.Width, mapSize.Height,
-                Global.FontDefault, new Rectangle(0, 0, GameSize.Width, GameSize.Height),
+                Global.FontDefault, new Rectangle(0, 0, viewWidth, viewHeight),
                 initialCells)
             {
-
                 // Fit the MapConsole inside the border
-                ViewPort = new Rectangle(0, 0, consoleWidth, consoleHeight),
                 Position = new Point(1, 1)
             };
-            //log.Debug("Created map console.");
+            log.DebugFormat("Created map console, map size [{0}], viewport size [{1}].", mapSize, mapWindow.ViewPort);
 
             mapWindow.Children.Add(mapConsole);
 
             return (mapConsole, mapWindow);
         }
 
-        private Cell[] GetCells(CompoundMap fullMap)
+        private Cell[] GetCells(SpaceMap spaceMap)
         {
             List<Cell> cells = new List<Cell>();
 
-            for (int y = 0; y < fullMap.SpaceMap.Height; y++)
+            for (int y = 0; y < spaceMap.Height; y++)
             {
-                for (int x = 0; x < fullMap.SpaceMap.Width; x++)
+                for (int x = 0; x < spaceMap.Width; x++)
                 {
-                    cells.Add(fullMap.SpaceMap.GetItem(x,y).Terrain.Looks);
+                    cells.Add(spaceMap.GetItem(x,y).Terrain.Looks);
                 }
             }
 
+            log.DebugFormat("GetCells returning {0} cells.", cells.Count);
             return cells.ToArray();
         }
     }

@@ -115,8 +115,9 @@ namespace CopperBend.Engine
             return Do_DirectionAttack(being, targetBeing);
         }
 
-        private bool Do_DirectionMove(IBeing being, Point newPoint)
+        private bool Do_DirectionMove(IBeing being, Point offset)
         {
+            var newPoint = being.Position + offset;
             Space tile = SpaceMap.GetItem(newPoint);
 
             if (tile.Terrain.Name == "closed door")
@@ -137,14 +138,16 @@ namespace CopperBend.Engine
 
             //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
 
-            var startingPoint = being.Location;
+            //var startingPoint = being.Position;
+
             //Map.MoveActor(actor, newPoint);
             //Map.UpdatePlayerFieldOfView(actor);
             //Map.IsDisplayDirty = true;
+            being.Position += offset;
 
             int directionsMoved = 0;
-            if (being.Location.X != startingPoint.X) directionsMoved++;
-            if (being.Location.Y != startingPoint.Y) directionsMoved++;
+            if (offset.X != 0) directionsMoved++;
+            if (offset.Y != 0) directionsMoved++;
             if (directionsMoved == 0)
                 throw new Exception("Moved nowhere?  Up/Down not yet handled.");
             else if (directionsMoved == 1)

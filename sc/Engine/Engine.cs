@@ -39,7 +39,7 @@ namespace CopperBend.Engine
         public Engine(int gameWidth, int gameHeight)
             : base()
         {
-            log = LogManager.GetLogger("CB", "CB.NewEngine");
+            log = LogManager.GetLogger("CB", "CB.Engine");
 
             IsVisible = true;
             IsFocused = true;

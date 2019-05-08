@@ -5,7 +5,6 @@ using System.Collections.Generic;
 //  Some methods to communicate and control, in junk drawer mode.
 //  I'll keep accumulating until structure emerges.
 //  In other places I pass important domain bits as arguments.
-//  See the EventBus for another channel.
 
 namespace CopperBend.Contract
 {
@@ -26,7 +25,6 @@ namespace CopperBend.Contract
         void Till(Space space);
 
         void Experience(PlantType plant, Exp experience);
-        void EnterMode(object sender, EngineMode mode, Func<bool> callback);
 
         bool CommandActor(IBeing being, Command command);
     }

@@ -20,7 +20,6 @@ namespace CopperBend.Engine
         private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
 
         private Describer Describer;
-        private EventBus EventBus;
         private IMessageOutput Output;
         private ILog log;
 
@@ -31,14 +30,12 @@ namespace CopperBend.Engine
             ISchedule schedule,
             IGameState gameState,
             Describer describer,
-            EventBus bus,
             IMessageOutput messageOutput
         )
         {
             Schedule = schedule;
             GameState = gameState;
             Describer = describer;
-            EventBus = bus;
             Output = messageOutput;
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
@@ -132,18 +129,13 @@ namespace CopperBend.Engine
                 var np = Describer.Describe(tile.Terrain.Name, DescMods.IndefiniteArticle);
                 if (being.IsPlayer)
                     Output.WriteLine($"I can't walk through {np}.");
-                EventBus.ClearPendingInput(this, new EventArgs());
+                
+                GameState.ClearPendingInput();
                 return false;
             }
 
-            //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
-
-            //var startingPoint = being.Position;
-
-            //Map.MoveActor(actor, newPoint);
-            //Map.UpdatePlayerFieldOfView(actor);
-            //Map.IsDisplayDirty = true;
             being.Position += offset;
+            GameState.PlayerMoved |= being.IsPlayer;
 
             int directionsMoved = 0;
             if (offset.X != 0) directionsMoved++;
@@ -262,7 +254,6 @@ namespace CopperBend.Engine
             }
 
             Till(space);
-            //SetMapDirty();
             ScheduleAgent(being, tillTime);
             return true;
         }
@@ -296,7 +287,6 @@ namespace CopperBend.Engine
                 being.RemoveFromInventory(seedStock);
             }
 
-            //SetMapDirty();
             Experience(seedToSow.PlantType, Exp.PlantSeed);
 
             return true;

@@ -15,15 +15,15 @@ namespace CopperBend.Engine
         private Describer Describer { get; set; }
         private Window Window { get; set; }
         private IControlPanel Controls { get; set; }
-        private readonly EventBus Bus;
+        private readonly GameState GameState;
         private readonly ILog log;
 
-        public InputCommandSource(Queue<AsciiKey> inQ, Describer describer, Window window, EventBus bus, IControlPanel controls)
+        public InputCommandSource(Queue<AsciiKey> inQ, Describer describer, Window window, GameState state, IControlPanel controls)
         {
             InQ = inQ;
             Describer = describer;
             Window = window;
-            Bus = bus;
+            GameState = state;
             Controls = controls;
             log = LogManager.GetLogger("CB", "CB.InputCommandSource");
         }
@@ -53,7 +53,7 @@ namespace CopperBend.Engine
             var commandGiven = deliverCommandFromInput();
             if (!commandGiven)
             {
-                Bus.EnterMode(EngineMode.InputBound, deliverCommandFromInput);
+                GameState.PushEngineMode(EngineMode.InputBound, deliverCommandFromInput);
             }
         }
 

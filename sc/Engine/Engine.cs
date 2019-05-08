@@ -31,6 +31,7 @@ namespace CopperBend.Engine
         public Queue<AsciiKey> InputQueue;
         private SpaceMap SpaceMap;
         private Being Player;
+        private GameState GameState;
 
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
@@ -68,14 +69,13 @@ namespace CopperBend.Engine
 
             Schedule = new Schedule();
             Describer describer = new Describer();
-            EventBus Bus = new EventBus();
-            Bus.EnterEngineModeSubscribers += (s, a) => PushEngineMode(a.Mode, a.Callback);  //0.1
-            Bus.ClearPendingInputSubscribers += (s, a) => InputQueue.Clear();//0.1
 
-            var gameState = new GameState();
-            Dispatcher = new CommandDispatcher(Schedule, gameState, describer, Bus, null );
+            GameState = new GameState();
+            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, null );
 
-            gameState.Player = Player = CreatePlayer(SpaceMap.PlayerStartPoint);
+            GameState.Player = Player = CreatePlayer(SpaceMap.PlayerStartPoint);
+            GameState.PushEngineMode = PushEngineMode;
+            GameState.ClearPendingInput = InputQueue.Clear;
 
             CompoundMap FullMap = new CompoundMap
             {
@@ -87,7 +87,7 @@ namespace CopperBend.Engine
                 LocatedTriggers = new List<LocatedTrigger>(),
                 BlightMap = null
             };
-            gameState.Map = FullMap;
+            GameState.Map = FullMap;
             Schedule.AddAgent(Player, 12);
 
             var builder = new UIBuilder(GameSize);
@@ -96,7 +96,7 @@ namespace CopperBend.Engine
             MapConsole.Children.Add(Player);
             MapWindow.Show();
 
-            Player.CommandSource = new InputCommandSource(InputQueue, describer, MapWindow, Bus, Dispatcher);
+            Player.CommandSource = new InputCommandSource(InputQueue, describer, MapWindow, GameState, Dispatcher);
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
@@ -133,6 +133,7 @@ namespace CopperBend.Engine
 
             QueueInput();
             ActOnMode();
+            SyncStateChanges();
 
             base.Update(timeElapsed);
         }
@@ -144,27 +145,26 @@ namespace CopperBend.Engine
             {
                 InputQueue.Enqueue(key);
             }
-
-            //CheckKeyboard();
         }
+
+        public void SyncStateChanges()
+        {
+            if (GameState.PlayerMoved)
+            {
+                //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
+                //Map.UpdatePlayerFieldOfView(actor);
+                //Map.IsDisplayDirty = true;
+                MapConsole.CenterViewPortOnPoint(Player.Position);
+                GameState.PlayerMoved = false;
+            }
+
+        }
+
 
         private AsciiKey GetNextKeyPress()
         {
             if (InputQueue.Count == 0) return new AsciiKey { Key = Keys.None };
             return InputQueue.Dequeue();
-        }
-
-        public void CheckKeyboard()  // 0.1, remove once ActOnMode in.
-        {
-            int xOff = 0;
-            int yOff = 0;
-            if (Kbd.IsKeyPressed(Keys.Left)) xOff = -1;
-            if (Kbd.IsKeyPressed(Keys.Right)) xOff = 1;
-            if (Kbd.IsKeyPressed(Keys.Up)) yOff = -1;
-            if (Kbd.IsKeyPressed(Keys.Down)) yOff = 1;
-            if (xOff == 0 && yOff == 0) return;
-
-            Player.Position += new Point(xOff, yOff);
         }
 
         #region Mode mechanics
@@ -330,7 +330,6 @@ namespace CopperBend.Engine
 
             //if (press == null) return;
 
-            //EventBus.ClearLargeMessage(this, new EventArgs());
             HideLargeMessage();
         }
 

@@ -18,7 +18,6 @@ namespace CopperBend.Engine
         private void MakeMaps()
         {
             MultiSpatialMap<IItem> MultiItemMap = new MultiSpatialMap<IItem>();
-
         }
 
         private int AlphaIndexOfKeyPress(AsciiKey key)
@@ -27,11 +26,6 @@ namespace CopperBend.Engine
             var asciiNum = (int)key.Character;
             if (asciiNum < lowercase_a || lowercase_z < asciiNum) return -1;
             return asciiNum - lowercase_a;
-        }
-
-        public void EnterMode(object sender, EngineMode mode, Func<bool> callback)
-        {
-            EventBus.EnterMode(mode, callback);
         }
 
         public void ScheduleAgent(IScheduleAgent agent, int tickOff)

@@ -10,9 +10,7 @@ namespace CopperBend.Contract
 {
     public interface IControlPanel
     {
-        void ScheduleAgent(IScheduleAgent being, int tickOff);
-
-        void AttackPlayer(IBeing being);
+        void ScheduleAgent(IScheduleAgent agent, int tickOff);
 
         bool CanActorSeeTarget(IBeing being, Point target);
         List<Point> GetPathTo(Point start, Point target);
@@ -24,9 +22,13 @@ namespace CopperBend.Contract
         void RemovePlantAt(Point point);
         void Till(Space space);
 
-        void Experience(PlantType plant, Exp experience);
+        void AddExperience(PlantType plant, Exp experience);
 
-        bool CommandActor(IBeing being, Command command);
+        bool CommandBeing(IBeing being, Command command);
+
+        bool PlayerMoved { get; set; }
+        Action<EngineMode, Func<bool>> PushEngineMode { get; }
+        Action ClearPendingInput { get; }
     }
 
     public enum EngineMode

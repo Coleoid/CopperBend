@@ -61,7 +61,7 @@ namespace CopperBend.Model
             }
 
             //controls.SetMapDirty();
-            controls.Experience(seedToSow.PlantType, Exp.PlantSeed);
+            controls.AddExperience(seedToSow.PlantType, Exp.PlantSeed);
         }
 
         internal Seed GetSeedFromStack()

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
 using SadConsole.Input;
 using CopperBend.Model;
-using GoRogue;
 using Direction = CopperBend.Contract.Direction;
 
 namespace CopperBend.Engine
@@ -14,11 +13,6 @@ namespace CopperBend.Engine
     {
         private const int lowercase_a = 97;
         private const int lowercase_z = 123;
-
-        private void MakeMaps()
-        {
-            MultiSpatialMap<IItem> MultiItemMap = new MultiSpatialMap<IItem>();
-        }
 
         private int AlphaIndexOfKeyPress(AsciiKey key)
         {
@@ -131,17 +125,6 @@ namespace CopperBend.Engine
             return false;
         }
 
-        public void AttackPlayer(IBeing being)
-        {
-            //0.1
-            int damage = 2;
-            Output.WriteLine($"The {being.Name} hit me for {damage}.");
-            being.Hurt(damage);
-
-            if (damage > 0)
-                Output.WriteLine($"Ow.  Down to {being.Health}.");
-        }
-
         public void HealActor(IBeing being, int amount)
         {
             being.Heal(amount);
@@ -173,7 +156,7 @@ namespace CopperBend.Engine
 
         public void PutItemOnMap(IItem item)
         {
-            //Map.Items.Add(item);
+            ItemMap.Add(item, item.Point);
         }
 
         public void RemovePlantAt(Point point)
@@ -192,7 +175,7 @@ namespace CopperBend.Engine
         }
 
         public int XP { get; set; } = 0;
-        public void Experience(PlantType plant, Exp experience)
+        public void AddExperience(PlantType plant, Exp experience)
         {
             //TODO:  An entire experience subsystem.  For now it can be "points".
 
@@ -222,5 +205,9 @@ namespace CopperBend.Engine
 
             //0.3 may unify those collections and loops, may restructure flow
         }
+
+        public bool PlayerMoved { get; set; }
+        public Action<EngineMode, Func<bool>> PushEngineMode { get; set; }
+        public Action ClearPendingInput { get; set; }
     }
 }

@@ -7,11 +7,9 @@ using System.Linq;
 
 namespace CopperBend.Model
 {
-    // Extends the SadConsole.Entities.Entity class
-    // by adding an ID to it using GoRogue's ID system
     public abstract class CbEntity : SadConsole.Entities.Entity, IHasID
     {
-        // one IDGenerator for all Entities
+        // one IDGenerator for all CbEntities
         public static IDGenerator IDGenerator = new IDGenerator();
         public uint ID { get; private set; } = IDGenerator.UseID();
 

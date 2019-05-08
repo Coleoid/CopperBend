@@ -44,7 +44,7 @@ namespace CopperBend.Engine
                 var cmd = GetCommand(being);
                 if (cmd.Action == CmdAction.Incomplete) return false;
 
-                var actionWasTaken = Controls.CommandActor(being, cmd);
+                var actionWasTaken = Controls.CommandBeing(being, cmd);
                 if (actionWasTaken) NextStep = null;
 
                 return actionWasTaken;
@@ -53,7 +53,7 @@ namespace CopperBend.Engine
             var commandGiven = deliverCommandFromInput();
             if (!commandGiven)
             {
-                GameState.PushEngineMode(EngineMode.InputBound, deliverCommandFromInput);
+                Controls.PushEngineMode(EngineMode.InputBound, deliverCommandFromInput);
             }
         }
 
@@ -110,8 +110,7 @@ namespace CopperBend.Engine
                 return CommandIncomplete;
             }
 
-            if (press.Key == Keys.OemQuestion // INSTANT BUG BELOW, during conversion
-                && (press.Key == Keys.LeftShift || press.Key == Keys.RightShift))
+            if (press.Character == '?')
             {
                 ShowInventory(being, i => i.IsConsumable);
                 return CommandIncomplete;
@@ -155,7 +154,7 @@ namespace CopperBend.Engine
                 return CommandIncomplete;
             }
 
-            //0.0 omae wa shinderu
+            //0.0 omae wa mou shindeiru
             if (press.Key == Keys.OemQuestion)
             {
                 ShowInventory(being, i => true);
@@ -175,7 +174,7 @@ namespace CopperBend.Engine
 
             return CommandIncomplete;
         }
-        //HMMM:  Consume_main and Drop_main differ only in CmdAction and inventory filter
+        //HMMM:  Consume_main and Drop_main differ only in CmdAction, inventory filter, text
 
         public Command Help()
         {
@@ -317,17 +316,18 @@ namespace CopperBend.Engine
             return CommandIncomplete;
         }
 
-        public Command PickUp(IBeing being) //0.2
+        /// <summary> 0.1:  simply grab the topmost.  Later, choose. </summary>
+        public Command PickUp(IBeing being)
         {
-            //  Right now, simply grabs the topmost
-            var topItem = being.ReachableItems()
-                .LastOrDefault();
+            var items = GameState.Map.ItemMap.GetItems(being.Position);
 
+            var topItem = items.LastOrDefault();
             if (topItem == null)
             {
                 WriteLine("Nothing to pick up here.");
                 return CommandIncomplete;
             }
+
             return new Command(CmdAction.PickUp, CmdDirection.None, topItem);
         }
 

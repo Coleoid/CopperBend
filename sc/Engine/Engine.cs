@@ -74,8 +74,8 @@ namespace CopperBend.Engine
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, null );
 
             GameState.Player = Player = CreatePlayer(SpaceMap.PlayerStartPoint);
-            GameState.PushEngineMode = PushEngineMode;
-            GameState.ClearPendingInput = InputQueue.Clear;
+            Dispatcher.PushEngineMode = PushEngineMode;
+            Dispatcher.ClearPendingInput = InputQueue.Clear;
 
             CompoundMap FullMap = new CompoundMap
             {
@@ -149,13 +149,13 @@ namespace CopperBend.Engine
 
         public void SyncStateChanges()
         {
-            if (GameState.PlayerMoved)
+            if (Dispatcher.PlayerMoved)
             {
                 //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
                 //Map.UpdatePlayerFieldOfView(actor);
                 //Map.IsDisplayDirty = true;
                 MapConsole.CenterViewPortOnPoint(Player.Position);
-                GameState.PlayerMoved = false;
+                Dispatcher.PlayerMoved = false;
             }
 
         }

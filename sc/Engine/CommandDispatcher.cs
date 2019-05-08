@@ -40,7 +40,7 @@ namespace CopperBend.Engine
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
 
-        public bool CommandActor(IBeing being, Command command)
+        public bool CommandBeing(IBeing being, Command command)
         {
             switch (command.Action)
             {
@@ -83,7 +83,7 @@ namespace CopperBend.Engine
 
                 being.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
                 Learn(fruit);
-                Experience(fruit.PlantType, Exp.EatFruit);
+                AddExperience(fruit.PlantType, Exp.EatFruit);
                 Schedule.AddAgent(being, 2);
             }
 
@@ -130,12 +130,12 @@ namespace CopperBend.Engine
                 if (being.IsPlayer)
                     Output.WriteLine($"I can't walk through {np}.");
                 
-                GameState.ClearPendingInput();
+                ClearPendingInput();
                 return false;
             }
 
             being.Position += offset;
-            GameState.PlayerMoved |= being.IsPlayer;
+            PlayerMoved |= being.IsPlayer;
 
             int directionsMoved = 0;
             if (offset.X != 0) directionsMoved++;
@@ -199,20 +199,20 @@ namespace CopperBend.Engine
 
         private bool Do_PickUp(IBeing being, Command command)
         {
-            var topItem = ItemMap.GetItems(being.Location)
-                .LastOrDefault();
-
-            if (topItem == null)
+            var item = command.Item;
+            var pickedUp = ItemMap.Remove(item);
+            if (pickedUp)
             {
-                Output.WriteLine("Nothing to pick up here.");
-                return false;
+                being.AddToInventory(item);
+                ScheduleAgent(being, 4);
+                Output.WriteLine($"Picked up {item.Name}");
             }
-
-            ItemMap.Remove(topItem);
-            being.AddToInventory(topItem);
-            Output.WriteLine($"Picked up {topItem.Name}");
-            ScheduleAgent(being, 4);
-            return true;
+            else
+            {
+                ScheduleAgent(being, 1);
+                Output.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
+            }
+            return pickedUp;
         }
 
         private bool Do_Use(IBeing being, Command command)
@@ -287,7 +287,7 @@ namespace CopperBend.Engine
                 being.RemoveFromInventory(seedStock);
             }
 
-            Experience(seedToSow.PlantType, Exp.PlantSeed);
+            AddExperience(seedToSow.PlantType, Exp.PlantSeed);
 
             return true;
         }

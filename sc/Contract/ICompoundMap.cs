@@ -137,7 +137,7 @@ namespace CopperBend.Contract
         public static IDGenerator IDGenerator = new IDGenerator();
         public uint ID { get; private set; } = IDGenerator.UseID();
         #endregion
-        public int Extent { get; }
+        public int Extent { get; set; }
     }
 
 

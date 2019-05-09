@@ -160,8 +160,8 @@ namespace CopperBend.Model
 
     public class Monster : Being
     {
-        public Monster(Color foreground, Color background) 
-            : base(foreground, background, 'M')
+        public Monster(Color foreground, Color background, int glyph = 'M') 
+            : base(foreground, background, glyph)
         {
         }
     }

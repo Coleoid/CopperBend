@@ -29,7 +29,6 @@ namespace CopperBend.Engine
         
         private Keyboard Kbd;
         public Queue<AsciiKey> InputQueue;
-        private SpaceMap SpaceMap;
         private Being Player;
         private GameState GameState;
 
@@ -46,6 +45,7 @@ namespace CopperBend.Engine
             IsFocused = true;
 
             MapSize = new Size(200, 130);
+
             GameSize = new Size(gameWidth, gameHeight);
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
 
@@ -63,35 +63,28 @@ namespace CopperBend.Engine
         {
             PushEngineMode(EngineMode.StartUp, null);
 
-            var gen = new MapGen();
-            SpaceMap = gen.GenerateMap(MapSize.Width, MapSize.Height, 100, 5, 15);
+            //var gen = new MapGen();
+            //SpaceMap = gen.GenerateMap(MapSize.Width, MapSize.Height, 100, 5, 15);
+
+            var loader = new MapLoader();
+            CompoundMap fullMap = loader.FarmMap();
             log.Debug("Generated map");
 
             Schedule = new Schedule();
             Describer describer = new Describer();
 
             GameState = new GameState();
-            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, null );
+            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, null);
 
-            GameState.Player = Player = CreatePlayer(SpaceMap.PlayerStartPoint);
+            GameState.Player = Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint);
             Dispatcher.PushEngineMode = PushEngineMode;
             Dispatcher.ClearPendingInput = InputQueue.Clear;
 
-            CompoundMap FullMap = new CompoundMap
-            {
-                Width = MapSize.Width,
-                Height = MapSize.Height,
-                SpaceMap = SpaceMap,
-                BeingMap = new MultiSpatialMap<IBeing>(),
-                ItemMap = new MultiSpatialMap<IItem>(),
-                LocatedTriggers = new List<LocatedTrigger>(),
-                BlightMap = null
-            };
-            GameState.Map = FullMap;
+            GameState.Map = fullMap;
             Schedule.AddAgent(Player, 12);
 
             var builder = new UIBuilder(GameSize);
-            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, MapSize, "Game Map", FullMap);
+            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, MapSize, "Game Map", fullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player);
             MapWindow.Show();
@@ -107,7 +100,7 @@ namespace CopperBend.Engine
             PushEngineMode(EngineMode.Schedule, null);
         }
 
-        private Being CreatePlayer(Point playerLocation)
+        private Being CreatePlayer(Coord playerLocation)
         {
             var player = new Player(Color.AntiqueWhite, Color.Transparent);
             player.Animation.CurrentFrame[0].Glyph = '@';

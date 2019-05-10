@@ -26,7 +26,6 @@ namespace CopperBend.Model
     {
         public int Health { get; set; }
         public int MaxHealth { get; set; }
-        public Point Location { get; protected set; }
         public char Symbol { get; set; }
 
         protected Being(Color foreground, Color background, int glyph, int width = 1, int height = 1)
@@ -38,28 +37,14 @@ namespace CopperBend.Model
             InventoryList = new List<IItem>();
         }
 
-        //internal ILog log;
         internal IControlPanel Controls { get; set; }
-        //public Being()
-        //    : this(new Point(0, 0))
-        //{ }
-        //public Being(Point point)
-        //{
-        //    Point = point;
-        //    Health = 6;
-        //    Awareness = 6;
-
-        //    InventoryList = new List<IItem>();
-
-        //    log = LogManager.GetLogger("CB.Being");
-        //}
-
-        public void MoveTo(Point point)
-        {
-            Location = point;
-        }
 
         //  IBeing
+        public void MoveTo(Coord point)
+        {
+            Position = point;
+        }
+
         public int Awareness { get; set; }
         public IAreaMap Map { get; set; }
 

@@ -89,7 +89,7 @@ namespace CopperBend.Contract
     public class TerrainType
     {
         public string Name;
-        public Cell Looks; //0.0 refine with screen representation
+        public Cell Looks; //0.1
         public bool CanSeeThrough;
         public bool CanWalkThrough;
         public bool CanPlant;
@@ -106,18 +106,18 @@ namespace CopperBend.Contract
         //public int Elevation;  //for later movement/attack mod
         public TerrainType Terrain;
 
-        //0.?: Coverings, water/blight/weeds
-
         //0.2.  0.3 accounts for modifiers (smoke, dust, giant creature, ...)
         public bool CanSeeThrough => Terrain.CanSeeThrough;
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
+        //0.2.  0.3 accounts for modifiers (permission, hostile aura, blight, ...)
         public bool CanPlant => Terrain.CanPlant;
 
         public bool CanPreparePlanting { get; internal set; }
         public bool IsTilled { get; internal set; }
         public bool IsTillable { get; internal set; }
         public bool IsSown { get; internal set; }
+        public bool IsKnown { get; internal set; }
     }
 
     public class AreaBlight : IHasID

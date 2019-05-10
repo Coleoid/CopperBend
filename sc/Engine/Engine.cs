@@ -12,6 +12,7 @@ using SadConState = SadConsole.Global;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using Size = System.Drawing.Size;
 using System.Linq;
+using GoRogue.MapViews;
 
 namespace CopperBend.Engine
 {
@@ -44,8 +45,6 @@ namespace CopperBend.Engine
             IsVisible = true;
             IsFocused = true;
 
-            MapSize = new Size(200, 130);
-
             GameSize = new Size(gameWidth, gameHeight);
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
 
@@ -62,9 +61,6 @@ namespace CopperBend.Engine
         public void Init()
         {
             PushEngineMode(EngineMode.StartUp, null);
-
-            //var gen = new MapGen();
-            //SpaceMap = gen.GenerateMap(MapSize.Width, MapSize.Height, 100, 5, 15);
 
             var loader = new MapLoader();
             CompoundMap fullMap = loader.FarmMap();
@@ -84,7 +80,7 @@ namespace CopperBend.Engine
             Schedule.AddAgent(Player, 12);
 
             var builder = new UIBuilder(GameSize);
-            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, MapSize, "Game Map", fullMap);
+            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "Game Map", fullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player);
             MapWindow.Show();
@@ -102,14 +98,16 @@ namespace CopperBend.Engine
 
         private Being CreatePlayer(Coord playerLocation)
         {
-            var player = new Player(Color.AntiqueWhite, Color.Transparent);
+            var player = new Player(Color.AntiqueWhite, Color.Transparent)
+            {
+                Name = "Suvail",
+                Position = playerLocation
+            };
             player.Animation.CurrentFrame[0].Glyph = '@';
             player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
-            player.Position = playerLocation;
             player.Components.Add(new EntityViewSyncComponent());
-            player.Name = "Suvail";
 
-            log.Debug("Created player entity.");
+            log.Debug("Created player.");
             return player;
         }
         #endregion
@@ -131,6 +129,7 @@ namespace CopperBend.Engine
             base.Update(timeElapsed);
         }
 
+
         public void QueueInput()
         {
             //  0.5, later other sources of input
@@ -145,8 +144,22 @@ namespace CopperBend.Engine
             if (Dispatcher.PlayerMoved)
             {
                 //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
-                //Map.UpdatePlayerFieldOfView(actor);
-                //Map.IsDisplayDirty = true;
+
+                //TODO:  relocate this FOV init code to (OnMapChange)
+                var sm = GameState.Map.SpaceMap;
+                var canSeeThrough = new LambdaMapView<bool>(
+                    () => sm.Width, () => sm.Height,
+                    (coord) => sm.CanSeeThrough(coord)
+                );
+                var fov = new FOV(canSeeThrough);
+                
+                //0.0, 0.2 will use FOV to change display
+                fov.Calculate(Player.Position);
+                sm.SeeCoords(fov.NewlySeen);
+                var inFovView = fov.BooleanFOV;
+                var inFovCoords = fov.CurrentFOV;  // whichever repr is more useful
+                //  having done that... how do I alter the rendering of the map cells?
+
                 MapConsole.CenterViewPortOnPoint(Player.Position);
                 Dispatcher.PlayerMoved = false;
             }

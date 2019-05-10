@@ -101,7 +101,7 @@ namespace CopperBend.Engine
         #region Direction
         private bool Do_Direction(IBeing being, CmdDirection direction)
         {
-            var point = PointInDirection(being.Location, direction);
+            var point = PointInDirection(being.Position, direction);
 
             IBeing targetBeing = BeingMap.GetItems(point).FirstOrDefault();
             if (targetBeing == null)
@@ -191,7 +191,7 @@ namespace CopperBend.Engine
             var item = being.RemoveFromInventory(command.Item);
             Guard.AgainstNullArgument(item, "Item to drop not found in inventory");
 
-            item.MoveTo(being.Location);
+            item.MoveTo(being.Position);
             ItemMap.Add(item, item.Point);
             ScheduleAgent(being, 1);
             return true;
@@ -231,7 +231,7 @@ namespace CopperBend.Engine
 
         private bool Use_Hoe(IBeing being, Command command)
         {
-            var targetPoint = PointInDirection(being.Location, command.Direction);
+            var targetPoint = PointInDirection(being.Position, command.Direction);
             var space = SpaceMap.GetItem(targetPoint);
             if (space.CanPlant)
             {
@@ -260,7 +260,7 @@ namespace CopperBend.Engine
 
         private bool Use_Seed(IBeing being, Command command)
         {
-            var targetPoint = PointInDirection(being.Location, command.Direction);
+            var targetPoint = PointInDirection(being.Position, command.Direction);
             var space = SpaceMap.GetItem(targetPoint);
 
             if (!space.IsTilled)

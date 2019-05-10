@@ -40,12 +40,7 @@ namespace CopperBend.Engine
             return messageLog;
         }
 
-        public (ScrollingConsole, Window) CreateMapWindow(
-            Size windowSize, 
-            Size mapSize, 
-            string title,
-            CompoundMap fullMap
-            )
+        public (ScrollingConsole, Window) CreateMapWindow(Size windowSize, string title, CompoundMap fullMap)
         {
             int viewWidth = windowSize.Width - 2;
             int viewHeight = windowSize.Height - 2;
@@ -68,14 +63,14 @@ namespace CopperBend.Engine
             Cell[] initialCells = GetCells(fullMap.SpaceMap);
 
             var mapConsole = new ScrollingConsole(
-                mapSize.Width, mapSize.Height,
+                fullMap.Width, fullMap.Height,
                 Global.FontDefault, new Rectangle(0, 0, viewWidth, viewHeight),
                 initialCells)
             {
                 // Fit the MapConsole inside the border
                 Position = new Point(1, 1)
             };
-            log.DebugFormat("Created map console, map size [{0}], viewport size [{1}].", mapSize, mapWindow.ViewPort);
+            log.DebugFormat("Created map console, map size [{0},{1}], viewport size [{2}].", fullMap.Width, fullMap.Height, mapWindow.ViewPort);
 
             mapWindow.Children.Add(mapConsole);
 

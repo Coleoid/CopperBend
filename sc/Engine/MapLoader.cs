@@ -24,6 +24,9 @@ namespace CopperBend.Engine
         private void InitTerrain()
         {
             TerrainTypes = new Dictionary<string, TerrainType>();
+            var dirtBG = new Color(50, 30, 13);
+            var growingBG = new Color(28, 54, 22);
+            var stoneBG = new Color(28, 30, 22);
 
             var type = new TerrainType
             {
@@ -40,9 +43,10 @@ namespace CopperBend.Engine
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 CanPlant = true,
-                Looks = new Cell(Color.DarkGray, Color.Gray, '.'),
+                Looks = new Cell(Color.DarkGray, dirtBG, '.'),
             };
             StoreTerrainType(type);
+
 
             type = new TerrainType
             {
@@ -50,7 +54,7 @@ namespace CopperBend.Engine
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 CanPlant = true,
-                Looks = new Cell(Color.Brown, Color.SandyBrown, '~'),
+                Looks = new Cell(Color.SaddleBrown, dirtBG, '~'),
 
             };
             StoreTerrainType(type);
@@ -61,7 +65,7 @@ namespace CopperBend.Engine
                 Name = "stone wall",
                 CanWalkThrough = false,
                 CanSeeThrough = false,
-                Looks = new Cell(Color.DarkGray, Color.SlateGray, '#'),
+                Looks = new Cell(Color.DarkGray, stoneBG, '#'),
             };
             StoreTerrainType(type);
 
@@ -70,7 +74,7 @@ namespace CopperBend.Engine
                 Name = "closed door",
                 CanWalkThrough = false,
                 CanSeeThrough = false,
-                Looks = new Cell(Color.DarkGray, Color.SlateGray, '+'),
+                Looks = new Cell(Color.DarkGray, stoneBG, '+'),
             };
             StoreTerrainType(type);
 
@@ -79,7 +83,7 @@ namespace CopperBend.Engine
                 Name = "open door",
                 CanWalkThrough = true,
                 CanSeeThrough = true,
-                Looks = new Cell(Color.DarkGray, Color.SlateGray, '-'),
+                Looks = new Cell(Color.DarkGray, stoneBG, '-'),
             };
             StoreTerrainType(type);
 
@@ -88,7 +92,7 @@ namespace CopperBend.Engine
                 Name = "wooden fence",
                 CanWalkThrough = false,
                 CanSeeThrough = false,
-                Looks = new Cell(Color.Brown, Color.SandyBrown, 'X'),
+                Looks = new Cell(Color.SaddleBrown, dirtBG, 'X'),
             };
             StoreTerrainType(type);
 
@@ -97,7 +101,7 @@ namespace CopperBend.Engine
                 Name = "wall",
                 CanWalkThrough = false,
                 CanSeeThrough = false,
-                Looks = new Cell(Color.DarkGray, Color.SlateGray, '='),
+                Looks = new Cell(Color.DarkGray, stoneBG, '='),
             };
             StoreTerrainType(type);
 
@@ -106,7 +110,7 @@ namespace CopperBend.Engine
                 Name = "gate",
                 CanWalkThrough = false,
                 CanSeeThrough = true,
-                Looks = new Cell(Color.DarkGray, Color.SlateGray, '%'),
+                Looks = new Cell(Color.DarkGray, stoneBG, '%'),
             };
             StoreTerrainType(type);
 
@@ -116,7 +120,7 @@ namespace CopperBend.Engine
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 CanPlant = true,
-                Looks = new Cell(Color.LightGreen, Color.LawnGreen, ','),
+                Looks = new Cell(Color.ForestGreen, growingBG, ','),
             };
             StoreTerrainType(type);
 
@@ -125,7 +129,7 @@ namespace CopperBend.Engine
                 Name = "tall weeds",
                 CanWalkThrough = true,
                 CanSeeThrough = true,
-                Looks = new Cell(Color.LightGreen, Color.LawnGreen, 'w'),
+                Looks = new Cell(Color.ForestGreen, growingBG, 'w'),
             };
             StoreTerrainType(type);
 
@@ -134,7 +138,7 @@ namespace CopperBend.Engine
                 Name = "table",
                 CanWalkThrough = false,
                 CanSeeThrough = true,
-                Looks = new Cell(Color.BurlyWood, Color.Wheat, 'T'),
+                Looks = new Cell(Color.BurlyWood, stoneBG, 'T'),
             };
             StoreTerrainType(type);
 
@@ -143,7 +147,7 @@ namespace CopperBend.Engine
                 Name = "stairs",
                 CanWalkThrough = true,
                 CanSeeThrough = true,
-                Looks = new Cell(Color.AliceBlue, Color.DarkGoldenrod, '>'),
+                Looks = new Cell(Color.AliceBlue, stoneBG, '>'),
             };
             StoreTerrainType(type);
 
@@ -168,27 +172,7 @@ namespace CopperBend.Engine
             else
                 map = DemoMap();
 
-            //Attach(map, state);
-
             return map;
-        }
-
-        //public void Attach(IAreaMap map, GameState state)
-        //{
-        //    map.ViewpointActor = state.Player;
-        //    map.Actors.Add(state.Player);
-        //    state.Player.MoveTo(map.PlayerStartsAt);
-        //    map.UpdatePlayerFieldOfView(state.Player);
-        //}
-
-        public IAreaMap LoadMap(string mapName)
-        {
-            return MapFromFile(mapName);
-        }
-
-        public IAreaMap MapFromFile(string mapName)
-        {
-            return null;
         }
 
         public CompoundMap MapFromYAML(string mapYaml)
@@ -197,10 +181,16 @@ namespace CopperBend.Engine
             var width = data.Terrain.Max(t => t.Length);
             var height = data.Terrain.Count();
 
-            var map = new CompoundMap();
-            var spaceMap = new SpaceMap(width, height);
-
-            var tilledType = TerrainTypes["tilled dirt"];  //0.1
+            var map = new CompoundMap
+            {
+                Width = width,
+                Height = height,
+                SpaceMap = new SpaceMap(width, height),
+                BeingMap = new MultiSpatialMap<IBeing>(),
+                ItemMap = new MultiSpatialMap<IItem>(),
+                LocatedTriggers = new List<LocatedTrigger>(),
+                BlightMap = new SpatialMap<AreaBlight>(),
+            };
 
             for (int y = 0; y < height; y++)
             {
@@ -217,16 +207,12 @@ namespace CopperBend.Engine
                     {
                         Terrain = type,
                     };
-                    spaceMap.Add(space, x, y);
+                    map.SpaceMap.Add(space, x, y);
 
-                    if (type == tilledType) spaceMap.Till(space);
+                    if (type == SpaceMap.TilledSoil) map.SpaceMap.Till(space);
                 }
             }
 
-            spaceMap.PlayerStartPoint = (23, 21);
-            map.SpaceMap = spaceMap;
-
-            var blightMap = new SpatialMap<AreaBlight>();
             foreach (var overlay in data.Blight ?? new List<BlightOverlayData>())
             {
                 var nums = Regex.Split(overlay.Location, ",");
@@ -247,15 +233,10 @@ namespace CopperBend.Engine
                         int extent = isD ? int.Parse(symbol) : 0;
 
 
-                        blightMap.Add(new AreaBlight {Extent = extent}, x + x_off, y + y_off);
+                        map.BlightMap.Add(new AreaBlight {Extent = extent}, x + x_off, y + y_off);
                     }
                 }
             }
-
-            map.BlightMap = blightMap;
-            map.BeingMap = new MultiSpatialMap<IBeing>();
-            map.ItemMap = new MultiSpatialMap<IItem>();
-            map.LocatedTriggers = new List<LocatedTrigger>();
 
             return map;
         }
@@ -266,7 +247,7 @@ namespace CopperBend.Engine
             if (_farmMap == null)
             {
                 _farmMap = MapFromYAML(FarmMapYaml);
-                //_farmMap.PlayerStartsAt = new Point(23, 21);
+                _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1
 
                 //  Obscure point on the edge to test map transitions
                 //_farmMap.AddEventAtLocation(new Point(41, 1), new CommandEntry(GameCommand.GoToFarmhouse, null));
@@ -352,7 +333,7 @@ terrain:
         }
 
 
-        #region Farm and farmhouse map text
+        #region Farm and farmhouse map YAML
         private readonly string FarmMapYaml = @"---
 name:  Farm
 

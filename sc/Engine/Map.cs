@@ -31,6 +31,17 @@ namespace CopperBend.Engine
             return GetItem(location).CanWalkThrough;
         }
 
+        public bool CanSeeThrough(Coord location)
+        {
+            // off the map is not visible
+            if (location.X < 0 || location.X >= Width
+             || location.Y < 0 || location.Y >= Height)
+                return false;
+
+            return GetItem(location).CanSeeThrough;
+        }
+
+
         internal void Sow(Space space, Seed seedToSow)
         {
             throw new NotImplementedException();
@@ -42,6 +53,15 @@ namespace CopperBend.Engine
             {
                 space.Terrain = TilledSoil;
             }
+        }
+
+        internal void SeeCoords(IEnumerable<Coord> newlySeen)
+        {
+            foreach (var seen in newlySeen)
+            {
+                GetItem(seen).IsKnown = true;
+            }
+            throw new NotImplementedException();
         }
     }
 }

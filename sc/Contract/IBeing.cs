@@ -21,7 +21,6 @@ namespace CopperBend.Contract
 
     public interface IBeing : IDestroyable, IScheduleAgent, IHasID
     {
-        Point Location { get; }
         Point Position { get; set; }
         string Name { get; set; }
         int Awareness { get; set; }
@@ -29,7 +28,7 @@ namespace CopperBend.Contract
 
         ICommandSource CommandSource { get; set; }
 
-        void MoveTo(Point point);
+        void MoveTo(Coord point);
         IItem WieldedTool { get; }
         void Wield(IItem item);
 

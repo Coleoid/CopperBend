@@ -15,7 +15,7 @@ namespace CopperBend.Engine
         private ISchedule Schedule { get; set; }
         private IGameState GameState { get; set; }
 
-        private SpaceMap SpaceMap => GameState.Map.SpaceMap;
+        protected SpaceMap SpaceMap => GameState.Map.SpaceMap;
         private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
         private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
 
@@ -278,7 +278,7 @@ namespace CopperBend.Engine
 
             var seedStock = (Seed)command.Item;
             var seedToSow = seedStock.GetSeedFromStack();
-            space.Sow(seedToSow);
+            SpaceMap.Sow(space, seedToSow);
 
             ScheduleAgent(seedToSow, 100);
 

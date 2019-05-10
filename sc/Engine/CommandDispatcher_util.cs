@@ -166,7 +166,7 @@ namespace CopperBend.Engine
 
         public void Till(Space space)
         {
-            space.Till();
+            SpaceMap.Till(space);
         }
 
         public void Learn(Fruit fruit)

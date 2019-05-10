@@ -118,16 +118,6 @@ namespace CopperBend.Contract
         public bool IsTilled { get; internal set; }
         public bool IsTillable { get; internal set; }
         public bool IsSown { get; internal set; }
-
-        internal void Sow(Seed seedToSow)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void Till()
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class AreaBlight : IHasID

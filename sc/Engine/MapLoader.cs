@@ -146,6 +146,8 @@ namespace CopperBend.Engine
                 Looks = new Cell(Color.AliceBlue, Color.DarkGoldenrod, '>'),
             };
             StoreTerrainType(type);
+
+            SpaceMap.TerrainTypes = TerrainTypes;
         }
 
         public void StoreTerrainType(TerrainType type)
@@ -217,7 +219,7 @@ namespace CopperBend.Engine
                     };
                     spaceMap.Add(space, x, y);
 
-                    if (type == tilledType) space.Till();
+                    if (type == tilledType) spaceMap.Till(space);
                 }
             }
 

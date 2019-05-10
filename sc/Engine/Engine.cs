@@ -160,6 +160,9 @@ namespace CopperBend.Engine
                 var inFovCoords = fov.CurrentFOV;  // whichever repr is more useful
                 //  having done that... how do I alter the rendering of the map cells?
 
+                GameState.Map.DisplayBuffer.CellsEnterFOV(fov.NewlySeen);
+                GameState.Map.DisplayBuffer.CellsLeaveFOV(fov.NewlyUnseen);
+
                 MapConsole.CenterViewPortOnPoint(Player.Position);
                 Dispatcher.PlayerMoved = false;
             }

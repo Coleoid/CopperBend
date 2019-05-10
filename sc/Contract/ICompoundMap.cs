@@ -31,6 +31,8 @@ namespace CopperBend.Contract
         IMapView<bool> GetView_CanSeeThrough();
         IMapView<bool> GetView_CanWalkThrough();
         IMapView<int> GetView_BlightStrength();
+
+        DisplayBuffer DisplayBuffer { get; }
     }
 
     public class CompoundMap : ICompoundMap
@@ -83,8 +85,28 @@ namespace CopperBend.Contract
         {
             throw new NotImplementedException();
         }
+
+        public DisplayBuffer DisplayBuffer { get; internal set; }
     }
 
+    public class DisplayBuffer
+    {
+        public Cell[] MapCells { get; internal set; }
+        public Cell[] DisplayCells { get; internal set; }
+
+        public void CellsEnterFOV(IEnumerable<Coord> newlySeen)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CellsLeaveFOV(IEnumerable<Coord> newlyUnseen)
+        {
+            throw new NotImplementedException();
+        }
+
+        //  Though really, what I care about (for updating) is cells in FOV,
+        //  and cells leaving FOV
+    }
 
     public class TerrainType
     {

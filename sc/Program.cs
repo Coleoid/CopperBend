@@ -1,7 +1,7 @@
-﻿using log4net;
-using log4net.Config;
-using System;
+﻿using System;
 using System.IO;
+using log4net;
+using log4net.Config;
 using Game = SadConsole.Game;
 
 namespace CopperBend.Application
@@ -35,7 +35,7 @@ namespace CopperBend.Application
                 log.Fatal("Exception terminated app", ex);
             }
             log.Info("Run ended");
-            Game.Instance.Dispose();
+            Game.Instance?.Dispose();
         }
     }
 }

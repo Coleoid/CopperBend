@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using Size = System.Drawing.Size;
+using System.Linq;
+using Color = Microsoft.Xna.Framework.Color;
+using Keys = Microsoft.Xna.Framework.Input.Keys;
 using log4net;
-using CopperBend.Contract;
-using CopperBend.Model;
-using GoRogue;
 using SadConsole;
 using SadConsole.Input;
 using SadConsole.Components;
-using Microsoft.Xna.Framework;
 using SadConState = SadConsole.Global;
-using Keys = Microsoft.Xna.Framework.Input.Keys;
-using Size = System.Drawing.Size;
-using System.Linq;
+using GoRogue;
 using GoRogue.MapViews;
+using CopperBend.Contract;
+using CopperBend.Fabric;
+using CopperBend.Model;
 
 namespace CopperBend.Engine
 {
@@ -63,20 +64,17 @@ namespace CopperBend.Engine
             PushEngineMode(EngineMode.StartUp, null);
 
             var loader = new MapLoader();
-            CompoundMap fullMap = loader.FarmMap();
+            ICompoundMap fullMap = loader.FarmMap();
             log.Debug("Generated map");
 
-            Schedule = new Schedule();
+            GameState = new GameState
+            {
+                Player = Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint),
+                Map = fullMap
+            };
+
             Describer describer = new Describer();
-
-            GameState = new GameState();
-            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, null);
-
-            GameState.Player = Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint);
-            Dispatcher.PushEngineMode = PushEngineMode;
-            Dispatcher.ClearPendingInput = InputQueue.Clear;
-
-            GameState.Map = fullMap;
+            Schedule = new Schedule();
             Schedule.AddAgent(Player, 12);
 
             var builder = new UIBuilder(GameSize);
@@ -85,13 +83,20 @@ namespace CopperBend.Engine
             MapConsole.Children.Add(Player);
             MapWindow.Show();
 
+            MessageLog = builder.CreateMessageLog();
+            Children.Add(MessageLog);
+            MessageLog.Show();
+
+            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)
+            {
+                PushEngineMode = PushEngineMode,
+                ClearPendingInput = InputQueue.Clear
+            };
+
             Player.CommandSource = new InputCommandSource(InputQueue, describer, MapWindow, GameState, Dispatcher);
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
-            MessageLog = builder.CreateMessageLog();
-            Children.Add(MessageLog);
-            MessageLog.Show();
 
             PushEngineMode(EngineMode.Schedule, null);
         }
@@ -160,8 +165,7 @@ namespace CopperBend.Engine
                 var inFovCoords = fov.CurrentFOV;  // whichever repr is more useful
                 //  having done that... how do I alter the rendering of the map cells?
 
-                GameState.Map.DisplayBuffer.CellsEnterFOV(fov.NewlySeen);
-                GameState.Map.DisplayBuffer.CellsLeaveFOV(fov.NewlyUnseen);
+                GameState.Map.UpdateFromFOV(fov, Player);
 
                 MapConsole.CenterViewPortOnPoint(Player.Position);
                 Dispatcher.PlayerMoved = false;

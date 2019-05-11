@@ -1,7 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using SadConsole;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Color = Microsoft.Xna.Framework.Color;
+using SadConsole;
+using GoRogue;
 
 namespace CopperBend.Engine
 {
@@ -30,13 +31,15 @@ namespace CopperBend.Engine
 
             // add the message console, reposition, enable the viewport, and add it to the window
             _messageConsole = new ScrollingConsole(width - _windowBorderThickness, _maxLines);
-            _messageConsole.Position = new Point(1, 1);
+            _messageConsole.Position = new Coord(1, 1);
             _messageConsole.ViewPort = new Rectangle(0, 0, width - 1, height - _windowBorderThickness);
 
             // create a scrollbar and attach it to an event handler, then add it to the Window
-            _messageScrollBar = new SadConsole.Controls.ScrollBar(SadConsole.Orientation.Vertical, height - _windowBorderThickness);
-            _messageScrollBar.Position = new Point(_messageConsole.Width + 1, _messageConsole.Position.X);
-            _messageScrollBar.IsEnabled = false;
+            _messageScrollBar = new SadConsole.Controls.ScrollBar(Orientation.Vertical, height - _windowBorderThickness)
+            {
+                Position = new Coord(_messageConsole.Width + 1, _messageConsole.Position.X),
+                IsEnabled = false
+            };
             _messageScrollBar.ValueChanged += MessageScrollBar_ValueChanged;
             Add(_messageScrollBar);
 
@@ -91,7 +94,7 @@ namespace CopperBend.Engine
             while (_lines.Count > _maxLines) { _lines.Dequeue(); }
 
             // Move the cursor to the last line and print the message.
-            _messageConsole.Cursor.Position = new Point(1, _lines.Count);
+            _messageConsole.Cursor.Position = new Coord(1, _lines.Count);
             _messageConsole.Cursor.Print(message + "\n");
         }
     }

@@ -1,11 +1,10 @@
-﻿using CopperBend.Contract;
-using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Input;
+using Keys = Microsoft.Xna.Framework.Input.Keys;
 using SadConsole.Input;
+using Coord = GoRogue.Coord;
+using CopperBend.Contract;
 using CopperBend.Model;
-using Direction = CopperBend.Contract.Direction;
 
 namespace CopperBend.Engine
 {
@@ -27,7 +26,7 @@ namespace CopperBend.Engine
             Schedule.AddAgent(agent, tickOff);
         }
 
-        private Point PointInDirection(Point start, CmdDirection direction)
+        private Coord CoordInDirection(Coord start, CmdDirection direction)
         {
             int newX = start.X;
             int newY = start.Y;
@@ -52,11 +51,11 @@ namespace CopperBend.Engine
                 newX++;
             }
 
-            return new Point(newX, newY);
+            return new Coord(newX, newY);
         }
 
 
-        private Point PointInDirection(Point start, Direction direction)
+        private Coord PointInDirection(Coord start, Direction direction)
         {
             int newX = start.X;
             int newY = start.Y;
@@ -89,7 +88,7 @@ namespace CopperBend.Engine
                 newX++;
             }
 
-            return new Point(newX, newY);
+            return new Coord(newX, newY);
         }
 
         private Direction DirectionOfKey(AsciiKey keyPress)
@@ -116,7 +115,7 @@ namespace CopperBend.Engine
         //    Map.IsDisplayDirty = true;
         //}
 
-        public bool CanActorSeeTarget(IBeing being, Point target)
+        public bool CanActorSeeTarget(IBeing being, Coord target)
         {
             //FINISH: one FOV and one Pathfinder per map
             //FieldOfView fov = new FieldOfView(Map);
@@ -136,7 +135,7 @@ namespace CopperBend.Engine
             //actor.Feed(amount);
         }
 
-        public List<Point> GetPathTo(Point start, Point target)
+        public List<Coord> GetPathTo(Coord start, Coord target)
         {
             //Map.SetWalkable(start, true);
             //Map.SetWalkable(target, true);
@@ -156,10 +155,10 @@ namespace CopperBend.Engine
 
         public void PutItemOnMap(IItem item)
         {
-            ItemMap.Add(item, item.Point);
+            ItemMap.Add(item, item.Location);
         }
 
-        public void RemovePlantAt(Point point)
+        public void RemovePlantAt(Coord position)
         {
             //Map.GetTileAt(point).RemovePlant();
         }
@@ -182,7 +181,7 @@ namespace CopperBend.Engine
             XP += 20;
         }
 
-        public void CheckActorAtCoordEvent(IBeing being, ITile tile)
+        public void CheckActorAtCoordEvent(IBeing being, Coord position)
         {
             //if (Map.LocationMessages.ContainsKey(tile.Point))
             //{

@@ -1,9 +1,9 @@
-﻿using CopperBend.Contract;
-using GoRogue;
-using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Color = Microsoft.Xna.Framework.Color;
+using GoRogue;
+using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
@@ -27,6 +27,7 @@ namespace CopperBend.Model
         public int Health { get; set; }
         public int MaxHealth { get; set; }
         public char Symbol { get; set; }
+        //public Coord Position { get; set; }
 
         protected Being(Color foreground, Color background, int glyph, int width = 1, int height = 1)
             : base(foreground, background, glyph, width, height)
@@ -42,11 +43,11 @@ namespace CopperBend.Model
         //  IBeing
         public void MoveTo(Coord point)
         {
-            Position = point;
+            base.Position = point;
         }
 
         public int Awareness { get; set; }
-        public IAreaMap Map { get; set; }
+        //public IAreaMap Map { get; set; }
 
         //  IDestroyable
         public void Heal(int amount) => Health = Math.Min(Health + amount, MaxHealth);

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CopperBend.Contract;
 using log4net;
-using Microsoft.Xna.Framework;
-using SadConsole;
+using Color = Microsoft.Xna.Framework.Color;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using SadConsole;
+using GoRogue;
+using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {
@@ -76,8 +78,8 @@ namespace CopperBend.Engine
                 for (int r = 1; r < Rooms.Count; r++)
                 {
                     //for all remaining rooms get the center of the room and the previous room
-                    Point previousRoomCenter = Rooms[r - 1].Center;
-                    Point currentRoomCenter = Rooms[r].Center;
+                    Coord previousRoomCenter = Rooms[r - 1].Center;
+                    Coord currentRoomCenter = Rooms[r].Center;
 
                     CreateHorizontalTunnel(previousRoomCenter.X, currentRoomCenter.X, previousRoomCenter.Y);
                     CreateVerticalTunnel(previousRoomCenter.Y, currentRoomCenter.Y, currentRoomCenter.X);

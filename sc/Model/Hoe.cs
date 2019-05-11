@@ -1,5 +1,4 @@
-﻿using CopperBend.Contract;
-using Microsoft.Xna.Framework;
+﻿using GoRogue;
 
 namespace CopperBend.Model
 {
@@ -7,8 +6,8 @@ namespace CopperBend.Model
     {
         public override string Name { get => "hoe"; }
 
-        public Hoe(Point point)
-            : base(point, 1, true)
+        public Hoe(Coord position)
+            : base(position, 1, true)
         {
         }
 

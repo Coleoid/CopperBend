@@ -1,5 +1,4 @@
 ﻿using GoRogue;
-using Microsoft.Xna.Framework;
 
 namespace CopperBend.Contract
 {
@@ -7,11 +6,11 @@ namespace CopperBend.Contract
     {
         string Name { get; }
         int Quantity { get; set; }
-        Point Point { get; }
-        void MoveTo(Point point);
+        Coord Location { get; }
+        void MoveTo(Coord location);
 
         bool IsUsable { get; }
-        void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, CmdDirection direction);
+        void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction);
 
         bool IsConsumable { get; }
         string ConsumeVerb { get; }
@@ -29,11 +28,4 @@ namespace CopperBend.Contract
         Healer,
         Thornfriend,
     }
-
-    public interface IMessageOutput
-    {
-        void Prompt(string text);
-        void WriteLine(string text);
-    }
-
 }

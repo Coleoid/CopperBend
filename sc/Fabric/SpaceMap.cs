@@ -1,10 +1,10 @@
-﻿using GoRogue;
-using CopperBend.Contract;
-using CopperBend.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using GoRogue;
+using CopperBend.Contract;
+using CopperBend.Model;  //0.1: later, Seed => ISowable, as the model matures
 
-namespace CopperBend.Engine
+namespace CopperBend.Fabric
 {
     public class SpaceMap : SpatialMap<Space>
     {
@@ -21,24 +21,24 @@ namespace CopperBend.Engine
             Height = height;
         }
 
-        public bool CanWalkThrough(Coord location)
+        public bool CanWalkThrough(Coord position)
         {
             // off the map is not walkable
-            if (location.X < 0 || location.X >= Width
-             || location.Y < 0 || location.Y >= Height)
+            if (position.X < 0 || position.X >= Width
+             || position.Y < 0 || position.Y >= Height)
                 return false;
 
-            return GetItem(location).CanWalkThrough;
+            return GetItem(position).CanWalkThrough;
         }
 
-        public bool CanSeeThrough(Coord location)
+        public bool CanSeeThrough(Coord position)
         {
             // off the map is not visible
-            if (location.X < 0 || location.X >= Width
-             || location.Y < 0 || location.Y >= Height)
+            if (position.X < 0 || position.X >= Width
+             || position.Y < 0 || position.Y >= Height)
                 return false;
 
-            return GetItem(location).CanSeeThrough;
+            return GetItem(position).CanSeeThrough;
         }
 
 
@@ -61,7 +61,6 @@ namespace CopperBend.Engine
             {
                 GetItem(seen).IsKnown = true;
             }
-            throw new NotImplementedException();
         }
     }
 }

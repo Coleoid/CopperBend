@@ -1,7 +1,7 @@
-﻿using CopperBend.Contract;
+﻿using System;
+using GoRogue;
+using CopperBend.Contract;
 using CopperBend.Fabric;
-using Microsoft.Xna.Framework;
-using System;
 
 namespace CopperBend.Model
 {
@@ -29,30 +29,30 @@ namespace CopperBend.Model
         {
         }
 
-        public Seed(Point point, int quantity, PlantType type)
-            : base(point, quantity, true)
+        public Seed(Coord position, int quantity, PlantType type)
+            : base(position, quantity, true)
         {
             PlantType = type;
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, CmdDirection direction)
+        public override void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
         {
-            if (!tile.IsTilled)
-            {
-                string qualifier = tile.IsTillable ? "untilled " : "";
-                output.WriteLine($"Cannot sow {qualifier}{tile.TileType.Name}.");
-                return;
-            }
+            //if (!tile.IsTilled)
+            //{
+            //    string qualifier = tile.IsTillable ? "untilled " : "";
+            //    output.Add($"Cannot sow {qualifier}{tile.TileType.Name}.");
+            //    return;
+            //}
 
-            if (tile.IsSown)
-            {
-                output.WriteLine($"The ground to my {direction} is already sown with a seed.");
-                return;
-            }
+            //if (tile.IsSown)
+            //{
+            //    output.Add($"The ground to my {direction} is already sown with a seed.");
+            //    return;
+            //}
 
-            var seedToSow = GetSeedFromStack();
-            tile.Sow(seedToSow);
-            //controls.AddToSchedule(seedToSow, 100);
+            //var seedToSow = GetSeedFromStack();
+            //tile.Sow(seedToSow);
+            ////controls.AddToSchedule(seedToSow, 100);
 
             if (--Quantity == 0)
             {
@@ -61,13 +61,14 @@ namespace CopperBend.Model
             }
 
             //controls.SetMapDirty();
+            var seedToSow = GetSeedFromStack();
             controls.AddExperience(seedToSow.PlantType, Exp.PlantSeed);
         }
 
         internal Seed GetSeedFromStack()
         {
             Guard.Against(Quantity < 1, "Somehow there's no seed here");
-            return new Seed(this.Point, 1, this.PlantType);
+            return new Seed(this.Location, 1, this.PlantType);
         }
 
 
@@ -78,9 +79,9 @@ namespace CopperBend.Model
             throw new NotImplementedException();
         }
 
-        private void SeedGrows(IControlPanel controls, IMessageOutput output)
+        private void SeedGrows(IControlPanel controls, ILogWindow output)
         {
-            output.WriteLine($"The seed is growing... Round {growthRound++}");
+            output.Add($"The seed is growing... Round {growthRound++}");
             controls.ScheduleAgent(this, growthRound > 2 ? 10 : 100);
         }
 
@@ -102,16 +103,16 @@ namespace CopperBend.Model
 
     public class HealerSeed : Seed
     {
-        public HealerSeed(Point point, int quantity) 
-            : base(point, quantity, PlantType.Healer)
+        public HealerSeed(Coord position, int quantity) 
+            : base(position, quantity, PlantType.Healer)
         {}
 
         protected override void SeedMatures(IControlPanel controls)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Point, 2, this.PlantType);
+            IItem fruit = new Fruit(this.Location, 2, this.PlantType);
             controls.PutItemOnMap(fruit);
-            controls.RemovePlantAt(this.Point);
+            controls.RemovePlantAt(this.Location);
             //controls.SetMapDirty();
         }
     }

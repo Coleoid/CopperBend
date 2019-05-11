@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using CopperBend.Contract;
-using GoRogue;
-using Microsoft.Xna.Framework;
-using SadConsole;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Color = Microsoft.Xna.Framework.Color;
+using SadConsole;
+using GoRogue;
+using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {

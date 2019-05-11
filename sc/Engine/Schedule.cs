@@ -1,10 +1,9 @@
-﻿using CopperBend.Contract;
-using CopperBend.Fabric;
-using CopperBend.Model;
-using log4net;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using log4net;
+using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {

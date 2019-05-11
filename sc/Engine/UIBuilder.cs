@@ -1,11 +1,12 @@
 ﻿using System;
-using CopperBend.Contract;
+using System.Collections.Generic;
+using Size = System.Drawing.Size;
+using log4net;
 using SadConsole;
 using SadConsole.Controls;
-using Microsoft.Xna.Framework;
-using Size = System.Drawing.Size;
-using System.Collections.Generic;
-using log4net;
+using GoRogue;
+using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {
@@ -25,7 +26,7 @@ namespace CopperBend.Engine
         {
             var messageLog = new MessageLogWindow(GameSize.Width, 8, "Message Log")
             {
-                Position = new Point(0, GameSize.Height - 8)
+                Position = new Coord(0, GameSize.Height - 8)
             };
 
             ////  Rudimentary fill the window
@@ -40,7 +41,7 @@ namespace CopperBend.Engine
             return messageLog;
         }
 
-        public (ScrollingConsole, Window) CreateMapWindow(Size windowSize, string title, CompoundMap fullMap)
+        public (ScrollingConsole, Window) CreateMapWindow(Size windowSize, string title, ICompoundMap fullMap)
         {
             int viewWidth = windowSize.Width - 2;
             int viewHeight = windowSize.Height - 2;
@@ -55,7 +56,7 @@ namespace CopperBend.Engine
             //TODO: make click do something
             Button closeButton = new Button(3, 1)
             {
-                Position = new Point(windowSize.Width - 3, 0),
+                Position = new Coord(windowSize.Width - 3, 0),
                 Text = "X"
             };
             mapWindow.Add(closeButton);
@@ -68,7 +69,7 @@ namespace CopperBend.Engine
                 initialCells)
             {
                 // Fit the MapConsole inside the border
-                Position = new Point(1, 1)
+                Position = new Coord(1, 1)
             };
             log.DebugFormat("Created map console, map size [{0},{1}], viewport size [{2}].", fullMap.Width, fullMap.Height, mapWindow.ViewPort);
 

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using CopperBend.Engine;
-using CopperBend.Model;
+using SadConsole;
 using GoRogue;
 using GoRogue.MapViews;
-using Microsoft.Xna.Framework;
-using SadConsole;
 using Rectangle = GoRogue.Rectangle;
+using CopperBend.Fabric;
+using CopperBend.Model;
 
 namespace CopperBend.Contract
 {
@@ -14,7 +13,7 @@ namespace CopperBend.Contract
     {
         int Width { get; }
         int Height { get; }
-        bool IsWithinMap(Point point);
+        bool IsWithinMap(Coord position);
 
         SpaceMap SpaceMap { get; }
         MultiSpatialMap<IBeing> BeingMap { get; }
@@ -24,88 +23,22 @@ namespace CopperBend.Contract
         List<LocatedTrigger> LocatedTriggers { get; }
 
         /// <summary> Can Plant considering terrain, blight, existing plants, and ownership. </summary>
-        bool CanPlant(Point point);
+        bool CanPlant(Coord position);
 
-        bool CanSeeThrough(Point point);
-        bool CanWalkThrough(Point point);
+        bool CanSeeThrough(Coord position);
+        bool CanWalkThrough(Coord position);
         IMapView<bool> GetView_CanSeeThrough();
         IMapView<bool> GetView_CanWalkThrough();
         IMapView<int> GetView_BlightStrength();
 
         DisplayBuffer DisplayBuffer { get; }
-    }
-
-    public class CompoundMap : ICompoundMap
-    {
-        public int Width { get; set; }
-
-        public int Height { get; set; }
-
-        public SpaceMap SpaceMap { get; set; }
-
-        public MultiSpatialMap<IBeing> BeingMap { get; set; }
-
-        public MultiSpatialMap<IItem> ItemMap { get; set; }
-
-        public SpatialMap<AreaBlight> BlightMap { get; set; }
-
-        public List<LocatedTrigger> LocatedTriggers { get; set; }
-
-        public bool CanPlant(Point point)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool CanSeeThrough(Point point)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool CanWalkThrough(Point point)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IMapView<int> GetView_BlightStrength()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IMapView<bool> GetView_CanSeeThrough()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IMapView<bool> GetView_CanWalkThrough()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsWithinMap(Point point)
-        {
-            throw new NotImplementedException();
-        }
-
-        public DisplayBuffer DisplayBuffer { get; internal set; }
+        void UpdateFromFOV(FOV fov, Being player);
     }
 
     public class DisplayBuffer
     {
-        public Cell[] MapCells { get; internal set; }
-        public Cell[] DisplayCells { get; internal set; }
-
-        public void CellsEnterFOV(IEnumerable<Coord> newlySeen)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CellsLeaveFOV(IEnumerable<Coord> newlyUnseen)
-        {
-            throw new NotImplementedException();
-        }
-
-        //  Though really, what I care about (for updating) is cells in FOV,
-        //  and cells leaving FOV
+        public Cell[] RawCells { get; internal set; }
+        public Cell[] OutputCells { get; internal set; }
     }
 
     public class TerrainType
@@ -153,42 +86,42 @@ namespace CopperBend.Contract
     }
 
 
-    public class Region
-    {
-        public Region()
-        {
-            Areas = new List<Rectangle>();
-        }
+    //public class Region
+    //{
+    //    public Region()
+    //    {
+    //        Areas = new List<Rectangle>();
+    //    }
 
-        public List<Rectangle> Areas { get; }
+    //    public List<Rectangle> Areas { get; }
 
-        public void AddArea(Rectangle area)
-        {
+    //    public void AddArea(Rectangle area)
+    //    {
 
-        }
+    //    }
 
-        public bool Contains(Point point)
-        {
-            foreach (var area in Areas)
-            {
-                if (area.Contains(point)) return true;
-            }
+    //    public bool Contains(Coord position)
+    //    {
+    //        foreach (var area in Areas)
+    //        {
+    //            if (area.Contains(position)) return true;
+    //        }
 
-            return false;
-        }
-    }
+    //        return false;
+    //    }
+    //}
 
-    public class BlightRegion : Region
-    {
+    //public class BlightRegion : Region
+    //{
 
-        public int Strength { get; set; }
-    }
+    //    public int Strength { get; set; }
+    //}
 
     public class LocatedTrigger
     {
         /// <summary> Whatever moved into the </summary>
         public Func<IHasID, bool> Trigger { get; }
-        public Region Region { get; }
+        //public Region Region { get; }
     }
 
 }

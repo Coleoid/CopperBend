@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Linq;
+using log4net;
+using SadConsole.Input;
+using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using GoRogue;
-using log4net;
-using Microsoft.Xna.Framework;
-using SadConsole.Input;
 
 namespace CopperBend.Engine
 {
@@ -20,7 +19,7 @@ namespace CopperBend.Engine
         private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
 
         private Describer Describer;
-        private IMessageOutput Output;
+        private MessageLogWindow MessageLog;
         private ILog log;
 
         private Action<AsciiKey> NextStep = null;
@@ -30,13 +29,13 @@ namespace CopperBend.Engine
             ISchedule schedule,
             IGameState gameState,
             Describer describer,
-            IMessageOutput messageOutput
+            MessageLogWindow messageLog
         )
         {
             Schedule = schedule;
             GameState = gameState;
             Describer = describer;
-            Output = messageOutput;
+            MessageLog = messageLog;
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
 
@@ -81,7 +80,7 @@ namespace CopperBend.Engine
                     throw new Exception($"Don't have eating written for fruit of {fruit.PlantType}.");
                 }
 
-                being.AddToInventory(new Seed(new Point(0, 0), 2, fruit.PlantType));
+                being.AddToInventory(new Seed((0, 0), 2, fruit.PlantType));
                 Learn(fruit);
                 AddExperience(fruit.PlantType, Exp.EatFruit);
                 Schedule.AddAgent(being, 2);
@@ -101,21 +100,20 @@ namespace CopperBend.Engine
         #region Direction
         private bool Do_Direction(IBeing being, CmdDirection direction)
         {
-            var point = PointInDirection(being.Position, direction);
+            var newPosition = CoordInDirection(being.Position, direction);
 
-            IBeing targetBeing = BeingMap.GetItems(point).FirstOrDefault();
-            if (targetBeing == null)
+            IBeing targetBeing = BeingMap.GetItems(newPosition).FirstOrDefault();
+            if (targetBeing != null)
             {
-                return Do_DirectionMove(being, point);
+                return Do_DirectionAttack(being, targetBeing);
             }
 
-            return Do_DirectionAttack(being, targetBeing);
+            return Do_DirectionMove(being, newPosition);
         }
 
-        private bool Do_DirectionMove(IBeing being, Point offset)
+        private bool Do_DirectionMove(IBeing being, Coord newPosition)
         {
-            var newPoint = being.Position + offset;
-            Space tile = SpaceMap.GetItem(newPoint);
+            Space tile = SpaceMap.GetItem(newPosition);
 
             if (tile.Terrain.Name == "closed door")
             {
@@ -124,46 +122,46 @@ namespace CopperBend.Engine
                 return true;
             }
 
-            if (!SpaceMap.CanWalkThrough(newPoint))
+            if (!SpaceMap.CanWalkThrough(newPosition))
             {
                 var np = Describer.Describe(tile.Terrain.Name, DescMods.IndefiniteArticle);
                 if (being.IsPlayer)
-                    Output.WriteLine($"I can't walk through {np}.");
+                    MessageLog.Add($"I can't walk through {np}.");
                 
                 ClearPendingInput();
                 return false;
             }
 
-            being.Position += offset;
-            PlayerMoved |= being.IsPlayer;
-
             int directionsMoved = 0;
-            if (offset.X != 0) directionsMoved++;
-            if (offset.Y != 0) directionsMoved++;
+            if (being.Position.X != newPosition.X) directionsMoved++;
+            if (being.Position.Y != newPosition.Y) directionsMoved++;
             if (directionsMoved == 0)
                 throw new Exception("Moved nowhere?  Up/Down not yet handled.");
             else if (directionsMoved == 1)
                 ScheduleAgent(being, 12);
             else
-                ScheduleAgent(being, 17);
+                ScheduleAgent(being, 17);  //0.2: roughly 12 * sqrt(2)
+
+            being.Position = newPosition;
 
             if (being.IsPlayer)
             {
-                var itemsHere = ItemMap.GetItems(newPoint);
+                PlayerMoved = true;
+                var itemsHere = ItemMap.GetItems(newPosition);
                 if (itemsHere.Count() > 7)
                 {
-                    Output.WriteLine("There are many items here.");
+                    MessageLog.Add("There are many items here.");
                 }
                 else if (itemsHere.Count() > 1)
                 {
-                    Output.WriteLine("There are several items here.");
+                    MessageLog.Add("There are several items here.");
                 }
                 else if (itemsHere.Count() == 1)
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
                     var np = Describer.Describe(item, DescMods.IndefiniteArticle);
-                    Output.WriteLine($"There {beVerb} {np} here.");
+                    MessageLog.Add($"There {beVerb} {np} here.");
                 }
                 else
                 {
@@ -192,7 +190,7 @@ namespace CopperBend.Engine
             Guard.AgainstNullArgument(item, "Item to drop not found in inventory");
 
             item.MoveTo(being.Position);
-            ItemMap.Add(item, item.Point);
+            ItemMap.Add(item, item.Location);
             ScheduleAgent(being, 1);
             return true;
         }
@@ -205,12 +203,12 @@ namespace CopperBend.Engine
             {
                 being.AddToInventory(item);
                 ScheduleAgent(being, 4);
-                Output.WriteLine($"Picked up {item.Name}");
+                MessageLog.Add($"Picked up {item.Name}");
             }
             else
             {
                 ScheduleAgent(being, 1);
-                Output.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
+                MessageLog.Add($"Item {item.Name} was no longer on the map, to pick up");
             }
             return pickedUp;
         }
@@ -231,18 +229,18 @@ namespace CopperBend.Engine
 
         private bool Use_Hoe(IBeing being, Command command)
         {
-            var targetPoint = PointInDirection(being.Position, command.Direction);
+            var targetPoint = CoordInDirection(being.Position, command.Direction);
             var space = SpaceMap.GetItem(targetPoint);
             if (space.CanPlant)
             {
-                Output.WriteLine("All's ready to plant here, already.");
+                MessageLog.Add("All's ready to plant here, already.");
                 return false;
             }
 
             if (!space.CanPreparePlanting)
             {
 
-                Output.WriteLine($"Cannot till the {space.Terrain.Name}.");
+                MessageLog.Add($"Cannot till the {space.Terrain.Name}.");
                 return false;
             }
 
@@ -260,19 +258,19 @@ namespace CopperBend.Engine
 
         private bool Use_Seed(IBeing being, Command command)
         {
-            var targetPoint = PointInDirection(being.Position, command.Direction);
+            var targetPoint = CoordInDirection(being.Position, command.Direction);
             var space = SpaceMap.GetItem(targetPoint);
 
             if (!space.IsTilled)
             {
                 string qualifier = space.IsTillable ? "untilled " : "";
-                Output.WriteLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
+                MessageLog.Add($"Cannot sow {qualifier}{space.Terrain.Name}.");
                 return false;
             }
 
             if (space.IsSown)
             {
-                Output.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
+                MessageLog.Add($"The ground to my {command.Direction} is already sown with a seed.");
                 return false;
             }
 

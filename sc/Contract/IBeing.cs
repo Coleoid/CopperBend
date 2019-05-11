@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GoRogue;
-using Microsoft.Xna.Framework;
 
 namespace CopperBend.Contract
 {
@@ -21,14 +20,13 @@ namespace CopperBend.Contract
 
     public interface IBeing : IDestroyable, IScheduleAgent, IHasID
     {
-        Point Position { get; set; }
+        Microsoft.Xna.Framework.Point Position { get; set; }  // Awkward bit to match SadConsole.Console...
         string Name { get; set; }
         int Awareness { get; set; }
-        IAreaMap Map { get; set; }
 
         ICommandSource CommandSource { get; set; }
 
-        void MoveTo(Coord point);
+        void MoveTo(Coord position);
         IItem WieldedTool { get; }
         void Wield(IItem item);
 

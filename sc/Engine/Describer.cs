@@ -1,9 +1,9 @@
-﻿using CopperBend.Contract;
-using CopperBend.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CopperBend.Contract;
+using CopperBend.Model;
 
 namespace CopperBend.Engine
 {

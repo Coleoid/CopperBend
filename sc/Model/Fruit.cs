@@ -1,5 +1,6 @@
-﻿using CopperBend.Contract;
-using Microsoft.Xna.Framework;
+﻿using Color = Microsoft.Xna.Framework.Color;
+using GoRogue;
+using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
@@ -7,8 +8,8 @@ namespace CopperBend.Model
     {
         public PlantType PlantType;
 
-        public Fruit(Point point, int quantity, PlantType plantType)
-            : base(point, quantity, false)
+        public Fruit(Coord location, int quantity, PlantType plantType)
+            : base(location, quantity, false)
         {
             PlantType = plantType;
             Symbol = '%';

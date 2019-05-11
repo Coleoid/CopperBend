@@ -1,6 +1,6 @@
-﻿using CopperBend.Contract;
-using Microsoft.Xna.Framework;
-using System;
+﻿using System;
+using GoRogue;
+using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
@@ -8,12 +8,12 @@ namespace CopperBend.Model
     {
         public override string Name { get => "knife"; }
 
-        public Knife(Point point)
-            : base(point, 1, true)
+        public Knife(Coord position)
+            : base(position, 1, true)
         {
         }
 
-        public override void ApplyTo(ITile tile, IControlPanel controls, IMessageOutput output, CmdDirection direction)
+        public override void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
         {
             throw new NotImplementedException();
         }

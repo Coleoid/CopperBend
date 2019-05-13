@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Size = System.Drawing.Size;
+using Color = Microsoft.Xna.Framework.Color;
 using log4net;
 using SadConsole;
 using SadConsole.Controls;
@@ -61,37 +61,17 @@ namespace CopperBend.Engine
             };
             mapWindow.Add(closeButton);
 
-            Cell[] initialCells = GetCells(fullMap.SpaceMap);
-
             var mapConsole = new ScrollingConsole(
-                fullMap.Width, fullMap.Height,
-                Global.FontDefault, new Rectangle(0, 0, viewWidth, viewHeight),
-                initialCells)
-            {
-                // Fit the MapConsole inside the border
-                Position = new Coord(1, 1)
-            };
+                fullMap.Width, fullMap.Height, Global.FontDefault,
+                new Rectangle(0, 0, viewWidth, viewHeight));
+
+            // Fit the MapConsole inside the MapWindow border
+            mapConsole.Position = new Coord(1, 1);
             log.DebugFormat("Created map console, map size [{0},{1}], viewport size [{2}].", fullMap.Width, fullMap.Height, mapWindow.ViewPort);
 
             mapWindow.Children.Add(mapConsole);
 
             return (mapConsole, mapWindow);
-        }
-
-        private Cell[] GetCells(SpaceMap spaceMap)
-        {
-            List<Cell> cells = new List<Cell>();
-
-            for (int y = 0; y < spaceMap.Height; y++)
-            {
-                for (int x = 0; x < spaceMap.Width; x++)
-                {
-                    cells.Add(spaceMap.GetItem(x,y).Terrain.Looks);
-                }
-            }
-
-            log.DebugFormat("GetCells returning {0} cells.", cells.Count);
-            return cells.ToArray();
         }
     }
 }

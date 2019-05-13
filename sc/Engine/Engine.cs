@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Size = System.Drawing.Size;
 using System.Linq;
+using Size = System.Drawing.Size;
+using log4net;
 using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
-using log4net;
 using SadConsole;
 using SadConsole.Input;
 using SadConsole.Components;
@@ -81,7 +81,16 @@ namespace CopperBend.Engine
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "Game Map", fullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player);
+            fullMap.SetInitialConsoleCells(MapConsole, fullMap.SpaceMap);
             MapWindow.Show();
+
+            var sm = fullMap.SpaceMap;
+            var canSeeThrough = new LambdaMapView<bool>(
+                () => sm.Width, () => sm.Height,
+                (coord) => sm.CanSeeThrough(coord)
+            );
+            fullMap.FOV = new FOV(canSeeThrough);
+
 
             MessageLog = builder.CreateMessageLog();
             Children.Add(MessageLog);
@@ -150,22 +159,7 @@ namespace CopperBend.Engine
             {
                 //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
 
-                //TODO:  relocate this FOV init code to (OnMapChange)
-                var sm = GameState.Map.SpaceMap;
-                var canSeeThrough = new LambdaMapView<bool>(
-                    () => sm.Width, () => sm.Height,
-                    (coord) => sm.CanSeeThrough(coord)
-                );
-                var fov = new FOV(canSeeThrough);
-                
-                //0.0, 0.2 will use FOV to change display
-                fov.Calculate(Player.Position);
-                sm.SeeCoords(fov.NewlySeen);
-                var inFovView = fov.BooleanFOV;
-                var inFovCoords = fov.CurrentFOV;  // whichever repr is more useful
-                //  having done that... how do I alter the rendering of the map cells?
-
-                GameState.Map.UpdateFromFOV(fov, Player);
+                GameState.Map.UpdateFromFOV(MapConsole, GameState.Map.FOV, Player.Position);
 
                 MapConsole.CenterViewPortOnPoint(Player.Position);
                 Dispatcher.PlayerMoved = false;

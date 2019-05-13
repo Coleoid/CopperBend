@@ -25,14 +25,16 @@ namespace CopperBend.Contract
         /// <summary> Can Plant considering terrain, blight, existing plants, and ownership. </summary>
         bool CanPlant(Coord position);
 
+        FOV FOV { get; set; }
+
         bool CanSeeThrough(Coord position);
         bool CanWalkThrough(Coord position);
         IMapView<bool> GetView_CanSeeThrough();
         IMapView<bool> GetView_CanWalkThrough();
         IMapView<int> GetView_BlightStrength();
 
-        DisplayBuffer DisplayBuffer { get; }
-        void UpdateFromFOV(FOV fov, Being player);
+        void SetInitialConsoleCells(ScrollingConsole console, SpaceMap spaceMap);
+        void UpdateFromFOV(ScrollingConsole console, FOV fov, Coord position);
     }
 
     public class DisplayBuffer

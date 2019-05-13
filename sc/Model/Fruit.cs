@@ -12,8 +12,8 @@ namespace CopperBend.Model
             : base(location, quantity, false)
         {
             PlantType = plantType;
-            Symbol = '%';
-            ColorForeground = Color.LightPink;
+            Glyph = '%';
+            Foreground = Color.LightPink;
             Name = "fruit";
         }
 

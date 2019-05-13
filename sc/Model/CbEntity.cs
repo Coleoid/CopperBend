@@ -27,7 +27,10 @@ namespace CopperBend.Model
         public int Health { get; set; }
         public int MaxHealth { get; set; }
         public char Symbol { get; set; }
-        //public Coord Position { get; set; }
+
+        public Color Foreground => Animation.CurrentFrame[0].Foreground;
+        public Color Background => Animation.CurrentFrame[0].Background;
+        public int Glyph => Animation.CurrentFrame[0].Glyph;
 
         protected Being(Color foreground, Color background, int glyph, int width = 1, int height = 1)
             : base(foreground, background, glyph, width, height)

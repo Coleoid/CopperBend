@@ -1,4 +1,5 @@
-﻿using GoRogue;
+﻿using Color = Microsoft.Xna.Framework.Color;
+using GoRogue;
 
 namespace CopperBend.Contract
 {
@@ -6,6 +7,10 @@ namespace CopperBend.Contract
     {
         string Name { get; }
         int Quantity { get; set; }
+
+        Color Foreground { get; }
+        int Glyph { get; }
+
         Coord Location { get; }
         void MoveTo(Coord location);
 

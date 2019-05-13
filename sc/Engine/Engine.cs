@@ -32,8 +32,8 @@ namespace CopperBend.Engine
         private Keyboard Kbd;
         public Queue<AsciiKey> InputQueue;
         private Being Player;
-        private GameState GameState;
 
+        private GameState GameState;
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
 
@@ -67,12 +67,6 @@ namespace CopperBend.Engine
             ICompoundMap fullMap = loader.FarmMap();
             log.Debug("Generated map");
 
-            GameState = new GameState
-            {
-                Player = Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint),
-                Map = fullMap
-            };
-
             Describer describer = new Describer();
             Schedule = new Schedule();
             Schedule.AddAgent(Player, 12);
@@ -84,25 +78,35 @@ namespace CopperBend.Engine
             fullMap.SetInitialConsoleCells(MapConsole, fullMap.SpaceMap);
             MapWindow.Show();
 
+            MessageLog = builder.CreateMessageLog();
+            Children.Add(MessageLog);
+            MessageLog.Show();
+
+            GameState = new GameState
+            {
+                Player = Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint),
+                Map = fullMap
+            };
+
             var sm = fullMap.SpaceMap;
             var canSeeThrough = new LambdaMapView<bool>(
                 () => sm.Width, () => sm.Height,
                 (coord) => sm.CanSeeThrough(coord)
             );
             fullMap.FOV = new FOV(canSeeThrough);
-
-
-            MessageLog = builder.CreateMessageLog();
-            Children.Add(MessageLog);
-            MessageLog.Show();
+            fullMap.UpdateFromFOV(MapConsole, fullMap.FOV, Player.Position);
 
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)
             {
                 PushEngineMode = PushEngineMode,
-                ClearPendingInput = InputQueue.Clear
+
+                IsInputReady = () => InputQueue.Count > 0,
+                GetNextInput = InputQueue.Dequeue,
+                ClearPendingInput = InputQueue.Clear,
+                AddMessage = MessageLog.Add,
             };
 
-            Player.CommandSource = new InputCommandSource(InputQueue, describer, MapWindow, GameState, Dispatcher);
+            Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher);
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 

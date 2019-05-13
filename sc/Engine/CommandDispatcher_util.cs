@@ -183,6 +183,7 @@ namespace CopperBend.Engine
 
         public void CheckActorAtCoordEvent(IBeing being, Coord position)
         {
+            
             //if (Map.LocationMessages.ContainsKey(tile.Point))
             //{
             //    var message = Map.LocationMessages[tile.Point];
@@ -207,6 +208,10 @@ namespace CopperBend.Engine
 
         public bool PlayerMoved { get; set; }
         public Action<EngineMode, Func<bool>> PushEngineMode { get; set; }
+
+        public Func<bool> IsInputReady { get; set; }
+        public Func<AsciiKey> GetNextInput { get; set; }
         public Action ClearPendingInput { get; set; }
+        public Action<string> AddMessage { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using GoRogue;
 using CopperBend.Fabric;
+using SadConsole.Input;
 
 //  Functional completeness levels:
 //  0.1:  Works in a limited way, with lame code
@@ -16,24 +16,36 @@ namespace CopperBend.Contract
     //  In other places I pass important domain bits as arguments.
     public interface IControlPanel
     {
+        /// <summary> The main purpose of the CommandDispatcher. </summary>
+        bool CommandBeing(IBeing being, Command command);
+
+        /// <summary> When an agent will decide what to do when its turn comes. </summary>
         void ScheduleAgent(IScheduleAgent agent, int tickOff);
 
-        //bool CanActorSeeTarget(IBeing being, Coord target);
-        //List<Coord> GetPathTo(Coord start, Coord target);
-
-        //void Learn(Fruit fruit);
-        //void SetMapDirty();
+        /// <summary> When an action interrupts the entire game, in some way. </summary>
+        Action<EngineMode, Func<bool>> PushEngineMode { get; }
 
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Coord position);
         void Till(Space space);
+
         void AddExperience(PlantType plant, Exp experience);
-
-        bool CommandBeing(IBeing being, Command command);
-
         bool PlayerMoved { get; set; }
-        Action<EngineMode, Func<bool>> PushEngineMode { get; }
+
+        //bool CanActorSeeTarget(IBeing being, Coord target);
+        //List<Coord> GetPathTo(Coord start, Coord target);
+        //void Learn(Fruit fruit);
+        //void SetMapDirty();
+
+        //  This approach works well.
+        //  Nobody touches the engine, where these details originate.
+        //  Event bus + subscriptions also worked, but the key upside of
+        // events is multiple subscribers, which was unneeded, so the 
+        // (significant) overhead was waste.
+        Func<bool> IsInputReady { get; }
+        Func<AsciiKey> GetNextInput { get; }
         Action ClearPendingInput { get; }
+        Action<string> AddMessage { get; }
     }
 
     //0.1:  Categories of experience
@@ -42,6 +54,7 @@ namespace CopperBend.Contract
         Unknown = 0,
         PlantSeed,
         EatFruit,
+        Blight
     }
 
     public interface ILogWindow

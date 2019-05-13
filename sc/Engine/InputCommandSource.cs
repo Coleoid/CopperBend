@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using log4net;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
-using SadConsole;
 using SadConsole.Input;
 using CopperBend.Contract;
 using CopperBend.Fabric;
@@ -12,31 +10,25 @@ namespace CopperBend.Engine
 {
     public class InputCommandSource : ICommandSource
     {
-        private Queue<AsciiKey> InQ { get; set; }
-        private Describer Describer { get; set; }
-        private Window Window { get; set; }
-        private IControlPanel Controls { get; set; }
-        private readonly GameState GameState;
+        private readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
+        private const int lowercase_a = 97;
+        private const int lowercase_z = 123;
         private readonly ILog log;
 
-        public InputCommandSource(Queue<AsciiKey> inQ, Describer describer, Window window, GameState state, IControlPanel controls)
+        private readonly Describer Describer;
+        private readonly GameState GameState;
+        private readonly IControlPanel Controls;
+
+        public InputCommandSource(Describer describer, GameState state, IControlPanel controls)
         {
-            InQ = inQ;
             Describer = describer;
-            Window = window;
             GameState = state;
             Controls = controls;
             log = LogManager.GetLogger("CB", "CB.InputCommandSource");
         }
-        
 
         public bool InMultiStepCommand => NextStep != null;
         private Func<AsciiKey, IBeing, Command> NextStep = null;
-        private bool QueueIsEmpty => InQ.Count == 0;
-
-        private readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
-        private const int lowercase_a = 97;
-        private const int lowercase_z = 123;
 
         public void GiveCommand(IBeing being)
         {
@@ -60,8 +52,8 @@ namespace CopperBend.Engine
 
         internal Command GetCommand(IBeing being)
         {
-            if (QueueIsEmpty) return CommandIncomplete;
-            var press = InQ.Dequeue();
+            if (!Controls.IsInputReady()) return CommandIncomplete;
+            var press = Controls.GetNextInput();
 
             if (InMultiStepCommand)  //  Most of them
             {
@@ -378,24 +370,17 @@ namespace CopperBend.Engine
             return asciiNum - lowercase_a;
         }
 
-        public void Prompt(string text)
-        {
-            log.InfoFormat("Prompt:  [{0}]", text);
-
-            //0.0 logwindow
-            //Window.Prompt(text);
-        }
-
         /// <summary> If more input is queued, the prompt will not be sent </summary>
         private Command FFwdOrPrompt(Func<AsciiKey, IBeing, Command> nextStep, string prompt, IBeing being)
         {
             NextStep = nextStep;
-            if (QueueIsEmpty)
+            if (!Controls.IsInputReady())
             {
-                Prompt(prompt);
+                //0.1: adds unwanted line break
+                Controls.AddMessage(prompt);
                 return CommandIncomplete;
             }
-            return NextStep(InQ.Dequeue(), being);
+            return NextStep(Controls.GetNextInput(), being);
         }
 
         public void ShowInventory(IBeing being, Func<IItem, bool> filter = null)
@@ -406,8 +391,7 @@ namespace CopperBend.Engine
 
         private void WriteLine(string line)
         {
-            //0.0 logwindow
-            //Window.WriteLine(line);
+            Controls.AddMessage(line);
         }
         #endregion
     }

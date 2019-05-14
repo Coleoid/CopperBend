@@ -22,25 +22,25 @@ namespace CopperBend.Contract
 
         List<LocatedTrigger> LocatedTriggers { get; }
 
-        /// <summary> Can Plant considering terrain, blight, existing plants, and ownership. </summary>
-        bool CanPlant(Coord position);
 
         FOV FOV { get; set; }
+        /// <summary> When a space changes its CanSeeThrough, set this flag true </summary>
+        bool VisibilityChanged { get; set; }
+        /// <summary> When a space's appearance (may) change, add its coords to this list </summary>
+        List<Coord> CoordsWithChanges { get; }
 
         bool CanSeeThrough(Coord position);
         bool CanWalkThrough(Coord position);
+        /// <summary> Can Plant considering terrain, blight, existing plants, and ownership. </summary>
+        bool CanPlant(Coord position);
+
         IMapView<bool> GetView_CanSeeThrough();
         IMapView<bool> GetView_CanWalkThrough();
         IMapView<int> GetView_BlightStrength();
 
         void SetInitialConsoleCells(ScrollingConsole console, SpaceMap spaceMap);
-        void UpdateFromFOV(ScrollingConsole console, FOV fov, Coord position);
-    }
-
-    public class DisplayBuffer
-    {
-        public Cell[] RawCells { get; internal set; }
-        public Cell[] OutputCells { get; internal set; }
+        void UpdateFOV(ScrollingConsole console, Coord position);
+        void UpdateViewOfCoords(ScrollingConsole console, IEnumerable<Coord> coords);
     }
 
     public class TerrainType
@@ -51,42 +51,6 @@ namespace CopperBend.Contract
         public bool CanWalkThrough;
         public bool CanPlant;
     }
-
-    public class Space : IHasID
-    {
-        #region standard IHasID
-        // one IDGenerator for all Spaces
-        public static IDGenerator IDGenerator = new IDGenerator();
-        public uint ID { get; private set; } = IDGenerator.UseID();
-        #endregion
-
-        //public int Elevation;  //for later movement/attack mod
-        public TerrainType Terrain;
-
-        //0.2.  0.3 accounts for modifiers (smoke, dust, giant creature, ...)
-        public bool CanSeeThrough => Terrain.CanSeeThrough;
-        public bool CanWalkThrough => Terrain.CanWalkThrough;
-
-        //0.2.  0.3 accounts for modifiers (permission, hostile aura, blight, ...)
-        public bool CanPlant => Terrain.CanPlant;
-
-        public bool CanPreparePlanting { get; internal set; }
-        public bool IsTilled { get; internal set; }
-        public bool IsTillable { get; internal set; }
-        public bool IsSown { get; internal set; }
-        public bool IsKnown { get; internal set; }
-    }
-
-    public class AreaBlight : IHasID
-    {
-        #region standard IHasID
-        // one IDGenerator for all AreaBlight
-        public static IDGenerator IDGenerator = new IDGenerator();
-        public uint ID { get; private set; } = IDGenerator.UseID();
-        #endregion
-        public int Extent { get; set; }
-    }
-
 
     //public class Region
     //{

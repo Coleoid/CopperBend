@@ -10,7 +10,6 @@ using SadConsole.Input;
 using SadConsole.Components;
 using SadConState = SadConsole.Global;
 using GoRogue;
-using GoRogue.MapViews;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
@@ -59,23 +58,27 @@ namespace CopperBend.Engine
             Init();
         }
 
+        private ICompoundMap FullMap;
         public void Init()
         {
             PushEngineMode(EngineMode.StartUp, null);
 
             var loader = new MapLoader();
-            ICompoundMap fullMap = loader.FarmMap();
+            FullMap = loader.FarmMap();
             log.Debug("Generated map");
 
             Describer describer = new Describer();
             Schedule = new Schedule();
+            Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             Schedule.AddAgent(Player, 12);
 
             var builder = new UIBuilder(GameSize);
-            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "Game Map", fullMap);
+            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "Game Map", FullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player);
-            fullMap.SetInitialConsoleCells(MapConsole, fullMap.SpaceMap);
+            FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
+            FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
+            FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
 
             MessageLog = builder.CreateMessageLog();
@@ -84,17 +87,9 @@ namespace CopperBend.Engine
 
             GameState = new GameState
             {
-                Player = Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint),
-                Map = fullMap
+                Player = Player,
+                Map = FullMap
             };
-
-            var sm = fullMap.SpaceMap;
-            var canSeeThrough = new LambdaMapView<bool>(
-                () => sm.Width, () => sm.Height,
-                (coord) => sm.CanSeeThrough(coord)
-            );
-            fullMap.FOV = new FOV(canSeeThrough);
-            fullMap.UpdateFromFOV(MapConsole, fullMap.FOV, Player.Position);
 
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)
             {
@@ -124,25 +119,18 @@ namespace CopperBend.Engine
             player.Animation.CurrentFrame[0].Glyph = '@';
             player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
             player.Components.Add(new EntityViewSyncComponent());
+            player.AddToInventory(new Hoe((0,0)));
 
             log.Debug("Created player.");
             return player;
         }
         #endregion
 
-        private bool firstTimeInUpdate = true;
-
         public override void Update(TimeSpan timeElapsed)
         {
-            if (firstTimeInUpdate)
-            {
-                log.Debug("First time in update.");
-                firstTimeInUpdate = false;
-            }
-
             QueueInput();
             ActOnMode();
-            SyncStateChanges();
+            SyncMapChanges();
 
             base.Update(timeElapsed);
         }
@@ -156,21 +144,6 @@ namespace CopperBend.Engine
                 InputQueue.Enqueue(key);
             }
         }
-
-        public void SyncStateChanges()
-        {
-            if (Dispatcher.PlayerMoved)
-            {
-                //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
-
-                GameState.Map.UpdateFromFOV(MapConsole, GameState.Map.FOV, Player.Position);
-
-                MapConsole.CenterViewPortOnPoint(Player.Position);
-                Dispatcher.PlayerMoved = false;
-            }
-
-        }
-
 
         private AsciiKey GetNextKeyPress()
         {
@@ -210,6 +183,7 @@ namespace CopperBend.Engine
             ModeStack.Push(newMode);
             CallbackStack.Push(callback);
 
+            if (oldMode == EngineMode.Schedule && CurrentMode == EngineMode.InputBound) return;
             log.Debug($"Pushed mode {oldMode} down, now in {CurrentMode}.");
         }
         internal void PopEngineMode()
@@ -217,6 +191,7 @@ namespace CopperBend.Engine
             var oldMode = ModeStack.Pop();
             CallbackStack.Pop();
 
+            if (oldMode == EngineMode.InputBound && CurrentMode == EngineMode.Schedule) return;
             log.Debug($"Popped mode {oldMode} off, now in {CurrentMode}.");
         }
         #endregion
@@ -273,7 +248,6 @@ namespace CopperBend.Engine
             }
         }
 
-        //0.0: Actual output currently turned off.
         #region Short Message log
         public Queue<string> MessageQueue;
         public void AddMessage(string newMessage)
@@ -291,12 +265,12 @@ namespace CopperBend.Engine
                 if (ShownMessages < ShownLineLimitBeforePause)
                 {
                     var nextMessage = MessageQueue.Dequeue();
-                    //0.0 WriteLine(nextMessage);
+                    AddMessage(nextMessage);
                     ShownMessages++;
                 }
                 else
                 {
-                    //0.0 WriteLine("-- more --");
+                    AddMessage("-- more --");
                     PushEngineMode(EngineMode.MessagesPending, null);
                 }
             }
@@ -317,6 +291,31 @@ namespace CopperBend.Engine
         }
         #endregion
 
+
+        public void SyncMapChanges()
+        {
+            if (FullMap.VisibilityChanged)
+            {
+                FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
+                FullMap.VisibilityChanged = false;
+                Dispatcher.PlayerMoved = true;
+            }
+
+            if (Dispatcher.PlayerMoved)
+            {
+                //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
+
+                FullMap.UpdateFOV(MapConsole, Player.Position);
+                MapConsole.CenterViewPortOnPoint(Player.Position);
+                Dispatcher.PlayerMoved = false;
+            }
+
+            var changedAndInFOV = FullMap.CoordsWithChanges.Intersect(FullMap.FOV.CurrentFOV);
+            FullMap.UpdateViewOfCoords(MapConsole, changedAndInFOV);
+            FullMap.CoordsWithChanges.Clear();
+        }
+
+        #region LargeMessages and Menus, currently empty
         private void HandleMenus()
         {
             //TODO:  All these:
@@ -348,6 +347,7 @@ namespace CopperBend.Engine
         {
             throw new NotImplementedException();
         }
+        #endregion
 
         //// The entities in the given map will be the MapConsole's only entities
         //private void SyncMapEntities(MultiSpatialMap<Being> map)

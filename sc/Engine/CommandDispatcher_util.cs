@@ -5,6 +5,7 @@ using SadConsole.Input;
 using Coord = GoRogue.Coord;
 using CopperBend.Contract;
 using CopperBend.Model;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {

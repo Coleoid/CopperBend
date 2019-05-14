@@ -229,17 +229,16 @@ namespace CopperBend.Engine
 
         private bool Use_Hoe(IBeing being, Command command)
         {
-            var targetPoint = CoordInDirection(being.Position, command.Direction);
-            var space = SpaceMap.GetItem(targetPoint);
-            if (space.CanPlant)
+            var targetCoord = CoordInDirection(being.Position, command.Direction);
+            var space = SpaceMap.GetItem(targetCoord);
+            if (space.IsTilled)
             {
-                MessageLog.Add("All's ready to plant here, already.");
+                MessageLog.Add("Ground here's already tilled.");
                 return false;
             }
 
-            if (!space.CanPreparePlanting)
+            if (!space.CanTill)
             {
-
                 MessageLog.Add($"Cannot till the {space.Terrain.Name}.");
                 return false;
             }
@@ -252,6 +251,7 @@ namespace CopperBend.Engine
             }
 
             Till(space);
+            GameState.Map.CoordsWithChanges.Add(targetCoord);
             ScheduleAgent(being, tillTime);
             return true;
         }
@@ -263,7 +263,7 @@ namespace CopperBend.Engine
 
             if (!space.IsTilled)
             {
-                string qualifier = space.IsTillable ? "untilled " : "";
+                string qualifier = space.CanTill ? "untilled " : "";
                 MessageLog.Add($"Cannot sow {qualifier}{space.Terrain.Name}.");
                 return false;
             }

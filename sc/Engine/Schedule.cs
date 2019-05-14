@@ -31,7 +31,7 @@ namespace CopperBend.Engine
             while (busyTick.Value.Count() == 0)
             {
                 TickEntries.Remove(busyTick.Key);
-                log.Debug($"Removed empty tick {busyTick.Key} from the schedule");
+                //log.Debug($"Removed empty tick {busyTick.Key} from the schedule");
                 if (TickEntries.Count() == 0)
                     throw new Exception("The Schedule should never empty out");
                 busyTick = TickEntries.First();

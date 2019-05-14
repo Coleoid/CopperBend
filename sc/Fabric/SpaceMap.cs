@@ -41,6 +41,16 @@ namespace CopperBend.Fabric
             return GetItem(position).CanSeeThrough;
         }
 
+        public bool CanPlant(Coord position)
+        {
+            // off the map is not plantable
+            if (position.X < 0 || position.X >= Width
+             || position.Y < 0 || position.Y >= Height)
+                return false;
+
+            return GetItem(position).CanPlant;
+        }
+
 
         internal void Sow(Space space, Seed seedToSow)
         {
@@ -49,7 +59,7 @@ namespace CopperBend.Fabric
 
         internal void Till(Space space)
         {
-            if (space.IsTillable && !space.IsTilled)
+            if (space.CanTill && !space.IsTilled)
             {
                 space.Terrain = TilledSoil;
             }
@@ -63,4 +73,39 @@ namespace CopperBend.Fabric
             }
         }
     }
+
+    public class Space : IHasID
+    {
+        #region standard IHasID
+        // one IDGenerator for all Spaces
+        public static IDGenerator IDGenerator = new IDGenerator();
+        public uint ID { get; private set; } = IDGenerator.UseID();
+        #endregion
+
+        //public int Elevation;  //for later movement/attack mod
+        public TerrainType Terrain;
+
+        //0.2.  0.3 accounts for modifiers (smoke, dust, giant creature, ...)
+        public bool CanSeeThrough => Terrain.CanSeeThrough;
+        public bool CanWalkThrough => Terrain.CanWalkThrough;
+
+        //0.2.  0.3 accounts for modifiers (permission, hostile aura, blight, ...)
+        public bool CanPlant => Terrain.CanPlant && IsTilled;
+        public bool CanTill => Terrain.CanPlant && !IsTilled;
+
+        public bool IsTilled { get; internal set; }
+        public bool IsSown { get; internal set; }
+        public bool IsKnown { get; internal set; }
+    }
+
+    public class AreaBlight : IHasID
+    {
+        #region standard IHasID
+        // one IDGenerator for all AreaBlight
+        public static IDGenerator IDGenerator = new IDGenerator();
+        public uint ID { get; private set; } = IDGenerator.UseID();
+        #endregion
+        public int Extent { get; set; }
+    }
+
 }

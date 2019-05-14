@@ -19,22 +19,14 @@ namespace CopperBend.Fabric
         public MultiSpatialMap<IItem> ItemMap { get; set; }
         public SpatialMap<AreaBlight> BlightMap { get; set; }
         public List<LocatedTrigger> LocatedTriggers { get; set; }
+
         public FOV FOV { get; set; }
+        public bool VisibilityChanged { get; set; }
+        public List<Coord> CoordsWithChanges { get; } = new List<Coord>();
 
-        public bool CanPlant(Coord location)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool CanSeeThrough(Coord location)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool CanWalkThrough(Coord location)
-        {
-            throw new NotImplementedException();
-        }
+        public bool CanSeeThrough(Coord location) => SpaceMap.CanSeeThrough(location);
+        public bool CanWalkThrough(Coord location) => SpaceMap.CanWalkThrough(location);
+        public bool CanPlant(Coord location) => SpaceMap.CanPlant(location);
 
         public IMapView<int> GetView_BlightStrength()
         {
@@ -43,7 +35,10 @@ namespace CopperBend.Fabric
 
         public IMapView<bool> GetView_CanSeeThrough()
         {
-            throw new NotImplementedException();
+            return new LambdaMapView<bool>(
+                () => Width, () => Height,
+                (coord) => CanSeeThrough(coord)
+            );
         }
 
         public IMapView<bool> GetView_CanWalkThrough()
@@ -56,36 +51,7 @@ namespace CopperBend.Fabric
             throw new NotImplementedException();
         }
 
-        //public DisplayBuffer DisplayBuffer { get; internal set; }
-
-
-        //  We only need to update two categories of cells:
-        //  Cells in FOV, and cells leaving FOV.
-        //  Also, only those within the scope of the UI.
-        //  I hope the UI bounding box can be handled by FOV calc.
-        //  It will technically have us updating a border of cells
-        //  outside the viewport (the edge moved away from), but I
-        //  like the ratio of effort saved to remaining inefficiency.
-
-
-        //  Next, if known but out of Field of View (FOV),
-        //  render just terrain type in "unseen" colors.
-        //  The remainder are in FOV:
-        //  Show the BG color of the terrain, then in order:
-        //  The FG of any visible being at the location, or
-        //  the FG of the topmost item at the loc'n, or
-        //  the FG of the terrain type.
-        //  Then (later, 0.5?) modified by lighting, et c.
-
-        //  On initial gen of OutputCells, on entry to new map:
-        //  Paint all cells.  If not known, blank.
-        // If known, "unseen" color of glyph of terrain.
-        public void InitialMapLoad()
-        {
-
-        }
-
-
+        /// <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known </summary>
         public void SetInitialConsoleCells(ScrollingConsole console, SpaceMap spaceMap)
         {
             var unknownCell = new Cell(Color.Black, Color.Black, ' ');
@@ -109,22 +75,32 @@ namespace CopperBend.Fabric
             }
         }
 
-        public void UpdateFromFOV(ScrollingConsole console, FOV fov, Coord position)
+        public void UpdateFOV(ScrollingConsole console, Coord position)
         {
-            fov.Calculate(position);
+            FOV.Calculate(position);
 
-            SpaceMap.SeeCoords(fov.NewlySeen);
+            SpaceMap.SeeCoords(FOV.NewlySeen);
 
             //  Cells outside of FOV are gray on black,
             // with only the glyph of the terrain showing.
             var unseenCell = new Cell(Color.DarkGray, Color.Black, ' ');
-            foreach (var location in fov.NewlyUnseen)
+            foreach (var location in FOV.NewlyUnseen)
             {
                 unseenCell.Glyph = SpaceMap.GetItem(location).Terrain.Looks.Glyph;
                 console.SetCellAppearance(location.X, location.Y, unseenCell);
             }
 
-            foreach (var location in fov.CurrentFOV)
+            UpdateViewOfCoords(console, FOV.NewlySeen);
+        }
+
+        public void UpdateViewOfCoords(ScrollingConsole console, IEnumerable<Coord> coords)
+        {
+            //  Show the BG color of the terrain, then in order:
+            //  The FG of any visible being at the location, or
+            //  the FG of the topmost item at the loc'n, or
+            //  the FG of the terrain type.
+            //  Then (later, 0.5?) modified by lighting, et c.
+            foreach (var location in coords)
             {
                 var targetCell = new Cell();
                 var rawCell = SpaceMap.GetItem(location).Terrain.Looks;
@@ -152,6 +128,7 @@ namespace CopperBend.Fabric
 
                 console.SetCellAppearance(location.X, location.Y, targetCell);
             }
+
         }
     }
 }

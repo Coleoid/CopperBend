@@ -5,7 +5,9 @@ using GoRogue;
 using GoRogue.MapViews;
 using CopperBend.Contract;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using SadConsole;
+using SadConsole.Effects;
 
 namespace CopperBend.Fabric
 {
@@ -51,6 +53,9 @@ namespace CopperBend.Fabric
             throw new NotImplementedException();
         }
 
+        public EffectsManager EffectsManager { get; private set; }
+
+
         /// <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known </summary>
         public void SetInitialConsoleCells(ScrollingConsole console, SpaceMap spaceMap)
         {
@@ -73,6 +78,8 @@ namespace CopperBend.Fabric
                     }
                 }
             }
+
+            EffectsManager = new EffectsManager(console);
         }
 
         public void UpdateFOV(ScrollingConsole console, Coord position)
@@ -84,8 +91,11 @@ namespace CopperBend.Fabric
             //  Cells outside of FOV are gray on black,
             // with only the glyph of the terrain showing.
             var unseenCell = new Cell(Color.DarkGray, Color.Black, ' ');
-            foreach (var location in FOV.NewlyUnseen)
+            foreach (var location in FOV.NewlyUnseen.Where(c => console.ViewPort.Contains(c)))
             {
+                //  Wiping the effect restores the original cell colors,
+                // so it must happen before setting OOV appearance
+                EffectsManager.SetEffect(console.Cells[location.Y * Width + location.X], null);
                 unseenCell.Glyph = SpaceMap.GetItem(location).Terrain.Looks.Glyph;
                 console.SetCellAppearance(location.X, location.Y, unseenCell);
             }
@@ -95,19 +105,19 @@ namespace CopperBend.Fabric
 
         public void UpdateViewOfCoords(ScrollingConsole console, IEnumerable<Coord> coords)
         {
-            //  Show the BG color of the terrain, then in order:
+            //  Show the BG color of the terrain, then whatever comes first:
             //  The FG of any visible being at the location, or
             //  the FG of the topmost item at the loc'n, or
             //  the FG of the terrain type.
             //  Then (later, 0.5?) modified by lighting, et c.
-            foreach (var location in coords)
+            foreach (var position in coords.Where(c => console.ViewPort.Contains(c)))
             {
                 var targetCell = new Cell();
-                var rawCell = SpaceMap.GetItem(location).Terrain.Looks;
+                var rawCell = SpaceMap.GetItem(position).Terrain.Looks;
                 targetCell.Background = rawCell.Background;
 
-                var beings = BeingMap.GetItems(location).ToList();
-                var items = ItemMap.GetItems(location).ToList();
+                var beings = BeingMap.GetItems(position).ToList();
+                var items = ItemMap.GetItems(position).ToList();
                 if (beings.Any())
                 {
                     var being = beings.Last();
@@ -126,9 +136,63 @@ namespace CopperBend.Fabric
                     targetCell.Glyph = rawCell.Glyph;
                 }
 
-                console.SetCellAppearance(location.X, location.Y, targetCell);
-            }
+                console.SetCellAppearance(position.X, position.Y, targetCell);
 
+                var blight = BlightMap.GetItem(position);
+                var fade = blight == null? null : GetFadeForBlightExtent(blight.Extent, rawCell.Background);
+                EffectsManager.SetEffect(console.Cells[position.Y * Width + position.X], fade);
+            }
+        }
+
+        public Fade GetFadeForBlightExtent(int extent, Color bgColor)
+        {
+            var rand = new Random();
+
+            if (extent == 0)
+            {
+                return null;
+            }
+            else if (extent < 3)
+            {
+                var lowColors = new Color[] { bgColor, new Color(15, 32, 0), bgColor, new Color(23, 22, 13), bgColor, new Color(8, 28, 26), bgColor };
+                //var lowColors = new Color[] { bgColor, new Color(31, 64, 0), bgColor, new Color(47, 45, 26), bgColor, new Color(16, 57, 52), bgColor };
+                var lowFade = new Fade
+                {
+                    FadeBackground = true,
+                    DestinationBackground = new ColorGradient(lowColors),
+                    FadeDuration = 4 + rand.NextDouble() * 2,
+                    Repeat = true,
+                    UseCellBackground = false,
+                };
+                return lowFade;
+            }
+            else if (extent < 6)
+            {
+                var midColors = new Color[] { bgColor, new Color(31, 64, 0), bgColor, new Color(47, 45, 26), bgColor, new Color(16, 57, 52), bgColor };
+                //var midColors = new Color[] { bgColor, new Color(63, 128, 0), new Color(94, 91, 53), new Color(32, 112, 104), bgColor };
+                var midFade = new Fade
+                {
+                    FadeBackground = true,
+                    DestinationBackground = new ColorGradient(midColors),
+                    FadeDuration = 2.3 + rand.NextDouble() * 1.1,
+                    Repeat = true,
+                    UseCellBackground = true
+                };
+                return midFade;
+            }
+            else
+            {
+                var highColors = new Color[] { bgColor, new Color(63, 128, 0), new Color(94, 91, 53), new Color(32, 112, 104), bgColor };
+                var highFade = new Fade
+                {
+                    FadeBackground = true,
+                    DestinationBackground = new ColorGradient(highColors),
+                    FadeDuration = 1.3 + rand.NextDouble() * .7,
+                    Repeat = true,
+                    UseCellBackground = true
+                };
+                return highFade;
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Keys = Microsoft.Xna.Framework.Input.Keys;
 using SadConsole.Input;
 using Coord = GoRogue.Coord;
 using CopperBend.Contract;
@@ -32,89 +31,13 @@ namespace CopperBend.Engine
             int newX = start.X;
             int newY = start.Y;
 
-            if ((direction & CmdDirection.North) == CmdDirection.North)
-            {
-                newY--;
-            }
+            if (direction.HasFlag(CmdDirection.North)) newY--;
+            if (direction.HasFlag(CmdDirection.South)) newY++;
+            if (direction.HasFlag(CmdDirection.West))  newX--;
+            if (direction.HasFlag(CmdDirection.East))  newX++;
 
-            if ((direction & CmdDirection.South) == CmdDirection.South)
-            {
-                newY++;
-            }
-
-            if ((direction & CmdDirection.West) == CmdDirection.West)
-            {
-                newX--;
-            }
-
-            if ((direction & CmdDirection.East) == CmdDirection.East)
-            {
-                newX++;
-            }
-
-            return new Coord(newX, newY);
+            return (newX, newY);
         }
-
-
-        private Coord PointInDirection(Coord start, Direction direction)
-        {
-            int newX = start.X;
-            int newY = start.Y;
-
-            if (direction == Direction.Up
-                || direction == Direction.UpLeft
-                || direction == Direction.UpRight)
-            {
-                newY--;
-            }
-
-            if (direction == Direction.Down
-                || direction == Direction.DownLeft
-                || direction == Direction.DownRight)
-            {
-                newY++;
-            }
-
-            if (direction == Direction.Left
-                || direction == Direction.UpLeft
-                || direction == Direction.DownLeft)
-            {
-                newX--;
-            }
-
-            if (direction == Direction.Right
-                || direction == Direction.UpRight
-                || direction == Direction.DownRight)
-            {
-                newX++;
-            }
-
-            return new Coord(newX, newY);
-        }
-
-        private Direction DirectionOfKey(AsciiKey keyPress)
-        {
-            return
-                keyPress.Key == Keys.Up ? Direction.Up :
-                keyPress.Key == Keys.Down ? Direction.Down :
-                keyPress.Key == Keys.Left ? Direction.Left :
-                keyPress.Key == Keys.Right ? Direction.Right :
-
-                keyPress.Key == Keys.NumPad1 ? Direction.DownLeft :
-                keyPress.Key == Keys.NumPad2 ? Direction.Down :
-                keyPress.Key == Keys.NumPad3 ? Direction.DownRight :
-                keyPress.Key == Keys.NumPad4 ? Direction.Left :
-                keyPress.Key == Keys.NumPad6 ? Direction.Right :
-                keyPress.Key == Keys.NumPad7 ? Direction.UpLeft :
-                keyPress.Key == Keys.NumPad8 ? Direction.Up :
-                keyPress.Key == Keys.NumPad9 ? Direction.UpRight :
-                Direction.None;
-        }
-
-        //public void SetMapDirty()
-        //{
-        //    Map.IsDisplayDirty = true;
-        //}
 
         public bool CanActorSeeTarget(IBeing being, Coord target)
         {

@@ -6,6 +6,7 @@ using GoRogue.MapViews;
 using Rectangle = GoRogue.Rectangle;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using SadConsole.Effects;
 
 namespace CopperBend.Contract
 {
@@ -37,6 +38,8 @@ namespace CopperBend.Contract
         IMapView<bool> GetView_CanSeeThrough();
         IMapView<bool> GetView_CanWalkThrough();
         IMapView<int> GetView_BlightStrength();
+
+        EffectsManager EffectsManager { get; }
 
         void SetInitialConsoleCells(ScrollingConsole console, SpaceMap spaceMap);
         void UpdateFOV(ScrollingConsole console, Coord position);

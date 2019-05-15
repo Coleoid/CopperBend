@@ -78,7 +78,8 @@ namespace CopperBend.Engine
             case Keys.OemComma: return PickUp(being);
 
             default:
-                WriteLine($"Command [{press.Character}] is unknown.");
+                if (press.Character != default(char))
+                    WriteLine($"Command [{press.Character}] is unknown.");
                 return CommandIncomplete;
             }
         }
@@ -147,8 +148,7 @@ namespace CopperBend.Engine
                 return CommandIncomplete;
             }
 
-            //0.0 omae wa mou shindeiru
-            if (press.Key == Keys.OemQuestion)
+            if (press.Character == '?')
             {
                 ShowInventory(being, i => true);
                 return CommandIncomplete;
@@ -173,10 +173,10 @@ namespace CopperBend.Engine
         {
             WriteLine("Help:");
             WriteLine("Arrow or numpad keys to move and attack");
-            WriteLine("a)pply wielded tool");
             WriteLine("d)rop an item");
             WriteLine("h)elp (or ?) shows this message");
             WriteLine("i)nventory");
+            WriteLine("u)se tool, wielded tool by default");
             WriteLine("w)ield a tool");
             WriteLine(",) Pick up object");
             return CommandIncomplete;

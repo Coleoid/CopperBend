@@ -105,7 +105,6 @@ namespace CopperBend.Engine
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
-
             PushEngineMode(EngineMode.Schedule, null);
         }
 
@@ -132,9 +131,15 @@ namespace CopperBend.Engine
             ActOnMode();
             SyncMapChanges();
 
+            AnimateBackground(timeElapsed);
+
             base.Update(timeElapsed);
         }
 
+        private void AnimateBackground(TimeSpan timeElapsed)
+        {
+            FullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
+        }
 
         public void QueueInput()
         {
@@ -294,6 +299,7 @@ namespace CopperBend.Engine
 
         public void SyncMapChanges()
         {
+            //  If any spaces changed whether they can be seen through, rebuild FOV
             if (FullMap.VisibilityChanged)
             {
                 FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
@@ -310,7 +316,10 @@ namespace CopperBend.Engine
                 Dispatcher.PlayerMoved = false;
             }
 
-            var changedAndInFOV = FullMap.CoordsWithChanges.Intersect(FullMap.FOV.CurrentFOV);
+            if (!FullMap.CoordsWithChanges.Any()) return;
+            var changedAndInFOV = FullMap.CoordsWithChanges
+                .Intersect(FullMap.FOV.CurrentFOV)
+                .Where(c => MapConsole.ViewPort.Contains(c));
             FullMap.UpdateViewOfCoords(MapConsole, changedAndInFOV);
             FullMap.CoordsWithChanges.Clear();
         }

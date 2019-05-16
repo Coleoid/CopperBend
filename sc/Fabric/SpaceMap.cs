@@ -76,10 +76,14 @@ namespace CopperBend.Fabric
 
     public class Space : IHasID
     {
+        public Space(uint id = uint.MaxValue)
+        {
+            ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
+        }
+
         #region standard IHasID
-        // one IDGenerator for all Spaces
-        public static IDGenerator IDGenerator = new IDGenerator();
-        public uint ID { get; private set; } = IDGenerator.UseID();
+        public static IDGenerator IDGenerator;
+        public uint ID { get; private set; }
         #endregion
 
         //public int Elevation;  //for later movement/attack mod
@@ -100,11 +104,16 @@ namespace CopperBend.Fabric
 
     public class AreaBlight : IHasID
     {
+        public AreaBlight(uint id = uint.MaxValue)
+        {
+            ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
+        }
+
         #region standard IHasID
-        // one IDGenerator for all AreaBlight
-        public static IDGenerator IDGenerator = new IDGenerator();
-        public uint ID { get; private set; } = IDGenerator.UseID();
+        public static IDGenerator IDGenerator;
+        public uint ID { get; private set; }
         #endregion
+
         public int Extent { get; set; }
     }
 

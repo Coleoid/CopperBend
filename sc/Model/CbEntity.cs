@@ -9,17 +9,19 @@ namespace CopperBend.Model
 {
     public abstract class CbEntity : SadConsole.Entities.Entity, IHasID
     {
-        // one IDGenerator for all CbEntities
-        public static IDGenerator IDGenerator = new IDGenerator();
-        public uint ID { get; private set; } = IDGenerator.UseID();
-
-        protected CbEntity(Color foreground, Color background, int glyph, int width = 1, int height = 1) 
+        protected CbEntity(Color foreground, Color background, int glyph, int width = 1, int height = 1, uint id = uint.MaxValue)
             : base(width, height)
         {
+            ID = (id == uint.MaxValue? IDGenerator.UseID() : id);
             Animation.CurrentFrame[0].Foreground = foreground;
             Animation.CurrentFrame[0].Background = background;
             Animation.CurrentFrame[0].Glyph = glyph;
         }
+
+        #region standard IHasID
+        public static IDGenerator IDGenerator;
+        public uint ID { get; private set; }
+        #endregion
     }
 
     public class Being : CbEntity, IBeing

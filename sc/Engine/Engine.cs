@@ -35,6 +35,7 @@ namespace CopperBend.Engine
         private GameState GameState;
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
+        private IDGenerator IDGenerator;
 
         #region Init
         public Engine(int gameWidth, int gameHeight)
@@ -62,6 +63,7 @@ namespace CopperBend.Engine
         public void Init()
         {
             PushEngineMode(EngineMode.StartUp, null);
+            PrepareIDGeneration();
 
             var loader = new MapLoader();
             FullMap = loader.FarmMap();
@@ -106,6 +108,18 @@ namespace CopperBend.Engine
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
             PushEngineMode(EngineMode.Schedule, null);
+        }
+
+        private void PrepareIDGeneration()
+        {
+            // On this path, each new IDed type needs addition here,
+            // yet no IDs will ever clash.  I like this tradeoff.
+            IDGenerator = new IDGenerator();
+
+            CbEntity.IDGenerator = IDGenerator;
+            Item.IDGenerator = IDGenerator;
+            Space.IDGenerator = IDGenerator;
+            AreaBlight.IDGenerator = IDGenerator;
         }
 
         private Being CreatePlayer(Coord playerLocation)

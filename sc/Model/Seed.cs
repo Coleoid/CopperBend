@@ -25,7 +25,7 @@ namespace CopperBend.Model
         }
 
         public Seed()
-            : base()
+            : base((0,0), 1, true)
         {
         }
 

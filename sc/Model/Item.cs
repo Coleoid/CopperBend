@@ -6,27 +6,16 @@ namespace CopperBend.Model
 {
     public class Item : IItem
     {
-        public Item(Coord location, int quantity, bool isUsable)
+        public Item(Coord location, int quantity = 1, bool isUsable = false, uint id = uint.MaxValue)
         {
+            ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
             Location = location;
             Quantity = quantity;
             IsUsable = isUsable;
         }
 
-        public Item(Coord location)
-        {
-            Location = location;
-            Quantity = 1;
-        }
-
-        public Item()
-        {
-            Quantity = 1;
-        }
-
-        // one IDGenerator for all Items
-        public static IDGenerator IDGenerator = new IDGenerator();
-        public uint ID { get; private set; } = IDGenerator.UseID();
+        public static IDGenerator IDGenerator;
+        public uint ID { get; private set; }
 
         public Color Foreground { get; set; }
         public int Glyph { get; set; }

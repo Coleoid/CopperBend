@@ -13,6 +13,7 @@ namespace CopperBend.Fabric
         public Coord PlayerStartPoint { get; set; }
         public static Dictionary<string, TerrainType> TerrainTypes { get; internal set; }
         public static TerrainType TilledSoil => TerrainTypes["tilled dirt"];
+        public static TerrainType PlantedSoil => TerrainTypes["planted dirt"];
 
         public SpaceMap(int width, int height)
             : base(height * width)
@@ -54,14 +55,19 @@ namespace CopperBend.Fabric
 
         internal void Sow(Space space, Seed seedToSow)
         {
-            throw new NotImplementedException();
+            if (space.CanPlant)
+            {
+                space.Terrain = PlantedSoil;
+                space.IsSown = true;
+            }
         }
 
         internal void Till(Space space)
         {
-            if (space.CanTill && !space.IsTilled)
+            if (space.CanTill)
             {
                 space.Terrain = TilledSoil;
+                space.IsTilled = true;
             }
         }
 
@@ -94,7 +100,7 @@ namespace CopperBend.Fabric
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
         //0.2.  0.3 accounts for modifiers (permission, hostile aura, blight, ...)
-        public bool CanPlant => Terrain.CanPlant && IsTilled;
+        public bool CanPlant => Terrain.CanPlant && IsTilled && !IsSown;
         public bool CanTill => Terrain.CanPlant && !IsTilled;
 
         public bool IsTilled { get; internal set; }

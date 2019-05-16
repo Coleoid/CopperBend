@@ -35,35 +35,34 @@ namespace CopperBend.Model
             PlantType = type;
         }
 
-        public override void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
-        {
-            //if (!tile.IsTilled)
-            //{
-            //    string qualifier = tile.IsTillable ? "untilled " : "";
-            //    output.Add($"Cannot sow {qualifier}{tile.TileType.Name}.");
-            //    return;
-            //}
+        //public override void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
+        //{
+        //    //if (!tile.IsTilled)
+        //    //{
+        //    //    string qualifier = tile.IsTillable ? "untilled " : "";
+        //    //    output.Add($"Cannot sow {qualifier}{tile.TileType.Name}.");
+        //    //    return;
+        //    //}
 
-            //if (tile.IsSown)
-            //{
-            //    output.Add($"The ground to my {direction} is already sown with a seed.");
-            //    return;
-            //}
+        //    //if (tile.IsSown)
+        //    //{
+        //    //    output.Add($"The ground to my {direction} is already sown with a seed.");
+        //    //    return;
+        //    //}
 
-            //var seedToSow = GetSeedFromStack();
-            //tile.Sow(seedToSow);
-            ////controls.AddToSchedule(seedToSow, 100);
+        //    //var seedToSow = GetSeedFromStack();
+        //    //tile.Sow(seedToSow);
+        //    ////controls.AddToSchedule(seedToSow, 100);
 
-            if (--Quantity == 0)
-            {
-                //0.0
-                //controls.RemoveFromInventory(this);
-            }
+        //    if (--Quantity == 0)
+        //    {
+        //        //0.0
+        //        //controls.RemoveFromInventory(this);
+        //    }
 
-            //controls.SetMapDirty();
-            var seedToSow = GetSeedFromStack();
-            controls.AddExperience(seedToSow.PlantType, Exp.PlantSeed);
-        }
+        //    var seedToSow = GetSeedFromStack();
+        //    controls.AddExperience(seedToSow.PlantType, Exp.PlantSeed);
+        //}
 
         internal Seed GetSeedFromStack()
         {
@@ -74,30 +73,33 @@ namespace CopperBend.Model
 
         private int growthRound = 0;
 
-        public virtual Action<IControlPanel> GetNextAction()
+        public void SeedGrows(IControlPanel controls)
         {
-            throw new NotImplementedException();
-        }
-
-        private void SeedGrows(IControlPanel controls, ILogWindow output)
-        {
-            output.Add($"The seed is growing... Round {growthRound++}");
-            controls.ScheduleAgent(this, growthRound > 2 ? 10 : 100);
+            controls.AddMessage($"The seed is growing... Round {growthRound++}");
+            if (growthRound > 3)
+                SeedMatures(controls);
+            else
+                controls.ScheduleAgent(this, growthRound > 2 ? 10 : 40);
         }
 
         protected virtual void SeedMatures(IControlPanel controls)
         {
-            throw new Exception("Override or come up with a default implementation");
+            throw new Exception("Outcome of seed maturity dependent on seed type.  Must override.");
         }
 
         public ScheduleEntry GetNextEntry()
         {
-            throw new NotImplementedException();
+            return GetNextEntry(100);
         }
 
         public ScheduleEntry GetNextEntry(int offset)
         {
-            throw new NotImplementedException();
+            return new ScheduleEntry
+            {
+                Action = (cp) => SeedGrows(cp),
+                Agent = this,
+                Offset = offset
+            };
         }
     }
 
@@ -113,7 +115,6 @@ namespace CopperBend.Model
             IItem fruit = new Fruit(this.Location, 2, this.PlantType);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this.Location);
-            //controls.SetMapDirty();
         }
     }
 }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Size = System.Drawing.Size;
-using log4net;
 using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
+using log4net;
 using SadConsole;
 using SadConsole.Input;
 using SadConsole.Components;
@@ -133,6 +133,7 @@ namespace CopperBend.Engine
             player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
             player.Components.Add(new EntityViewSyncComponent());
             player.AddToInventory(new Hoe((0,0)));
+            player.AddToInventory(new HealerSeed((0,0), 2));
 
             log.Debug("Created player.");
             return player;

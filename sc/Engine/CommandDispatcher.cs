@@ -258,8 +258,8 @@ namespace CopperBend.Engine
 
         private bool Use_Seed(IBeing being, Command command)
         {
-            var targetPoint = CoordInDirection(being.Position, command.Direction);
-            var space = SpaceMap.GetItem(targetPoint);
+            var targetCoord = CoordInDirection(being.Position, command.Direction);
+            var space = SpaceMap.GetItem(targetCoord);
 
             if (!space.IsTilled)
             {
@@ -287,6 +287,8 @@ namespace CopperBend.Engine
 
             AddExperience(seedToSow.PlantType, Exp.PlantSeed);
 
+            GameState.Map.CoordsWithChanges.Add(targetCoord);
+            ScheduleAgent(being, 8);
             return true;
         }
 

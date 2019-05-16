@@ -56,7 +56,16 @@ namespace CopperBend.Engine
                 CanSeeThrough = true,
                 CanPlant = true,
                 Looks = new Cell(Color.SaddleBrown, dirtBG, '~'),
+            };
+            StoreTerrainType(type);
 
+            type = new TerrainType
+            {
+                Name = "planted dirt",
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                CanPlant = false,
+                Looks = new Cell(Color.ForestGreen, dirtBG, '~'),
             };
             StoreTerrainType(type);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
@@ -7,18 +8,21 @@ namespace CopperBend.Model
 {
     public class Seed : Item, ISeed, IScheduleAgent
     {
-        public PlantType PlantType;
+        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
+        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+
+        public PlantDetails PlantDetails;
 
         public override string Name
         {
-            get => "seed";
+            get => $"{PlantDetails.MainName} seed";
         }
 
-        public override bool SameThingAs(IItem item)
+        public override bool StacksWith(IItem item)
         {
             if (item is Seed seed)
             {
-                return PlantType == seed.PlantType;
+                return PlantDetails.ID == seed.PlantDetails.ID;
             }
 
             return false;
@@ -29,47 +33,22 @@ namespace CopperBend.Model
         {
         }
 
-        public Seed(Coord position, int quantity, PlantType type)
+        public Seed(Coord position, int quantity, uint typeID)
             : base(position, quantity, true)
         {
-            PlantType = type;
+            PlantDetails = PlantByID[typeID];
         }
-
-        //public override void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
-        //{
-        //    //if (!tile.IsTilled)
-        //    //{
-        //    //    string qualifier = tile.IsTillable ? "untilled " : "";
-        //    //    output.Add($"Cannot sow {qualifier}{tile.TileType.Name}.");
-        //    //    return;
-        //    //}
-
-        //    //if (tile.IsSown)
-        //    //{
-        //    //    output.Add($"The ground to my {direction} is already sown with a seed.");
-        //    //    return;
-        //    //}
-
-        //    //var seedToSow = GetSeedFromStack();
-        //    //tile.Sow(seedToSow);
-        //    ////controls.AddToSchedule(seedToSow, 100);
-
-        //    if (--Quantity == 0)
-        //    {
-        //        //0.0
-        //        //controls.RemoveFromInventory(this);
-        //    }
-
-        //    var seedToSow = GetSeedFromStack();
-        //    controls.AddExperience(seedToSow.PlantType, Exp.PlantSeed);
-        //}
 
         internal Seed GetSeedFromStack()
         {
             Guard.Against(Quantity < 1, "Somehow there's no seed here");
-            return new Seed(this.Location, 1, this.PlantType);
+            return new Seed(this.Location, 1, this.PlantDetails.ID);
         }
 
+        public override string Adjective
+        {
+            get => PlantDetails.SeedKnown ? PlantDetails.MainName : PlantDetails.SeedAdjective;
+        }
 
         private int growthRound = 0;
 
@@ -84,7 +63,10 @@ namespace CopperBend.Model
 
         protected virtual void SeedMatures(IControlPanel controls)
         {
-            throw new Exception("Outcome of seed maturity dependent on seed type.  Must override.");
+            //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
+            IItem fruit = new Fruit(this.Location, 2, this.PlantDetails.ID);
+            controls.PutItemOnMap(fruit);
+            controls.RemovePlantAt(this.Location);
         }
 
         public ScheduleEntry GetNextEntry()
@@ -100,21 +82,6 @@ namespace CopperBend.Model
                 Agent = this,
                 Offset = offset
             };
-        }
-    }
-
-    public class HealerSeed : Seed
-    {
-        public HealerSeed(Coord position, int quantity) 
-            : base(position, quantity, PlantType.Healer)
-        {}
-
-        protected override void SeedMatures(IControlPanel controls)
-        {
-            //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Location, 2, this.PlantType);
-            controls.PutItemOnMap(fruit);
-            controls.RemovePlantAt(this.Location);
         }
     }
 }

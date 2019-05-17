@@ -20,8 +20,13 @@ namespace CopperBend.Engine
 
     public class Describer
     {
+        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
+        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+
+
         private Random rnd;
-        public Describer(int randomSeed = 88)  //  larva
+
+        public Describer(int randomSeed = 88) //0.1
         {
             //TODO: Game-wide randomizer seed management
             rnd = new Random(randomSeed);
@@ -30,7 +35,6 @@ namespace CopperBend.Engine
             ScrambleFruit();
         }
 
-        #region Seeds
         public List<string> SeedAdjectives = new List<string>
         {
             "burred",
@@ -38,33 +42,18 @@ namespace CopperBend.Engine
             "smooth",
         };
 
-        public Dictionary<PlantType, string> SeedDescriptionFrom;
-        public Dictionary<string, PlantType> SeedTypeFrom;
-        public Dictionary<PlantType, bool> SeedLearned;
-
         private void ScrambleSeeds()
         {
             var shuffled = SeedAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
 
-            SeedTypeFrom = new Dictionary<string, PlantType>();
-            SeedDescriptionFrom = new Dictionary<PlantType, string>();
-            SeedLearned = new Dictionary<PlantType, bool>();
-
-            //  I am broot
-            SeedTypeFrom[shuffled[0]] = PlantType.Boomer;
-            SeedTypeFrom[shuffled[1]] = PlantType.Healer;
-            SeedTypeFrom[shuffled[2]] = PlantType.Thornfriend;
-            SeedDescriptionFrom[PlantType.Boomer] = shuffled[0];
-            SeedDescriptionFrom[PlantType.Healer] = shuffled[1];
-            SeedDescriptionFrom[PlantType.Thornfriend] = shuffled[2];
-            SeedLearned[PlantType.Boomer] = false;
-            SeedLearned[PlantType.Healer] = false;
-            SeedLearned[PlantType.Thornfriend] = false;
+            foreach (var key in PlantByID.Keys)
+            {
+                PlantByID[key].SeedAdjective = shuffled[0];
+                shuffled.RemoveAt(0);
+            }
         }
-        #endregion
 
-        #region Fruit
         public List<string> FruitAdjectives = new List<string>
         {
             "knobby",
@@ -72,43 +61,27 @@ namespace CopperBend.Engine
             "smooth",
         };
 
-        public Dictionary<PlantType, string> FruitDescriptionFrom;
-        public Dictionary<string, PlantType> FruitTypeFrom;
-        public Dictionary<PlantType, bool> FruitLearned;
-
         private void ScrambleFruit()
         {
-            //TODO: Take randomizer seed, so that Save/Load
-            //  just needs that number to recreate the shuffles.
             var shuffled = FruitAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
 
-            FruitTypeFrom = new Dictionary<string, PlantType>();
-            FruitDescriptionFrom = new Dictionary<PlantType, string>();
-            FruitLearned = new Dictionary<PlantType, bool>();
-
-            //  I am broot
-            FruitTypeFrom[shuffled[0]] = PlantType.Boomer;
-            FruitTypeFrom[shuffled[1]] = PlantType.Healer;
-            FruitTypeFrom[shuffled[2]] = PlantType.Thornfriend;
-            FruitDescriptionFrom[PlantType.Boomer] = shuffled[0];
-            FruitDescriptionFrom[PlantType.Healer] = shuffled[1];
-            FruitDescriptionFrom[PlantType.Thornfriend] = shuffled[2];
-            FruitLearned[PlantType.Boomer] = false;
-            FruitLearned[PlantType.Healer] = false;
-            FruitLearned[PlantType.Thornfriend] = false;
+            foreach (var key in PlantByID.Keys)
+            {
+                PlantByID[key].FruitAdjective = shuffled[0];
+                shuffled.RemoveAt(0);
+            }
         }
-        #endregion
 
         public void Learn(Seed seed)
         {
-            SeedLearned[seed.PlantType] = true;
+            PlantByID[seed.PlantDetails.ID].SeedKnown = true;
         }
 
         public void Learn(Fruit fruit)
         {
-            FruitLearned[fruit.PlantType] = true;
-            SeedLearned[fruit.PlantType] = true;
+            PlantByID[fruit.PlantDetails.ID].FruitKnown = true;
+            PlantByID[fruit.PlantDetails.ID].SeedKnown = true;
         }
 
         public string Describe(string name, DescMods mods = DescMods.None, int quantity = 1, string adj = "")
@@ -176,25 +149,15 @@ namespace CopperBend.Engine
             return Describe(item.Name, mods, item.Quantity, AdjectiveFor(item));
         }
 
-        //TODO:  Fix the smell of these two methods.
+        //TODO:  these belong in class Seed and class Fruit, right?
         public string AdjectiveFor(Seed seed)
         {
-            var type = seed.PlantType;
-            string adj = SeedLearned[type]
-                ? type.ToString().ToLower()
-                : SeedDescriptionFrom[type];
-
-            return adj;
+            return seed.PlantDetails.SeedKnown? seed.PlantDetails.MainName : seed.PlantDetails.SeedAdjective;
         }
 
         public string AdjectiveFor(Fruit fruit)
         {
-            var type = fruit.PlantType;
-            string adj = FruitLearned[type]
-                ? type.ToString().ToLower()
-                : FruitDescriptionFrom[type];
-
-            return adj;
+            return fruit.PlantDetails.FruitKnown ? fruit.PlantDetails.MainName : fruit.PlantDetails.FruitAdjective;
         }
 
     }

@@ -98,7 +98,7 @@ namespace CopperBend.Engine
         }
 
         public int XP { get; set; } = 0;
-        public void AddExperience(PlantType plant, Exp experience)
+        public void AddExperience(uint plantID, Exp experience)
         {
             //TODO:  An entire experience subsystem.  For now it can be "points".
 

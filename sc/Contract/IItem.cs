@@ -1,4 +1,5 @@
-﻿using Color = Microsoft.Xna.Framework.Color;
+﻿using System.Collections.Generic;
+using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 
 namespace CopperBend.Contract
@@ -21,16 +22,45 @@ namespace CopperBend.Contract
         string ConsumeVerb { get; }
         string Adjective { get; set; }
 
-        bool SameThingAs(IItem item);
+        bool StacksWith(IItem item);
     }
 
     public interface ISeed : IItem
     { }
 
-    public enum PlantType
+    public class PlantDetails
     {
-        Boomer,
-        Healer,
-        Thornfriend,
+        public uint ID;
+        public string MainName { get; set; }
+        public int GrowthTime { get; set; }
+        public bool SeedKnown;
+        public bool FruitKnown;
+        public string SeedAdjective;
+        public string FruitAdjective;
+        public List<(PlantPart, PlantUse, string)> Uses;
     }
+
+    public enum PlantPart
+    {
+        Unset = 0,
+        Root,
+        Stem,
+        Leaf,
+        Flower,
+        Fruit,
+        Seed
+    }
+
+    public enum PlantUse
+    {
+        Unset = 0,
+        Food,
+        Medicine,
+        Toxin,
+        Textile,
+        Flavor,
+        Beauty
+    }
+
+
 }

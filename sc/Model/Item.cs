@@ -21,7 +21,7 @@ namespace CopperBend.Model
         public int Glyph { get; set; }
 
         public virtual string Name { get; set; }
-        public string Adjective { get; set; } = string.Empty;
+        public virtual string Adjective { get; set; } = string.Empty;
         public int Quantity { get; set; }
 
         public Coord Location { get; protected set; }
@@ -47,11 +47,10 @@ namespace CopperBend.Model
 
         public virtual string ConsumeVerb => "eat";
 
-        public virtual bool SameThingAs(IItem item)
+        public virtual bool StacksWith(IItem item)
         {
             return Name == item.Name
                 && GetType() == item.GetType();
         }
     }
 }
-

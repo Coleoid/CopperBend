@@ -64,6 +64,7 @@ namespace CopperBend.Engine
         {
             PushEngineMode(EngineMode.StartUp, null);
             PrepareIDGeneration();
+            PreparePlants();
 
             var loader = new MapLoader();
             FullMap = loader.FarmMap();
@@ -122,6 +123,45 @@ namespace CopperBend.Engine
             AreaBlight.IDGenerator = IDGenerator;
         }
 
+        private Dictionary<string, PlantDetails> PlantsByName;
+        private Dictionary<uint, PlantDetails> PlantsByID;
+        private void PreparePlants()
+        {
+            PlantsByName = new Dictionary<string, PlantDetails>();
+            PlantsByID = new Dictionary<uint, PlantDetails>();
+
+            AddPlantDetails( new PlantDetails {
+                ID = 1,
+                MainName = "Boomer",
+                GrowthTime = 400
+            });
+            AddPlantDetails(new PlantDetails
+            {
+                ID = 2,
+                MainName = "Healer",
+                GrowthTime = 400
+            });
+            AddPlantDetails(new PlantDetails
+            {
+                ID = 3,
+                MainName = "Thornfriend",
+                GrowthTime = 400
+            });
+
+            Seed.PlantByID = PlantsByID;
+            Seed.PlantByName = PlantsByName;
+            Fruit.PlantByID = PlantsByID;
+            Fruit.PlantByName = PlantsByName;
+            Describer.PlantByID = PlantsByID;
+            Describer.PlantByName = PlantsByName;
+        }
+
+        private void AddPlantDetails(PlantDetails plant)
+        {
+            PlantsByID[plant.ID] = plant;
+            PlantsByName[plant.MainName] = plant;
+        }
+
         private Being CreatePlayer(Coord playerLocation)
         {
             var player = new Player(Color.AntiqueWhite, Color.Transparent)
@@ -133,7 +173,7 @@ namespace CopperBend.Engine
             player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
             player.Components.Add(new EntityViewSyncComponent());
             player.AddToInventory(new Hoe((0,0)));
-            player.AddToInventory(new HealerSeed((0,0), 2));
+            player.AddToInventory(new Seed((0,0), 2, PlantsByName["Healer"].ID));
 
             log.Debug("Created player.");
             return player;

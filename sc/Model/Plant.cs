@@ -18,10 +18,10 @@ namespace CopperBend.Model
 
     public class GrowingPlant : IScheduleAgent
     {
-        public PlantType PlantType { get; protected set; }
+        public PlantDetails PlantDetails { get; protected set; }
         public GrowingPlant(Seed seed, ISchedule schedule)
         {
-            PlantType = seed.PlantType;
+            PlantDetails = seed.PlantDetails;
             schedule.AddAgent(this);
         }
 
@@ -34,7 +34,7 @@ namespace CopperBend.Model
         {
             return new ScheduleEntry
             {
-                Action = (cp) => throw new Exception($"Make code to grow plant {PlantType}!"),
+                Action = (cp) => throw new Exception($"Make code to grow plant {PlantDetails.MainName}!"),
                 Offset = offset
             };
         }

@@ -29,7 +29,7 @@ namespace CopperBend.Contract
         void RemovePlantAt(Coord position);
         void Till(Space space);
 
-        void AddExperience(PlantType plant, Exp experience);
+        void AddExperience(uint plantID, Exp experience);
         bool PlayerMoved { get; set; }
 
         //bool CanActorSeeTarget(IBeing being, Coord target);

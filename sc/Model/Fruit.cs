@@ -1,17 +1,21 @@
 ﻿using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
+using System.Collections.Generic;
 
 namespace CopperBend.Model
 {
     public class Fruit : Item
     {
-        public PlantType PlantType;
+        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
+        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
 
-        public Fruit(Coord location, int quantity, PlantType plantType)
+        public PlantDetails PlantDetails;
+
+        public Fruit(Coord location, int quantity, uint typeID)
             : base(location, quantity, false)
         {
-            PlantType = plantType;
+            PlantDetails = PlantByID[typeID];
             Glyph = '%';
             Foreground = Color.LightPink;
             Name = "fruit";

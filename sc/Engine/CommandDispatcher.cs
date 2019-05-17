@@ -69,20 +69,20 @@ namespace CopperBend.Engine
 
             if (item is Fruit fruit)
             {
-                switch (fruit.PlantType)
+                switch (fruit.PlantDetails.MainName)
                 {
-                case PlantType.Healer:
+                case "Healer":
                     HealActor(being, 4);
                     FeedActor(being, 400);
                     break;
 
                 default:
-                    throw new Exception($"Don't have eating written for fruit of {fruit.PlantType}.");
+                    throw new Exception($"Don't have eating written for fruit of {fruit.PlantDetails.MainName}.");
                 }
 
-                being.AddToInventory(new Seed((0, 0), 2, fruit.PlantType));
+                being.AddToInventory(new Seed((0, 0), 2, fruit.PlantDetails.ID));
                 Learn(fruit);
-                AddExperience(fruit.PlantType, Exp.EatFruit);
+                AddExperience(fruit.PlantDetails.ID, Exp.EatFruit);
                 Schedule.AddAgent(being, 2);
             }
 
@@ -285,7 +285,7 @@ namespace CopperBend.Engine
                 being.RemoveFromInventory(seedStock);
             }
 
-            AddExperience(seedToSow.PlantType, Exp.PlantSeed);
+            AddExperience(seedToSow.PlantDetails.ID, Exp.PlantSeed);
 
             GameState.Map.CoordsWithChanges.Add(targetCoord);
             ScheduleAgent(being, 8);

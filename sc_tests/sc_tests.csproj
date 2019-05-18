@@ -56,8 +56,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DescriberTests.cs" />
+    <Compile Include="DispatcherTests.cs" />
+    <Compile Include="Dispatcher_Use_Tests.cs" />
+    <Compile Include="InputCommandSourceTestsBase.cs" />
+    <Compile Include="InputCS_command_Tests.cs" />
+    <Compile Include="InputCS_command_use_Tests.cs" />
+    <Compile Include="InputCS_utility_Tests.cs" />
+    <Compile Include="MapLoaderTests.cs" />
+    <Compile Include="PresetCommandSourceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScheduleTests.cs" />
     <Compile Include="Serialization_tests.cs" />
+    <Compile Include="VignetteTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

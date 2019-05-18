@@ -92,11 +92,6 @@ namespace CopperBend.Engine
             SpaceMap.Till(space);
         }
 
-        public void Learn(Fruit fruit)
-        {
-            Describer.Learn(fruit);
-        }
-
         public int XP { get; set; } = 0;
         public void AddExperience(uint plantID, Exp experience)
         {

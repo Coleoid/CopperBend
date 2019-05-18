@@ -3,6 +3,14 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Authors>Jason Cole</Authors>
+    <Product>Copper Bend</Product>
+    <Description>A Western Fantasy Tower Defense Mystery Roguelike</Description>
+    <Copyright>Copyright 2019, all rights reserved</Copyright>
+    <Version>0.0.8</Version>
+    <AssemblyName>Copper Bend</AssemblyName>
+    <RootNamespace>CopperBend</RootNamespace>
+    <StartupObject>CopperBend.Application.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

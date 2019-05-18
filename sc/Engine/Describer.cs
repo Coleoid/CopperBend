@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CopperBend.Contract;
-using CopperBend.Model;
 
 namespace CopperBend.Engine
 {
@@ -37,9 +36,44 @@ namespace CopperBend.Engine
 
         public List<string> SeedAdjectives = new List<string>
         {
+            "abrasive",
+            "blistered",
+            "bumpy",
             "burred",
+            "barbed",
+            "bulging",
+            "blemished",
+            "chunky",
+            "cratered",
+            "dense",
+            "dented",
+            "dusty",
+            "elastic",
+            "flat",
+            "fuzzy",
+            "gritty",
+            "glossy",
+            "hard",
+            "irregular",
+            "jagged",
+            "knobbed",
+            "lustrous",
+            "metallic",
+            "matte",
+            "pitted",
+            "pointy",
+            "pockmarked",
+            "prickly",
+            "ragged",
+            "ridged",
             "rough",
+            "sharp-edged",
+            "scaly",
             "smooth",
+            "shiny",
+            "slippery",
+            "spiny",
+            "thorny",
         };
 
         private void ScrambleSeeds()
@@ -56,9 +90,34 @@ namespace CopperBend.Engine
 
         public List<string> FruitAdjectives = new List<string>
         {
+            "abrasive",
+            "barbed",
+            "bloated",
+            "blunt",
+            "bulging",
+            "cushioned",
+            "elastic",
+            "firm",
+            "fuzzy",
+            "flat",
+            "gelatinous",
+            "hard",
             "knobby",
-            "star-shaped",
+            "mushy",
+            "pulpy",
+            "prickly",
+            "rough",
+            "silky",
             "smooth",
+            "spotted",
+            "striped",
+            "streaky",
+            "springy",
+            "star-shaped",
+            "tough",
+            "velvety",
+            "aromatic",
+            "sharp-smelling",
         };
 
         private void ScrambleFruit()
@@ -73,15 +132,9 @@ namespace CopperBend.Engine
             }
         }
 
-        public void Learn(Seed seed)
+        public string Describe(IItem item, DescMods mods = DescMods.None)
         {
-            PlantByID[seed.PlantDetails.ID].SeedKnown = true;
-        }
-
-        public void Learn(Fruit fruit)
-        {
-            PlantByID[fruit.PlantDetails.ID].FruitKnown = true;
-            PlantByID[fruit.PlantDetails.ID].SeedKnown = true;
+            return Describe(item.Name, mods, item.Quantity, item.Adjective);
         }
 
         public string Describe(string name, DescMods mods = DescMods.None, int quantity = 1, string adj = "")
@@ -126,39 +179,5 @@ namespace CopperBend.Engine
 
             return description;
         }
-
-        public string AdjectiveFor(IItem item)
-        {
-            if (item is Seed seed)
-            {
-                return AdjectiveFor(seed);
-            }
-            if (item is Fruit fruit)
-            {
-                return AdjectiveFor(fruit);
-            }
-            else  //  potions, wands, scrolls are the genre staples...
-            {
-                return item.Adjective;
-            }
-
-        }
-
-        public string Describe(IItem item, DescMods mods = DescMods.None)
-        {
-            return Describe(item.Name, mods, item.Quantity, AdjectiveFor(item));
-        }
-
-        //TODO:  these belong in class Seed and class Fruit, right?
-        public string AdjectiveFor(Seed seed)
-        {
-            return seed.PlantDetails.SeedKnown? seed.PlantDetails.MainName : seed.PlantDetails.SeedAdjective;
-        }
-
-        public string AdjectiveFor(Fruit fruit)
-        {
-            return fruit.PlantDetails.FruitKnown ? fruit.PlantDetails.MainName : fruit.PlantDetails.FruitAdjective;
-        }
-
     }
 }

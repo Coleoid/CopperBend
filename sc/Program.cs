@@ -28,6 +28,7 @@ namespace CopperBend.Application
                 //  Engine is now a console, which cannot be created before .Run() below.
                 //  .OnInitialize must be set before .Run is called.
                 Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight);
+                Game.Instance.Window.Title = "Copper Bend";
                 Game.Instance.Run();
             }
             catch (Exception ex)

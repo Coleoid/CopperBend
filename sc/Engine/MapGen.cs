@@ -11,7 +11,7 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {
-
+    //  Placeholder, roughly from AnsiWare tutorial--not currently in use
     public class MapGen
     {
         protected internal List<Rectangle> Rooms;

@@ -154,7 +154,7 @@ namespace CopperBend.Fabric
             }
             else if (extent < 3)
             {
-                var lowColors = new Color[] { bgColor, new Color(15, 32, 0), bgColor, new Color(23, 22, 13), bgColor, new Color(8, 28, 26), bgColor };
+                var lowColors = new Color[] { bgColor, new Color(11, 44, 0), bgColor, new Color(23, 22, 17), bgColor, new Color(8, 28, 11), bgColor };
                 //var lowColors = new Color[] { bgColor, new Color(31, 64, 0), bgColor, new Color(47, 45, 26), bgColor, new Color(16, 57, 52), bgColor };
                 var lowFade = new Fade
                 {

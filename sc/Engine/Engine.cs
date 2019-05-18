@@ -68,7 +68,7 @@ namespace CopperBend.Engine
 
             var loader = new MapLoader();
             FullMap = loader.FarmMap();
-            log.Debug("Generated map");
+            log.Debug("Loaded the map");
 
             Describer describer = new Describer();
             Schedule = new Schedule();
@@ -76,7 +76,7 @@ namespace CopperBend.Engine
             Schedule.AddAgent(Player, 12);
 
             var builder = new UIBuilder(GameSize);
-            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "Game Map", FullMap);
+            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player);
             FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);

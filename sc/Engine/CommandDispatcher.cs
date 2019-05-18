@@ -80,8 +80,10 @@ namespace CopperBend.Engine
                     throw new Exception($"Don't have eating written for fruit of {fruit.PlantDetails.MainName}.");
                 }
 
-                being.AddToInventory(new Seed((0, 0), 2, fruit.PlantDetails.ID));
-                Learn(fruit);
+                var seed = new Seed((0, 0), 2, fruit.PlantDetails.ID);
+                being.AddToInventory(seed);
+                fruit.PlantDetails.FruitKnown = true;
+                fruit.PlantDetails.SeedKnown = true;  //  Eating fruit also shows us what its seeds are.
                 AddExperience(fruit.PlantDetails.ID, Exp.EatFruit);
                 Schedule.AddAgent(being, 2);
             }

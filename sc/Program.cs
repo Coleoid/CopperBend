@@ -22,8 +22,7 @@ namespace CopperBend.Application
 
             try
             {
-                //Game.Create("IBM.font", gameWidth, gameHeight);
-                Game.Create(gameWidth, gameHeight);
+                Game.Create("Cheepicus_14x14.font", gameWidth, gameHeight);
 
                 //  Engine is now a console, which cannot be created before .Run() below.
                 //  .OnInitialize must be set before .Run is called.

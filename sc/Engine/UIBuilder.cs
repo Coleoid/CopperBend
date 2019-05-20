@@ -14,12 +14,14 @@ namespace CopperBend.Engine
     {
         private readonly ILog log;
         public readonly Size GameSize;
+        //public Font Font;
 
-        public UIBuilder(Size gameSize)
+        public UIBuilder(Size gameSize, Font font)
         {
             log = LogManager.GetLogger("CB", "CB.UIBuilder");
 
             GameSize = gameSize;
+            //Font = font;
         }
 
         public MessageLogWindow CreateMessageLog()
@@ -62,7 +64,7 @@ namespace CopperBend.Engine
             mapWindow.Add(closeButton);
 
             var mapConsole = new ScrollingConsole(
-                fullMap.Width, fullMap.Height, Global.FontDefault,
+                fullMap.Width, fullMap.Height, SadConsole.Global.FontDefault,
                 new Rectangle(0, 0, viewWidth, viewHeight));
 
             // Fit the MapConsole inside the MapWindow border

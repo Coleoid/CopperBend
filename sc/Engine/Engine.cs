@@ -70,12 +70,17 @@ namespace CopperBend.Engine
             FullMap = loader.FarmMap();
             log.Debug("Loaded the map");
 
+            //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
+            //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
+            //SadConsole.Global.FontDefault = font;
             Describer describer = new Describer();
             Schedule = new Schedule();
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
+            Player.Font = Font;
             Schedule.AddAgent(Player, 12);
 
-            var builder = new UIBuilder(GameSize);
+
+            var builder = new UIBuilder(GameSize, null); //font
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player);

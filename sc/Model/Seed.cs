@@ -47,7 +47,7 @@ namespace CopperBend.Model
 
         public override string Adjective
         {
-            get => PlantDetails.SeedKnown ? PlantDetails.MainName : PlantDetails.SeedAdjective;
+            get => PlantDetails.SeedDescriptionAsKnown;
         }
 
         private int growthRound = 0;
@@ -64,7 +64,7 @@ namespace CopperBend.Model
         protected virtual void SeedMatures(IControlPanel controls)
         {
             //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Location, 2, this.PlantDetails.ID);
+            IItem fruit = new Fruit(this.Location, 2, this.PlantDetails);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this.Location);
         }

@@ -102,7 +102,6 @@ namespace CopperBend.Engine
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)
             {
                 PushEngineMode = PushEngineMode,
-
                 IsInputReady = () => InputQueue.Count > 0,
                 GetNextInput = InputQueue.Dequeue,
                 ClearPendingInput = InputQueue.Clear,

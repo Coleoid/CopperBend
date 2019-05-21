@@ -12,15 +12,19 @@ namespace CopperBend.Model
 
         public PlantDetails PlantDetails;
 
-        public Fruit(Coord location, int quantity, uint typeID)
+        public Fruit(Coord location, int quantity, PlantDetails details)
             : base(location, quantity, false)
         {
-            PlantDetails = PlantByID[typeID];
+            PlantDetails = details;
             Glyph = '%';
             Foreground = Color.LightPink;
             Name = "fruit";
         }
 
+        public override string Name
+        {
+            get => $"{PlantDetails.FruitDescriptionAsKnown} fruit";
+        }
         public override bool IsConsumable => true;
     }
 }

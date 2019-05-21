@@ -37,6 +37,8 @@ namespace CopperBend.Contract
         public bool FruitKnown;
         public string SeedAdjective;
         public string FruitAdjective;
+        public string SeedDescriptionAsKnown => SeedKnown ? MainName : SeedAdjective;
+        public string FruitDescriptionAsKnown => FruitKnown ? MainName : FruitAdjective;
         public List<(PlantPart, PlantUse, string)> Uses;
     }
 

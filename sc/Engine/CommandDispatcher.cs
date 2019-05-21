@@ -115,18 +115,26 @@ namespace CopperBend.Engine
 
         private bool Do_DirectionMove(IBeing being, Coord newPosition)
         {
-            Space tile = SpaceMap.GetItem(newPosition);
+            Space space = SpaceMap.GetItem(newPosition);
 
-            if (tile.Terrain.Name == "closed door")
+            if (space.Terrain.Name == "closed door")
             {
-                //TODO:  Map.OpenDoor(tile);
-                ScheduleAgent(being, 4);
-                return true;
+                var success = SpaceMap.OpenDoor(space);
+                if (success)
+                {
+                    ScheduleAgent(being, 4);
+                    GameState.Map.CoordsWithChanges.Add(newPosition);
+                }
+                else
+                {
+                    MessageLog.Add("Door's stuck.");
+                }
+                return success;
             }
 
             if (!SpaceMap.CanWalkThrough(newPosition))
             {
-                var np = Describer.Describe(tile.Terrain.Name, DescMods.IndefiniteArticle);
+                var np = Describer.Describe(space.Terrain.Name, DescMods.IndefiniteArticle);
                 if (being.IsPlayer)
                     MessageLog.Add($"I can't walk through {np}.");
                 

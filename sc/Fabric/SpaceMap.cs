@@ -78,6 +78,17 @@ namespace CopperBend.Fabric
                 GetItem(seen).IsKnown = true;
             }
         }
+
+        internal bool OpenDoor(Space tile)
+        {
+            if (tile.Terrain == TerrainTypes["closed door"])
+            {
+                tile.Terrain = TerrainTypes["open door"];
+                return true;
+            }
+
+            return false;
+        }
     }
 
     public class Space : IHasID

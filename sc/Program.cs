@@ -18,7 +18,7 @@ namespace CopperBend.Application
             log.Info("Run started");
 
             int gameWidth = 80;
-            int gameHeight = 40;
+            int gameHeight = 60;
 
             try
             {

@@ -9,9 +9,11 @@ namespace CopperBend.Engine
 {
     public class Schedule : ISchedule
     {
-        public int CurrentTick { get; private set; } = 0;
-        private readonly SortedDictionary<int, List<Action<IControlPanel>>> TickEntries;
         private readonly ILog log;
+        public int CurrentTick { get; private set; } = 0;
+
+        //0.1, actions need to become serializable
+        private readonly SortedDictionary<int, List<Action<IControlPanel>>> TickEntries;
 
         public Schedule()
         {
@@ -19,11 +21,10 @@ namespace CopperBend.Engine
             log = LogManager.GetLogger("CB", "CB.Schedule");
         }
 
-        //  Removes and returns the next to act
-        //  Ordered by tick of occurrence, then FIFO per tick
+        /// <summary> Get next scheduled action, ordered by tick of occurrence, then FIFO per tick </summary>
         public Action<IControlPanel> GetNextAction()
         {
-            log.DebugFormat("GetNextAction, tick {0}", CurrentTick);
+            log.DebugFormat("Schedule.GetNextAction @ tick {0}", CurrentTick);
             if (TickEntries.Count() == 0)
                 throw new Exception("The Schedule should never empty out");
 
@@ -72,5 +73,4 @@ namespace CopperBend.Engine
             AddEntry(agent.GetNextEntry(offset));
         }
     }
-
 }

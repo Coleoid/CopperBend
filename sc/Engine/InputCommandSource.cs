@@ -11,8 +11,6 @@ namespace CopperBend.Engine
     public class InputCommandSource : ICommandSource
     {
         private readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
-        private const int lowercase_a = 97;
-        private const int lowercase_z = 123;
         private readonly ILog log;
 
         private readonly Describer Describer;
@@ -184,7 +182,7 @@ namespace CopperBend.Engine
 
         public Command Inventory(IBeing being)
         {
-            ShowInventory(being, i => true);
+            ShowInventory(being);
             return CommandIncomplete;
         }
 
@@ -364,10 +362,9 @@ namespace CopperBend.Engine
 
         private static int AlphaIndexOfKeyPress(AsciiKey press)
         {
-            //if (!press.Char.HasValue) return -1;
-            var asciiNum = (int)press.Character;
-            if (asciiNum < lowercase_a || lowercase_z < asciiNum) return -1;
-            return asciiNum - lowercase_a;
+            int asciiNum = press.Character;
+            if (asciiNum < 'a' || 'z' < asciiNum) return -1;
+            return asciiNum - 'a';
         }
 
         /// <summary> If more input is queued, the prompt will not be sent </summary>
@@ -376,8 +373,7 @@ namespace CopperBend.Engine
             NextStep = nextStep;
             if (!Controls.IsInputReady())
             {
-                //0.1: adds unwanted line break
-                Controls.AddMessage(prompt);
+                Controls.Prompt(prompt);
                 return CommandIncomplete;
             }
             return NextStep(Controls.GetNextInput(), being);
@@ -385,13 +381,17 @@ namespace CopperBend.Engine
 
         public void ShowInventory(IBeing being, Func<IItem, bool> filter = null)
         {
-            //0.0 logwindow
-            //Window.ShowInventory(actor.Inventory, filter);
+            if (filter == null) filter = (i) => true;
+            char index = 'a';
+            foreach (var item in being.Inventory.Where(filter))
+            {
+                WriteLine($"{index++}) {item.Name}");
+            }
         }
 
         private void WriteLine(string line)
         {
-            Controls.AddMessage(line);
+            Controls.WriteLine(line);
         }
         #endregion
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Color = Microsoft.Xna.Framework.Color;
 using SadConsole;
 using GoRogue;
@@ -10,7 +11,7 @@ namespace CopperBend.Engine
     {
         //max number of lines to store in message log
         private static readonly int _maxLines = 100;
-        private readonly Queue<string> _lines;
+        private readonly List<string> _lines;
 
 
         private ScrollingConsole _messageConsole;
@@ -25,7 +26,7 @@ namespace CopperBend.Engine
             DefaultBackground = Color.DarkGreen;
             // Ensure that the window background is the correct colour
             Theme.WindowTheme.FillStyle.Background = DefaultBackground;
-            _lines = new Queue<string>();
+            _lines = new List<string>();
             CanDrag = true;
             Title = title.Align(HorizontalAlignment.Center, Width);
 
@@ -87,15 +88,35 @@ namespace CopperBend.Engine
             }
         }
 
-        //add a line to the queue of messages
+        private int cursor_x = 1;
+        /// <summary> add a complete line to the messages </summary>
         public void Add(string message)
         {
-            _lines.Enqueue(message);
-            while (_lines.Count > _maxLines) { _lines.Dequeue(); }
-
-            // Move the cursor to the last line and print the message.
-            _messageConsole.Cursor.Position = new Coord(1, _lines.Count);
+            add_message_to_list(message);
+            Coord cursor = (cursor_x, _lines.Count - (cursor_x == 1 ? 0 : 1));
+            _messageConsole.Cursor.Position = cursor;
             _messageConsole.Cursor.Print(message + "\n");
+            cursor_x = 1;
+        }
+
+        /// <summary> add an unfinished line to the messages </summary>
+        public void Prompt(string message)
+        {
+            add_message_to_list(message);
+            Coord cursor = (cursor_x, _lines.Count - (cursor_x == 1 ? 0 : 1));
+            _messageConsole.Cursor.Position = cursor;
+            _messageConsole.Cursor.Print(message);
+            cursor_x += message.Length;
+        }
+
+        private void add_message_to_list(string message)
+        {
+            if (cursor_x == 1)
+                _lines.Add(message);
+            else
+                _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  //0.1 poly-yugh-tacular.
+
+            if (_lines.Count > _maxLines) { _lines.RemoveRange(0, _lines.Count - _maxLines); }
         }
     }
 }

@@ -131,6 +131,7 @@ namespace CopperBend.Engine
         public Func<bool> IsInputReady { get; set; }
         public Func<AsciiKey> GetNextInput { get; set; }
         public Action ClearPendingInput { get; set; }
-        public Action<string> AddMessage { get; set; }
+        public Action<string> WriteLine { get; set; }
+        public Action<string> Prompt { get; set; }
     }
 }

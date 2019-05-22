@@ -23,7 +23,7 @@ namespace CopperBend.Model
 
         public override string Name
         {
-            get => $"{PlantDetails.FruitDescriptionAsKnown} fruit";
+            get => PlantDetails.FruitDescriptionAsKnown;
         }
         public override bool IsConsumable => true;
     }

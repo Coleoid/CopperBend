@@ -13,16 +13,11 @@ namespace CopperBend.Model
 
         public PlantDetails PlantDetails;
 
-        public override string Name
-        {
-            get => $"{PlantDetails.MainName} seed";
-        }
-
         public override bool StacksWith(IItem item)
         {
             if (item is Seed seed)
             {
-                return PlantDetails.ID == seed.PlantDetails.ID;
+                return PlantDetails == seed.PlantDetails;
             }
 
             return false;
@@ -30,8 +25,7 @@ namespace CopperBend.Model
 
         public Seed()
             : base((0,0), 1, true)
-        {
-        }
+        { }
 
         public Seed(Coord position, int quantity, uint typeID)
             : base(position, quantity, true)
@@ -45,7 +39,7 @@ namespace CopperBend.Model
             return new Seed(this.Location, 1, this.PlantDetails.ID);
         }
 
-        public override string Adjective
+        public override string Name
         {
             get => PlantDetails.SeedDescriptionAsKnown;
         }
@@ -54,7 +48,7 @@ namespace CopperBend.Model
 
         public void SeedGrows(IControlPanel controls)
         {
-            controls.AddMessage($"The seed is growing... Round {growthRound++}");
+            controls.WriteLine($"The seed is growing... Round {growthRound++}");
             if (growthRound > 3)
                 SeedMatures(controls);
             else

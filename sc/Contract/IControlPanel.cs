@@ -45,7 +45,8 @@ namespace CopperBend.Contract
         Func<bool> IsInputReady { get; }
         Func<AsciiKey> GetNextInput { get; }
         Action ClearPendingInput { get; }
-        Action<string> AddMessage { get; }
+        Action<string> WriteLine { get; }
+        Action<string> Prompt { get; }
     }
 
     //0.1:  Categories of experience

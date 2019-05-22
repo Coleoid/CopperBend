@@ -105,7 +105,8 @@ namespace CopperBend.Engine
                 IsInputReady = () => InputQueue.Count > 0,
                 GetNextInput = InputQueue.Dequeue,
                 ClearPendingInput = InputQueue.Clear,
-                AddMessage = MessageLog.Add,
+                WriteLine = MessageLog.Add,
+                Prompt = MessageLog.Prompt,
             };
 
             Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher);
@@ -248,7 +249,7 @@ namespace CopperBend.Engine
             CallbackStack.Push(callback);
 
             if (oldMode == EngineMode.Schedule && CurrentMode == EngineMode.InputBound) return;
-            log.Debug($"Pushed mode {oldMode} down, now in {CurrentMode}.");
+            log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
         }
         internal void PopEngineMode()
         {
@@ -256,7 +257,7 @@ namespace CopperBend.Engine
             CallbackStack.Pop();
 
             if (oldMode == EngineMode.InputBound && CurrentMode == EngineMode.Schedule) return;
-            log.Debug($"Popped mode {oldMode} off, now in {CurrentMode}.");
+            log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
         }
         #endregion
 

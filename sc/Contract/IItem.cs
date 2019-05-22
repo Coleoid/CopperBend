@@ -37,12 +37,12 @@ namespace CopperBend.Contract
         public bool FruitKnown;
         public string SeedAdjective;
         public string FruitAdjective;
-        public string SeedDescriptionAsKnown => SeedKnown ? MainName : SeedAdjective;
-        public string FruitDescriptionAsKnown => FruitKnown ? MainName : FruitAdjective;
-        public List<(PlantPart, PlantUse, string)> Uses;
+        public string SeedDescriptionAsKnown => $"{(SeedKnown ? MainName : SeedAdjective)} seed";
+        public string FruitDescriptionAsKnown => FruitKnown ? MainName : $"{FruitAdjective} fruit";
+        public List<(PlantPart, PlantUse, string)> Uses;  //0.+
     }
 
-    public enum PlantPart
+    public enum PlantPart  //0.+
     {
         Unset = 0,
         Root,
@@ -53,7 +53,7 @@ namespace CopperBend.Contract
         Seed
     }
 
-    public enum PlantUse
+    public enum PlantUse  //0.+
     {
         Unset = 0,
         Food,
@@ -63,6 +63,4 @@ namespace CopperBend.Contract
         Flavor,
         Beauty
     }
-
-
 }

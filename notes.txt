@@ -1,0 +1,73 @@
+===  Save/Load synchronizing
+
+--- The GoRogue IDGenerator
+What will a unit test tell me about how it works?
+
+It tells me that the returned ids simply start at 0 and increment by 1.  So long as this doesn't change, when serializing, we can get and store:
+
+    int TotalIDsGenerated = gen.UseID();
+
+...and after serialize/deserialize, fast-forward the generator with...
+
+    for (var i = 0; i < TotalIDsGenerated; i++) gen.UseID();
+(or)
+    while (gen.UseID() < TotalIDsGenerated - 1) {}  //bug if 0 ids generated before persisting.
+
+...so that the next requested ID will be equal to TotalIDsGenerated, and will continue from there.
+
+Entails:  We need to allow the deserializer to set the IDs, rather than gen them.
+
+Quickly trying a couple of approaches, I liked adding an id arg on the constructors, with a default of uint.MaxValue, and going to the generator for the value if we get the default.
+    Usage in the normal app doesn't change
+    No additional constructors or methods
+    No need to allow outside write access to the IDs
+
+This will give us reliable sync of entity IDs across save/load, which is one element of being able to save/load the schedule.
+
+
+--- RNGs
+
+Time for more unit tests.
+A hypothesis that seeding a Random generator B with the last output of generator A would synchronize the two from there on, does not survive a unit test.
+Research provides even grimmer answers.
+Hoever, GoRogue uses the Troschuetz RNG library, whose generators are all marked [Serializable], and the implementations are open.  That seems to be the correct play, here.
+
+The next step, some tests prove that serializing, then deserializing to a new object restores the sequence.  Discarding options:
+
+  The (convenient) .Net Random class is incompatible between .Net framework versions, and doesn't guarantee the same series from the same seed.  Too much uncertainty for part of the infrastructure which will be key when debugging from a save file.
+
+  The (strong, very long-period) MersenneTwister serializes (Base64) to 3.7k characters.  I expect that I'll have several (many?) specific-purpose RNGs in the full game, which could really bulk up the save file.
+
+  The (extra fast) XorShift128 generator has bad internal seeding (in this version of the Troschuetz library), so at least its first values are badly unrandom.  If it's fixed later, it may well not deserialize its sequence across versions.
+
+I'm choosing, for now, the NR3 generator.  It seems plenty fast for me, and is the recommended choice in "a famous numerical analysis book".  The Troschuetz library includes two faster variants (and other fast algorithms) in case I ever find it's slow enough to notice.  It serializes (Base64) to under 500 characters.  This may eventually bother me, in which case I can seek gains by writing a custom serialization that only saves/restores the state.  
+
+Last hurdle:
+  I'm doing saves in YAML format.  The YamlDotNet serialization won't serialize the RNG object directly.  So, I serialize the NR3 generator with .NET serialization, convert the resulting bytes to a Base64 string, and stick that in a string property of my save object.  Reverse the steps to load, test passes.
+  I tried just serializing the byte array, which worked, yet was one line per byte in the resulting YAML.  Terrible, and still opaque.  The extra step of byte[] => Base64 is worth it.  I aim for the save files to remain readable, hackable, and a debugging tool.
+
+
+--- The schedule
+
+Another element is getting the lambdas out of the schedule.
+  So how does that look?
+  For any particular ScheduleAgent, an action name and arbitrary data are enough.
+    (Not that deserializing arbitrary data structures is trivial, when structure type is unknown.)
+
+For non-agent occurrences?  Wrap them in thematic agents?
+Perhaps there's a pre-agent dispatcher which performs many standard actions...
+Perhaps the structure of the domain entities holding behavior logic is not a good fit here.
+
+===
+
+I began with different classes for different plant types, which gave me technical problems to begin with, and which also raises the bar for modding to a really rugged place.
+
+Now I've got a data object holding specifics of each sort of growing thing, available to the involved classes.  We'll see how long that's enough.  Will it keep working well for directing more complex effects of plants?  Like, this fruit heals, that fruit buffs speed, this plant will grab hostiles passing over it for a few seconds, and so on.
+    Ooh.  I gotta call that "grabgrass".
+
+
+This details object also holds the randomized descriptions and player knowledge.  This is convenient, but those data need to be persisted for game save/load, where the rest of the data don't.  Saving invariant data will bloat save files.  (But also provide some insulation against upgrades invalidating saves?)
+
+
+===
+

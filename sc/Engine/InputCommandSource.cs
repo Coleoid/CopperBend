@@ -91,11 +91,11 @@ namespace CopperBend.Engine
             var targetBlight = GameState.Map.BlightMap.GetItem(newPosition);
             if (targetBlight?.Extent > 0)
             {
-                if (!haveClearedBlightBefore)
+                if (!being.HasClearedBlightBefore)
                 {
                     blightDirection = dir;
                     Controls.WriteLine("Lookin' at the scum covering the ground sets my teeth on edge.  I'm growling.");
-                    return FFwdOrPrompt(Direction_decide_to_Clear_Blight, "Am I gonna attack this stuff bare-handed? (y/n): ", being);
+                    return FFwdOrPrompt(Direction_decide_to_Clear_Blight, "Am I goin' after this stuff bare-handed? (y/n): ", being);
                 }
             }
 
@@ -104,7 +104,6 @@ namespace CopperBend.Engine
 
         //0.1 SFD clear blight
         CmdDirection blightDirection;
-        bool haveClearedBlightBefore = false;
         public Command Direction_decide_to_Clear_Blight(AsciiKey press, IBeing being)
         {
             if (press.Key == Keys.Escape || press.Character == 'n')

@@ -61,9 +61,12 @@ namespace CopperBend.Model
         public ICommandSource CommandSource { get; set; }
 
         public IItem WieldedTool { get; internal set; }
+        public IItem Gloves { get; internal set; }
 
         public bool IsPlayer { get; set; }
-
+        
+        public bool HasClearedBlightBefore { get; set; }
+        
         internal void CmdDirection(CmdDirection direction)
         {
             //log.Debug($"got CmdDirection({direction})");

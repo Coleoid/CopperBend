@@ -1,4 +1,6 @@
-﻿using System;
+﻿using GoRogue;
+using System;
+using System.Collections.Generic;
 
 namespace CopperBend.Fabric
 {
@@ -14,5 +16,15 @@ namespace CopperBend.Fabric
             if (argument == null) throw new Exception(message);
         }
 
+    }
+
+    public static class CoordExtensions
+    {
+        public static IEnumerable<Coord> Neighbors(this Coord self)
+        {
+            for (int y = self.Y - 1; y < self.Y + 2; y++)
+                for (int x = self.X - 1; x < self.X + 2; x++)
+                    yield return new Coord(x, y);
+        }
     }
 }

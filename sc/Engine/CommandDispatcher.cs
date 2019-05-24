@@ -124,19 +124,48 @@ namespace CopperBend.Engine
         private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, AreaBlight targetBlight)
         {
             //0.1 needs messaging
-            being.Hurt(2);
-            targetBlight.Extent = Math.Max(0, targetBlight.Extent - 3);
+            if (being.WieldedTool == null && being.Gloves == null)
+            {
+                WriteLineIfPlayer(being, "I tear the blight off the ground.  Satisfying, but it's hurting my hands.");
+                being.Hurt(2);
+                targetBlight.Extent = Math.Max(0, targetBlight.Extent - 6);
+                if (!being.HasClearedBlightBefore)
+                {
+                    WriteLineIfPlayer(being, "Whereever I touch it, the stuff starts crumbling.");
+                }
+
+                bool damageSpread = false;
+                foreach (Coord neighbor in newPosition.Neighbors())
+                {
+                    AreaBlight blight = BlightMap.GetItem(neighbor);
+                    if (blight?.Extent > 0)
+                    {
+                        blight.Extent = Math.Max(0, blight.Extent - 3);
+                        GameState.Map.CoordsWithChanges.Add(neighbor);
+                        damageSpread = true;
+                    }
+                }
+
+                if (damageSpread)
+                    WriteLineIfPlayer(being, "The damage to this stuff spreads outward.  Good.");
+            }
+            else
+            {
+                targetBlight.Extent = Math.Max(0, targetBlight.Extent - 3);
+                GameState.Map.CoordsWithChanges.Add(newPosition);
+            }
+
             ScheduleAgent(being, 24);
-            GameState.Map.CoordsWithChanges.Add(newPosition);
+            being.HasClearedBlightBefore = true;
             return true;
         }
 
-            private bool Do_DirectionMove(IBeing being, Coord newPosition)
+        private bool Do_DirectionMove(IBeing being, Coord newPosition)
         {
             if (newPosition.X < 0 || newPosition.Y < 0
                 || SpaceMap.Width <= newPosition.X || SpaceMap.Height <= newPosition.Y)
             {
-                WriteLine("Can't move off the map."); //0.1, transition to other maps instead
+                WriteLineIfPlayer(being, "Can't move off the map."); //0.1, transition to other maps instead
                 return false;
             }
             Space space = SpaceMap.GetItem(newPosition);
@@ -184,11 +213,11 @@ namespace CopperBend.Engine
                 var itemsHere = ItemMap.GetItems(newPosition);
                 if (itemsHere.Count() > 7)
                 {
-                    MessageLog.Add("There are many items here.");
+                    MessageLog.Add("A pile of things here.");
                 }
                 else if (itemsHere.Count() > 1)
                 {
-                    MessageLog.Add("There are several items here.");
+                    MessageLog.Add("Some things here.");
                 }
                 else if (itemsHere.Count() == 1)
                 {

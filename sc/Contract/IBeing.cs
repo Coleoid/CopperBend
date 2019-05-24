@@ -41,6 +41,8 @@ namespace CopperBend.Contract
         IEnumerable<IItem> ReachableItems();
 
         IItem WieldedTool { get; }
+        IItem Gloves { get; }
         void Wield(IItem item);
+        bool HasClearedBlightBefore { get; set; }
     }
 }

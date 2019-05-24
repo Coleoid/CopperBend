@@ -68,6 +68,7 @@ Now I've got a data object holding specifics of each sort of growing thing, avai
 
 This details object also holds the randomized descriptions and player knowledge.  This is convenient, but those data need to be persisted for game save/load, where the rest of the data don't.  Saving invariant data will bloat save files.  (But also provide some insulation against upgrades invalidating saves?)
 
+Oh, it also provides a basis for hybrid/created plant types...
 
 ===
 

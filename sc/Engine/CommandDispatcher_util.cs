@@ -132,6 +132,7 @@ namespace CopperBend.Engine
         public Func<AsciiKey> GetNextInput { get; set; }
         public Action ClearPendingInput { get; set; }
         public Action<string> WriteLine { get; set; }
+        public Action<IBeing, string> WriteLineIfPlayer { get; set; }
         public Action<string> Prompt { get; set; }
     }
 }

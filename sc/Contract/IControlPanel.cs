@@ -47,6 +47,7 @@ namespace CopperBend.Contract
         Func<AsciiKey> GetNextInput { get; }
         Action ClearPendingInput { get; }
         Action<string> WriteLine { get; }
+        Action<IBeing, string> WriteLineIfPlayer { get; }
         Action<string> Prompt { get; }
     }
 

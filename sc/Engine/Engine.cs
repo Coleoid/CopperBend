@@ -106,6 +106,7 @@ namespace CopperBend.Engine
                 GetNextInput = InputQueue.Dequeue,
                 ClearPendingInput = InputQueue.Clear,
                 WriteLine = MessageLog.Add,
+                WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) MessageLog.Add(message); },
                 Prompt = MessageLog.Prompt,
             };
 
@@ -378,8 +379,7 @@ namespace CopperBend.Engine
 
             if (!FullMap.CoordsWithChanges.Any()) return;
             var changedAndInFOV = FullMap.CoordsWithChanges
-                .Intersect(FullMap.FOV.CurrentFOV)
-                .Where(c => MapConsole.ViewPort.Contains(c));
+                .Intersect(FullMap.FOV.CurrentFOV);
             FullMap.UpdateViewOfCoords(MapConsole, changedAndInFOV);
             FullMap.CoordsWithChanges.Clear();
         }

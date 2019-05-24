@@ -17,6 +17,7 @@ namespace CopperBend.Engine
         protected SpaceMap SpaceMap => GameState.Map.SpaceMap;
         private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
         private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
+        private SpatialMap<AreaBlight> BlightMap => GameState.Map.BlightMap;
 
         private Describer Describer;
         private MessageLogWindow MessageLog;
@@ -110,11 +111,34 @@ namespace CopperBend.Engine
                 return Do_DirectionAttack(being, targetBeing);
             }
 
+            //0.1 SFD clear blight
+            var targetBlight = BlightMap.GetItem(newPosition);
+            if (targetBlight?.Extent > 0)
+            {
+                return Do_DirectionClearBlight(being, newPosition, targetBlight);
+            }
+
             return Do_DirectionMove(being, newPosition);
         }
 
-        private bool Do_DirectionMove(IBeing being, Coord newPosition)
+        private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, AreaBlight targetBlight)
         {
+            //0.1 needs messaging
+            being.Hurt(2);
+            targetBlight.Extent = Math.Max(0, targetBlight.Extent - 3);
+            ScheduleAgent(being, 24);
+            GameState.Map.CoordsWithChanges.Add(newPosition);
+            return true;
+        }
+
+            private bool Do_DirectionMove(IBeing being, Coord newPosition)
+        {
+            if (newPosition.X < 0 || newPosition.Y < 0
+                || SpaceMap.Width <= newPosition.X || SpaceMap.Height <= newPosition.Y)
+            {
+                WriteLine("Can't move off the map."); //0.1, transition to other maps instead
+                return false;
+            }
             Space space = SpaceMap.GetItem(newPosition);
 
             if (space.Terrain.Name == "closed door")

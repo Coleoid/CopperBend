@@ -26,7 +26,7 @@ namespace CopperBend.Engine
             Schedule.AddAgent(agent, tickOff);
         }
 
-        private Coord CoordInDirection(Coord start, CmdDirection direction)
+        public Coord CoordInDirection(Coord start, CmdDirection direction)
         {
             int newX = start.X;
             int newY = start.Y;

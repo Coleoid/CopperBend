@@ -10,6 +10,7 @@ using SadConsole;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Model;
 
 namespace CopperBend.Engine
 {
@@ -154,7 +155,7 @@ namespace CopperBend.Engine
 
             type = new TerrainType()
             {
-                Name = "stairs",
+                Name = "stairs down",
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 Looks = new Cell(Color.AliceBlue, stoneBG, '>'),
@@ -258,7 +259,8 @@ namespace CopperBend.Engine
             {
                 _farmMap = MapFromYAML(FarmMapYaml);
                 _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1
-
+                Coord ShedCoord = (28, 4);
+                _farmMap.ItemMap.Add(new Hoe(ShedCoord), ShedCoord);
                 //  Obscure point on the edge to test map transitions
                 //_farmMap.AddEventAtLocation(new Point(41, 1), new CommandEntry(GameCommand.GoToFarmhouse, null));
 

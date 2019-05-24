@@ -25,6 +25,7 @@ namespace CopperBend.Contract
         /// <summary> When an action interrupts the entire game, in some way. </summary>
         Action<EngineMode, Func<bool>> PushEngineMode { get; }
 
+        Coord CoordInDirection(Coord start, CmdDirection direction);
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Coord position);
         void Till(Space space);

@@ -9,6 +9,7 @@ namespace CopperBend.Model
         public Hoe(Coord position)
             : base(position, 1, true)
         {
+            Glyph = '\\';
         }
 
         //public override void ApplyTo(Space space, IControlPanel controls, IMessageOutput output, CmdDirection direction)

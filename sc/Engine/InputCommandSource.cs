@@ -5,6 +5,7 @@ using Keys = Microsoft.Xna.Framework.Input.Keys;
 using SadConsole.Input;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using GoRogue;
 
 namespace CopperBend.Engine
 {
@@ -62,7 +63,7 @@ namespace CopperBend.Engine
             var dir = DirectionOf(press);
             if (dir != CmdDirection.None)
             {
-                return new Command(CmdAction.Direction, dir);
+                return Direction(being, dir);
             }
 
             switch (press.Key)
@@ -81,6 +82,39 @@ namespace CopperBend.Engine
                 return CommandIncomplete;
             }
         }
+
+        private Command Direction(IBeing being, CmdDirection dir)
+        {
+            var newPosition = Controls.CoordInDirection(being.Position, dir);
+            
+            //0.1 SFD clear blight
+            var targetBlight = GameState.Map.BlightMap.GetItem(newPosition);
+            if (targetBlight?.Extent > 0)
+            {
+                if (!haveClearedBlightBefore)
+                {
+                    blightDirection = dir;
+                    Controls.WriteLine("Lookin' at the scum covering the ground sets my teeth on edge.  I'm growling.");
+                    return FFwdOrPrompt(Direction_decide_to_Clear_Blight, "Am I gonna attack this stuff bare-handed? (y/n): ", being);
+                }
+            }
+
+            return new Command(CmdAction.Direction, dir);
+        }
+
+        //0.1 SFD clear blight
+        CmdDirection blightDirection;
+        bool haveClearedBlightBefore = false;
+        public Command Direction_decide_to_Clear_Blight(AsciiKey press, IBeing being)
+        {
+            if (press.Key == Keys.Escape || press.Character == 'n')
+            {
+                WriteLine("Not yet.");
+                return CommandIncomplete;
+            }
+            return new Command(CmdAction.Direction, blightDirection);
+        }
+
 
         public Command Consume(IBeing being)
         {

@@ -387,7 +387,7 @@ namespace CopperBend.Engine
         #region LargeMessages and Menus, currently empty
         private void HandleMenus()
         {
-            //TODO:  All these:
+            //TODO:  All menu actions:
             //  Start new game
             //  Load game
             //  Save and Quit

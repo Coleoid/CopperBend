@@ -49,7 +49,7 @@ namespace CopperBend.Contract
     public class TerrainType
     {
         public string Name;
-        public Cell Looks; //0.1
+        public Cell Looks; //0.1 name for bleh
         public bool CanSeeThrough;
         public bool CanWalkThrough;
         public bool CanPlant;

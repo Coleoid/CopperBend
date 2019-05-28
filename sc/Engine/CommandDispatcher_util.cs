@@ -92,17 +92,20 @@ namespace CopperBend.Engine
             SpaceMap.Till(space);
         }
 
-        public int XP { get; set; } = 0;
+        public Dictionary<Exp, int> XP { get; set; } = new Dictionary<Exp, int>();
         public void AddExperience(uint plantID, Exp experience)
         {
-            //TODO:  An entire experience subsystem.  For now it can be "points".
+            if (!XP.ContainsKey(experience))
+                XP[experience] = 0;
 
-            XP += 20;
+            //0.1 vary XP gain based on action, fix args
+            XP[experience] += 20;
         }
 
         public void CheckActorAtCoordEvent(IBeing being, Coord position)
         {
-            
+            ////0.1 fix load of map-based events
+
             //if (Map.LocationMessages.ContainsKey(tile.Point))
             //{
             //    var message = Map.LocationMessages[tile.Point];
@@ -112,7 +115,6 @@ namespace CopperBend.Engine
             //    Map.LocationMessages.Remove(tile.Point);
             //}
 
-            ////0.2
             //if (Map.LocationEventEntries.ContainsKey(tile.Point))
             //{
             //    var entries = Map.LocationEventEntries[tile.Point];

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GoRogue;
 using CopperBend.Contract;
-using CopperBend.Model;  //0.1: later, Seed => ISowable, as the model matures
+using CopperBend.Model;
 
 namespace CopperBend.Fabric
 {

@@ -12,7 +12,7 @@ namespace CopperBend.Engine
         private readonly ILog log;
         public int CurrentTick { get; private set; } = 0;
 
-        //0.1, actions need to become serializable
+        //0.1 restructure ScheduleEntries to something serializable
         private readonly SortedDictionary<int, List<Action<IControlPanel>>> TickEntries;
 
         public Schedule()

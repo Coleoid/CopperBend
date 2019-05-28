@@ -146,7 +146,7 @@ namespace CopperBend.Fabric
 
         public Fade GetFadeForBlightExtent(int extent, Color bgColor)
         {
-            //0.2
+            //0.2 better random might not be needed here...
             var rand = new Random();
 
             if (extent < 1)

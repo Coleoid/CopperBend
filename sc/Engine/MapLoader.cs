@@ -258,7 +258,7 @@ namespace CopperBend.Engine
             if (_farmMap == null)
             {
                 _farmMap = MapFromYAML(FarmMapYaml);
-                _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1
+                _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1 get start location from map
                 Coord ShedCoord = (28, 4);
                 _farmMap.ItemMap.Add(new Hoe(ShedCoord), ShedCoord);
                 //  Obscure point on the edge to test map transitions

@@ -51,7 +51,7 @@ namespace CopperBend.Contract
         Action<string> Prompt { get; }
     }
 
-    //0.1:  Categories of experience
+    //0.1 needs more categories
     public enum Exp
     {
         Unknown = 0,

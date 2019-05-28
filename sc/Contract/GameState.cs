@@ -4,6 +4,6 @@
     {
         ICompoundMap Map { get; }
         IBeing Player { get; }
-        //0.1:  Later, collect everything which is saved/loaded, and stateful.
+        //0.1 should grow to be the repo of everything needed to save/load
     }
 }

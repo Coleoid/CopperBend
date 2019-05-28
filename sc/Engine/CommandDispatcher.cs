@@ -89,9 +89,8 @@ namespace CopperBend.Engine
                 Schedule.AddAgent(being, 2);
             }
 
-            //0.1
-            if (item.Quantity < 1)
-                throw new Exception($"Not enough {item.Name} to {item.ConsumeVerb}, somehow.");
+            //0.2 need to think about bail-out protocol
+            Guard.Against(item.Quantity < 1, $"Not enough {item.Name} to {item.ConsumeVerb}, somehow.");
             item.Quantity--;
             if (item.Quantity < 1)
                 being.RemoveFromInventory(item);
@@ -123,7 +122,7 @@ namespace CopperBend.Engine
 
         private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, AreaBlight targetBlight)
         {
-            //0.1 needs messaging
+            //0.2 wants smoother ux
             if (being.WieldedTool == null && being.Gloves == null)
             {
                 WriteLineIfPlayer(being, "I tear the blight off the ground.  Satisfying, but it's hurting my hands.");
@@ -165,7 +164,8 @@ namespace CopperBend.Engine
             if (newPosition.X < 0 || newPosition.Y < 0
                 || SpaceMap.Width <= newPosition.X || SpaceMap.Height <= newPosition.Y)
             {
-                WriteLineIfPlayer(being, "Can't move off the map."); //0.1, transition to other maps instead
+                //0.1 add transitions to other maps
+                WriteLineIfPlayer(being, "Can't move off the map.");
                 return false;
             }
             Space space = SpaceMap.GetItem(newPosition);
@@ -236,10 +236,9 @@ namespace CopperBend.Engine
 
         private bool Do_DirectionAttack(IBeing being, IBeing target)
         {
-            //0.1
+            //0.1 instead decide damage and speed via attack & defense info
             target.Hurt(2);
             ScheduleAgent(being, 12);
-            //0.2
             //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
             //conflictSystem.Attack("Wah!", 2, targetActor);
             return true;

@@ -6,6 +6,7 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
+    //0.1: later, Seed => ISowable, as the model matures
     public class Seed : Item, ISeed, IScheduleAgent
     {
         public static Dictionary<uint, PlantDetails> PlantByID { get; set; }

@@ -87,10 +87,10 @@ namespace CopperBend.Engine
         {
             var newPosition = Controls.CoordInDirection(being.Position, dir);
             
-            //0.1 SFD clear blight
             var targetBlight = GameState.Map.BlightMap.GetItem(newPosition);
             if (targetBlight?.Extent > 0)
             {
+                //0.1 improve impact of this landmark event
                 if (!being.HasClearedBlightBefore)
                 {
                     blightDirection = dir;

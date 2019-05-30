@@ -6,6 +6,7 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using GoRogue.DiceNotation;
 
 namespace CopperBend.Engine
 {
@@ -110,11 +111,10 @@ namespace CopperBend.Engine
                 return Do_DirectionAttack(being, targetBeing);
             }
 
-            //0.1 SFD clear blight
-            var targetBlight = BlightMap.GetItem(newPosition);
-            if (targetBlight?.Extent > 0)
+            var blight = BlightMap.GetItem(newPosition);
+            if (blight?.Extent > 0)
             {
-                return Do_DirectionClearBlight(being, newPosition, targetBlight);
+                return Do_DirectionClearBlight(being, newPosition, blight);
             }
 
             return Do_DirectionMove(being, newPosition);
@@ -125,13 +125,10 @@ namespace CopperBend.Engine
             //0.2 wants smoother ux
             if (being.WieldedTool == null && being.Gloves == null)
             {
-                WriteLineIfPlayer(being, "I tear the blight off the ground.  Satisfying, but it's hurting my hands.");
-                being.Hurt(2);
-                targetBlight.Extent = Math.Max(0, targetBlight.Extent - 6);
-                if (!being.HasClearedBlightBefore)
-                {
-                    WriteLineIfPlayer(being, "Whereever I touch it, the stuff starts crumbling.");
-                }
+                Message(being, Msgs.BarehandBlightDamage);
+                Damage(being, targetBlight);
+                Damage(targetBlight, DamageType.Player, 6);
+                GameState.Map.CoordsWithChanges.Add(newPosition);
 
                 bool damageSpread = false;
                 foreach (Coord neighbor in newPosition.Neighbors())
@@ -139,24 +136,131 @@ namespace CopperBend.Engine
                     AreaBlight blight = BlightMap.GetItem(neighbor);
                     if (blight?.Extent > 0)
                     {
-                        blight.Extent = Math.Max(0, blight.Extent - 3);
+                        Damage(blight, DamageType.Player, 3);
                         GameState.Map.CoordsWithChanges.Add(neighbor);
                         damageSpread = true;
                     }
                 }
 
                 if (damageSpread)
-                    WriteLineIfPlayer(being, "The damage to this stuff spreads outward.  Good.");
+                    Message(being, Msgs.BlightDamageSpreads);
             }
             else
             {
-                targetBlight.Extent = Math.Max(0, targetBlight.Extent - 3);
+                Damage(targetBlight, being.WieldedTool);
                 GameState.Map.CoordsWithChanges.Add(newPosition);
             }
 
             ScheduleAgent(being, 24);
             being.HasClearedBlightBefore = true;
             return true;
+        }
+
+        public enum DamageType
+        {
+            Unset = 0,
+            AreaBlight,
+            Player,
+            Impact_point,
+            Impact_edge,
+            Impact_blunt,
+        }
+
+        public void Damage(IDestroyable target, IItem source)
+        {
+            int amount = DamageToTargetFromItem(target, source);
+            Damage(target, amount);
+        }
+
+        public void Damage(IDestroyable target, AreaBlight source)
+        {
+            int half = source.Extent * 5;
+
+            int amount = half + new Random().Next(half) + 1;  //0.1 need to use managed random
+
+            Damage(target, DamageType.AreaBlight, amount);
+        }
+
+        public void Damage(IDestroyable target, IBeing source)
+        {
+            int amount = DamageToTargetFromBeing(target, source);
+            Damage(target, amount);
+        }
+
+        // to collect modifiers to damage from type
+        public void Damage(IDestroyable target, DamageType type, int amount)
+        {
+            if (type == DamageType.AreaBlight && target is Player)
+            {
+                //0.2 want player resistance to account for in-play factors
+                amount = Math.Clamp(amount / 10, 1, 3);
+            }
+            //0.1 relocate more cases from elsewhere to here
+            Damage(target, amount);
+        }
+
+        public void Damage(IDestroyable target, int amount)
+        {
+            target.Hurt(amount);
+            if (target is AreaBlight blight)
+            {
+                if (blight.Extent == 0)
+                {
+                    GameState.Map.BlightMap.Remove(blight);
+                }
+            }
+        }
+
+        private int DamageToTargetFromItem(IDestroyable target, IItem source)
+        {
+            throw new NotImplementedException();
+        }
+
+        //0.1 move beyond one special case and a couple of constants
+        private int DamageToTargetFromBeing(IDestroyable target, IBeing source)
+        {
+            if (source.IsPlayer)
+            {
+                if (target is AreaBlight)
+                {
+                    return 6;
+                }
+
+                return 2;
+            }
+
+            return 4;
+        }
+
+        public enum Msgs
+        {
+            Unset = 0,
+            BarehandBlightDamage,
+            BlightDamageSpreads
+        }
+
+        public void Message(IBeing being, Msgs messageKey)
+        {
+            Guard.Against(messageKey == Msgs.Unset, "Must set message key");
+            if (!being.IsPlayer) return;
+
+            switch (messageKey)
+            {
+            case Msgs.BarehandBlightDamage:
+                WriteLine("I tear the blight off the ground.  Satisfying, but it's hurting my hands.");
+                if (!being.HasClearedBlightBefore)
+                {
+                    WriteLine("Whereever I touch it, the stuff starts crumbling.");
+                }
+                break;
+
+            case Msgs.BlightDamageSpreads:
+                WriteLine("The damage to this stuff spreads outward.  Good.");
+                break;
+
+            default:
+                throw new Exception($"Must code message for key [{messageKey}].");
+            }
         }
 
         private bool Do_DirectionMove(IBeing being, Coord newPosition)

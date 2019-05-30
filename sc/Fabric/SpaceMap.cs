@@ -2,6 +2,7 @@
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
+using System;
 
 namespace CopperBend.Fabric
 {
@@ -118,7 +119,7 @@ namespace CopperBend.Fabric
         public bool IsKnown { get; internal set; }
     }
 
-    public class AreaBlight : IHasID
+    public class AreaBlight : IHasID, IDestroyable
     {
         public AreaBlight(uint id = uint.MaxValue)
         {
@@ -131,6 +132,24 @@ namespace CopperBend.Fabric
         #endregion
 
         public int Extent { get; set; }
+
+        #region IDestroyable
+        public int MaxHealth => 80;
+
+        public int Health => Extent;
+
+        public void Heal(int amount)
+        {
+            Guard.Against(amount < 0, $"Cannot heal negative amount {amount}.");
+            Extent = Math.Min(MaxHealth, Extent + amount);
+        }
+
+        public void Hurt(int amount)
+        {
+            Guard.Against(amount < 0, $"Cannot hurt negative amount {amount}.");
+            Extent = Math.Max(0, Extent - amount);
+        }
+        #endregion
     }
 
 }

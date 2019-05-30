@@ -39,13 +39,16 @@ namespace CopperBend.Contract
         //void SetMapDirty();
 
         //  This approach works well.
-        //  Nobody touches the engine, where these details originate.
-        //  Event bus + subscriptions also worked, but the key upside of
-        // events is multiple subscribers, which was unneeded, so the 
-        // (significant) overhead was waste.
+        //  Now nobody touches the engine, where these details originate.
+        //  Events/subscriptions also worked, but the defining advantage
+        // of events is providing multiple subscribers, which we didn't
+        // need, so the (significant) coding overhead was waste.
+        //0.2 group in interface, have ControlPanel delegate to another implementing obj?
         Func<bool> IsInputReady { get; }
         Func<AsciiKey> GetNextInput { get; }
         Action ClearPendingInput { get; }
+
+        //0.2 group in interface, have ControlPanel delegate to another implementing obj?
         Action<string> WriteLine { get; }
         Action<IBeing, string> WriteLineIfPlayer { get; }
         Action<string> Prompt { get; }

@@ -1,66 +1,18 @@
-using CopperBend.Contract;
-using CopperBend.Fabric;
 using CopperBend.Model;
 using GoRogue;
 using NUnit.Framework;
-using System.Collections.Generic;
 
 namespace CopperBend.Engine.tests
 {
     [TestFixture]
     public class DescriberTests
     {
-        private Dictionary<string, PlantDetails> PlantsByName;
-        private Dictionary<uint, PlantDetails> PlantsByID;
-
-        //0.1 remove this duplication between engine and tests
         [SetUp]
-        public void PreparePlants()
+        public void SetUp()
         {
-            PlantsByName = new Dictionary<string, PlantDetails>();
-            PlantsByID = new Dictionary<uint, PlantDetails>();
-
-            AddPlantDetails(new PlantDetails
-            {
-                ID = 1,
-                MainName = "Boomer",
-                GrowthTime = 400
-            });
-            AddPlantDetails(new PlantDetails
-            {
-                ID = 2,
-                MainName = "Healer",
-                GrowthTime = 400
-            });
-            AddPlantDetails(new PlantDetails
-            {
-                ID = 3,
-                MainName = "Thornfriend",
-                GrowthTime = 400
-            });
-
-            Seed.PlantByID = PlantsByID;
-            Seed.PlantByName = PlantsByName;
-            Fruit.PlantByID = PlantsByID;
-            Fruit.PlantByName = PlantsByName;
-            Describer.PlantByID = PlantsByID;
-            Describer.PlantByName = PlantsByName;
-
-
-            var IDGenerator = new IDGenerator();
-
-            CbEntity.IDGenerator = IDGenerator;
-            Item.IDGenerator = IDGenerator;
-            Space.IDGenerator = IDGenerator;
-            AreaBlight.IDGenerator = IDGenerator;
+            Engine.InitializeIDGenerator();
+            Engine.InitializePlantRepos();
         }
-
-        private void AddPlantDetails(PlantDetails plant)
-        {
-            PlantsByID[plant.ID] = plant;
-            PlantsByName[plant.MainName] = plant;
-        }
-
 
         [TestCase(1, "", "rock")]
         [TestCase(2, "", "rocks")]

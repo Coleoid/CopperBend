@@ -35,7 +35,7 @@ namespace CopperBend.Engine
         private GameState GameState;
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
-        private IDGenerator IDGenerator;
+        //private IDGenerator IDGenerator;
 
         #region Init
         public Engine(int gameWidth, int gameHeight)
@@ -63,8 +63,8 @@ namespace CopperBend.Engine
         public void Init()
         {
             PushEngineMode(EngineMode.StartUp, null);
-            PrepareIDGeneration();
-            PreparePlants();
+            InitializeIDGenerator();
+            InitializePlantRepos();
 
             var loader = new MapLoader();
             FullMap = loader.FarmMap();
@@ -117,57 +117,6 @@ namespace CopperBend.Engine
             PushEngineMode(EngineMode.Schedule, null);
         }
 
-        private void PrepareIDGeneration()
-        {
-            // On this path, each new IDed type needs addition here,
-            // yet no IDs will ever clash.  I like this tradeoff.
-            IDGenerator = new IDGenerator();
-
-            CbEntity.IDGenerator = IDGenerator;
-            Item.IDGenerator = IDGenerator;
-            Space.IDGenerator = IDGenerator;
-            AreaBlight.IDGenerator = IDGenerator;
-        }
-
-        private Dictionary<string, PlantDetails> PlantsByName;
-        private Dictionary<uint, PlantDetails> PlantsByID;
-        private void PreparePlants()
-        {
-            PlantsByName = new Dictionary<string, PlantDetails>();
-            PlantsByID = new Dictionary<uint, PlantDetails>();
-
-            AddPlantDetails( new PlantDetails {
-                ID = 1,
-                MainName = "Boomer",
-                GrowthTime = 400
-            });
-            AddPlantDetails(new PlantDetails
-            {
-                ID = 2,
-                MainName = "Healer",
-                GrowthTime = 400
-            });
-            AddPlantDetails(new PlantDetails
-            {
-                ID = 3,
-                MainName = "Thornfriend",
-                GrowthTime = 400
-            });
-
-            Seed.PlantByID = PlantsByID;
-            Seed.PlantByName = PlantsByName;
-            Fruit.PlantByID = PlantsByID;
-            Fruit.PlantByName = PlantsByName;
-            Describer.PlantByID = PlantsByID;
-            Describer.PlantByName = PlantsByName;
-        }
-
-        private void AddPlantDetails(PlantDetails plant)
-        {
-            PlantsByID[plant.ID] = plant;
-            PlantsByName[plant.MainName] = plant;
-        }
-
         private Being CreatePlayer(Coord playerLocation)
         {
             var player = new Player(Color.AntiqueWhite, Color.Transparent)
@@ -179,7 +128,7 @@ namespace CopperBend.Engine
             player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
             player.Components.Add(new EntityViewSyncComponent());
             player.AddToInventory(new Hoe((0,0)));
-            player.AddToInventory(new Seed((0,0), 2, PlantsByName["Healer"].ID));
+            player.AddToInventory(new Seed((0,0), 2, PlantByName["Healer"].ID));
 
             log.Debug("Created player.");
             return player;
@@ -416,6 +365,64 @@ namespace CopperBend.Engine
         {
             throw new NotImplementedException();
         }
+
+        public static void InitializeIDGenerator()
+        {
+            // On this path, each new IDed type needs addition here,
+            // yet no IDs will ever clash.  I like this tradeoff.
+            var IDGenerator = new IDGenerator();
+
+            CbEntity.IDGenerator = IDGenerator;
+            Item.IDGenerator = IDGenerator;
+            Space.IDGenerator = IDGenerator;
+            AreaBlight.IDGenerator = IDGenerator;
+        }
+
+        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
+        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+
+        public static void InitializePlantRepos()
+        {
+            PlantByID = new Dictionary<uint, PlantDetails>();
+            PlantByName = new Dictionary<string, PlantDetails>();
+
+            PlantDetails plant = null;
+
+            plant = new PlantDetails
+            {
+                ID = 1,
+                MainName = "Boomer",
+                GrowthTime = 400
+            };
+            PlantByID[plant.ID] = plant;
+            PlantByName[plant.MainName] = plant;
+
+            plant = new PlantDetails
+            {
+                ID = 2,
+                MainName = "Healer",
+                GrowthTime = 400
+            };
+            PlantByID[plant.ID] = plant;
+            PlantByName[plant.MainName] = plant;
+
+            plant = new PlantDetails
+            {
+                ID = 3,
+                MainName = "Thornfriend",
+                GrowthTime = 400
+            };
+            PlantByID[plant.ID] = plant;
+            PlantByName[plant.MainName] = plant;
+
+            Seed.PlantByID = PlantByID;
+            Seed.PlantByName = PlantByName;
+            Fruit.PlantByID = PlantByID;
+            Fruit.PlantByName = PlantByName;
+            Describer.PlantByID = PlantByID;
+            Describer.PlantByName = PlantByName;
+        }
+
         #endregion
 
         //// The entities in the given map will be the MapConsole's only entities

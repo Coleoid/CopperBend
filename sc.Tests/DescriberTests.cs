@@ -7,7 +7,7 @@ namespace CopperBend.Engine.tests
     [TestFixture]
     public class DescriberTests
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             Engine.InitializeIDGenerator();
@@ -31,7 +31,6 @@ namespace CopperBend.Engine.tests
             Assert.That(desc, Is.EqualTo(expected));
         }
 
-        [Test]
         [TestCase(1, "", "the rock")]
         [TestCase(1, "grey", "the grey rock")]
         [TestCase(2, "", "the rocks")]

@@ -139,7 +139,9 @@ namespace CopperBend.Fabric
                 console.SetCellAppearance(position.X, position.Y, targetCell);
 
                 var blight = BlightMap.GetItem(position);
-                var fade = blight?.Extent == 0? null : GetFadeForBlightExtent(blight.Extent, rawCell.Background);
+                Fade fade = null;
+                if (blight?.Extent > 0)
+                    fade = GetFadeForBlightExtent(blight.Extent, rawCell.Background);
                 EffectsManager.SetEffect(console.Cells[position.Y * Width + position.X], fade);
             }
         }

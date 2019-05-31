@@ -247,10 +247,10 @@ namespace CopperBend.Engine
             switch (messageKey)
             {
             case Msgs.BarehandBlightDamage:
-                WriteLine("I tear the blight off the ground.  Satisfying, but it's hurting my hands.");
+                WriteLine("I tear it off the ground.  Burns... my hands start bleeding.  Acid?");
                 if (!being.HasClearedBlightBefore)
                 {
-                    WriteLine("Whereever I touch it, the stuff starts crumbling.");
+                    WriteLine("Where I touched it, the stuff is crumbling.");
                 }
                 break;
 
@@ -284,7 +284,7 @@ namespace CopperBend.Engine
                 }
                 else
                 {
-                    MessageLog.Add("Door's stuck.");
+                    MessageLog.WriteLine("Door's stuck.");
                 }
                 return success;
             }
@@ -293,7 +293,7 @@ namespace CopperBend.Engine
             {
                 var np = Describer.Describe(space.Terrain.Name, DescMods.IndefiniteArticle);
                 if (being.IsPlayer)
-                    MessageLog.Add($"I can't walk through {np}.");
+                    MessageLog.WriteLine($"I can't walk through {np}.");
                 
                 ClearPendingInput();
                 return false;
@@ -317,18 +317,18 @@ namespace CopperBend.Engine
                 var itemsHere = ItemMap.GetItems(newPosition);
                 if (itemsHere.Count() > 7)
                 {
-                    MessageLog.Add("A pile of things here.");
+                    MessageLog.WriteLine("A pile of things here.");
                 }
                 else if (itemsHere.Count() > 1)
                 {
-                    MessageLog.Add("Some things here.");
+                    MessageLog.WriteLine("Some things here.");
                 }
                 else if (itemsHere.Count() == 1)
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
                     var np = Describer.Describe(item, DescMods.IndefiniteArticle);
-                    MessageLog.Add($"There {beVerb} {np} here.");
+                    MessageLog.WriteLine($"There {beVerb} {np} here.");
                 }
                 else
                 {
@@ -369,12 +369,12 @@ namespace CopperBend.Engine
             {
                 being.AddToInventory(item);
                 ScheduleAgent(being, 4);
-                MessageLog.Add($"Picked up {item.Name}");
+                MessageLog.WriteLine($"Picked up {item.Name}");
             }
             else
             {
                 ScheduleAgent(being, 1);
-                MessageLog.Add($"Item {item.Name} was no longer on the map, to pick up");
+                MessageLog.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
             }
             return pickedUp;
         }
@@ -399,13 +399,13 @@ namespace CopperBend.Engine
             var space = SpaceMap.GetItem(targetCoord);
             if (space.IsTilled)
             {
-                MessageLog.Add("Ground here's already tilled.");
+                MessageLog.WriteLine("Ground here's already tilled.");
                 return false;
             }
 
             if (!space.CanTill)
             {
-                MessageLog.Add($"Cannot till the {space.Terrain.Name}.");
+                MessageLog.WriteLine($"Cannot till the {space.Terrain.Name}.");
                 return false;
             }
 
@@ -430,13 +430,13 @@ namespace CopperBend.Engine
             if (!space.IsTilled)
             {
                 string qualifier = space.CanTill ? "untilled " : "";
-                MessageLog.Add($"Cannot sow {qualifier}{space.Terrain.Name}.");
+                MessageLog.WriteLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
                 return false;
             }
 
             if (space.IsSown)
             {
-                MessageLog.Add($"The ground to my {command.Direction} is already sown with a seed.");
+                MessageLog.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
                 return false;
             }
 

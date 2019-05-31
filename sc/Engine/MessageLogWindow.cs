@@ -88,33 +88,36 @@ namespace CopperBend.Engine
             }
         }
 
+        private bool isNewLine = true;
         private int cursor_x = 1;
         /// <summary> add a complete line to the messages </summary>
-        public void Add(string message)
+        public void WriteLine(string message)
         {
             add_message_to_list(message);
-            Coord cursor = (cursor_x, _lines.Count - (cursor_x == 1 ? 0 : 1));
+            Coord cursor = (cursor_x, _lines.Count);
             _messageConsole.Cursor.Position = cursor;
             _messageConsole.Cursor.Print(message + "\n");
             cursor_x = 1;
+            isNewLine = true;
         }
 
         /// <summary> add an unfinished line to the messages </summary>
         public void Prompt(string message)
         {
             add_message_to_list(message);
-            Coord cursor = (cursor_x, _lines.Count - (cursor_x == 1 ? 0 : 1));
+            Coord cursor = (cursor_x, _lines.Count);
             _messageConsole.Cursor.Position = cursor;
             _messageConsole.Cursor.Print(message);
             cursor_x += message.Length;
+            isNewLine = false;
         }
 
         private void add_message_to_list(string message)
         {
-            if (cursor_x == 1)
+            if (isNewLine)
                 _lines.Add(message);
             else
-                _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  //0.1 poly-yugh-tacular.
+                _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  //0.1 macro-yecch-tacular.
 
             if (_lines.Count > _maxLines) { _lines.RemoveRange(0, _lines.Count - _maxLines); }
         }

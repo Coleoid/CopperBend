@@ -105,8 +105,8 @@ namespace CopperBend.Engine
                 IsInputReady = () => InputQueue.Count > 0,
                 GetNextInput = InputQueue.Dequeue,
                 ClearPendingInput = InputQueue.Clear,
-                WriteLine = MessageLog.Add,
-                WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) MessageLog.Add(message); },
+                WriteLine = MessageLog.WriteLine,
+                WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) MessageLog.WriteLine(message); },
                 Prompt = MessageLog.Prompt,
             };
 

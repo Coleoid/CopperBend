@@ -111,6 +111,8 @@ namespace CopperBend.Engine
                 WriteLine("Not yet.");
                 return CommandIncomplete;
             }
+
+            WriteLine("Yes.  Now.");
             return new Command(CmdAction.Direction, blightDirection);
         }
 

@@ -4,7 +4,6 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    //0.1 needs damage categories
     public interface IDestroyable
     {
         int MaxHealth { get; }

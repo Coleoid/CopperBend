@@ -90,7 +90,7 @@ namespace CopperBend.Engine
             var targetBlight = GameState.Map.BlightMap.GetItem(newPosition);
             if (targetBlight?.Extent > 0)
             {
-                //0.1 improve impact of this landmark event
+                //0.1.STORY  improve impact of this landmark event
                 if (!being.HasClearedBlightBefore)
                 {
                     blightDirection = dir;
@@ -102,7 +102,7 @@ namespace CopperBend.Engine
             return new Command(CmdAction.Direction, dir);
         }
 
-        //0.1 SFD clear blight
+        //0.1.STORY  first time clearing blight
         CmdDirection blightDirection;
         public Command Direction_decide_to_Clear_Blight(AsciiKey press, IBeing being)
         {

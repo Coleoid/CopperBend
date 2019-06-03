@@ -146,9 +146,9 @@ namespace CopperBend.Fabric
             }
         }
 
+        //0.2  review for wasteful object creation
         public Fade GetFadeForBlightExtent(int extent, Color bgColor)
         {
-            //0.2 better random might not be needed here...
             var rand = new Random();
 
             if (extent < 1)

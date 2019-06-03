@@ -83,7 +83,7 @@ namespace CopperBend.Model
         }
         public void AddToInventory(IItem item)
         {
-            //0.1 everything stacks without quantity limit
+            //0.2.INV  limit stack size of some items
             var existingItem = Inventory
                 .FirstOrDefault(i => i.StacksWith(item));
             if (existingItem == null)

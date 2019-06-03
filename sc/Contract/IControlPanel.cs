@@ -4,10 +4,10 @@ using CopperBend.Fabric;
 using SadConsole.Input;
 
 //  Functional completeness levels:
-//  0.1:  Works in a limited way, with lame code
-//  0.2:  Code less lame, but either incomplete or awkward for player
-//  0.K:  Not expecting more needed before initial release
-//  0.+:  Quality beyond initial release needs
+//  0.1  ---  The code works in a limited way, and is lame
+//  0.2  ---  Code is less lame, yet not ready for initial release
+//  0.K  ---  Ready for initial release
+//  0.+  ---  Quality beyond initial release needs, guess I was inspired
 
 namespace CopperBend.Contract
 {
@@ -43,18 +43,18 @@ namespace CopperBend.Contract
         //  Events/subscriptions also worked, but the defining advantage
         // of events is providing multiple subscribers, which we didn't
         // need, so the (significant) coding overhead was waste.
-        //0.2 group in interface, have ControlPanel delegate to another implementing obj?
+        //0.2  group in interface, have ControlPanel delegate to another implementing obj?
         Func<bool> IsInputReady { get; }
         Func<AsciiKey> GetNextInput { get; }
         Action ClearPendingInput { get; }
 
-        //0.2 group in interface, have ControlPanel delegate to another implementing obj?
+        //0.2  group in interface, have ControlPanel delegate to another implementing obj?
         Action<string> WriteLine { get; }
         Action<IBeing, string> WriteLineIfPlayer { get; }
         Action<string> Prompt { get; }
     }
 
-    //0.1 needs more categories
+    //0.1.XP  extend categories
     public enum Exp
     {
         Unknown = 0,

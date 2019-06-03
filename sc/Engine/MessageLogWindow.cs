@@ -117,7 +117,7 @@ namespace CopperBend.Engine
             if (isNewLine)
                 _lines.Add(message);
             else
-                _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  //0.1 macro-yecch-tacular.
+                _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  // macro-yecch-tacular.
 
             if (_lines.Count > _maxLines) { _lines.RemoveRange(0, _lines.Count - _maxLines); }
         }

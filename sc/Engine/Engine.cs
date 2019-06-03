@@ -176,7 +176,6 @@ namespace CopperBend.Engine
         //    Large, Large, Input, Schedule, Start
         //  ...and we can later leave the quest details without confusion
         //  about what we're doing.
-        //  0.2:  later, mode and callback go into a GameState object.
 
         private Stack<EngineMode> ModeStack;
         private Stack<Func<bool>> CallbackStack;
@@ -336,7 +335,7 @@ namespace CopperBend.Engine
         #region LargeMessages and Menus, currently empty
         private void HandleMenus()
         {
-            //TODO:  All menu actions:
+            //0.1.SAVE  create menu actions related to save/load
             //  Start new game
             //  Load game
             //  Save and Quit

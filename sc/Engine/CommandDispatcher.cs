@@ -90,7 +90,7 @@ namespace CopperBend.Engine
                 Schedule.AddAgent(being, 2);
             }
 
-            //0.2 need to think about bail-out protocol
+            //0.2  think about bail-out protocol on sanity check failure
             Guard.Against(item.Quantity < 1, $"Not enough {item.Name} to {item.ConsumeVerb}, somehow.");
             item.Quantity--;
             if (item.Quantity < 1)
@@ -122,7 +122,7 @@ namespace CopperBend.Engine
 
         private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, AreaBlight targetBlight)
         {
-            //0.2 wants smoother ux
+            //0.2  wants smoother ux
             if (being.WieldedTool == null && being.Gloves == null)
             {
                 Message(being, Msgs.BarehandBlightDamage);
@@ -176,7 +176,7 @@ namespace CopperBend.Engine
         {
             int half = source.Extent * 5;
 
-            int amount = half + new Random().Next(half) + 1;  //0.1 need to use managed random
+            int amount = half + new Random().Next(half) + 1;  //0.1.SAVE  need to use managed random
 
             Damage(target, DamageType.AreaBlight, amount);
         }
@@ -192,10 +192,10 @@ namespace CopperBend.Engine
         {
             if (type == DamageType.AreaBlight && target is Player)
             {
-                //0.2 want player resistance to account for in-play factors
+                //0.2.DMG  create more sophisticated player blight resistance
                 amount = Math.Clamp(amount / 10, 1, 3);
             }
-            //0.1 relocate more cases from elsewhere to here
+            //0.1.DMG  relocate more cases from elsewhere to here
             Damage(target, amount);
         }
 
@@ -209,6 +209,13 @@ namespace CopperBend.Engine
                     GameState.Map.BlightMap.Remove(blight);
                 }
             }
+
+            if (target.Health < 1)
+            {
+                //  Is this the afterlife?
+                //  Some things 
+                //TODO:  Remove?  Put on list to be
+            }
         }
 
         private int DamageToTargetFromItem(IDestroyable target, IItem source)
@@ -216,7 +223,7 @@ namespace CopperBend.Engine
             throw new NotImplementedException();
         }
 
-        //0.1 move beyond one special case and a couple of constants
+        //0.1.DMG  move beyond one special case and a couple of constants
         private int DamageToTargetFromBeing(IDestroyable target, IBeing source)
         {
             if (source.IsPlayer)
@@ -268,7 +275,7 @@ namespace CopperBend.Engine
             if (newPosition.X < 0 || newPosition.Y < 0
                 || SpaceMap.Width <= newPosition.X || SpaceMap.Height <= newPosition.Y)
             {
-                //0.1 add transitions to other maps
+                //0.1.MAP  add transitions to other maps
                 WriteLineIfPlayer(being, "Can't move off the map.");
                 return false;
             }
@@ -307,7 +314,7 @@ namespace CopperBend.Engine
             else if (directionsMoved == 1)
                 ScheduleAgent(being, 12);
             else
-                ScheduleAgent(being, 17);  //0.2: roughly 12 * sqrt(2)
+                ScheduleAgent(being, 17);  //0.2  get rid of constant move costs
 
             being.Position = newPosition;
 
@@ -340,7 +347,7 @@ namespace CopperBend.Engine
 
         private bool Do_DirectionAttack(IBeing being, IBeing target)
         {
-            //0.1 instead decide damage and speed via attack & defense info
+            //0.1.DMG  instead decide damage and speed via attack & defense info
             target.Hurt(2);
             ScheduleAgent(being, 12);
             //var conflictSystem = new ConflictSystem(Window, Map, Schedule);

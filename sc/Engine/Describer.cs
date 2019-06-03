@@ -25,7 +25,7 @@ namespace CopperBend.Engine
 
         private Random rnd;
 
-        public Describer(int randomSeed = 88) //0.1 better RNG system
+        public Describer(int randomSeed = 88) //0.1.SAVE  better RNG system
         {
             //TODO: Game-wide randomizer seed management
             rnd = new Random(randomSeed);

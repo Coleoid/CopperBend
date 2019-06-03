@@ -98,13 +98,13 @@ namespace CopperBend.Engine
             if (!XP.ContainsKey(experience))
                 XP[experience] = 0;
 
-            //0.1 vary XP gain based on action, fix args
+            //0.1.XP  vary XP gain based on action, fix args
             XP[experience] += 20;
         }
 
         public void CheckActorAtCoordEvent(IBeing being, Coord position)
         {
-            ////0.1 fix load of map-based events
+            ////0.1.MAP  fix load of map-based events
 
             //if (Map.LocationMessages.ContainsKey(tile.Point))
             //{

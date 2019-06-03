@@ -106,11 +106,11 @@ namespace CopperBend.Fabric
         //public int Elevation;  //for later movement/attack mod
         public TerrainType Terrain;
 
-        //0.2.  0.3 accounts for modifiers (smoke, dust, giant creature, ...)
+        //0.2.MAP  check for modifiers (smoke, dust, giant creature, ...)
         public bool CanSeeThrough => Terrain.CanSeeThrough;
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
-        //0.2.  0.3 accounts for modifiers (permission, hostile aura, blight, ...)
+        //0.2.MAP  check for modifiers (permission, hostile aura, blight, ...)
         public bool CanPlant => Terrain.CanPlant && IsTilled && !IsSown;
         public bool CanTill => Terrain.CanPlant && !IsTilled;
 

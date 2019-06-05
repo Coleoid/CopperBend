@@ -3,6 +3,7 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
 using System;
+using YamlDotNet.Serialization;
 
 namespace CopperBend.Fabric
 {
@@ -106,12 +107,16 @@ namespace CopperBend.Fabric
         //public int Elevation;  //for later movement/attack mod
         public TerrainType Terrain;
 
+        [YamlIgnore]
         //0.2.MAP  check for modifiers (smoke, dust, giant creature, ...)
         public bool CanSeeThrough => Terrain.CanSeeThrough;
+        [YamlIgnore]
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
+        [YamlIgnore]
         //0.2.MAP  check for modifiers (permission, hostile aura, blight, ...)
         public bool CanPlant => Terrain.CanPlant && IsTilled && !IsSown;
+        [YamlIgnore]
         public bool CanTill => Terrain.CanPlant && !IsTilled;
 
         public bool IsTilled { get; internal set; }

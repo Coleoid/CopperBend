@@ -188,7 +188,7 @@ namespace CopperBend.Engine
 
         public CompoundMap MapFromYAML(string mapYaml)
         {
-            var data = DataFromYAML(mapYaml);
+            MapData data = DataFromYAML(mapYaml);
             var width = data.Terrain.Max(t => t.Length);
             var height = data.Terrain.Count();
 
@@ -468,16 +468,16 @@ terrain:
     public class MapData
     {
         public string Name { get; set; }
-        public Dictionary<string, string> Legend { get; set; }
-        public List<string> Terrain { get; set; }
-        public List<BlightOverlayData> Blight { get; set; }
-        public List<string> FirstSightMessage { get; set; }
+        public Dictionary<string, string> Legend { get; set; } = new Dictionary<string, string>();
+        public List<string> Terrain { get; set; } = new List<string>();
+        public List<BlightOverlayData> Blight { get; set; } = new List<BlightOverlayData>();
+        public List<string> FirstSightMessage { get; set; } = new List<string>();
     }
 
     public class BlightOverlayData
     {
         public string Name { get; set; }
         public string Location { get; set; }
-        public List<string> Terrain { get; set; }
+        public List<string> Terrain { get; set; } = new List<string>();
     }
 }

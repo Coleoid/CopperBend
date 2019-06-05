@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using SadConsole;
 using SadConsole.Effects;
+using YamlDotNet.Serialization;
 
 namespace CopperBend.Fabric
 {
@@ -24,6 +25,8 @@ namespace CopperBend.Fabric
 
         public FOV FOV { get; set; }
         public bool VisibilityChanged { get; set; }
+
+        [YamlIgnore]
         public List<Coord> CoordsWithChanges { get; } = new List<Coord>();
 
         public bool CanSeeThrough(Coord location) => SpaceMap.CanSeeThrough(location);

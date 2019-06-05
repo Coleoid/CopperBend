@@ -6,7 +6,6 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using GoRogue.DiceNotation;
 
 namespace CopperBend.Engine
 {

@@ -72,6 +72,7 @@ namespace CopperBend.Engine
             case Keys.D: return Drop(being);
             case Keys.H: return Help();
             case Keys.I: return Inventory(being);
+            case Keys.S: return SaveGame();
             case Keys.U: return Use(being);
             case Keys.W: return Wield(being);
             case Keys.OemComma: return PickUp(being);
@@ -218,6 +219,12 @@ namespace CopperBend.Engine
         public Command Inventory(IBeing being)
         {
             ShowInventory(being);
+            return CommandIncomplete;
+        }
+
+        public Command SaveGame()
+        {
+            //var x 
             return CommandIncomplete;
         }
 

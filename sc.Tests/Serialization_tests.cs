@@ -1,15 +1,112 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
-using CopperBend.Engine;
-using CopperBend.Fabric;
+using Microsoft.Xna.Framework;
+using SadConsole;
+using Newtonsoft.Json;
+using NUnit.Framework;
 using YamlDotNet.Serialization;
 using YamlDotNet.RepresentationModel;
+using CopperBend.Contract;
+using CopperBend.Engine;
+using CopperBend.Fabric;
 
 namespace sc_tests
 {
     //  Throwing stuff at the wall  --  This is all mad dog prototyping
+
+    [TestFixture]
+    public class JsonSerialTests
+    {
+        [SetUp]
+        public void SetUp()
+        {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+            };
+        }
+
+        [Test]
+        public void Can_roundtrip_Cell()
+        {
+            var cell = new Cell
+            {
+                Background = Color.AliceBlue,
+                Foreground = Color.AliceBlue,
+                Glyph = '@',
+                IsVisible = true,
+            };
+
+            var json = JsonConvert.SerializeObject(cell);
+            //System.Console.Error.WriteLine(json);
+            Cell newCell = JsonConvert.DeserializeObject<Cell>(json);
+
+            Assert.That(newCell, Is.Not.Null);
+            Assert.That(newCell.Background, Is.EqualTo(Color.AliceBlue));
+            Assert.That(newCell.Foreground, Is.EqualTo(Color.AliceBlue));
+            Assert.That(newCell.Glyph, Is.EqualTo('@'));
+        }
+
+        [Test]
+        public void Can_roundtrip_TerrainType()
+        {
+            var tt = new TerrainType
+            {
+                Name = "dirt road",
+                CanPlant = false,
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+            };
+            var json = JsonConvert.SerializeObject(tt);
+            //System.Console.Error.WriteLine(json);
+            var newTT = JsonConvert.DeserializeObject<TerrainType>(json);
+
+            Assert.That(newTT.Name, Is.EqualTo(tt.Name));
+            Assert.That(newTT.CanPlant, Is.EqualTo(tt.CanPlant));
+            Assert.That(newTT.CanSeeThrough, Is.EqualTo(tt.CanSeeThrough));
+            Assert.That(newTT.CanWalkThrough, Is.EqualTo(tt.CanWalkThrough));
+        }
+
+
+        [Test]
+        public void Can_roundtrip_Space()
+        {
+            var space = new Space
+            {
+                IsKnown = true,
+                IsSown = true,
+                IsTilled = true
+            };
+
+            var json = JsonConvert.SerializeObject(space);
+            //System.Console.Error.WriteLine(json);
+            var newSpace = JsonConvert.DeserializeObject<Space>(json);
+
+            Assert.That(newSpace.IsKnown);
+            Assert.That(newSpace.IsSown);
+            Assert.That(newSpace.IsTilled);
+        }
+
+        [Test]
+        public void Can_roundtrip_SpaceMap()
+        {
+            // Cannot create and populate list type CopperBend.Fabric.SpaceMap
+            var map = new SpaceMap(2, 2)
+            {
+                PlayerStartPoint = (3, 3)
+            };
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
+
+            Assert.That(newMap.Height, Is.EqualTo(2));
+            Assert.That(newMap.Width, Is.EqualTo(2));
+            Assert.That(newMap.PlayerStartPoint, Is.EqualTo((3,3)));
+        }
+    }
+
+
 
     public class SpaceMapSaveData
     {
@@ -42,10 +139,10 @@ namespace sc_tests
             var smap = new SpaceMap(2, 2);
             var cmap = new CompoundMap();
             cmap.SpaceMap = smap;
-            smap.Add(new Space(), (0, 0));
-            smap.Add(new Space(), (0, 1));
-            smap.Add(new Space(), (1, 0));
-            smap.Add(new Space(), (1, 1));
+            smap.AddSpace(new Space(), (0, 0));
+            smap.AddSpace(new Space(), (0, 1));
+            smap.AddSpace(new Space(), (1, 0));
+            smap.AddSpace(new Space(), (1, 1));
 
             var saveData = new CompoundMapSaveData(cmap);
 
@@ -62,7 +159,7 @@ namespace sc_tests
             //    output = writer.ToString();
             //}
 
-            Assert.Fail(yaml);
+            //System.Console.Error.WriteLine(yaml);
             //System.Diagnostics.Debugger.Launch();
         }
 
@@ -76,7 +173,7 @@ namespace sc_tests
             md.Blight.Add(overlay);
             var serializer = new SerializerBuilder().Build();
             var yaml = serializer.Serialize(md);
-            Assert.Fail(yaml);
+            //System.Console.Error.WriteLine(yaml);
         }
 
         public void Read___()

@@ -278,7 +278,7 @@ namespace CopperBend.Engine
                 WriteLineIfPlayer(being, "Can't move off the map.");
                 return false;
             }
-            Space space = SpaceMap.GetItem(newPosition);
+            Space space = SpaceMap.GetSpace(newPosition);
 
             if (space.Terrain.Name == "closed door")
             {
@@ -402,7 +402,7 @@ namespace CopperBend.Engine
         private bool Use_Hoe(IBeing being, Command command)
         {
             var targetCoord = CoordInDirection(being.Position, command.Direction);
-            var space = SpaceMap.GetItem(targetCoord);
+            var space = SpaceMap.GetSpace(targetCoord);
             if (space.IsTilled)
             {
                 MessageLog.WriteLine("Ground here's already tilled.");
@@ -431,7 +431,7 @@ namespace CopperBend.Engine
         private bool Use_Seed(IBeing being, Command command)
         {
             var targetCoord = CoordInDirection(being.Position, command.Direction);
-            var space = SpaceMap.GetItem(targetCoord);
+            var space = SpaceMap.GetSpace(targetCoord);
 
             if (!space.IsTilled)
             {

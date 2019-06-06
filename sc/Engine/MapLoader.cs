@@ -218,7 +218,7 @@ namespace CopperBend.Engine
                     {
                         Terrain = type,
                     };
-                    map.SpaceMap.Add(space, x, y);
+                    map.SpaceMap.AddSpace(space, (x, y));
 
                     if (type == SpaceMap.TilledSoil) map.SpaceMap.Till(space);
                 }

@@ -9,6 +9,7 @@ using YamlDotNet.RepresentationModel;
 using CopperBend.Contract;
 using CopperBend.Engine;
 using CopperBend.Fabric;
+using GoRogue;
 
 namespace sc_tests
 {
@@ -91,18 +92,42 @@ namespace sc_tests
         [Test]
         public void Can_roundtrip_SpaceMap()
         {
-            // Cannot create and populate list type CopperBend.Fabric.SpaceMap
             var map = new SpaceMap(2, 2)
             {
                 PlayerStartPoint = (3, 3)
             };
+
+            map.AddSpace(new Space(888), (4, 4));
+
             var json = JsonConvert.SerializeObject(map);
             //System.Console.Error.WriteLine(json);
             var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
 
             Assert.That(newMap.Height, Is.EqualTo(2));
             Assert.That(newMap.Width, Is.EqualTo(2));
-            Assert.That(newMap.PlayerStartPoint, Is.EqualTo((3,3)));
+            Assert.That(newMap.PlayerStartPoint, Is.EqualTo((3, 3)));
+
+            var space = newMap.GetSpace((4, 4));
+            Assert.That(space, Is.Not.Null);
+        }
+
+
+        [Test]
+        public void Can_roundtrip_SpaceMap_Spaces()
+        {
+            var map = new SpaceMap(2, 2)
+            {
+            };
+
+            map.AddSpace(new Space(888), (4, 4));
+
+            var json = JsonConvert.SerializeObject(map);
+            System.Console.Error.WriteLine(json);
+            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
+
+            var space = newMap.GetSpace((4, 4));
+            Assert.That(space, Is.Not.Null);
+            Assert.That(space.ID, Is.EqualTo(888));
         }
     }
 

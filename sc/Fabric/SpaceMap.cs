@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 using GoRogue;
@@ -18,6 +20,8 @@ namespace CopperBend.Fabric
         public int Height { get; set; }
         public Coord PlayerStartPoint { get; set; }
 
+        public Dictionary<string, Space> AllSpaces { get; set; } = new Dictionary<string, Space>();
+
         [JsonIgnore]
         public SpatialMap<Space> Spatial { get; set; }
 
@@ -28,10 +32,34 @@ namespace CopperBend.Fabric
             Spatial = new SpatialMap<Space>(width * height);
         }
 
-        public Space GetSpace(Coord position) => Spatial.GetItem(position);
+        public Space GetSpace(Coord position)
+        {
+            SyncSpaces();
+            return Spatial.GetItem(position);
+        }
 
-        public void AddSpace(Space space, Coord position) => Spatial.Add(space, position);
+        public void AddSpace(Space space, Coord position)
+        {
+            SyncSpaces();
+            Spatial.Add(space, position);
+            AllSpaces[position.ToString()] = space;
+        }
 
+        /// <summary> Populates the SpatialMap after deserializing </summary>
+        /// <remarks> Honestly, I'm not the biggest fan of this. </remarks>
+        public void SyncSpaces()
+        {
+            if (Spatial.Any() || !AllSpaces.Any()) return;
+
+            foreach (string coordString in AllSpaces.Keys)
+            {
+                var nums = Regex.Matches(coordString, @"\d+");
+                int x = int.Parse(nums[0].Value);
+                int y = int.Parse(nums[1].Value);
+                Coord coord = new Coord(x, y);
+                Spatial.Add(AllSpaces[coordString], coord);
+            }
+        }
 
         public bool CanWalkThrough(Coord position)
         {

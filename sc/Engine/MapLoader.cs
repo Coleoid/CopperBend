@@ -200,7 +200,7 @@ namespace CopperBend.Engine
                 BeingMap = new MultiSpatialMap<IBeing>(),
                 ItemMap = new MultiSpatialMap<IItem>(),
                 LocatedTriggers = new List<LocatedTrigger>(),
-                BlightMap = new SpatialMap<AreaBlight>(),
+                BlightMap = new BlightMap(),
             };
 
             for (int y = 0; y < height; y++)
@@ -218,7 +218,7 @@ namespace CopperBend.Engine
                     {
                         Terrain = type,
                     };
-                    map.SpaceMap.AddSpace(space, (x, y));
+                    map.SpaceMap.AddItem(space, (x, y));
 
                     if (type == SpaceMap.TilledSoil) map.SpaceMap.Till(space);
                 }
@@ -244,7 +244,7 @@ namespace CopperBend.Engine
                         int extent = isD ? int.Parse(symbol) : 0;
 
 
-                        map.BlightMap.Add(new AreaBlight {Extent = extent}, x + x_off, y + y_off);
+                        map.BlightMap.AddItem(new AreaBlight {Extent = extent}, (x + x_off, y + y_off));
                     }
                 }
             }

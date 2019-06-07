@@ -4,12 +4,8 @@ using Microsoft.Xna.Framework;
 using SadConsole;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 using CopperBend.Contract;
-using CopperBend.Engine;
 using CopperBend.Fabric;
-using GoRogue;
 
 namespace sc_tests
 {
@@ -92,145 +88,87 @@ namespace sc_tests
         [Test]
         public void Can_roundtrip_SpaceMap()
         {
-            var map = new SpaceMap(2, 2)
+            var map = new SpaceMap(5, 5)
             {
                 PlayerStartPoint = (3, 3)
             };
 
-            map.AddSpace(new Space(888), (4, 4));
+            map.AddItem(new Space(888), (4, 4));
 
             var json = JsonConvert.SerializeObject(map);
             //System.Console.Error.WriteLine(json);
             var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
 
-            Assert.That(newMap.Height, Is.EqualTo(2));
-            Assert.That(newMap.Width, Is.EqualTo(2));
+            Assert.That(newMap.Height, Is.EqualTo(5));
+            Assert.That(newMap.Width, Is.EqualTo(5));
             Assert.That(newMap.PlayerStartPoint, Is.EqualTo((3, 3)));
 
-            var space = newMap.GetSpace((4, 4));
+            var space = newMap.GetItem((4, 4));
             Assert.That(space, Is.Not.Null);
         }
 
 
         [Test]
-        public void Can_roundtrip_SpaceMap_Spaces()
+        public void Can_roundtrip_SpaceMap_down_to_Cell()
         {
-            var map = new SpaceMap(2, 2)
+            Cell originalCell = new Cell
             {
+                Glyph = '~',
             };
 
-            map.AddSpace(new Space(888), (4, 4));
+            var originalTerrain = new TerrainType
+            {
+                Looks = originalCell
+            };
+
+            var originalSpace = new Space(888)
+            {
+                Terrain = originalTerrain
+            };
+
+            var map = new SpaceMap(6, 6);
+
+            map.AddItem(originalSpace, (4, 4));
+
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
+
+            var space = newMap.GetItem((4, 4));
+            var cell = space.Terrain.Looks;
+            Assert.That(cell, Is.Not.Null);
+            Assert.That(cell.Glyph, Is.EqualTo('~'));
+        }
+
+        [Test]
+        public void Can_roundtrip_BlightMap()
+        {
+            var map = new BlightMap() { Name = "Bofungus" };
+            var blight = new AreaBlight() {Extent = 11};
+            map.AddItem(blight, (7, 11));
+            map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
 
             var json = JsonConvert.SerializeObject(map);
             System.Console.Error.WriteLine(json);
-            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
+            var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
 
-            var space = newMap.GetSpace((4, 4));
-            Assert.That(space, Is.Not.Null);
-            Assert.That(space.ID, Is.EqualTo(888));
-        }
-    }
-
-
-
-    public class SpaceMapSaveData
-    {
-        public SpaceMapSaveData(SpaceMap map)
-        {
-            Width = map.Width;
-            Height = map.Height;
-        }
-
-        public int Width { get; set; }
-        public int Height { get; set; }
-    }
-
-    public class CompoundMapSaveData
-    {
-        public CompoundMapSaveData(CompoundMap map)
-        {
-            SpaceMap = new SpaceMapSaveData(map.SpaceMap);
-        }
-
-        public SpaceMapSaveData SpaceMap { get; set; }
-    }
-
-    [TestFixture]
-    public class Serialization_tests
-    {
-        //[Test]
-        public void yaml_SpaceMap()
-        {
-            var smap = new SpaceMap(2, 2);
-            var cmap = new CompoundMap();
-            cmap.SpaceMap = smap;
-            smap.AddSpace(new Space(), (0, 0));
-            smap.AddSpace(new Space(), (0, 1));
-            smap.AddSpace(new Space(), (1, 0));
-            smap.AddSpace(new Space(), (1, 1));
-
-            var saveData = new CompoundMapSaveData(cmap);
-
-            //var serializer = new SerializerBuilder().Build();
-            //var yaml = serializer.Serialize(saveData);
-            var serializer = new SerializerBuilder().Build();
-            var yaml = serializer.Serialize(cmap);
-
-            //var serializer = new Serializer();
-            //string output = null;
-            //using (StringWriter writer = new StringWriter())
-            //{
-            //    serializer.Serialize(writer, saveData);
-            //    output = writer.ToString();
-            //}
-
-            //System.Console.Error.WriteLine(yaml);
-            //System.Diagnostics.Debugger.Launch();
+            Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
+            var entry = newMap.GetItem((7, 11));
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.ID, Is.EqualTo(888));
         }
 
         [Test]
-        public void yaml_MapData()
+        public void Can_roundtrip_AreaBlight()
         {
-            var md = new MapData();
-            md.Name = "map name";
-            BlightOverlayData overlay = new BlightOverlayData { Location = "here", Name = "Frank" };
-            overlay.Terrain.Add("ava987f076a");
-            md.Blight.Add(overlay);
-            var serializer = new SerializerBuilder().Build();
-            var yaml = serializer.Serialize(md);
-            //System.Console.Error.WriteLine(yaml);
+            var blight = new AreaBlight() { Extent = 14 };
+
+            var json = JsonConvert.SerializeObject(blight);
+            //System.Console.Error.WriteLine(json);
+            var newBlight = JsonConvert.DeserializeObject<AreaBlight>(json);
+
+            Assert.That(newBlight.Extent, Is.EqualTo(14));
         }
-
-        public void Read___()
-        {
-            using (StreamReader reader = File.OpenText("path-and-name-of-your-yaml-file"))
-            {
-                var stream = new YamlStream();
-                stream.Load(reader);
-            }
-
-        }
-
-        public void Write___()
-        {
-            using (TextWriter writer = new StringWriter())
-            {
-                var stream = new YamlStream();
-                stream.Save(writer);
-            }
-
-        }
-
-        //[Test]
-        //public void Serdeser_GameState()
-        //{
-        //    var gameState = new GameState();
-
-        //    var bytes = ObjectToByteArray(gameState);
-        //    var newState = (GameState)ByteArrayToObject(bytes);
-
-        //    Assert.That(gameState.Map, Is.EqualTo(newState.Map));
-        //}
 
         public static byte[] ObjectToByteArray(object obj)
         {
@@ -251,6 +189,5 @@ namespace sc_tests
                 return obj;
             }
         }
-
     }
 }

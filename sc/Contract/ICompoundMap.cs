@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using SadConsole;
 using GoRogue;
 using GoRogue.MapViews;
-using Rectangle = GoRogue.Rectangle;
 using CopperBend.Fabric;
-using CopperBend.Model;
 using SadConsole.Effects;
 
 namespace CopperBend.Contract
@@ -19,7 +17,7 @@ namespace CopperBend.Contract
         SpaceMap SpaceMap { get; }
         MultiSpatialMap<IBeing> BeingMap { get; }
         MultiSpatialMap<IItem> ItemMap { get; }
-        SpatialMap<AreaBlight> BlightMap { get; }
+        BlightMap BlightMap { get; }
 
         List<LocatedTrigger> LocatedTriggers { get; }
 

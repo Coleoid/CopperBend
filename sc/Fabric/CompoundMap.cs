@@ -20,7 +20,7 @@ namespace CopperBend.Fabric
         public SpaceMap SpaceMap { get; set; }
         public MultiSpatialMap<IBeing> BeingMap { get; set; }
         public MultiSpatialMap<IItem> ItemMap { get; set; }
-        public SpatialMap<AreaBlight> BlightMap { get; set; }
+        public BlightMap BlightMap { get; set; }
         public List<LocatedTrigger> LocatedTriggers { get; set; }
 
         public FOV FOV { get; set; }
@@ -69,7 +69,7 @@ namespace CopperBend.Fabric
             {
                 for (int x = 0; x < spaceMap.Width; x++)
                 {
-                    var space = spaceMap.GetSpace((x, y));
+                    var space = spaceMap.GetItem((x, y));
                     if (space.IsKnown)
                     {
                         knownCell.Glyph = space.Terrain.Looks.Glyph;
@@ -99,7 +99,7 @@ namespace CopperBend.Fabric
                 //  Wiping the effect restores the original cell colors,
                 // so it must happen before setting OOV appearance
                 EffectsManager.SetEffect(console.Cells[location.Y * Width + location.X], null);
-                unseenCell.Glyph = SpaceMap.GetSpace(location).Terrain.Looks.Glyph;
+                unseenCell.Glyph = SpaceMap.GetItem(location).Terrain.Looks.Glyph;
                 console.SetCellAppearance(location.X, location.Y, unseenCell);
             }
 
@@ -116,7 +116,7 @@ namespace CopperBend.Fabric
             foreach (var position in coords.Where(c => console.ViewPort.Contains(c)))
             {
                 var targetCell = new Cell();
-                var rawCell = SpaceMap.GetSpace(position).Terrain.Looks;
+                var rawCell = SpaceMap.GetItem(position).Terrain.Looks;
                 targetCell.Background = rawCell.Background;
 
                 var beings = BeingMap.GetItems(position).ToList();

@@ -97,7 +97,7 @@ namespace CopperBend.Engine
             {
                 for (int x = 0; x < map.Width; x++)
                 {
-                    map.AddSpace(new Space {Terrain = _wall}, (x, y));
+                    map.AddItem(new Space {Terrain = _wall}, (x, y));
                 }
             }
         }
@@ -120,7 +120,7 @@ namespace CopperBend.Engine
 
         private void SetFloorSpace(int x, int y)
         {
-            var space = _map.GetSpace((x, y));
+            var space = _map.GetItem((x, y));
             space.Terrain = _floor;
         }
 

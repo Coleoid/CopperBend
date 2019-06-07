@@ -17,7 +17,7 @@ namespace CopperBend.Engine
         protected SpaceMap SpaceMap => GameState.Map.SpaceMap;
         private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
         private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
-        private SpatialMap<AreaBlight> BlightMap => GameState.Map.BlightMap;
+        private BlightMap BlightMap => GameState.Map.BlightMap;
 
         private Describer Describer;
         private MessageLogWindow MessageLog;
@@ -205,7 +205,7 @@ namespace CopperBend.Engine
             {
                 if (blight.Extent == 0)
                 {
-                    GameState.Map.BlightMap.Remove(blight);
+                    GameState.Map.BlightMap.RemoveItem(blight);
                 }
             }
 
@@ -278,7 +278,7 @@ namespace CopperBend.Engine
                 WriteLineIfPlayer(being, "Can't move off the map.");
                 return false;
             }
-            Space space = SpaceMap.GetSpace(newPosition);
+            Space space = SpaceMap.GetItem(newPosition);
 
             if (space.Terrain.Name == "closed door")
             {
@@ -402,7 +402,7 @@ namespace CopperBend.Engine
         private bool Use_Hoe(IBeing being, Command command)
         {
             var targetCoord = CoordInDirection(being.Position, command.Direction);
-            var space = SpaceMap.GetSpace(targetCoord);
+            var space = SpaceMap.GetItem(targetCoord);
             if (space.IsTilled)
             {
                 MessageLog.WriteLine("Ground here's already tilled.");
@@ -431,7 +431,7 @@ namespace CopperBend.Engine
         private bool Use_Seed(IBeing being, Command command)
         {
             var targetCoord = CoordInDirection(being.Position, command.Direction);
-            var space = SpaceMap.GetSpace(targetCoord);
+            var space = SpaceMap.GetItem(targetCoord);
 
             if (!space.IsTilled)
             {

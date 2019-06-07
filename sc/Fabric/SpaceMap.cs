@@ -3,62 +3,110 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using YamlDotNet.Serialization;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
 
 namespace CopperBend.Fabric
 {
-    public class SpaceMap
+    public class SerializableSpatialMap<T> where T: class, IHasID
+    {
+        [JsonIgnore]
+        public SpatialMap<T> SpatialMap { get; set; }
+
+        /// <summary> The serialization border for our mapped items.  Shouldn't be used by normal app code. </summary>
+        /// <remarks> Would be a touch nicer with a string -> Coord implicit conversion. </remarks>
+        public Dictionary<string, T> SerialItems
+        {
+            get
+            {
+                var items = new Dictionary<string, T>();
+                foreach (var coord in SpatialMap.Positions)
+                {
+                    var item = SpatialMap.GetItem(coord);
+                    items.Add(coord.ToString(), item);
+                }
+
+                return items;
+            }
+
+            set
+            {
+                SpatialMap = new SpatialMap<T>();
+                foreach (var key in value.Keys)
+                {
+                    var nums = Regex.Matches(key, @"\d+");
+                    int x = int.Parse(nums[0].Value);
+                    int y = int.Parse(nums[1].Value);
+                    Coord coord = new Coord(x, y);
+                    SpatialMap.Add(value[key], coord);
+                }
+            }
+        }
+
+
+        public SerializableSpatialMap(int initialCapacity = 32)
+        {
+            SpatialMap = new SpatialMap<T>(initialCapacity);
+        }
+
+        public T GetItem(Coord position)
+        {
+            T item = null;
+            System.Console.Error.WriteLine($"Posn: {position}");
+            if (position == (7, 11))
+            {
+                System.Console.Error.WriteLine("All items:");
+
+                foreach (var pos in SpatialMap.Positions)
+                {
+                    System.Console.Error.WriteLine($"Posn: {pos}");
+                }
+            }
+            else
+            {
+                item = SpatialMap.GetItem(position);
+                System.Console.Error.WriteLine($"Item: {item.ID}");
+            }
+
+            return item;
+        }
+
+        public void AddItem(T item, Coord position)
+        {
+            SpatialMap.Add(item, position);
+        }
+
+        public void RemoveItem(T item)
+        {
+            SpatialMap.Remove(item);
+        }
+    }
+
+    public class BlightMap : SerializableSpatialMap<AreaBlight>
+    {
+        public string Name { get; set; }
+        public BlightMap()
+            : base()
+        {
+        }
+    }
+
+    public class SpaceMap : SerializableSpatialMap<Space>
     {
         public static Dictionary<string, TerrainType> TerrainTypes { get; internal set; }
         public static TerrainType TilledSoil => TerrainTypes["tilled dirt"];
         public static TerrainType PlantedSoil => TerrainTypes["planted dirt"];
-
+        public Coord PlayerStartPoint { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public Coord PlayerStartPoint { get; set; }
 
-        public Dictionary<string, Space> AllSpaces { get; set; } = new Dictionary<string, Space>();
-
-        [JsonIgnore]
-        public SpatialMap<Space> Spatial { get; set; }
 
         public SpaceMap(int width, int height)
+        : base(width * height)
         {
             Width = width;
             Height = height;
-            Spatial = new SpatialMap<Space>(width * height);
-        }
-
-        public Space GetSpace(Coord position)
-        {
-            SyncSpaces();
-            return Spatial.GetItem(position);
-        }
-
-        public void AddSpace(Space space, Coord position)
-        {
-            SyncSpaces();
-            Spatial.Add(space, position);
-            AllSpaces[position.ToString()] = space;
-        }
-
-        /// <summary> Populates the SpatialMap after deserializing </summary>
-        /// <remarks> Honestly, I'm not the biggest fan of this. </remarks>
-        public void SyncSpaces()
-        {
-            if (Spatial.Any() || !AllSpaces.Any()) return;
-
-            foreach (string coordString in AllSpaces.Keys)
-            {
-                var nums = Regex.Matches(coordString, @"\d+");
-                int x = int.Parse(nums[0].Value);
-                int y = int.Parse(nums[1].Value);
-                Coord coord = new Coord(x, y);
-                Spatial.Add(AllSpaces[coordString], coord);
-            }
         }
 
         public bool CanWalkThrough(Coord position)
@@ -68,7 +116,7 @@ namespace CopperBend.Fabric
              || position.Y < 0 || position.Y >= Height)
                 return false;
 
-            return GetSpace(position).CanWalkThrough;
+            return GetItem(position).CanWalkThrough;
         }
 
         public bool CanSeeThrough(Coord position)
@@ -78,7 +126,7 @@ namespace CopperBend.Fabric
              || position.Y < 0 || position.Y >= Height)
                 return false;
 
-            return GetSpace(position).CanSeeThrough;
+            return GetItem(position).CanSeeThrough;
         }
 
         public bool CanPlant(Coord position)
@@ -88,7 +136,7 @@ namespace CopperBend.Fabric
              || position.Y < 0 || position.Y >= Height)
                 return false;
 
-            return GetSpace(position).CanPlant;
+            return GetItem(position).CanPlant;
         }
 
 
@@ -114,15 +162,15 @@ namespace CopperBend.Fabric
         {
             foreach (var seen in newlySeen)
             {
-                GetSpace(seen).IsKnown = true;
+                GetItem(seen).IsKnown = true;
             }
         }
 
-        internal bool OpenDoor(Space tile)
+        internal bool OpenDoor(Space space)
         {
-            if (tile.Terrain == TerrainTypes["closed door"])
+            if (space.Terrain == TerrainTypes["closed door"])
             {
-                tile.Terrain = TerrainTypes["open door"];
+                space.Terrain = TerrainTypes["open door"];
                 return true;
             }
 
@@ -145,19 +193,15 @@ namespace CopperBend.Fabric
         //public int Elevation;  //for later movement/attack mod
         public TerrainType Terrain;
 
-        [YamlIgnore]
         [JsonIgnore]
         //0.2.MAP  check for modifiers (smoke, dust, giant creature, ...)
         public bool CanSeeThrough => Terrain.CanSeeThrough;
-        [YamlIgnore]
         [JsonIgnore]
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
-        [YamlIgnore]
         [JsonIgnore]
         //0.2.MAP  check for modifiers (permission, hostile aura, blight, ...)
         public bool CanPlant => Terrain.CanPlant && IsTilled && !IsSown;
-        [YamlIgnore]
         [JsonIgnore]
         public bool CanTill => Terrain.CanPlant && !IsTilled;
 
@@ -181,8 +225,9 @@ namespace CopperBend.Fabric
         public int Extent { get; set; }
 
         #region IDestroyable
-        public int MaxHealth => 80;
+        public int MaxHealth { get; set; } = 80;
 
+        [JsonIgnore]
         public int Health => Extent;
 
         public void Heal(int amount)

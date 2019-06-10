@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Xna.Framework;
 using SadConsole;
@@ -149,7 +150,8 @@ namespace sc_tests
             map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
 
             var json = JsonConvert.SerializeObject(map);
-            System.Console.Error.WriteLine(json);
+            //System.Console.Error.WriteLine(json);
+            Debugger.Launch();
             var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
 
             Assert.That(newMap.Name, Is.EqualTo("Bofungus"));

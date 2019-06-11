@@ -97,6 +97,7 @@ namespace sc_tests
             map.AddItem(new Space(888), (4, 4));
 
             var json = JsonConvert.SerializeObject(map);
+            //Debugger.Launch();
             //System.Console.Error.WriteLine(json);
             var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
 
@@ -106,6 +107,25 @@ namespace sc_tests
 
             var space = newMap.GetItem((4, 4));
             Assert.That(space, Is.Not.Null);
+        }
+
+        [Test]
+        public void Can_roundtrip_BlightMap()
+        {
+            var map = new BlightMap(1,1) { Name = "Bofungus" }; //0.0: deserializing cheese
+            var blight = new AreaBlight(888) { Extent = 11 };
+            map.AddItem(blight, (7, 11));
+            map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
+
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            //Debugger.Launch();
+            var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
+
+            Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
+            var entry = newMap.GetItem((7, 11));
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.ID, Is.EqualTo(888));
         }
 
 
@@ -139,25 +159,6 @@ namespace sc_tests
             var cell = space.Terrain.Looks;
             Assert.That(cell, Is.Not.Null);
             Assert.That(cell.Glyph, Is.EqualTo('~'));
-        }
-
-        [Test]
-        public void Can_roundtrip_BlightMap()
-        {
-            var map = new BlightMap() { Name = "Bofungus" };
-            var blight = new AreaBlight() {Extent = 11};
-            map.AddItem(blight, (7, 11));
-            map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
-
-            var json = JsonConvert.SerializeObject(map);
-            //System.Console.Error.WriteLine(json);
-            Debugger.Launch();
-            var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
-
-            Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
-            var entry = newMap.GetItem((7, 11));
-            Assert.That(entry, Is.Not.Null);
-            Assert.That(entry.ID, Is.EqualTo(888));
         }
 
         [Test]

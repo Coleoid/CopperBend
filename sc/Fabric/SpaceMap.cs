@@ -52,23 +52,7 @@ namespace CopperBend.Fabric
 
         public T GetItem(Coord position)
         {
-            T item = null;
-            System.Console.Error.WriteLine($"Posn: {position}");
-            if (position == (7, 11))
-            {
-                System.Console.Error.WriteLine("All items:");
-
-                foreach (var pos in SpatialMap.Positions)
-                {
-                    System.Console.Error.WriteLine($"Posn: {pos}");
-                }
-            }
-            else
-            {
-                item = SpatialMap.GetItem(position);
-                System.Console.Error.WriteLine($"Item: {item.ID}");
-            }
-
+            T item = SpatialMap.GetItem(position);
             return item;
         }
 
@@ -86,10 +70,18 @@ namespace CopperBend.Fabric
     public class BlightMap : SerializableSpatialMap<AreaBlight>
     {
         public string Name { get; set; }
-        public BlightMap()
+
+        //0.0  the arguments sidestep a Json.net deserializing bug:
+        //  it won't reload SerialItems when creating with default ctor
+        public BlightMap(int width, int height)
             : base()
         {
         }
+        
+        //public BlightMap()
+        //    : base()
+        //{
+        //}
     }
 
     public class SpaceMap : SerializableSpatialMap<Space>

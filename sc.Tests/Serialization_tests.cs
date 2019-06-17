@@ -109,24 +109,25 @@ namespace sc_tests
             Assert.That(space, Is.Not.Null);
         }
 
-        //[Test]
-        //public void Can_roundtrip_BlightMap()
-        //{
-        //    var map = new BlightMap() { Name = "Bofungus" }; //0.0: deserializing cheese
-        //    var blight = new AreaBlight(888) { Extent = 11 };
-        //    map.AddItem(blight, (7, 11));
-        //    map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
+        [Test]
+        public void Can_roundtrip_BlightMap()
+        {
+            //0.2: int ctor arg = deserializing workaround
+            var map = new BlightMap(1) { Name = "Bofungus" };
+            var blight = new AreaBlight(888) { Extent = 11 };
+            map.AddItem(blight, (7, 11));
+            map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
 
-        //    var json = JsonConvert.SerializeObject(map);
-        //    //System.Console.Error.WriteLine(json);
-        //    //Debugger.Launch();
-        //    var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            //Debugger.Launch();
+            var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
 
-        //    Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
-        //    var entry = newMap.GetItem((7, 11));
-        //    Assert.That(entry, Is.Not.Null);
-        //    Assert.That(entry.ID, Is.EqualTo(888));
-        //}
+            Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
+            var entry = newMap.GetItem((7, 11));
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.ID, Is.EqualTo(888));
+        }
 
 
         [Test]

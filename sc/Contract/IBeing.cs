@@ -4,20 +4,6 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    public interface IDestroyable
-    {
-        int MaxHealth { get; }
-        int Health { get; }
-        void Heal(int amount);
-        void Hurt(int amount);
-    }
-
-    public interface IScheduleAgent
-    {
-        ScheduleEntry GetNextEntry();
-        ScheduleEntry GetNextEntry(int offset);
-    }
-
     public interface IBeing : IDestroyable, IScheduleAgent, IHasID
     {
         string Name { get; set; }

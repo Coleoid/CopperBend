@@ -73,11 +73,15 @@ namespace CopperBend.Fabric
 
         //0.0  the arguments sidestep a Json.net deserializing bug:
         //  it won't reload SerialItems when creating with default ctor
+        public BlightMap(int dummy)
+            : base()
+        {
+        }
         //public BlightMap(int width, int height)
         //    : base()
         //{
         //}
-        
+
         //public BlightMap()
         //    : base()
         //{

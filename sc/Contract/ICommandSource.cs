@@ -2,6 +2,7 @@
 
 namespace CopperBend.Contract
 {
+    /// <summary> A CommandSource supplies a being's action decisions </summary>
     public interface ICommandSource
     {
         void GiveCommand(IBeing being);

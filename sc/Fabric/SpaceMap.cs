@@ -136,7 +136,7 @@ namespace CopperBend.Fabric
         }
 
 
-        internal void Sow(Space space, Seed seedToSow)
+        internal void Sow(Space space, Item seedToSow)
         {
             if (space.CanPlant)
             {

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
+using CopperBend.Model;
+using CopperBend.Fabric;
 
 namespace CopperBend.Contract
 {
@@ -19,15 +21,15 @@ namespace CopperBend.Contract
         Microsoft.Xna.Framework.Point Position { get; set; }
         void MoveTo(Coord position);
 
-        IEnumerable<IItem> Inventory { get; }
-        void AddToInventory(IItem item);
-        IItem RemoveFromInventory(int inventorySlot);
-        IItem RemoveFromInventory(IItem item);
-        IEnumerable<IItem> ReachableItems();
+        IEnumerable<Item> Inventory { get; }
+        void AddToInventory(Item item);
+        Item RemoveFromInventory(int inventorySlot);
+        Item RemoveFromInventory(Item item);
+        IEnumerable<Item> ReachableItems();
 
-        IItem WieldedTool { get; }
-        IItem Gloves { get; }
-        void Wield(IItem item);
+        Item WieldedTool { get; }
+        Item Gloves { get; }
+        void Wield(Item item);
         bool HasClearedBlightBefore { get; set; }
     }
 }

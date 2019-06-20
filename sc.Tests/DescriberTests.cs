@@ -1,3 +1,4 @@
+using CopperBend.Fabric;
 using CopperBend.Model;
 using GoRogue;
 using NUnit.Framework;

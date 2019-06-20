@@ -41,7 +41,7 @@
 //        public void Consume_nothing_available()
 //        {
 //            var knife = new Knife(new Point(0, 0));
-//            __actor.Inventory.Returns(new List<IItem> { knife });
+//            __actor.Inventory.Returns(new List<Item> { knife });
 //            Queue(RLKey.C);
 //            Cmd = _source.GetCommand(__actor);
 
@@ -54,7 +54,7 @@
 //        public void Consume_cancel()
 //        {
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { fruit });
+//            __actor.Inventory.Returns(new List<Item> { fruit });
 //            Queue(RLKey.C);
 //            Queue(RLKey.Escape);
 //            Cmd = _source.GetCommand(__actor);
@@ -69,8 +69,8 @@
 //        {
 //            var knife = new Knife(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.ReachableItems().Returns(new List<IItem> { });
-//            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+//            __actor.ReachableItems().Returns(new List<Item> { });
+//            __actor.Inventory.Returns(new List<Item> { knife, fruit });
 
 //            Queue(RLKey.C);
 //            Cmd = _source.GetCommand(__actor);
@@ -91,8 +91,8 @@
 //        {
 //            var knife = new Knife(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.ReachableItems().Returns(new List<IItem> { });
-//            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+//            __actor.ReachableItems().Returns(new List<Item> { });
+//            __actor.Inventory.Returns(new List<Item> { knife, fruit });
 
 //            Queue(RLKey.C);
 //            Cmd = _source.GetCommand(__actor);
@@ -113,8 +113,8 @@
 //        {
 //            var knife = new Knife(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.ReachableItems().Returns(new List<IItem> { });
-//            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+//            __actor.ReachableItems().Returns(new List<Item> { });
+//            __actor.Inventory.Returns(new List<Item> { knife, fruit });
 
 //            Queue(RLKey.C);
 //            Queue(RLKey.C);
@@ -129,7 +129,7 @@
 //        private void Consume_reachable()
 //        {
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.ReachableItems().Returns(new List<IItem> { fruit });
+//            __actor.ReachableItems().Returns(new List<Item> { fruit });
 //            Queue(RLKey.C);
 //            Cmd = _source.GetCommand(__actor);
 
@@ -149,7 +149,7 @@
 //        [Test]
 //        public void Drop_nothing_available()
 //        {
-//            __actor.Inventory.Returns(new List<IItem> { });
+//            __actor.Inventory.Returns(new List<Item> { });
 //            Queue(RLKey.D);
 //            Cmd = _source.GetCommand(__actor);
 
@@ -162,7 +162,7 @@
 //        public void Drop_cancel()
 //        {
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { fruit });
+//            __actor.Inventory.Returns(new List<Item> { fruit });
 //            Queue(RLKey.D);
 //            Queue(RLKey.Escape);
 //            Cmd = _source.GetCommand(__actor);
@@ -177,7 +177,7 @@
 //        {
 //            var knife = new Knife(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+//            __actor.Inventory.Returns(new List<Item> { knife, fruit });
 
 //            Queue(RLKey.D);
 //            Cmd = _source.GetCommand(__actor);
@@ -199,7 +199,7 @@
 //        {
 //            var knife = new Knife(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { knife, fruit });
+//            __actor.Inventory.Returns(new List<Item> { knife, fruit });
 
 //            Queue(RLKey.D);
 //            Queue(RLKey.C);
@@ -248,7 +248,7 @@
 //        [Test]
 //        public void PickUp_nothing()
 //        {
-//            __actor.ReachableItems().Returns(new List<IItem> { });
+//            __actor.ReachableItems().Returns(new List<Item> { });
 //            Queue(RLKey.Comma);
 //            Cmd = _source.GetCommand(__actor);
 
@@ -260,7 +260,7 @@
 //        public void PickUp_single()
 //        {
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.ReachableItems().Returns(new List<IItem> { fruit });
+//            __actor.ReachableItems().Returns(new List<Item> { fruit });
 //            Queue(RLKey.Comma);
 //            Cmd = _source.GetCommand(__actor);
 
@@ -273,7 +273,7 @@
 //        //{
 //        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
 //        //    var knife = new Knife(new Point(0,0));
-//        //    __actor.ReachableItems().Returns(new List<IItem> { fruit, knife });
+//        //    __actor.ReachableItems().Returns(new List<Item> { fruit, knife });
 //        //    Queue(RLKey.Comma);
 //        //    Cmd = _source.GetCommand(__actor);
 

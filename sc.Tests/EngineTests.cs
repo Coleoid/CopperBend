@@ -1,4 +1,5 @@
-﻿using CopperBend.Model;
+﻿using CopperBend.Fabric;
+using CopperBend.Model;
 using NUnit.Framework;
 
 namespace CopperBend.Engine.Tests

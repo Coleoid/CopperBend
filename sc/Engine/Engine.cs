@@ -13,6 +13,7 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using Newtonsoft.Json;
 
 namespace CopperBend.Engine
 {
@@ -69,6 +70,7 @@ namespace CopperBend.Engine
             var loader = new MapLoader();
             FullMap = loader.FarmMap();
             log.Debug("Loaded the map");
+            SaveMap(FullMap);
 
             //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
             //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
@@ -117,6 +119,18 @@ namespace CopperBend.Engine
             PushEngineMode(EngineMode.Schedule, null);
         }
 
+        private void SaveMap(ICompoundMap fullMap)
+        {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+            };
+
+
+            throw new NotImplementedException();
+        }
+
         private Being CreatePlayer(Coord playerLocation)
         {
             var player = new Player(Color.AntiqueWhite, Color.Transparent)
@@ -127,8 +141,8 @@ namespace CopperBend.Engine
             player.Animation.CurrentFrame[0].Glyph = '@';
             player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
             player.Components.Add(new EntityViewSyncComponent());
-            player.AddToInventory(new Hoe((0,0)));
-            player.AddToInventory(new Seed((0,0), 2, PlantByName["Healer"].ID));
+            player.AddToInventory(new Hoe((0, 0)));
+            player.AddToInventory(new Seed((0, 0), 2, PlantByName["Healer"].ID));
 
             log.Debug("Created player.");
             return player;

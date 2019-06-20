@@ -5,76 +5,76 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
-    public class Seed : Item, ISeed, IScheduleAgent
-    {
-        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
-        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+    //public class Seed : Item, IScheduleAgent
+    //{
+    //    public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
+    //    public static Dictionary<string, PlantDetails> PlantByName { get; set; }
 
-        public PlantDetails PlantDetails;
+    //    public PlantDetails PlantDetails;
 
-        public override bool StacksWith(IItem item)
-        {
-            if (item is Seed seed)
-            {
-                return PlantDetails == seed.PlantDetails;
-            }
+    //    public override bool StacksWith(Item item)
+    //    {
+    //        if (item is Seed seed)
+    //        {
+    //            return PlantDetails == seed.PlantDetails;
+    //        }
 
-            return false;
-        }
+    //        return false;
+    //    }
 
-        public Seed()
-            : base((0,0), 1, true)
-        { }
+    //    public Seed()
+    //        : base((0,0), 1, true)
+    //    { }
 
-        public Seed(Coord position, int quantity, uint typeID)
-            : base(position, quantity, true)
-        {
-            PlantDetails = PlantByID[typeID];
-        }
+    //    public Seed(Coord position, int quantity, uint typeID)
+    //        : base(position, quantity, true)
+    //    {
+    //        PlantDetails = PlantByID[typeID];
+    //    }
 
-        internal Seed GetSeedFromStack()
-        {
-            Guard.Against(Quantity < 1, "Somehow there's no seed here");
-            return new Seed(this.Location, 1, this.PlantDetails.ID);
-        }
+    //    internal Seed GetSeedFromStack()
+    //    {
+    //        Guard.Against(Quantity < 1, "Somehow there's no seed here");
+    //        return new Seed(this.Location, 1, this.PlantDetails.ID);
+    //    }
 
-        public override string Name
-        {
-            get => PlantDetails.SeedDescriptionAsKnown;
-        }
+    //    public override string Name
+    //    {
+    //        get => PlantDetails.SeedDescriptionAsKnown;
+    //    }
 
-        private int growthRound = 0;
+    //    private int growthRound = 0;
 
-        public void SeedGrows(IControlPanel controls)
-        {
-            controls.WriteLine($"The seed is growing... Round {growthRound++}");
-            if (growthRound > 3)
-                SeedMatures(controls);
-            else
-                controls.ScheduleAgent(this, growthRound > 2 ? 10 : 40);
-        }
+    //    public void SeedGrows(IControlPanel controls)
+    //    {
+    //        controls.WriteLine($"The seed is growing... Round {growthRound++}");
+    //        if (growthRound > 3)
+    //            SeedMatures(controls);
+    //        else
+    //            controls.ScheduleAgent(this, growthRound > 2 ? 10 : 40);
+    //    }
 
-        protected virtual void SeedMatures(IControlPanel controls)
-        {
-            //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Location, 2, this.PlantDetails);
-            controls.PutItemOnMap(fruit);
-            controls.RemovePlantAt(this.Location);
-        }
+    //    protected virtual void SeedMatures(IControlPanel controls)
+    //    {
+    //        //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
+    //        Item fruit = new Fruit(this.Location, 2, this.PlantDetails);
+    //        controls.PutItemOnMap(fruit);
+    //        controls.RemovePlantAt(this.Location);
+    //    }
 
-        public ScheduleEntry GetNextEntry()
-        {
-            return GetNextEntry(100);
-        }
+    //    public ScheduleEntry GetNextEntry()
+    //    {
+    //        return GetNextEntry(100);
+    //    }
 
-        public ScheduleEntry GetNextEntry(int offset)
-        {
-            return new ScheduleEntry
-            {
-                Action = (cp) => SeedGrows(cp),
-                Agent = this,
-                Offset = offset
-            };
-        }
-    }
+    //    public ScheduleEntry GetNextEntry(int offset)
+    //    {
+    //        return new ScheduleEntry
+    //        {
+    //            Action = (cp) => SeedGrows(cp),
+    //            Agent = this,
+    //            Offset = offset
+    //        };
+    //    }
+    //}
 }

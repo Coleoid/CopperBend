@@ -46,8 +46,8 @@
 //        {
 //            var hoe = new Hoe(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { fruit, hoe });
-//            __actor.WieldedTool.Returns((IItem)null);
+//            __actor.Inventory.Returns(new List<Item> { fruit, hoe });
+//            __actor.WieldedTool.Returns((Item)null);
 
 //            Queue(RLKey.U);
 //            Cmd = _source.GetCommand(__actor);
@@ -75,8 +75,8 @@
 //        {
 //            var hoe = new Hoe(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { fruit, hoe });
-//            __actor.WieldedTool.Returns((IItem)null);
+//            __actor.Inventory.Returns(new List<Item> { fruit, hoe });
+//            __actor.WieldedTool.Returns((Item)null);
 
 //            Queue(RLKey.U);
 //            Queue(RLKey.B);
@@ -98,8 +98,8 @@
 //        {
 //            var hoe = new Hoe(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { fruit, hoe });
-//            __actor.WieldedTool.Returns((IItem)null);
+//            __actor.Inventory.Returns(new List<Item> { fruit, hoe });
+//            __actor.WieldedTool.Returns((Item)null);
 
 //            Queue(RLKey.U);
 //            Queue(RLKey.B);
@@ -118,7 +118,7 @@
 //            var knife = new Knife(new Point(0, 0));
 //            var hoe = new Hoe(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { fruit, hoe });
+//            __actor.Inventory.Returns(new List<Item> { fruit, hoe });
 //            __actor.WieldedTool.Returns(knife);
 
 //            Queue(RLKey.U);
@@ -148,8 +148,8 @@
 //            var knife = new Knife(new Point(0, 0));
 //            var hoe = new Hoe(new Point(0, 0));
 //            var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-//            __actor.Inventory.Returns(new List<IItem> { fruit, hoe });
-//            __actor.WieldedTool.Returns((IItem)null);
+//            __actor.Inventory.Returns(new List<Item> { fruit, hoe });
+//            __actor.WieldedTool.Returns((Item)null);
 
 //            Queue(RLKey.U);
 //            Queue(RLKey.C);

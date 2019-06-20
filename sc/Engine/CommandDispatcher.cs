@@ -15,8 +15,8 @@ namespace CopperBend.Engine
         private IGameState GameState { get; set; }
 
         protected SpaceMap SpaceMap => GameState.Map.SpaceMap;
-        private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
-        private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
+        private SerializableMultiSpatialMap<Being> BeingMap => GameState.Map.BeingMap;
+        private SerializableMultiSpatialMap<Item> ItemMap => GameState.Map.ItemMap;
         private BlightMap BlightMap => GameState.Map.BlightMap;
 
         private Describer Describer;
@@ -61,7 +61,7 @@ namespace CopperBend.Engine
         }
 
 
-        public bool Do_Consume(IBeing being, IItem item)
+        public bool Do_Consume(IBeing being, Item item)
         {
             Guard.AgainstNullArgument(item, "No item in consume command");
             var invItem = being.RemoveFromInventory(item);
@@ -165,7 +165,7 @@ namespace CopperBend.Engine
             Impact_blunt,
         }
 
-        public void Damage(IDestroyable target, IItem source)
+        public void Damage(IDestroyable target, Item source)
         {
             int amount = DamageToTargetFromItem(target, source);
             Damage(target, amount);
@@ -217,7 +217,7 @@ namespace CopperBend.Engine
             }
         }
 
-        private int DamageToTargetFromItem(IDestroyable target, IItem source)
+        private int DamageToTargetFromItem(IDestroyable target, Item source)
         {
             throw new NotImplementedException();
         }
@@ -362,7 +362,7 @@ namespace CopperBend.Engine
             Guard.AgainstNullArgument(item, "Item to drop not found in inventory");
 
             item.MoveTo(being.Position);
-            ItemMap.Add(item, item.Location);
+            ItemMap.AddItem(item, item.Location);
             ScheduleAgent(being, 1);
             return true;
         }
@@ -370,7 +370,7 @@ namespace CopperBend.Engine
         private bool Do_PickUp(IBeing being, Command command)
         {
             var item = command.Item;
-            var pickedUp = ItemMap.Remove(item);
+            var pickedUp = ItemMap.RemoveItem(item);
             if (pickedUp)
             {
                 being.AddToInventory(item);
@@ -471,7 +471,7 @@ namespace CopperBend.Engine
             return true;
         }
 
-        private bool Do_Wield(IBeing being, IItem item)
+        private bool Do_Wield(IBeing being, Item item)
         {
             being.Wield(item);
             ScheduleAgent(being, 6);

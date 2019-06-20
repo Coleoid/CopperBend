@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using SadConsole;
 using SadConsole.Effects;
 using YamlDotNet.Serialization;
+using CopperBend.Model;
 
 namespace CopperBend.Fabric
 {
@@ -18,9 +19,9 @@ namespace CopperBend.Fabric
         public int Height { get; set; }
 
         public SpaceMap SpaceMap { get; set; }
-        public MultiSpatialMap<IBeing> BeingMap { get; set; }
-        public MultiSpatialMap<IItem> ItemMap { get; set; }
         public BlightMap BlightMap { get; set; }
+        public SerializableMultiSpatialMap<Being> BeingMap { get; set; }
+        public SerializableMultiSpatialMap<Item> ItemMap { get; set; }
         public List<LocatedTrigger> LocatedTriggers { get; set; }
 
         public FOV FOV { get; set; }

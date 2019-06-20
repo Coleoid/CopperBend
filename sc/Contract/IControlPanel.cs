@@ -26,7 +26,7 @@ namespace CopperBend.Contract
         Action<EngineMode, Func<bool>> PushEngineMode { get; }
 
         Coord CoordInDirection(Coord start, CmdDirection direction);
-        void PutItemOnMap(IItem item);
+        void PutItemOnMap(Item item);
         void RemovePlantAt(Coord position);
         void Till(Space space);
 

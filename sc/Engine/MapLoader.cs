@@ -197,8 +197,8 @@ namespace CopperBend.Engine
                 Width = width,
                 Height = height,
                 SpaceMap = new SpaceMap(width, height),
-                BeingMap = new MultiSpatialMap<IBeing>(),
-                ItemMap = new MultiSpatialMap<IItem>(),
+                BeingMap = new SerializableMultiSpatialMap<Being>(),
+                ItemMap = new SerializableMultiSpatialMap<Item>(),
                 LocatedTriggers = new List<LocatedTrigger>(),
                 //BlightMap = new BlightMap(1, 1),  //0.0: deserializing cheese
                 BlightMap = new BlightMap(1),
@@ -261,7 +261,7 @@ namespace CopperBend.Engine
                 _farmMap = MapFromYAML(FarmMapYaml);
                 _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1.MAP  get start location from map
                 Coord ShedCoord = (28, 4);
-                _farmMap.ItemMap.Add(new Hoe(ShedCoord), ShedCoord);
+                _farmMap.ItemMap.AddItem(new Hoe(ShedCoord), ShedCoord);
                 //  Obscure point on the edge to test map transitions
                 //_farmMap.AddEventAtLocation(new Point(41, 1), new CommandEntry(GameCommand.GoToFarmhouse, null));
 
@@ -364,7 +364,7 @@ legend:
  '>': stairs down
 
 firstSightMessage:
- - 'I wake up.  Cold--frost on the ground, except where I was lying.'
+ - 'I wake up cold.  Frost on the ground, except where I was lying.'
  - 'Everything hurts when I stand up.'
  - 'The sky... says it''s morning.  A small farmhouse to the east.'
  - 'Something real wrong with the ground to the west, and the northwest.'

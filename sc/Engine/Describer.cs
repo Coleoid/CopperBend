@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {
@@ -132,7 +133,7 @@ namespace CopperBend.Engine
             }
         }
 
-        public string Describe(IItem item, DescMods mods = DescMods.None)
+        public string Describe(Item item, DescMods mods = DescMods.None)
         {
             return Describe(item.Name, mods, item.Quantity, item.Adjective);
         }

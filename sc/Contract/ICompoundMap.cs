@@ -5,6 +5,7 @@ using GoRogue;
 using GoRogue.MapViews;
 using CopperBend.Fabric;
 using SadConsole.Effects;
+using CopperBend.Model;
 
 namespace CopperBend.Contract
 {
@@ -15,8 +16,8 @@ namespace CopperBend.Contract
         bool IsWithinMap(Coord position);
 
         SpaceMap SpaceMap { get; }
-        MultiSpatialMap<IBeing> BeingMap { get; }
-        MultiSpatialMap<IItem> ItemMap { get; }
+        SerializableMultiSpatialMap<Being> BeingMap { get; }
+        SerializableMultiSpatialMap<Item> ItemMap { get; }
         BlightMap BlightMap { get; }
 
         List<LocatedTrigger> LocatedTriggers { get; }

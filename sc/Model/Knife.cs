@@ -4,18 +4,18 @@ using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
-    public class Knife : Item
-    {
-        public override string Name { get => "knife"; }
+    //public class Knife : Item
+    //{
+    //    public override string Name { get => "knife"; }
 
-        public Knife(Coord position)
-            : base(position, 1, true)
-        {
-        }
+    //    public Knife(Coord position)
+    //        : base(position, 1, true)
+    //    {
+    //    }
 
-        public override void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public override void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 }

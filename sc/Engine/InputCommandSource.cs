@@ -229,8 +229,8 @@ namespace CopperBend.Engine
         }
 
         #region Use
-        private IItem PriorUsedItem = null;
-        private IItem ThisUsedItem = null;
+        private Item PriorUsedItem = null;
+        private Item ThisUsedItem = null;
         public Command Use(IBeing being)
         {
             ThisUsedItem = ThisUsedItem ?? PriorUsedItem ?? being.WieldedTool;
@@ -392,7 +392,7 @@ namespace CopperBend.Engine
             }
         }
 
-        private IItem ItemInInventoryLocation(AsciiKey press, IBeing being)
+        private Item ItemInInventoryLocation(AsciiKey press, IBeing being)
         {
             int inventorySlot = AlphaIndexOfKeyPress(press);
             if (-1 < inventorySlot && inventorySlot < being.Inventory.Count())
@@ -421,7 +421,7 @@ namespace CopperBend.Engine
             return NextStep(Controls.GetNextInput(), being);
         }
 
-        public void ShowInventory(IBeing being, Func<IItem, bool> filter = null)
+        public void ShowInventory(IBeing being, Func<Item, bool> filter = null)
         {
             if (filter == null) filter = (i) => true;
             char index = 'a';

@@ -1,5 +1,6 @@
 using System;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
@@ -19,9 +20,10 @@ namespace CopperBend.Model
     public class GrowingPlant : IScheduleAgent
     {
         public PlantDetails PlantDetails { get; protected set; }
-        public GrowingPlant(Seed seed, ISchedule schedule)
+        public GrowingPlant(Item seed, ISchedule schedule)
         {
-            PlantDetails = seed.PlantDetails;
+            
+            PlantDetails = seed.GetComponent<PlantDetails>();
             schedule.AddAgent(this);
         }
 
@@ -39,5 +41,4 @@ namespace CopperBend.Model
             };
         }
     }
-
 }

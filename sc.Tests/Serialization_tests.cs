@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Xna.Framework;
 using SadConsole;
@@ -7,6 +8,8 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Model;
+using GoRogue;
 
 namespace sc_tests
 {
@@ -24,6 +27,56 @@ namespace sc_tests
                 PreserveReferencesHandling = PreserveReferencesHandling.Objects
             };
         }
+
+        [Test]
+        public void Can_roundtrip_CompoundMap()
+        {
+            var map = new CompoundMap
+            {
+                SpaceMap = new SpaceMap(2, 2),
+                BlightMap = new BlightMap(0),
+                ItemMap = new SerializableMultiSpatialMap<Item>(),
+                BeingMap = new SerializableMultiSpatialMap<Being>(),
+                Width = 2, Height = 2,
+            };
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            CompoundMap newMap = JsonConvert.DeserializeObject<CompoundMap>(json);
+
+            Assert.That(newMap, Is.Not.Null);
+            Assert.That(newMap.SpaceMap, Is.Not.Null);
+            Assert.That(newMap.BlightMap, Is.Not.Null);
+            Assert.That(newMap.ItemMap, Is.Not.Null);
+            Assert.That(newMap.BeingMap, Is.Not.Null);
+            Assert.That(newMap.Width, Is.EqualTo(2));
+            Assert.That(newMap.Height, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Can_roundtrip_SMSM()
+        {
+            var map = new SerializableMultiSpatialMap<Item>();
+            var oneTwo = new Coord(1, 2);
+            var knife = new Item(ItemProto.Knife);
+            var rock = new Item(ItemProto.Rock);
+            map.AddItem(knife, oneTwo);
+            map.AddItem(rock, oneTwo);
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            var newMap = JsonConvert.DeserializeObject<SerializableMultiSpatialMap<Item>>(json);
+
+            Assert.That(newMap, Is.Not.Null);
+            var items = newMap.GetItems(oneTwo).ToList();
+
+            // problem.
+            Assert.That(items[0].ID, Is.EqualTo(knife.ID));
+            Assert.That(items[1].ID, Is.EqualTo(rock.ID));
+
+            // problem.
+            Assert.That(items[0], Is.EqualTo(knife));
+            Assert.That(items[1], Is.EqualTo(rock));
+        }
+
 
         [Test]
         public void Can_roundtrip_Cell()

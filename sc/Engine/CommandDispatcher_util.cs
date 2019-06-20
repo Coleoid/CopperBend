@@ -77,9 +77,9 @@ namespace CopperBend.Engine
             throw new NotImplementedException();
         }
 
-        public void PutItemOnMap(IItem item)
+        public void PutItemOnMap(Item item)
         {
-            ItemMap.Add(item, item.Location);
+            ItemMap.AddItem(item, item.Location);
         }
 
         public void RemovePlantAt(Coord position)

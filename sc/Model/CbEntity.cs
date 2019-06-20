@@ -4,6 +4,7 @@ using System.Linq;
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
@@ -40,7 +41,7 @@ namespace CopperBend.Model
             Health = MaxHealth = 6;
             Awareness = 6;
 
-            InventoryList = new List<IItem>();
+            InventoryList = new List<Item>();
         }
 
         internal IControlPanel Controls { get; set; }
@@ -60,8 +61,8 @@ namespace CopperBend.Model
 
         public ICommandSource CommandSource { get; set; }
 
-        public IItem WieldedTool { get; internal set; }
-        public IItem Gloves { get; internal set; }
+        public Item WieldedTool { get; internal set; }
+        public Item Gloves { get; internal set; }
 
         public bool IsPlayer { get; set; }
         
@@ -76,12 +77,12 @@ namespace CopperBend.Model
 
         //  Inventory has extra game effects, so I want to be sure I
         //  don't casually add/remove directly from the list, from outside.
-        private List<IItem> InventoryList;
-        public IEnumerable<IItem> Inventory
+        private List<Item> InventoryList;
+        public IEnumerable<Item> Inventory
         {
             get => InventoryList;
         }
-        public void AddToInventory(IItem item)
+        public void AddToInventory(Item item)
         {
             //0.2.INV  limit stack size of some items
             var existingItem = Inventory
@@ -92,18 +93,18 @@ namespace CopperBend.Model
                 existingItem.Quantity += item.Quantity;
         }
 
-        public IItem RemoveFromInventory(int inventorySlot)
+        public Item RemoveFromInventory(int inventorySlot)
         {
             if (inventorySlot >= InventoryList.Count()) return null;
 
-            IItem item = InventoryList.ElementAt(inventorySlot);
+            Item item = InventoryList.ElementAt(inventorySlot);
             InventoryList.RemoveAt(inventorySlot);
             if (WieldedTool == item) WieldedTool = null;
 
             return item;
         }
 
-        public IItem RemoveFromInventory(IItem item)
+        public Item RemoveFromInventory(Item item)
         {
             if (!InventoryList.Contains(item)) return null;
 
@@ -114,14 +115,14 @@ namespace CopperBend.Model
             return item;
         }
 
-        public void Wield(IItem item)
+        public void Wield(Item item)
         {
             WieldedTool = item;
             if (item != null && !InventoryList.Any(i => i == item))
                 AddToInventory(item);
         }
 
-        public IEnumerable<IItem> ReachableItems()
+        public IEnumerable<Item> ReachableItems()
         {
             throw new NotImplementedException();
             //return Map.Items.Where(i => i.Point.Equals(Point));

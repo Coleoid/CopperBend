@@ -19,7 +19,7 @@ namespace CopperBend.Fabric
 
         public SpaceMap SpaceMap { get; set; }
         public MultiSpatialMap<IBeing> BeingMap { get; set; }
-        public MultiSpatialMap<IItem> ItemMap { get; set; }
+        public ItemMap ItemMap { get; set; }
         public BlightMap BlightMap { get; set; }
         public List<LocatedTrigger> LocatedTriggers { get; set; }
 

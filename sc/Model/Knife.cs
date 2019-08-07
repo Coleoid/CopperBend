@@ -7,6 +7,7 @@ namespace CopperBend.Model
     public class Knife : Item
     {
         public override string Name { get => "knife"; }
+        public override string ItemType { get => "Knife"; }
 
         public Knife(Coord position)
             : base(position, 1, true)

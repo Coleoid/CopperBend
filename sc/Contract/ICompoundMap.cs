@@ -16,7 +16,7 @@ namespace CopperBend.Contract
 
         SpaceMap SpaceMap { get; }
         MultiSpatialMap<IBeing> BeingMap { get; }
-        MultiSpatialMap<IItem> ItemMap { get; }
+        ItemMap ItemMap { get; }
         BlightMap BlightMap { get; }
 
         List<LocatedTrigger> LocatedTriggers { get; }

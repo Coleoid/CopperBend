@@ -198,7 +198,7 @@ namespace CopperBend.Engine
                 Height = height,
                 SpaceMap = new SpaceMap(width, height),
                 BeingMap = new MultiSpatialMap<IBeing>(),
-                ItemMap = new MultiSpatialMap<IItem>(),
+                ItemMap = new ItemMap(),
                 LocatedTriggers = new List<LocatedTrigger>(),
                 //BlightMap = new BlightMap(1, 1),  //0.0: deserializing cheese
                 BlightMap = new BlightMap(1),

@@ -1,18 +1,22 @@
 ﻿using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
+using Newtonsoft.Json;
+using CopperBend.Fabric;
 
 namespace CopperBend.Contract
 {
+    [JsonConverter(typeof(Converter_of_IItem))]
     public interface IItem : IHasID
     {
         string Name { get; }
+        string ItemType { get; }
         int Quantity { get; set; }
 
         Color Foreground { get; }
         int Glyph { get; }
 
-        Coord Location { get; }
+        Coord Location { get; set; }
         void MoveTo(Coord location);
 
         bool IsUsable { get; }

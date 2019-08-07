@@ -1,369 +1,390 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using NUnit.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using NUnit.Framework;
 
-//namespace Newtonsoft.Json.Tests.Issues
-//{
-//    [TestFixture]
-//    public class IssueNNNN
-//    {
-//        //  All failing classes have:
-//        //      a 0-param constructor
-//        //      a property with a complex setter
-//        //      the property has a generic in its type
+namespace Newtonsoft.Json.Tests.Issues
+{
+    [TestFixture]
+    public class IssueNNNN
+    {
+        //  All failing classes have:
+        //      a 0-param constructor
+        //      a property with a complex setter
+        //      the property has a generic in its type
 
-//        //  If we hide the 0-param ctor with a 1-param ctor, deserialization works.
-//        //  If the property simply assigns its value to an internal field, deserialization works.
-//        //  If the property type is string or string[], deserialization works.
-//        [Test]
-//        public void Test()
-//        {
-//            var failing = new Failing_Two();
+        //  If we hide the 0-param ctor with a 1-param ctor, deserialization works.
+        //  If the property simply assigns its value to an internal field, deserialization works.
+        //  If the property type is string or string[], deserialization works.
+        //[Test]
+        //public void Test()
+        //{
+        //    var failing = new Failing_Two();
 
-//            failing.AddItem("Fun", "(2,2)");
-//            failing.AddItem("Games", "(7,7)");
+        //    failing.AddItem("Fun", "(2,2)");
+        //    failing.AddItem("Games", "(7,7)");
 
-//            //  Note that even with a failing object, the serialization is correct.
-//            //  Passing_(One|Two|Three) and Failing_(One|Two|Three) objects serialize to identical JSON.
-//            var jsonFailing = JsonConvert.SerializeObject(failing);
+        //    //  Note that even with a failing object, the serialization is correct.
+        //    //  Passing_(One|Two|Three) and Failing_(One|Two|Three) objects serialize to identical JSON.
+        //    var jsonFailing = JsonConvert.SerializeObject(failing);
 
-//            //  It's the deserialization which loses the data.
-//            var newFailing = JsonConvert.DeserializeObject<Failing_Two>(jsonFailing);
+        //    //  It's the deserialization which loses the data.
+        //    var newFailing = JsonConvert.DeserializeObject<Failing_Two>(jsonFailing);
 
-//            Assert.AreEqual("Fun", newFailing.BackingStore["(2,2)"]);
-//            Assert.AreEqual("Games", newFailing.BackingStore["(7,7)"]);
-//        }
+        //    Assert.AreEqual("Fun", newFailing.BackingStore["(2,2)"]);
+        //    Assert.AreEqual("Games", newFailing.BackingStore["(7,7)"]);
+        //}
 
-//        [TestCase("Passing_One")]
-//        [TestCase("Passing_Two")]
-//        [TestCase("Passing_Three")]
-//        [TestCase("Failing_One")]
-//        [TestCase("Failing_Two")]
-//        [TestCase("Failing_Three")]
-//        public void Test_six(string whichObject)
-//        {
-//            //  Note that even with a failing object, the serialization is correct.
-//            //  Passing_(One|Two|Three) and Failing_(One|Two|Three) objects serialize to identical JSON.
-//            IShowIssueNNNN tryMe = new Passing_Three();
+        [Test]
+        public void Test_any()
+        {
+            var attempt = new Passing_Three();
 
-//            tryMe.AddItem("Fun", "(2,2)");
-//            tryMe.AddItem("Games", "(7,7)");
+            attempt.AddItem("Fun", "(2,2)");
+            attempt.AddItem("Games", "(7,7)");
 
-//            var json = JsonConvert.SerializeObject(tryMe);
+            var json = JsonConvert.SerializeObject(attempt);
+            //Debugger.Launch();
 
-//            IShowIssueNNNN dserTry = null;
-//            switch (whichObject)
-//            {
-//            case "Passing_One":
-//                dserTry = JsonConvert.DeserializeObject<Passing_One>(json);
-//                break;
-//            case "Passing_Two":
-//                dserTry = JsonConvert.DeserializeObject<Passing_Two>(json);
-//                break;
-//            case "Passing_Three":
-//                dserTry = JsonConvert.DeserializeObject<Passing_Three>(json);
-//                break;
-//            case "Failing_One":
-//                dserTry = JsonConvert.DeserializeObject<Failing_One>(json);
-//                break;
-//            case "Failing_Two":
-//                dserTry = JsonConvert.DeserializeObject<Failing_Two>(json);
-//                break;
-//            case "Failing_Three":
-//                dserTry = JsonConvert.DeserializeObject<Failing_Three>(json);
-//                break;
-//            default:
-//                throw new Exception("This unit test has a bug.");
-//            }
+            var converters = new List<JsonConverter>();
+            //var conv = new JsonConverter<Failing_One>();
 
-//            Assert.AreEqual("Fun", dserTry.BackingStore["(2,2)"]);
-//            Assert.AreEqual("Games", dserTry.BackingStore["(7,7)"]);
-//        }
+            var newAttempt = JsonConvert.DeserializeObject<Passing_Three>(json);
 
-//        public interface IShowIssueNNNN
-//        {
-//            Dictionary<string, string> BackingStore { get; set; }
-//            Dictionary<string, string> SerialItems { get; set; }
-//            void AddItem(string item, string position);
-//        }
+            Assert.AreEqual("Fun", newAttempt.BackingStore["(2,2)"]);
+            Assert.AreEqual("Games", newAttempt.BackingStore["(7,7)"]);
+        }
 
 
-//        public class Failing_One : IShowIssueNNNN
-//        {
-//            //  In the original code, the backing store is a different sort of object,
-//            // from a third party library, and it isn't serializable.
-//            //  My app only touches BackingStore, and Json.NET only touches SerialItems.
-//            [JsonIgnore]
-//            public Dictionary<string, string> BackingStore { get; set; } = new Dictionary<string, string>();
+        //        [TestCase("Passing_One")]
+        //        [TestCase("Passing_Two")]
+        //        [TestCase("Passing_Three")]
+        //        [TestCase("Failing_One")]
+        //        [TestCase("Failing_Two")]
+        //        [TestCase("Failing_Three")]
+        //        public void Test_six(string whichObject)
+        //        {
+        //            //  Note that even with a failing object, the serialization is correct.
+        //            //  Passing_(One|Two|Three) and Failing_(One|Two|Three) objects serialize to identical JSON.
+        //            IShowIssueNNNN tryMe = new Passing_Three();
 
-//            //  The getter and setter below contain the adapter code.
-//            //  Originally, the dictionary type, classes, and adapter logic were more complex.  :D
-//            public Dictionary<string, string> SerialItems
-//            {
-//                get
-//                {
-//                    var items = new Dictionary<string, string>();
-//                    foreach (var key in BackingStore.Keys)
-//                    {
-//                        items[key] = BackingStore[key];
-//                    }
+        //            tryMe.AddItem("Fun", "(2,2)");
+        //            tryMe.AddItem("Games", "(7,7)");
 
-//                    return items;
-//                }
+        //            var json = JsonConvert.SerializeObject(tryMe);
 
-//                set
-//                {
-//                    // fails (this setter is not called during deserialization):
-//                    BackingStore = new Dictionary<string, string>();
-//                    foreach (var key in value.Keys)
-//                    {
-//                        BackingStore[key] = value[key];
-//                    }
-//                }
-//            }
+        //            IShowIssueNNNN dserTry = null;
+        //            switch (whichObject)
+        //            {
+        //            case "Passing_One":
+        //                dserTry = JsonConvert.DeserializeObject<Passing_One>(json);
+        //                break;
+        //            case "Passing_Two":
+        //                dserTry = JsonConvert.DeserializeObject<Passing_Two>(json);
+        //                break;
+        //            case "Passing_Three":
+        //                dserTry = JsonConvert.DeserializeObject<Passing_Three>(json);
+        //                break;
+        //            case "Failing_One":
+        //                dserTry = JsonConvert.DeserializeObject<Failing_One>(json);
+        //                break;
+        //            case "Failing_Two":
+        //                dserTry = JsonConvert.DeserializeObject<Failing_Two>(json);
+        //                break;
+        //            case "Failing_Three":
+        //                dserTry = JsonConvert.DeserializeObject<Failing_Three>(json);
+        //                break;
+        //            default:
+        //                throw new Exception("This unit test has a bug.");
+        //            }
 
-//            public void AddItem(string item, string position)
-//            {
-//                BackingStore[position] = item;
-//            }
-//        }
+        //            Assert.AreEqual("Fun", dserTry.BackingStore["(2,2)"]);
+        //            Assert.AreEqual("Games", dserTry.BackingStore["(7,7)"]);
+        //        }
 
-//        public class Passing_One : IShowIssueNNNN
-//        {
-//            //  A copy/paste of Failing_One.
-//            //  The only differences between this class and the failing class above:
-//            //  * Different class name
-//            //  * Different comments
-//            //  * This ctor:
-//            public Passing_One(int dummy)
-//            { }
+        //        public interface IShowIssueNNNN
+        //        {
+        //            Dictionary<string, string> BackingStore { get; set; }
+        //            Dictionary<string, string> SerialItems { get; set; }
+        //            void AddItem(string item, string position);
+        //        }
 
-//            [JsonIgnore]
-//            public Dictionary<string, string> BackingStore { get; set; } = new Dictionary<string, string>();
 
-//            public Dictionary<string, string> SerialItems
-//            {
-//                get
-//                {
-//                    var items = new Dictionary<string, string>();
-//                    foreach (var key in BackingStore.Keys)
-//                    {
-//                        items[key] = BackingStore[key];
-//                    }
+        public class Failing_One // : IShowIssueNNNN
+        {
+            //  In the original code, the backing store is a different sort of object,
+            // from a third party library, and it isn't serializable.
+            //  My app only touches BackingStore, and Json.NET only touches SerialItems.
+            [JsonIgnore]
+            public Dictionary<string, string> BackingStore { get; set; } = new Dictionary<string, string>();
 
-//                    return items;
-//                }
+            //  The getter and setter below contain the adapter code.
+            //  Originally, the dictionary type, classes, and adapter logic were more complex.  :D
+            public Dictionary<string, string> SerialItems
+            {
+                get
+                {
+                    var items = new Dictionary<string, string>();
+                    foreach (var key in BackingStore.Keys)
+                    {
+                        items[key] = BackingStore[key];
+                    }
 
-//                set
-//                {
-//                    // now being called during deserialization, and succeeding:
-//                    BackingStore = new Dictionary<string, string>();
-//                    foreach (var key in value.Keys)
-//                    {
-//                        BackingStore[key] = value[key];
-//                    }
-//                }
-//            }
+                    return items;
+                }
 
-//            public void AddItem(string item, string position)
-//            {
-//                BackingStore[position] = item;
-//            }
-//        }
+                set
+                {
+                    // fails (this setter is not called during deserialization):
+                    BackingStore = new Dictionary<string, string>();
+                    foreach (var key in value.Keys)
+                    {
+                        BackingStore[key] = value[key];
+                    }
+                }
+            }
 
-//        //  The issue doesn't involve inheritance, part one:
-//        //  Child of a failing class fails.
-//        public class Failing_Two : Failing_One, IShowIssueNNNN
-//        {
-//        }
+            public void AddItem(string item, string position)
+            {
+                BackingStore[position] = item;
+            }
+        }
 
-//        //  The issue doesn't involve inheritance, part two:
-//        //  Now we pass, as the 1-param ctor hides the 0-param ctor.
-//        public class Passing_Two : Failing_One, IShowIssueNNNN
-//        {
-//            public Passing_Two(int dummy)
-//            { }
-//        }
+        //        public class Passing_One : IShowIssueNNNN
+        //        {
+        //            //  A copy/paste of Failing_One.
+        //            //  The only differences between this class and the failing class above:
+        //            //  * Different class name
+        //            //  * Different comments
+        //            //  * This ctor:
+        //            public Passing_One(int dummy)
+        //            { }
 
-//        //  The issue depends on the 0-param ctor, whether implicit or explicit:
-//        //  We fail when we have both a 1-param ctor and a 0-param ctor.
-//        public class Failing_Three : Failing_One, IShowIssueNNNN
-//        {
-//            public Failing_Three(int dummy)
-//            { }
+        //            [JsonIgnore]
+        //            public Dictionary<string, string> BackingStore { get; set; } = new Dictionary<string, string>();
 
-//            public Failing_Three()
-//                : base()
-//            { }
-//        }
+        //            public Dictionary<string, string> SerialItems
+        //            {
+        //                get
+        //                {
+        //                    var items = new Dictionary<string, string>();
+        //                    foreach (var key in BackingStore.Keys)
+        //                    {
+        //                        items[key] = BackingStore[key];
+        //                    }
 
-//        //  The issue depends on complex setter logic:
-//        //  This version passes, despite its 0-param ctor.
-//        //  It delegates directly to its backing store.
-//        //  I only learned that this was an element of the issue while simplifying
-//        // for the bug report.  In the original code, BackingStore is a
-//        // different type from SerialItems, which is why SerialItems exists at all.
-//        public class Passing_Three : IShowIssueNNNN
-//        {
-//            //  It also passes if we delete this ctor and leave it implicit.
-//            public Passing_Three()
-//                : base()
-//            { }
+        //                    return items;
+        //                }
 
-//            [JsonIgnore]
-//            public Dictionary<string, string> BackingStore { get; set; } = new Dictionary<string, string>();
+        //                set
+        //                {
+        //                    // now being called during deserialization, and succeeding:
+        //                    BackingStore = new Dictionary<string, string>();
+        //                    foreach (var key in value.Keys)
+        //                    {
+        //                        BackingStore[key] = value[key];
+        //                    }
+        //                }
+        //            }
 
-//            public Dictionary<string, string> SerialItems
-//            {
-//                get { return BackingStore; }
-//                set { BackingStore = value; }
-//            }
+        //            public void AddItem(string item, string position)
+        //            {
+        //                BackingStore[position] = item;
+        //            }
+        //        }
 
-//            public void AddItem(string item, string position)
-//            {
-//                BackingStore[position] = item;
-//            }
-//        }
+        //        //  The issue doesn't involve inheritance, part one:
+        //        //  Child of a failing class fails.
+        //        public class Failing_Two : Failing_One, IShowIssueNNNN
+        //        {
+        //        }
 
-//        //  The issue depends on a complex proxy type:
-//        //  This version has a 0-param constructor and a complex setter
-//        public class Passing_Four
-//        {
-//            // has 0-param constructor
-//            public Passing_Four()
-//            { }
+        //        //  The issue doesn't involve inheritance, part two:
+        //        //  Now we pass, as the 1-param ctor hides the 0-param ctor.
+        //        public class Passing_Two : Failing_One, IShowIssueNNNN
+        //        {
+        //            public Passing_Two(int dummy)
+        //            { }
+        //        }
 
-//            [JsonIgnore]
-//            public string BackingStore { get; set; } = string.Empty;
+        //        //  The issue depends on the 0-param ctor, whether implicit or explicit:
+        //        //  We fail when we have both a 1-param ctor and a 0-param ctor.
+        //        public class Failing_Three : Failing_One, IShowIssueNNNN
+        //        {
+        //            public Failing_Three(int dummy)
+        //            { }
 
-//            public string SerialProxy
-//            {
-//                get
-//                {
-//                    var intermediate = BackingStore.Clone().ToString();
-//                    return intermediate.Trim();
-//                }
+        //            public Failing_Three()
+        //                : base()
+        //            { }
+        //        }
 
-//                // has a complex setter
-//                set
-//                {
-//                    var intermediate = value.Clone().ToString();
-//                    BackingStore = intermediate.Trim();
-//                }
-//            }
-//        }
+        //  The issue depends on complex setter logic:
+        //  This version passes, despite its 0-param ctor.
+        //  It delegates directly to its backing store.
+        //  I only learned that this was an element of the issue while simplifying
+        // for the bug report.  In the original code, BackingStore is a
+        // different type from SerialItems, which is why SerialItems exists at all.
+        public class Passing_Three  // : IShowIssueNNNN
+        {
+            //  It also passes if we delete this ctor and leave it implicit.
+            public Passing_Three()
+            { }
 
-//        [Test]
-//        public void Proxy_of_simple_type_deserializes_correctly()
-//        {
-//            var passing = new Passing_Four();
+            [JsonIgnore]
+            public Dictionary<string, string> BackingStore { get; set; } = new Dictionary<string, string>();
 
-//            passing.BackingStore = " Wargh! ";
+            public Dictionary<string, string> SerialItems
+            {
+                get { return BackingStore; }
+                set { BackingStore = value; }
+            }
 
-//            var json = JsonConvert.SerializeObject(passing);
+            public void AddItem(string item, string position)
+            {
+                BackingStore[position] = item;
+            }
+        }
 
-//            var newPassing = JsonConvert.DeserializeObject<Passing_Four>(json);
+        //        //  The issue depends on a complex proxy type:
+        //        //  This version has a 0-param constructor and a complex setter
+        //        public class Passing_Four
+        //        {
+        //            // has 0-param constructor
+        //            public Passing_Four()
+        //            { }
 
-//            Assert.AreEqual("Wargh!", newPassing.BackingStore);
-//        }
+        //            [JsonIgnore]
+        //            public string BackingStore { get; set; } = string.Empty;
 
-//        //  The issue also occurs with List<string>:
-//        public class Failing_Four
-//        {
-//            // has 0-param constructor
-//            public Failing_Four()
-//            { }
+        //            public string SerialProxy
+        //            {
+        //                get
+        //                {
+        //                    var intermediate = BackingStore.Clone().ToString();
+        //                    return intermediate.Trim();
+        //                }
 
-//            [JsonIgnore]
-//            public List<string> BackingStore { get; set; } = new List<string>();
+        //                // has a complex setter
+        //                set
+        //                {
+        //                    var intermediate = value.Clone().ToString();
+        //                    BackingStore = intermediate.Trim();
+        //                }
+        //            }
+        //        }
 
-//            public List<string> SerialProxy
-//            {
-//                get
-//                {
-//                    var list = new List<string>();
-//                    foreach (var str in BackingStore)
-//                    {
-//                        list.Add(str);
-//                    }
-//                    return list;
-//                }
+        //        [Test]
+        //        public void Proxy_of_simple_type_deserializes_correctly()
+        //        {
+        //            var passing = new Passing_Four();
 
-//                // has a complex setter
-//                set
-//                {
-//                    BackingStore = new List<string>();
-//                    foreach (var str in value)
-//                    {
-//                        BackingStore.Add(str);
-//                    }
-//                }
-//            }
-//        }
+        //            passing.BackingStore = " Wargh! ";
 
-//        [Test]
-//        public void Proxy_of_list_of_string_type_deserializes_wrong()
-//        {
-//            var passing = new Failing_Four();
+        //            var json = JsonConvert.SerializeObject(passing);
 
-//            passing.BackingStore.Add(" Wargh! ");
-//            passing.BackingStore.Add("Bloit!");
+        //            var newPassing = JsonConvert.DeserializeObject<Passing_Four>(json);
 
-//            var json = JsonConvert.SerializeObject(passing);
+        //            Assert.AreEqual("Wargh!", newPassing.BackingStore);
+        //        }
 
-//            var newPassing = JsonConvert.DeserializeObject<Failing_Four>(json);
+        //        //  The issue also occurs with List<string>:
+        //        public class Failing_Four
+        //        {
+        //            // has 0-param constructor
+        //            public Failing_Four()
+        //            { }
 
-//            Assert.AreEqual(2, newPassing.BackingStore.Count);
-//        }
+        //            [JsonIgnore]
+        //            public List<string> BackingStore { get; set; } = new List<string>();
 
-//        //  The issue does not occur with string[]:
-//        public class Passing_Five
-//        {
-//            // has 0-param constructor
-//            public Passing_Five()
-//            { }
+        //            public List<string> SerialProxy
+        //            {
+        //                get
+        //                {
+        //                    var list = new List<string>();
+        //                    foreach (var str in BackingStore)
+        //                    {
+        //                        list.Add(str);
+        //                    }
+        //                    return list;
+        //                }
 
-//            [JsonIgnore]
-//            public string[] BackingStore { get; set; } = new string[2];
+        //                // has a complex setter
+        //                set
+        //                {
+        //                    BackingStore = new List<string>();
+        //                    foreach (var str in value)
+        //                    {
+        //                        BackingStore.Add(str);
+        //                    }
+        //                }
+        //            }
+        //        }
 
-//            public string[] SerialProxy
-//            {
-//                get
-//                {
-//                    var list = new string [BackingStore.Length];
-//                    for (int i = 0; i < BackingStore.Length; i++)
-//                    {
-//                        list[i] = BackingStore[i];
-//                    }
-//                    return list;
-//                }
+        //        [Test]
+        //        public void Proxy_of_list_of_string_type_deserializes_wrong()
+        //        {
+        //            var passing = new Failing_Four();
 
-//                // has a complex setter
-//                set
-//                {
-//                    BackingStore = new string[value.Length];
-//                    for (int i = 0; i < value.Length; i++)
-//                    {
-//                        BackingStore[i] = value[i];
-//                    }
-//                }
-//            }
-//        }
+        //            passing.BackingStore.Add(" Wargh! ");
+        //            passing.BackingStore.Add("Bloit!");
 
-//        [Test]
-//        public void Proxy_of_array_of_string_type_deserializes_correctly()
-//        {
-//            var passing = new Passing_Five();
+        //            var json = JsonConvert.SerializeObject(passing);
 
-//            passing.BackingStore[0] = " Wargh! ";
-//            passing.BackingStore[1] = "Bloit!";
+        //            var newPassing = JsonConvert.DeserializeObject<Failing_Four>(json);
 
-//            var json = JsonConvert.SerializeObject(passing);
+        //            Assert.AreEqual(2, newPassing.BackingStore.Count);
+        //        }
 
-//            var newPassing = JsonConvert.DeserializeObject<Passing_Five>(json);
+        //        //  The issue does not occur with string[]:
+        //        public class Passing_Five
+        //        {
+        //            // has 0-param constructor
+        //            public Passing_Five()
+        //            { }
 
-//            Assert.AreEqual(2, newPassing.BackingStore.Length);
-//            Assert.AreEqual("Bloit!", newPassing.BackingStore[1]);
-//        }
-//    }
-//}
+        //            [JsonIgnore]
+        //            public string[] BackingStore { get; set; } = new string[2];
+
+        //            public string[] SerialProxy
+        //            {
+        //                get
+        //                {
+        //                    var list = new string [BackingStore.Length];
+        //                    for (int i = 0; i < BackingStore.Length; i++)
+        //                    {
+        //                        list[i] = BackingStore[i];
+        //                    }
+        //                    return list;
+        //                }
+
+        //                // has a complex setter
+        //                set
+        //                {
+        //                    BackingStore = new string[value.Length];
+        //                    for (int i = 0; i < value.Length; i++)
+        //                    {
+        //                        BackingStore[i] = value[i];
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        //        [Test]
+        //        public void Proxy_of_array_of_string_type_deserializes_correctly()
+        //        {
+        //            var passing = new Passing_Five();
+
+        //            passing.BackingStore[0] = " Wargh! ";
+        //            passing.BackingStore[1] = "Bloit!";
+
+        //            var json = JsonConvert.SerializeObject(passing);
+
+        //            var newPassing = JsonConvert.DeserializeObject<Passing_Five>(json);
+
+        //            Assert.AreEqual(2, newPassing.BackingStore.Length);
+        //            Assert.AreEqual("Bloit!", newPassing.BackingStore[1]);
+        //        }
+    }
+}

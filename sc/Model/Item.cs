@@ -22,9 +22,10 @@ namespace CopperBend.Model
 
         public virtual string Name { get; set; }
         public virtual string Adjective { get; set; } = string.Empty;
+        public virtual string ItemType { get; set; } = "Item";
         public int Quantity { get; set; }
 
-        public Coord Location { get; protected set; }
+        public Coord Location { get; set; }
 
         public void MoveTo(int x, int y)
         {

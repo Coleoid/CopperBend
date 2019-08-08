@@ -11,6 +11,8 @@ namespace CopperBend.Fabric
     [JsonConverter(typeof(ItemMapConverter))]
     public class ItemMap : MultiSpatialMap<IItem>
     {
+        // Experiment.  The default serialization doesn't save properties
+        // added to this class, probably because it derives from IEnumerable.
         public string MyName { get; set; }
     }
 
@@ -32,21 +34,15 @@ namespace CopperBend.Fabric
             Type objectType, object existingValue,
             JsonSerializer serializer)
         {
+            var itemConverter = new Converter_of_IItem();
             ItemMap map = new ItemMap();
 
-            //var jMap = JObject.Load(reader);
-            //var jItems = jMap["Items"];
-            //var items = JArray.Load(jItems.CreateReader());
-            var items = JArray.Load(reader);
-
-            var itemConverter = new Converter_of_IItem();
-            foreach (JObject jOb in items)
+            foreach (JObject jOb in JArray.Load(reader))
             {
                 var item = itemConverter.ReadJObject(jOb["Item"] as JObject, serializer);
                 map.Add(item, item.Location);
             }
             
-            //serializer.Populate(reader, map);
             return map;
         }
     }
@@ -73,23 +69,27 @@ namespace CopperBend.Fabric
 
         public IItem ReadJObject(JObject jOb, JsonSerializer serializer)
         {
-            var item = default(IItem);
-            switch (jOb["ItemType"].Value<string>())
-            {
-            case "Item":
-                item = new Item((0, 0));
-                break;
-            case "Knife":
-                item = new Knife((0, 0));
-                break;
-            }
-            serializer.Populate(jOb.CreateReader(), item);
-
-            var locn = jOb["Location"].ToString();
-            var nums = Regex.Matches(locn, @"\d+");
+            var locnText = jOb["Location"].ToString();
+            var nums = Regex.Matches(locnText, @"\d+");
             int x = int.Parse(nums[1].Value);
             int y = int.Parse(nums[2].Value);
-            item.Location = new Coord(x, y);
+            var coord = new Coord(x, y);
+
+            var itemType = jOb["ItemType"].Value<string>();
+            IItem item = default(IItem);
+            switch (itemType)
+            {
+            case "Item":
+                item = new Item(coord);
+                break;
+            case "Knife":
+                item = new Knife(coord);
+                break;
+
+            default:
+                throw new Exception($"Unknown item type [{itemType}].");
+            }
+            serializer.Populate(jOb.CreateReader(), item);
 
             return item;
         }

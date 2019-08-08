@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using GoRogue;
 using CopperBend.Contract;
@@ -9,85 +6,6 @@ using CopperBend.Model;
 
 namespace CopperBend.Fabric
 {
-    public class SerializableSpatialMap<T> where T: class, IHasID
-    {
-        [JsonIgnore]
-        public SpatialMap<T> SpatialMap { get; set; }
-
-        /// <summary> The serialization border for our mapped items.  Shouldn't be used by normal app code. </summary>
-        /// <remarks> Would be a touch nicer with a string -> Coord implicit conversion. </remarks>
-        public Dictionary<string, T> SerialItems
-        {
-            get
-            {
-                var items = new Dictionary<string, T>();
-                foreach (var coord in SpatialMap.Positions)
-                {
-                    var item = SpatialMap.GetItem(coord);
-                    items.Add(coord.ToString(), item);
-                }
-
-                return items;
-            }
-
-            set
-            {
-                SpatialMap = new SpatialMap<T>();
-                foreach (var key in value.Keys)
-                {
-                    var nums = Regex.Matches(key, @"\d+");
-                    int x = int.Parse(nums[0].Value);
-                    int y = int.Parse(nums[1].Value);
-                    Coord coord = new Coord(x, y);
-                    SpatialMap.Add(value[key], coord);
-                }
-            }
-        }
-
-
-        public SerializableSpatialMap(int initialCapacity = 32)
-        {
-            SpatialMap = new SpatialMap<T>(initialCapacity);
-        }
-
-        public T GetItem(Coord position)
-        {
-            T item = SpatialMap.GetItem(position);
-            return item;
-        }
-
-        public void AddItem(T item, Coord position)
-        {
-            SpatialMap.Add(item, position);
-        }
-
-        public void RemoveItem(T item)
-        {
-            SpatialMap.Remove(item);
-        }
-    }
-
-    public class BlightMap : SerializableSpatialMap<AreaBlight>
-    {
-        public string Name { get; set; }
-
-        //0.0  the arguments sidestep a Json.net deserializing bug:
-        //  it won't reload SerialItems when creating with default ctor
-        public BlightMap(int dummy)
-            : base()
-        {
-        }
-        //public BlightMap(int width, int height)
-        //    : base()
-        //{
-        //}
-
-        //public BlightMap()
-        //    : base()
-        //{
-        //}
-    }
-
     public class SpaceMap : SerializableSpatialMap<Space>
     {
         public static Dictionary<string, TerrainType> TerrainTypes { get; internal set; }
@@ -205,39 +123,4 @@ namespace CopperBend.Fabric
         public bool IsSown { get; set; }
         public bool IsKnown { get; set; }
     }
-
-    public class AreaBlight : IHasID, IDestroyable
-    {
-        public AreaBlight(uint id = uint.MaxValue)
-        {
-            ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
-        }
-
-        #region standard IHasID
-        public static IDGenerator IDGenerator;
-        public uint ID { get; private set; }
-        #endregion
-
-        public int Extent { get; set; }
-
-        #region IDestroyable
-        public int MaxHealth { get; set; } = 80;
-
-        [JsonIgnore]
-        public int Health => Extent;
-
-        public void Heal(int amount)
-        {
-            Guard.Against(amount < 0, $"Cannot heal negative amount {amount}.");
-            Extent = Math.Min(MaxHealth, Extent + amount);
-        }
-
-        public void Hurt(int amount)
-        {
-            Guard.Against(amount < 0, $"Cannot hurt negative amount {amount}.");
-            Extent = Math.Max(0, Extent - amount);
-        }
-        #endregion
-    }
-
 }

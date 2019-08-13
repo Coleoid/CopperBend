@@ -4,7 +4,7 @@ using CopperBend.Contract;
 using CopperBend.Model;
 using log4net;
 using log4net.Config;
-using Microsoft.Xna.Framework;
+using log4net.Repository;
 using NUnit.Framework;
 
 namespace CopperBend.Engine.tests
@@ -19,8 +19,27 @@ namespace CopperBend.Engine.tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            var repo = LogManager.CreateRepository("CB");
-            BasicConfigurator.Configure(repo);
+            bool foundRepo = false;
+            var repos = LogManager.GetAllRepositories();
+            foreach (var r in repos)
+            {
+                if (r.Name == "CB") foundRepo = true;
+            }
+
+            ILoggerRepository repo = null;
+            if (foundRepo)
+            {
+                repo = LogManager.GetRepository("CB");
+            }
+            else
+            {
+                repo = LogManager.CreateRepository("CB");
+                BasicConfigurator.Configure(repo);
+            }
+            // nfw this should be this difficult.
+
+            var log = LogManager.GetLogger("CB", "CB");
+
             Engine.InitializeIDGenerator();
             Engine.InitializePlantRepos();
         }
@@ -42,7 +61,6 @@ namespace CopperBend.Engine.tests
         [Test]
         public void Local_sub_or_lambda_to_close_over_more_data()
         {
-            //var actor = new Player(Color.AntiqueWhite, Color.Black);
             var targets = new List<Being>();
             IBeing passedActor = null;
             List<Being> passedTargets = null;

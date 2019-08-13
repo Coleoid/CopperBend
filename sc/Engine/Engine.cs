@@ -16,7 +16,7 @@ using CopperBend.Model;
 
 namespace CopperBend.Engine
 {
-    public class Engine : ContainerConsole
+    public partial class Engine : ContainerConsole
     {
         private ILog log;
 
@@ -364,7 +364,26 @@ namespace CopperBend.Engine
         {
             throw new NotImplementedException();
         }
+        #endregion
 
+        //// The entities in the given map will be the MapConsole's only entities
+        //private void SyncMapEntities(MultiSpatialMap<Being> map)
+        //{
+        //    // update the Map Console to hold only the Map's entities
+        //    MapConsole.Children.Clear();
+        //    foreach (var being in map.Items)
+        //    {
+        //        MapConsole.Children.Add(being);
+        //    }
+
+        //    // keep future changes to the map Entities up-to-date in the MapConsole
+        //    map.ItemAdded += (s, a) => MapConsole.Children.Add(a.Item);
+        //    map.ItemRemoved += (s, a) => MapConsole.Children.Remove(a.Item);
+        //}
+    }
+
+    public partial class Engine
+    {
         public static void InitializeIDGenerator()
         {
             // On this path, each new IDed type needs addition here,
@@ -421,22 +440,5 @@ namespace CopperBend.Engine
             Describer.PlantByID = PlantByID;
             Describer.PlantByName = PlantByName;
         }
-
-        #endregion
-
-        //// The entities in the given map will be the MapConsole's only entities
-        //private void SyncMapEntities(MultiSpatialMap<Being> map)
-        //{
-        //    // update the Map Console to hold only the Map's entities
-        //    MapConsole.Children.Clear();
-        //    foreach (var being in map.Items)
-        //    {
-        //        MapConsole.Children.Add(being);
-        //    }
-
-        //    // keep future changes to the map Entities up-to-date in the MapConsole
-        //    map.ItemAdded += (s, a) => MapConsole.Children.Add(a.Item);
-        //    map.ItemRemoved += (s, a) => MapConsole.Children.Remove(a.Item);
-        //}
     }
 }

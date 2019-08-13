@@ -20,7 +20,7 @@ namespace CopperBend.Engine
         private BlightMap BlightMap => GameState.Map.BlightMap;
 
         private Describer Describer;
-        private MessageLogWindow MessageLog;
+        private IMessageLogWindow MessageLog;
         private ILog log;
 
         private Action<AsciiKey> NextStep = null;
@@ -30,7 +30,7 @@ namespace CopperBend.Engine
             ISchedule schedule,
             IGameState gameState,
             Describer describer,
-            MessageLogWindow messageLog
+            IMessageLogWindow messageLog
         )
         {
             Schedule = schedule;

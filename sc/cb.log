@@ -18,3 +18,23 @@ CB.UIBuilder DEBUG 2019/08/15 09:51:38.738 - [1] Created map window, [{X:0 Y:0 W
 CB.UIBuilder DEBUG 2019/08/15 09:51:38.747 - [1] Created map console, map size [46,32], viewport size [{X:0 Y:0 Width:53 Height:52}].
 CB.Engine DEBUG 2019/08/15 09:51:38.797 - [1] Enter mode Schedule, push down mode StartUp.
 CB INFO  2019/08/15 09:51:41.303 - [1] Run ended
+CB INFO  2019/08/20 09:52:44.639 - [1] 
+======================================
+CB INFO  2019/08/20 09:52:44.649 - [1] Run started
+CB.Engine DEBUG 2019/08/20 09:52:45.269 - [1] Enter mode StartUp, push down mode Unknown.
+CB.Engine DEBUG 2019/08/20 09:52:45.389 - [1] Loaded the map
+CB.Engine DEBUG 2019/08/20 09:52:45.408 - [1] Created player.
+CB.UIBuilder DEBUG 2019/08/20 09:52:45.435 - [1] Created map window, [{X:0 Y:0 Width:424 Height:832}].
+CB.UIBuilder DEBUG 2019/08/20 09:52:45.443 - [1] Created map console, map size [46,32], viewport size [{X:0 Y:0 Width:53 Height:52}].
+CB.Engine DEBUG 2019/08/20 09:52:45.502 - [1] Enter mode Schedule, push down mode StartUp.
+CB INFO  2019/08/20 09:52:48.415 - [1] Run ended
+CB INFO  2019/08/20 12:50:09.908 - [1] 
+======================================
+CB INFO  2019/08/20 12:50:09.919 - [1] Run started
+CB.Engine DEBUG 2019/08/20 12:50:10.392 - [1] Enter mode StartUp, push down mode Unknown.
+CB.Engine DEBUG 2019/08/20 12:50:10.516 - [1] Loaded the map
+CB.Engine DEBUG 2019/08/20 12:50:10.534 - [1] Created player.
+CB.UIBuilder DEBUG 2019/08/20 12:50:10.560 - [1] Created map window, [{X:0 Y:0 Width:424 Height:832}].
+CB.UIBuilder DEBUG 2019/08/20 12:50:10.567 - [1] Created map console, map size [46,32], viewport size [{X:0 Y:0 Width:53 Height:52}].
+CB.Engine DEBUG 2019/08/20 12:50:10.616 - [1] Enter mode Schedule, push down mode StartUp.
+CB INFO  2019/08/20 12:50:10.876 - [1] Run ended

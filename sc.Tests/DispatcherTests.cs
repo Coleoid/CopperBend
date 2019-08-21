@@ -1,15 +1,16 @@
-﻿using CopperBend.Contract;
-using CopperBend.Fabric;
-using CopperBend.Model;
-using NUnit.Framework;
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.IO;
 using Microsoft.Xna.Framework;
+using NUnit.Framework;
 using NSubstitute;
 using log4net.Config;
 using log4net;
-using System.IO;
 using log4net.Repository;
+using CopperBend.Contract;
+using CopperBend.Fabric;
+using CopperBend.Model;
 
 namespace CopperBend.Engine.tests
 {
@@ -88,30 +89,26 @@ namespace CopperBend.Engine.tests
         //    return areaMap;
         //}
 
+        //[Explicit, Property("Context", "ConsoleRunning")]
         [TestCase(CmdAction.Wait, CmdDirection.None, 6)]
         [TestCase(CmdAction.Consume, CmdDirection.None, 2)]
         [TestCase(CmdAction.Drop, CmdDirection.None, 1)]
         [TestCase(CmdAction.Wield, CmdDirection.None, 6)]
         public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
         {
-            SadConsole.Game.Create(20, 20);
-            SadConsole.Game.OnInitialize = () =>
-            {
-                Assert.That(SadConsole.Global.GraphicsDevice, Is.Not.Null);
-                Assert.That(SadConsole.Game.Instance.GraphicsDevice, Is.Not.Null);
+            ScEntityFactory.ReturnNull = true;
+            //if (!Debugger.IsAttached)
+            //    Debugger.Launch();
+            //Assert.That(SadConsole.Global.GraphicsDevice, Is.Not.Null);
+            //Assert.That(SadConsole.Game.Instance.GraphicsDevice, Is.Not.Null);
 
-                var actor = new Player(Color.AliceBlue, Color.Black);
-                var item = new Fruit((0, 0), 1, new PlantDetails()); //(new Point(0, 0), 1, PlantType.Healer);
-                actor.AddToInventory(item);
+            var actor = new Player(Color.AliceBlue, Color.Black);
+            var item = new Fruit((0, 0), 1, Fruit.PlantByName["Healer"]);
+            actor.AddToInventory(item);
 
-                var cmd = new Command(action, direction, item);
-                _dispatcher.CommandBeing(actor, cmd);
-                __schedule.Received().AddAgent(actor, tickOff);
-
-                SadConsole.Game.Instance.Exit();
-            };
-
-            SadConsole.Game.Instance.Run();
+            var cmd = new Command(action, direction, item);
+            _dispatcher.CommandBeing(actor, cmd);
+            __schedule.Received().AddAgent(actor, tickOff);
         }
 
 

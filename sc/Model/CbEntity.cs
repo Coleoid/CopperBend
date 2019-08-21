@@ -4,18 +4,22 @@ using System.Linq;
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
+using Microsoft.Xna.Framework;
+using SadConsole;
+using SadConsole.Components;
 
 namespace CopperBend.Model
 {
-    public abstract class CbEntity : SadConsole.Entities.Entity, IHasID
+    public abstract class CbEntity : /*SadConsole.Entities.Entity,*/ IHasID
     {
-        protected CbEntity(Color foreground, Color background, int glyph, int width = 1, int height = 1, uint id = uint.MaxValue)
-            : base(width, height)
+        //protected SadConsole.IEntity ScEntity = null;
+        protected SadConsole.Entities.Entity ScEntity = null;
+
+        protected CbEntity(Color foreground, Color background, int glyph, uint id = uint.MaxValue)
         {
             ID = (id == uint.MaxValue? IDGenerator.UseID() : id);
-            Animation.CurrentFrame[0].Foreground = foreground;
-            Animation.CurrentFrame[0].Background = background;
-            Animation.CurrentFrame[0].Glyph = glyph;
+            var factory = new ScEntityFactory();
+            ScEntity = factory.NewEntity(foreground, background, glyph);
         }
 
         #region standard IHasID
@@ -30,12 +34,12 @@ namespace CopperBend.Model
         public int MaxHealth { get; set; }
         public char Symbol { get; set; }
 
-        public Color Foreground => Animation.CurrentFrame[0].Foreground;
-        public Color Background => Animation.CurrentFrame[0].Background;
-        public int Glyph => Animation.CurrentFrame[0].Glyph;
+        public Color Foreground => ScEntity.Animation.CurrentFrame[0].Foreground;
+        public Color Background => ScEntity.Animation.CurrentFrame[0].Background;
+        public int Glyph => ScEntity.Animation.CurrentFrame[0].Glyph;
 
-        protected Being(Color foreground, Color background, int glyph, int width = 1, int height = 1)
-            : base(foreground, background, glyph, width, height)
+        protected Being(Color foreground, Color background, int glyph)
+            : base(foreground, background, glyph)
         {
             Health = MaxHealth = 6;
             Awareness = 6;
@@ -48,7 +52,7 @@ namespace CopperBend.Model
         //  IBeing
         public void MoveTo(Coord point)
         {
-            base.Position = point;
+            ScEntity.Position = point;
         }
 
         public int Awareness { get; set; }
@@ -81,6 +85,10 @@ namespace CopperBend.Model
         {
             get => InventoryList;
         }
+        public string Name { get => ScEntity.Name; set => ScEntity.Name = value; }
+        public Point Position { get => ScEntity.Position; set => ScEntity.Position = value; }
+        public SadConsole.Console Console { get => ScEntity; }
+
         public void AddToInventory(IItem item)
         {
             //0.2.INV  limit stack size of some items
@@ -145,10 +153,15 @@ namespace CopperBend.Model
 
     public class Player : Being
     {
-        public Player(Color foreground, Color background, int glyph = '@', int width = 1, int height = 1)
-            : base(foreground, background, glyph, width, height)
+        public Player(Color foreground, Color background, int glyph = '@')
+            : base(foreground, background, glyph)
         {
             IsPlayer = true;
+        }
+
+        internal void AddComponent(IConsoleComponent component)
+        {
+            ScEntity.Components.Add(component);
         }
     }
 

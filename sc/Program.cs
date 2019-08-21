@@ -27,19 +27,7 @@ namespace CopperBend.Application
 
         public void OnExecute()
         {
-            if (TestMode)
-                RunTests();
-            else
-                RunGame();
-        }
-
-        public void RunTests()
-        {
-            Console.WriteLine("RunTests");
-            var runner = new GameRunningTestRunner();
-            runner.RunTests();
-            ITestEngine testEngine = TestEngineActivator.CreateInstance();
-
+            RunGame();
         }
 
         public void RunGame()
@@ -61,7 +49,7 @@ namespace CopperBend.Application
 
                 //  Engine is now a console, which cannot be created before .Run() below.
                 //  .OnInitialize must be set before .Run is called.
-                Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight);
+                Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight, TestMode);
                 Game.Instance.Window.Title = "Copper Bend";
                 Game.Instance.Run();
             }

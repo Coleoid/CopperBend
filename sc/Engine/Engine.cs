@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CopperBend.Application;
 using Size = System.Drawing.Size;
 using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
@@ -35,10 +36,10 @@ namespace CopperBend.Engine
         private GameState GameState;
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
-        //private IDGenerator IDGenerator;
+        private bool TestMode;
 
         #region Init
-        public Engine(int gameWidth, int gameHeight)
+        public Engine(int gameWidth, int gameHeight, bool testMode = false)
             : base()
         {
             log = LogManager.GetLogger("CB", "CB.Engine");
@@ -55,6 +56,7 @@ namespace CopperBend.Engine
             InputQueue = new Queue<AsciiKey>();
             ModeStack = new Stack<EngineMode>();
             CallbackStack = new Stack<Func<bool>>();
+            TestMode = testMode;
 
             Init();
         }
@@ -76,14 +78,20 @@ namespace CopperBend.Engine
             Describer describer = new Describer();
             Schedule = new Schedule();
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
-            Player.Font = Font;
+            //Player.Font = Font;
             Schedule.AddAgent(Player, 12);
 
+            if (TestMode)
+            {
+                ScEntityFactory.ReturnNull = true;
+                var testRunner = new GameRunningTestRunner();
+                Schedule.AddAgent(testRunner, 1);
+            }
 
             var builder = new UIBuilder(GameSize, null); //font
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
             Children.Add(MapWindow);
-            MapConsole.Children.Add(Player);
+            MapConsole.Children.Add(Player.Console);
             FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
             FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
             FullMap.UpdateFOV(MapConsole, Player.Position);
@@ -119,14 +127,12 @@ namespace CopperBend.Engine
 
         private Being CreatePlayer(Coord playerLocation)
         {
-            var player = new Player(Color.AntiqueWhite, Color.Transparent)
+            var player = new Player(Color.AntiqueWhite, Color.Transparent, '@')
             {
                 Name = "Suvail",
                 Position = playerLocation
             };
-            player.Animation.CurrentFrame[0].Glyph = '@';
-            player.Animation.CurrentFrame[0].Foreground = Color.AntiqueWhite;
-            player.Components.Add(new EntityViewSyncComponent());
+            player.AddComponent(new EntityViewSyncComponent());
             player.AddToInventory(new Hoe((0,0)));
             player.AddToInventory(new Seed((0,0), 2, PlantByName["Healer"].ID));
 
@@ -168,11 +174,11 @@ namespace CopperBend.Engine
 
         #region Mode mechanics
         //  We can stack modes of the game to any level.
-        //  Say the schedule reaches the player, who is entering a command,
-        //  and inspecting their quest log or inventory, the stack is:
+        //  Say the schedule reaches the player, who enters a command
+        //  to inspect their quest/job list, the stack is:
         //    Large, Input, Schedule, Start
         //  Each mode on the stack has its own callback, so if we then
-        //  we go into details of a quest, the states could be:
+        //  look into details of a quest, the states could be:
         //    Large, Large, Input, Schedule, Start
         //  ...and we can later leave the quest details without confusion
         //  about what we're doing.
@@ -197,16 +203,18 @@ namespace CopperBend.Engine
             ModeStack.Push(newMode);
             CallbackStack.Push(callback);
 
-            if (oldMode == EngineMode.Schedule && CurrentMode == EngineMode.InputBound) return;
-            log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
+            if (oldMode != EngineMode.Schedule || CurrentMode != EngineMode.InputBound)
+                log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
         }
         internal void PopEngineMode()
         {
             var oldMode = ModeStack.Pop();
             CallbackStack.Pop();
 
-            if (oldMode == EngineMode.InputBound && CurrentMode == EngineMode.Schedule) return;
-            log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
+            // We're always shifting between input and schedule during play,
+            // so let's only log more interesting mode changes.
+            if (oldMode != EngineMode.InputBound || CurrentMode != EngineMode.Schedule)
+                log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
         }
         #endregion
 

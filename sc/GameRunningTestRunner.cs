@@ -14,19 +14,19 @@ namespace CopperBend.Application
     internal class GameRunningTestRunner : ITestEventListener, IScheduleAgent
     {
         public List<string> EventReports { get; set; } = new List<string>();
-        private IControlPanel ControlPanel = null;  //TODO: will we want to or be able to use this?
 
         public ScheduleEntry GetNextEntry(int offset)
         {
-            return new ScheduleEntry
-            {
-                Action = (cp) => {
-                    ControlPanel = cp; // ?
-                    this.RunTests();
-                },
-                Agent = this,
-                Offset = offset
-            };
+            return null;
+            //return new ScheduleEntry
+            //{
+            //    Action = (cp) => {
+            //        ControlPanel = cp; // ?
+            //        this.RunTests();
+            //    },
+            //    Agent = this,
+            //    Offset = offset
+            //};
         }
 
         public void RunTests()

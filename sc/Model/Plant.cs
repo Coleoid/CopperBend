@@ -1,5 +1,6 @@
 using System;
 using CopperBend.Contract;
+using CopperBend.Engine;
 
 namespace CopperBend.Model
 {
@@ -34,7 +35,7 @@ namespace CopperBend.Model
         {
             return new ScheduleEntry
             {
-                Action = (cp) => throw new Exception($"Make code to grow plant {PlantDetails.MainName}!"),
+                Action = ScheduleAction.PlantGrows,
                 Offset = offset
             };
         }

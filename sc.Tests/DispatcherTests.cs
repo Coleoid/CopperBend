@@ -96,7 +96,11 @@ namespace CopperBend.Engine.tests
         [TestCase(CmdAction.Wield, CmdDirection.None, 6)]
         public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
         {
-            ScEntityFactory.ReturnNull = true;
+            //TODO: Mock this factory
+            //ScEntityFactory.ReturnNull = true;
+            IEntityFactory mockEntityFactory = Substitute.For<IEntityFactory>();
+            Being.EntityFactory = mockEntityFactory;
+
             //if (!Debugger.IsAttached)
             //    Debugger.Launch();
             //Assert.That(SadConsole.Global.GraphicsDevice, Is.Not.Null);

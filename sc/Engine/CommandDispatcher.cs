@@ -40,6 +40,30 @@ namespace CopperBend.Engine
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
 
+
+        public void Dispatch(ScheduleEntry nextAction)
+        {
+            switch (nextAction.Action)
+            {
+            case ScheduleAction.GetCommand:
+                var being = nextAction.Agent as IBeing;
+                being.GiveCommand();
+                break;
+
+            case ScheduleAction.SeedGrows:
+                break;
+            case ScheduleAction.PlantGrows:
+                break;
+
+            case ScheduleAction.Unset:
+                throw new Exception("Unset action got into schedule somehow.");
+            
+            default:
+                throw new Exception($"Need to write Dispatch() case for ScheduleAction.{nextAction.Action}.");
+            }
+        }
+
+
         public bool CommandBeing(IBeing being, Command command)
         {
             switch (command.Action)

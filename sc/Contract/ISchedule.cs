@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace CopperBend.Contract
 {
@@ -8,15 +8,25 @@ namespace CopperBend.Contract
 
         void AddEntry(ScheduleEntry entry);
         void Clear();
-        Action<IControlPanel> GetNextAction();
+        ScheduleEntry GetNextAction();
         void AddAgent(IScheduleAgent agent);
         void AddAgent(IScheduleAgent agent, int offset);
     }
 
-    public struct ScheduleEntry
+    public class ScheduleEntry
     {
-        public Action<IControlPanel> Action;
-        public int Offset;
-        public IScheduleAgent Agent;
+        public IScheduleAgent Agent { get; set; }
+        public ScheduleAction Action { get; set; }
+        public Dictionary<string, string> Data { get; set; }
+        public int Offset { get; set; }
+    }
+
+    public enum ScheduleAction
+    {
+        Unset = 0,
+
+        GetCommand,
+        SeedGrows,
+        PlantGrows,
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GoRogue;
 using CopperBend.Contract;
+using CopperBend.Engine;
 using CopperBend.Fabric;
 
 namespace CopperBend.Model
@@ -71,7 +72,7 @@ namespace CopperBend.Model
         {
             return new ScheduleEntry
             {
-                Action = (cp) => SeedGrows(cp),
+                Action = ScheduleAction.SeedGrows,
                 Agent = this,
                 Offset = offset
             };

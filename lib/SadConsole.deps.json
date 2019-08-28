@@ -1,0 +1,134 @@
+{
+  "runtimeTarget": {
+    "name": ".NETStandard,Version=v2.0/",
+    "signature": "2b5dbfc10098c942f0557c095f5ea61909527c5e"
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETStandard,Version=v2.0": {},
+    ".NETStandard,Version=v2.0/": {
+      "SadConsole/8.4.1-debug": {
+        "dependencies": {
+          "InheritDoc": "2.2.1",
+          "Microsoft.SourceLink.GitHub": "1.0.0-beta2-18618-05",
+          "MonoGame.Content.Builder": "3.7.0.9",
+          "MonoGame.Framework.DesktopGL.Core": "3.7.0.7",
+          "NETStandard.Library": "2.0.3",
+          "Newtonsoft.Json": "11.0.2"
+        },
+        "runtime": {
+          "SadConsole.dll": {}
+        }
+      },
+      "InheritDoc/2.2.1": {
+        "runtime": {
+          "lib/net45/InheritDoc.exe": {
+            "assemblyVersion": "2.2.1.0",
+            "fileVersion": "2.2.1.0"
+          }
+        }
+      },
+      "Microsoft.Build.Tasks.Git/1.0.0-beta2-18618-05": {},
+      "Microsoft.NETCore.Platforms/1.1.0": {},
+      "Microsoft.SourceLink.Common/1.0.0-beta2-18618-05": {},
+      "Microsoft.SourceLink.GitHub/1.0.0-beta2-18618-05": {
+        "dependencies": {
+          "Microsoft.Build.Tasks.Git": "1.0.0-beta2-18618-05",
+          "Microsoft.SourceLink.Common": "1.0.0-beta2-18618-05"
+        }
+      },
+      "MonoGame.Content.Builder/3.7.0.9": {},
+      "MonoGame.Framework.DesktopGL.Core/3.7.0.7": {
+        "runtime": {
+          "lib/netstandard2.0/MonoGame.Framework.dll": {
+            "assemblyVersion": "3.7.0.7",
+            "fileVersion": "3.7.0.7"
+          }
+        }
+      },
+      "NETStandard.Library/2.0.3": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0"
+        }
+      },
+      "Newtonsoft.Json/11.0.2": {
+        "runtime": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "11.0.0.0",
+            "fileVersion": "11.0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SadConsole/8.4.1-debug": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "InheritDoc/2.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ifa49NtFY03/GA+3+AffU3rl/Av9Ip56YoD5qNut10kDBxTtpTpoWsvBh8+VaYqyvgJgJ8+lj3vQEyzwKnOWLA==",
+      "path": "inheritdoc/2.2.1",
+      "hashPath": "inheritdoc.2.2.1.nupkg.sha512"
+    },
+    "Microsoft.Build.Tasks.Git/1.0.0-beta2-18618-05": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GcxvC20U34k0LNBHxpvO1Nl3YjAbgU3oBn7BxyI6+woB4I0lryHu8bvp4SSRYXF6V2p6QueLw0hPtvaBSa6+5w==",
+      "path": "microsoft.build.tasks.git/1.0.0-beta2-18618-05",
+      "hashPath": "microsoft.build.tasks.git.1.0.0-beta2-18618-05.nupkg.sha512"
+    },
+    "Microsoft.NETCore.Platforms/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
+      "path": "microsoft.netcore.platforms/1.1.0",
+      "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
+    },
+    "Microsoft.SourceLink.Common/1.0.0-beta2-18618-05": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-obLbR9apXZwID0woyykZzhUuU+K4xyLKwyZ8HKSW/SKd7wfywQ19ei6i4MM+ieVF0S7QJQFxGvuTWPlEBsFF6A==",
+      "path": "microsoft.sourcelink.common/1.0.0-beta2-18618-05",
+      "hashPath": "microsoft.sourcelink.common.1.0.0-beta2-18618-05.nupkg.sha512"
+    },
+    "Microsoft.SourceLink.GitHub/1.0.0-beta2-18618-05": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MTBBSI7ggTcnULTFLmud9Qp/SLjyrOlFijJXjMXHSe+3JGMCZeYF4tUNKQwQ989+7gR0nlQMhin63mJB0Tmb6g==",
+      "path": "microsoft.sourcelink.github/1.0.0-beta2-18618-05",
+      "hashPath": "microsoft.sourcelink.github.1.0.0-beta2-18618-05.nupkg.sha512"
+    },
+    "MonoGame.Content.Builder/3.7.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AAt9ns5w6c9JkZFC2UC+nB8v+kTDgRP1ONaB5lLSfzBhrGULUoNwMxiRAzi7GlPVj5yynu3PHNi8kZTOUIdF9g==",
+      "path": "monogame.content.builder/3.7.0.9",
+      "hashPath": "monogame.content.builder.3.7.0.9.nupkg.sha512"
+    },
+    "MonoGame.Framework.DesktopGL.Core/3.7.0.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-DDQdsO3OreMfpKCPCjBP0hiClhvwo71bK68F8fCP0utkOKbL3dvkVfqrYinlM+QSt30dDt21yO9pMJJStikpHA==",
+      "path": "monogame.framework.desktopgl.core/3.7.0.7",
+      "hashPath": "monogame.framework.desktopgl.core.3.7.0.7.nupkg.sha512"
+    },
+    "NETStandard.Library/2.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7eEsfllPZgUuQ2UL0btAeOgkwfMb6cpA58+H6nmWyDQ2MtZBoBYWErLsCB+I7X+tsngfgEQNR1b1pZm4JFHDLQ==",
+      "path": "netstandard.library/2.0.3",
+      "hashPath": "netstandard.library.2.0.3.nupkg.sha512"
+    },
+    "Newtonsoft.Json/11.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IvJe1pj7JHEsP8B8J8DwlMEx8UInrs/x+9oVY+oCD13jpLu4JbJU2WCIsMRn5C4yW9+DgkaO8uiVE5VHKjpmdQ==",
+      "path": "newtonsoft.json/11.0.2",
+      "hashPath": "newtonsoft.json.11.0.2.nupkg.sha512"
+    }
+  }
+}

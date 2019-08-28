@@ -25,11 +25,17 @@
     <PackageReference Include="Mono.Cecil" Version="0.11.0" />
     <PackageReference Include="MonoGame.Content.Builder" Version="3.7.0.9" />
     <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.7.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit.Engine.Api" Version="3.10.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.14.0" />
-    <PackageReference Include="SadConsole.Standard" Version="8.2.0" />
     <PackageReference Include="YamlDotNet" Version="6.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SadConsole">
+      <HintPath>..\lib\SadConsole.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -10,19 +10,18 @@ namespace CopperBend.Engine
     public class Schedule : ISchedule
     {
         private readonly ILog log;
-        public int CurrentTick { get; private set; } = 0;
-
-        //0.1.SAVE  restructure ScheduleEntries to something serializable
-        private readonly SortedDictionary<int, List<Action<IControlPanel>>> TickEntries;
+        private readonly SortedDictionary<int, List<ScheduleEntry>> TickEntries;
+        public int CurrentTick { get; private set; }
 
         public Schedule()
         {
-            TickEntries = new SortedDictionary<int, List<Action<IControlPanel>>>();
             log = LogManager.GetLogger("CB", "CB.Schedule");
+            TickEntries = new SortedDictionary<int, List<ScheduleEntry>>();
+            CurrentTick = 0;
         }
 
         /// <summary> Get next scheduled action, ordered by tick of occurrence, then FIFO per tick </summary>
-        public Action<IControlPanel> GetNextAction()
+        public ScheduleEntry GetNextAction()
         {
             log.DebugFormat("Schedule.GetNextAction @ tick {0}", CurrentTick);
             if (TickEntries.Count() == 0)
@@ -44,25 +43,6 @@ namespace CopperBend.Engine
             return nextAction;
         }
 
-        //  Action scheduled at CurrentTick plus offset
-        public void AddEntry(ScheduleEntry entry)
-        {
-            Guard.AgainstNullArgument(entry);
-            Guard.AgainstNullArgument(entry.Action);
-
-            int actionTick = CurrentTick + entry.Offset;
-            if (!TickEntries.ContainsKey(actionTick))
-            {
-                TickEntries.Add(actionTick, new List<Action<IControlPanel>>());
-            }
-            TickEntries[actionTick].Add(entry.Action);
-        }
-
-        public void Clear()
-        {
-            TickEntries.Clear();
-        }
-
         public void AddAgent(IScheduleAgent agent)
         {
             AddEntry(agent.GetNextEntry());
@@ -71,6 +51,25 @@ namespace CopperBend.Engine
         public void AddAgent(IScheduleAgent agent, int offset)
         {
             AddEntry(agent.GetNextEntry(offset));
+        }
+
+        //  Action scheduled at CurrentTick plus offset
+        public void AddEntry(ScheduleEntry entry)
+        {
+            Guard.AgainstNullArgument(entry);
+            Guard.Against(entry.Action == ScheduleAction.Unset);
+
+            int actionTick = CurrentTick + entry.Offset;
+            if (!TickEntries.ContainsKey(actionTick))
+            {
+                TickEntries.Add(actionTick, new List<ScheduleEntry>());
+            }
+            TickEntries[actionTick].Add(entry);
+        }
+
+        public void Clear()
+        {
+            TickEntries.Clear();
         }
     }
 }

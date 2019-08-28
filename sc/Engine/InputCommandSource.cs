@@ -5,7 +5,6 @@ using Keys = Microsoft.Xna.Framework.Input.Keys;
 using SadConsole.Input;
 using CopperBend.Contract;
 using CopperBend.Fabric;
-using GoRogue;
 
 namespace CopperBend.Engine
 {

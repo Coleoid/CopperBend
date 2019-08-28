@@ -91,6 +91,7 @@ namespace CopperBend.Engine
         public List<string> FruitAdjectives = new List<string>
         {
             "abrasive",
+            "aromatic",
             "barbed",
             "bloated",
             "blunt",
@@ -104,20 +105,19 @@ namespace CopperBend.Engine
             "hard",
             "knobby",
             "mushy",
-            "pulpy",
             "prickly",
+            "pulpy",
             "rough",
+            "sharp-smelling",
             "silky",
             "smooth",
             "spotted",
-            "striped",
-            "streaky",
             "springy",
             "star-shaped",
+            "streaky",
+            "striped",
             "tough",
             "velvety",
-            "aromatic",
-            "sharp-smelling",
         };
 
         private void ScrambleFruit()

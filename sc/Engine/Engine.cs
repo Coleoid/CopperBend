@@ -83,9 +83,12 @@ namespace CopperBend.Engine
 
             if (TestMode)
             {
-                ScEntityFactory.ReturnNull = true;
                 var testRunner = new GameRunningTestRunner();
                 Schedule.AddAgent(testRunner, 1);
+            }
+            else
+            {
+                Being.EntityFactory = new EntityFactory();
             }
 
             var builder = new UIBuilder(GameSize, null); //font
@@ -266,7 +269,7 @@ namespace CopperBend.Engine
             while (CurrentMode == EngineMode.Schedule)
             {
                 var nextAction = Schedule.GetNextAction();
-                nextAction?.Invoke(Dispatcher);
+                Dispatcher.Dispatch(nextAction);
             }
         }
 

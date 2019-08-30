@@ -4,7 +4,6 @@ namespace CopperBend.Contract
 {
     public interface ISpace : IHasID
     {
-        uint ID { get; }
         bool CanPlant { get; }
         bool CanSeeThrough { get; }
         bool CanTill { get; }

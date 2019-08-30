@@ -9,6 +9,10 @@ using CopperBend.Fabric;
 using CopperBend.Model;
 using System.Diagnostics;
 using System.Linq;
+using Newtonsoft.Json.Serialization;
+using System;
+using CopperBend.Persist;
+using Newtonsoft.Json.Converters;
 
 namespace sc_tests
 {
@@ -25,7 +29,8 @@ namespace sc_tests
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                ContractResolver = DomainContractResolver.Instance,
             };
         }
 
@@ -120,6 +125,28 @@ namespace sc_tests
         }
     }
 
+
+    public class DomainContractResolver : DefaultContractResolver
+    {
+        public static readonly DomainContractResolver Instance = new DomainContractResolver();
+
+        protected override JsonContract CreateContract(Type objectType)
+        {
+            JsonContract contract = base.CreateContract(objectType);
+
+            if (objectType == typeof(ItemMap))
+            {
+                contract.Converter = new ItemMapConverter();
+            }
+            if (typeof(IItem).IsAssignableFrom(objectType))
+            {
+                contract.Converter = new Converter_of_IItem();
+            }
+
+            return contract;
+        }
+    }
+
     [TestFixture]
     public class JsonSerialTests
     {
@@ -129,9 +156,12 @@ namespace sc_tests
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                ContractResolver = DomainContractResolver.Instance
             };
         }
+
+
 
         //[Test]
         //public void CRT_PlantDetails()

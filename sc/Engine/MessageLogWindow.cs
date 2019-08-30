@@ -45,7 +45,7 @@ namespace CopperBend.Engine
         private int _scrollBarCurrentPosition;
 
         // account for the thickness of the window border to prevent UI element spillover
-        private int _windowBorderThickness = 2;
+        private readonly int _windowBorderThickness = 2;
 
         public MessageLogWindow(int width, int height, string title) : base(width, height)
         {

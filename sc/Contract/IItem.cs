@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
-using Newtonsoft.Json;
 using GoRogue;
-using CopperBend.Persist;
 
 namespace CopperBend.Contract
 {
-    [JsonConverter(typeof(Converter_of_IItem))]
     public interface IItem : IHasID
     {
         string Name { get; }

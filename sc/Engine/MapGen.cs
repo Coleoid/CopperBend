@@ -16,11 +16,11 @@ namespace CopperBend.Engine
     {
         protected internal List<Rectangle> Rooms;
         protected SpaceMap _map;
-        private ILog log;
+        private readonly ILog log;
         private Cell _wallCell;
         private TerrainType _wall;
         private Cell _floorCell;
-        private TerrainType _floor;
+        private readonly TerrainType _floor;
 
         public MapGen()
         {

@@ -1,11 +1,8 @@
 ﻿using GoRogue;
-using Newtonsoft.Json;
 using CopperBend.Contract;
-using CopperBend.Persist;
 
 namespace CopperBend.Fabric
 {
-    [JsonConverter(typeof(ItemMapConverter))]
     public class ItemMap : MultiSpatialMap<IItem>, IItemMap
     {
         // Experiment.  The default serialization doesn't save properties

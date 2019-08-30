@@ -5,7 +5,7 @@ using System;
 
 namespace CopperBend.Fabric
 {
-    public class BlightMap : SerializableSpatialMap<AreaBlight>
+    public class BlightMap : SerializableSpatialMap<IAreaBlight>, IBlightMap
     {
         public string Name { get; set; }
 
@@ -17,7 +17,7 @@ namespace CopperBend.Fabric
         }
     }
 
-    public class AreaBlight : IHasID, IDestroyable
+    public class AreaBlight : IHasID, IDestroyable, IAreaBlight
     {
         public AreaBlight(uint id = uint.MaxValue)
         {

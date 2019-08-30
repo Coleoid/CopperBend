@@ -14,10 +14,10 @@ namespace CopperBend.Engine
         private ISchedule Schedule { get; set; }
         private IGameState GameState { get; set; }
 
-        protected SpaceMap SpaceMap => GameState.Map.SpaceMap;
+        protected ISpaceMap SpaceMap => GameState.Map.SpaceMap;
         private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
-        private MultiSpatialMap<IItem> ItemMap => GameState.Map.ItemMap;
-        private BlightMap BlightMap => GameState.Map.BlightMap;
+        private IItemMap ItemMap => GameState.Map.ItemMap;
+        private IBlightMap BlightMap => GameState.Map.BlightMap;
 
         private Describer Describer;
         private IMessageLogWindow MessageLog;
@@ -143,7 +143,7 @@ namespace CopperBend.Engine
             return Do_DirectionMove(being, newPosition);
         }
 
-        private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, AreaBlight targetBlight)
+        private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, IAreaBlight targetBlight)
         {
             //0.2  wants smoother ux
             if (being.WieldedTool == null && being.Gloves == null)
@@ -156,7 +156,7 @@ namespace CopperBend.Engine
                 bool damageSpread = false;
                 foreach (Coord neighbor in newPosition.Neighbors())
                 {
-                    AreaBlight blight = BlightMap.GetItem(neighbor);
+                    IAreaBlight blight = BlightMap.GetItem(neighbor);
                     if (blight?.Extent > 0)
                     {
                         Damage(blight, DamageType.Player, 3);
@@ -195,7 +195,7 @@ namespace CopperBend.Engine
             Damage(target, amount);
         }
 
-        public void Damage(IDestroyable target, AreaBlight source)
+        public void Damage(IDestroyable target, IAreaBlight source)
         {
             int half = source.Extent * 5;
 
@@ -302,7 +302,7 @@ namespace CopperBend.Engine
                 WriteLineIfPlayer(being, "Can't move off the map.");
                 return false;
             }
-            Space space = SpaceMap.GetItem(newPosition);
+            ISpace space = SpaceMap.GetItem(newPosition);
 
             if (space.Terrain.Name == "closed door")
             {

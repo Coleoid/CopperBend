@@ -17,10 +17,10 @@ namespace CopperBend.Fabric
         public int Width { get; set; }
         public int Height { get; set; }
 
-        public SpaceMap SpaceMap { get; set; }
+        public ISpaceMap SpaceMap { get; set; }
         public MultiSpatialMap<IBeing> BeingMap { get; set; }
-        public ItemMap ItemMap { get; set; }
-        public BlightMap BlightMap { get; set; }
+        public IItemMap ItemMap { get; set; }
+        public IBlightMap BlightMap { get; set; }
         public List<LocatedTrigger> LocatedTriggers { get; set; }
 
         public FOV FOV { get; set; }
@@ -60,7 +60,7 @@ namespace CopperBend.Fabric
 
 
         /// <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known </summary>
-        public void SetInitialConsoleCells(ScrollingConsole console, SpaceMap spaceMap)
+        public void SetInitialConsoleCells(ScrollingConsole console, ISpaceMap spaceMap)
         {
             var unknownCell = new Cell(Color.Black, Color.Black, ' ');
             var knownCell = new Cell(Color.DarkGray, Color.Black, 'i');

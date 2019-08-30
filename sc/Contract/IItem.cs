@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using Newtonsoft.Json;
@@ -57,14 +58,17 @@ namespace CopperBend.Contract
         Seed
     }
 
+    [Flags]
     public enum PlantUse  //0.+
     {
         Unset = 0,
-        Food,
-        Medicine,
-        Toxin,
-        Textile,
-        Flavor,
-        Beauty
+        Food = 1,
+        Medicine = 2,
+        Toxin = 4,
+        Textile = 8,
+        Flavor = 16,
+        Beauty = 32,
+        Magic = 64,
+        Symbolism = 128
     }
 }

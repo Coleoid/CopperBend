@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 namespace CopperBend.Fabric
 {
     [JsonConverter(typeof(ItemMapConverter))]
-    public class ItemMap : MultiSpatialMap<IItem>
+    public class ItemMap : MultiSpatialMap<IItem>, IItemMap
     {
         // Experiment.  The default serialization doesn't save properties
         // added to this class, probably because it derives from IEnumerable.

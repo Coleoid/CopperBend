@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using SadConsole;
 using GoRogue;
 using GoRogue.MapViews;
-using CopperBend.Fabric;
 using SadConsole.Effects;
 
 namespace CopperBend.Contract
@@ -14,10 +13,10 @@ namespace CopperBend.Contract
         int Height { get; }
         bool IsWithinMap(Coord position);
 
-        SpaceMap SpaceMap { get; }
+        ISpaceMap SpaceMap { get; }
         MultiSpatialMap<IBeing> BeingMap { get; }
-        ItemMap ItemMap { get; }
-        BlightMap BlightMap { get; }
+        IItemMap ItemMap { get; }
+        IBlightMap BlightMap { get; }
 
         List<LocatedTrigger> LocatedTriggers { get; }
 
@@ -39,7 +38,7 @@ namespace CopperBend.Contract
 
         EffectsManager EffectsManager { get; }
 
-        void SetInitialConsoleCells(ScrollingConsole console, SpaceMap spaceMap);
+        void SetInitialConsoleCells(ScrollingConsole console, ISpaceMap spaceMap);
         void UpdateFOV(ScrollingConsole console, Coord position);
         void UpdateViewOfCoords(ScrollingConsole console, IEnumerable<Coord> coords);
     }

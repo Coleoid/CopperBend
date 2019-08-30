@@ -87,7 +87,7 @@ namespace CopperBend.Engine
             //Map.GetTileAt(point).RemovePlant();
         }
 
-        public void Till(Space space)
+        public void Till(ISpace space)
         {
             SpaceMap.Till(space);
         }

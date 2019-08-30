@@ -2,11 +2,10 @@
 using Newtonsoft.Json;
 using GoRogue;
 using CopperBend.Contract;
-using CopperBend.Model;
 
 namespace CopperBend.Fabric
 {
-    public class SpaceMap : SerializableSpatialMap<Space>
+    public class SpaceMap : SerializableSpatialMap<ISpace>, ISpaceMap
     {
         public static Dictionary<string, TerrainType> TerrainTypes { get; internal set; }
         public static TerrainType TilledSoil => TerrainTypes["tilled dirt"];
@@ -54,7 +53,7 @@ namespace CopperBend.Fabric
         }
 
 
-        internal void Sow(Space space, Seed seedToSow)
+        public void Sow(ISpace space, ISeed seedToSow)
         {
             if (space.CanPlant)
             {
@@ -63,7 +62,7 @@ namespace CopperBend.Fabric
             }
         }
 
-        internal void Till(Space space)
+        public void Till(ISpace space)
         {
             if (space.CanTill)
             {
@@ -72,7 +71,7 @@ namespace CopperBend.Fabric
             }
         }
 
-        internal void SeeCoords(IEnumerable<Coord> newlySeen)
+        public void SeeCoords(IEnumerable<Coord> newlySeen)
         {
             foreach (var seen in newlySeen)
             {
@@ -80,7 +79,7 @@ namespace CopperBend.Fabric
             }
         }
 
-        internal bool OpenDoor(Space space)
+        public bool OpenDoor(ISpace space)
         {
             if (space.Terrain == TerrainTypes["closed door"])
             {
@@ -92,7 +91,7 @@ namespace CopperBend.Fabric
         }
     }
 
-    public class Space : IHasID
+    public class Space : IHasID, ISpace
     {
         public Space(uint id = uint.MaxValue)
         {
@@ -105,7 +104,7 @@ namespace CopperBend.Fabric
         #endregion
 
         //public int Elevation;  //for later movement/attack mod
-        public TerrainType Terrain;
+        public TerrainType Terrain { get; set; }
 
         [JsonIgnore]
         //0.2.MAP  check for modifiers (smoke, dust, giant creature, ...)

@@ -89,7 +89,7 @@ namespace CopperBend.Engine.tests
         //    return areaMap;
         //}
 
-        //[Explicit, Property("Context", "ConsoleRunning")]
+        [Explicit, Property("Context", "ConsoleRunning")]
         [TestCase(CmdAction.Wait, CmdDirection.None, 6)]
         [TestCase(CmdAction.Consume, CmdDirection.None, 2)]
         [TestCase(CmdAction.Drop, CmdDirection.None, 1)]
@@ -97,14 +97,11 @@ namespace CopperBend.Engine.tests
         public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
         {
             //TODO: Mock this factory
-            //ScEntityFactory.ReturnNull = true;
-            IEntityFactory mockEntityFactory = Substitute.For<IEntityFactory>();
-            Being.EntityFactory = mockEntityFactory;
+            // needs IConsole plugged into the SadConsole project
+            //IEntityFactory mockEntityFactory = Substitute.For<IEntityFactory>();
+            //Being.EntityFactory = mockEntityFactory;
 
-            //if (!Debugger.IsAttached)
-            //    Debugger.Launch();
-            //Assert.That(SadConsole.Global.GraphicsDevice, Is.Not.Null);
-            //Assert.That(SadConsole.Game.Instance.GraphicsDevice, Is.Not.Null);
+            Being.EntityFactory = new EntityFactory();
 
             var actor = new Player(Color.AliceBlue, Color.Black);
             var item = new Fruit((0, 0), 1, Fruit.PlantByName["Healer"]);

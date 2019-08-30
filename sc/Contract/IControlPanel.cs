@@ -1,6 +1,5 @@
 ﻿using System;
 using GoRogue;
-using CopperBend.Fabric;
 using SadConsole.Input;
 
 //  Functional completeness levels:
@@ -28,7 +27,7 @@ namespace CopperBend.Contract
         Coord CoordInDirection(Coord start, CmdDirection direction);
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Coord position);
-        void Till(Space space);
+        void Till(ISpace space);
 
         void AddExperience(uint plantID, Exp experience);
         bool PlayerMoved { get; set; }

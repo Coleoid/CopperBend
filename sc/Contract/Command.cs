@@ -1,6 +1,4 @@
-﻿using CopperBend.Contract;
-
-namespace CopperBend.Fabric
+﻿namespace CopperBend.Contract
 {
     public struct Command
     {

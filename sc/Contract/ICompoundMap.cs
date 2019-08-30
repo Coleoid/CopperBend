@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using SadConsole;
+using SadConsole.Effects;
 using GoRogue;
 using GoRogue.MapViews;
-using SadConsole.Effects;
 
 namespace CopperBend.Contract
 {

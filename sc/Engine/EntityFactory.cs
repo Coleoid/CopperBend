@@ -1,19 +1,14 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using SadConsole.Entities;
+using CopperBend.Contract;
 
-namespace CopperBend.Model
+namespace CopperBend.Engine
 {
-    public interface IEntityFactory
-    {
-        void WireCbEntity(CbEntity cb, Color foreground, Color background, int glyph);
-    }
-
     public class EntityFactory: IEntityFactory
     {
         public EntityFactory() { }
 
-        public void WireCbEntity(CbEntity cb, Color foreground, Color background, int glyph)
+        public void WireCbEntity(ITakeScEntity cb, Color foreground, Color background, int glyph)
         {
             cb.ScEntity = NewSCEntity(foreground, background, glyph);
         }

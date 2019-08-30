@@ -1,6 +1,6 @@
 ﻿using System;
-using GoRogue;
 using SadConsole.Input;
+using GoRogue;
 
 //  Functional completeness levels:
 //  0.1  ---  The code works in a limited way, and is lame

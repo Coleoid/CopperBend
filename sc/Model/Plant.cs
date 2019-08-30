@@ -1,6 +1,5 @@
 using System;
 using CopperBend.Contract;
-using CopperBend.Engine;
 
 namespace CopperBend.Model
 {

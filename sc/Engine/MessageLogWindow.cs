@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
 using SadConsole;
-using GoRogue;
-using Microsoft.Xna.Framework.Graphics;
 using SadConsole.Effects;
+using GoRogue;
 
 namespace CopperBend.Engine
 {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
-using GoRogue;
 using Newtonsoft.Json;
-using CopperBend.Fabric;
+using GoRogue;
+using CopperBend.Persist;
 
 namespace CopperBend.Contract
 {

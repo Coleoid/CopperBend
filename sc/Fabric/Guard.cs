@@ -1,6 +1,6 @@
-﻿using GoRogue;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using GoRogue;
 
 namespace CopperBend.Fabric
 {

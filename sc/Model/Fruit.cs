@@ -1,7 +1,7 @@
-﻿using Color = Microsoft.Xna.Framework.Color;
+﻿using System.Collections.Generic;
+using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
-using System.Collections.Generic;
 
 namespace CopperBend.Model
 {

@@ -68,7 +68,7 @@ namespace CopperBend.Engine
             InitializeIDGenerator();
             InitializePlantRepos();
 
-            var loader = new MapLoader();
+            var loader = new Persist.MapLoader();  //TODO: IoC
             FullMap = loader.FarmMap();
             log.Debug("Loaded the map");
 

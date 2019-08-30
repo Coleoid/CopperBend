@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
-using Microsoft.Xna.Framework;
-using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
-    public class Being : CbEntity, IBeing
+    public class Being : CbEntity, IBeing, ITakeScEntity
     {
         public int Health { get; set; }
         public int MaxHealth { get; set; }

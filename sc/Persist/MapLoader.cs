@@ -12,7 +12,7 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 
-namespace CopperBend.Engine
+namespace CopperBend.Persist
 {
     public class MapLoader
     {

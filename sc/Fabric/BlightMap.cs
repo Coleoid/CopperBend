@@ -1,7 +1,7 @@
-﻿using CopperBend.Contract;
-using GoRogue;
+﻿using System;
 using Newtonsoft.Json;
-using System;
+using GoRogue;
+using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {

@@ -4,7 +4,7 @@ namespace CopperBend.Model
 {
     public abstract class CbEntity : IHasID
     {
-        protected internal SadConsole.Entities.IEntity ScEntity = null;
+        public SadConsole.Entities.IEntity ScEntity { get; set; } = null;
 
         protected CbEntity(uint id = uint.MaxValue)
         {

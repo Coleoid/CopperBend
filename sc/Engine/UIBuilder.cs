@@ -1,12 +1,10 @@
 ﻿using System;
 using Size = System.Drawing.Size;
-using Color = Microsoft.Xna.Framework.Color;
 using log4net;
 using SadConsole;
 using SadConsole.Controls;
 using GoRogue;
 using CopperBend.Contract;
-using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {

@@ -1,25 +1,17 @@
-﻿using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Xna.Framework;
-using SadConsole;
+﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using System.Diagnostics;
 using System.Linq;
-using Newtonsoft.Json.Serialization;
-using System;
 using CopperBend.Persist;
-using Newtonsoft.Json.Converters;
+using System.Diagnostics;
+using SadConsole;
 
 namespace sc_tests
 {
-    //  Throwing stuff at the wall  --  This is all mad dog prototyping
     //  CRT_* tests that we "can round-trip" an object, serialize then deserialize
-
-
     [TestFixture]
     public class Dser_ItemMap_Tests
     {
@@ -33,7 +25,6 @@ namespace sc_tests
                 ContractResolver = DomainContractResolver.Instance,
             };
         }
-
 
         [Test]
         public void CRT_Item()
@@ -86,7 +77,7 @@ namespace sc_tests
         [Test]
         public void CRT_IItem_Knife()
         {
-            IItem item = new Knife((2,4))
+            IItem item = new Knife((2, 4))
             {
                 Adjective = "TSA-Approved",
                 Quantity = 1,
@@ -104,7 +95,7 @@ namespace sc_tests
             Assert.That(newItem.IsUsable, Is.EqualTo(item.IsUsable));
 
             Assert.That(newItem.ItemType, Is.EqualTo("Knife"));
-            Assert.That(newItem.Location, Is.EqualTo((2,4)));
+            Assert.That(newItem.Location, Is.EqualTo((2, 4)));
         }
 
         [Test]
@@ -121,247 +112,243 @@ namespace sc_tests
             //Assert.That(newMap.MyName, Is.EqualTo("Bobby"));
             Knife knife = newMap.Items.ElementAt(0) as Knife;
             Assert.That(knife.ItemType, Is.EqualTo("Knife"));
-            Assert.That(knife.Location, Is.EqualTo((3,3)));
+            Assert.That(knife.Location, Is.EqualTo((3, 3)));
         }
-    }
 
 
-    public class DomainContractResolver : DefaultContractResolver
-    {
-        public static readonly DomainContractResolver Instance = new DomainContractResolver();
-
-        protected override JsonContract CreateContract(Type objectType)
+        [Test]
+        public void CRT_PlantDetails()
         {
-            JsonContract contract = base.CreateContract(objectType);
-
-            if (objectType == typeof(ItemMap))
+            var details = new PlantDetails
             {
-                contract.Converter = new ItemMapConverter();
-            }
-            if (typeof(IItem).IsAssignableFrom(objectType))
-            {
-                contract.Converter = new Converter_of_IItem();
-            }
-
-            return contract;
-        }
-    }
-
-    [TestFixture]
-    public class JsonSerialTests
-    {
-        [SetUp]
-        public void SetUp()
-        {
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                ContractResolver = DomainContractResolver.Instance
+                FruitAdjective = "Zesty",
+                FruitKnown = true,
+                GrowthTime = 88,
+                MainName = "Lemon",
+                SeedAdjective = "Pale",
+                SeedKnown = true,
             };
+
+            var json = JsonConvert.SerializeObject(details);
+            var newDetails = JsonConvert.DeserializeObject<PlantDetails>(json);
+            Assert.That(newDetails.FruitAdjective, Is.EqualTo(details.FruitAdjective));
+            Assert.That(newDetails.FruitKnown, Is.EqualTo(details.FruitKnown));
+            Assert.That(newDetails.GrowthTime, Is.EqualTo(details.GrowthTime));
+            Assert.That(newDetails.MainName, Is.EqualTo(details.MainName));
+            Assert.That(newDetails.SeedAdjective, Is.EqualTo(details.SeedAdjective));
+            Assert.That(newDetails.SeedKnown, Is.EqualTo(details.SeedKnown));
         }
 
+        [Test]
+        public void CRT_Fruit()
+        {
+            var details = new PlantDetails
+            {
+                FruitAdjective = "Zesty",
+            };
+            var fruit = new Fruit((0, 0), 1, details, 44)
+            {
+                Name = "Fluffy",
+                Glyph = '*',
+                Adjective = "So",
+                Quantity = 120,
+                Foreground = Color.BlanchedAlmond,
+                IsUsable = false,
+            };
 
+            var json = JsonConvert.SerializeObject(fruit);
 
-        //[Test]
-        //public void CRT_PlantDetails()
-        //{
-        //    var details = new PlantDetails
-        //    {
-        //        FruitAdjective = "Zesty",
-        //        FruitKnown = true,
-        //        GrowthTime = 88,
-        //        MainName = "Lemon",
-        //        SeedAdjective = "Pale",
-        //        SeedKnown = true,
-        //    };
+            var newFruit = JsonConvert.DeserializeObject<Fruit>(json);
+            Assert.That(newFruit.Name, Is.EqualTo(fruit.Name));
+            Assert.That(newFruit.Adjective, Is.EqualTo(fruit.Adjective));
+            Assert.That(newFruit.Glyph, Is.EqualTo(fruit.Glyph));
+            Assert.That(newFruit.Quantity, Is.EqualTo(fruit.Quantity));
+            Assert.That(newFruit.Foreground, Is.EqualTo(fruit.Foreground));
+            Assert.That(newFruit.IsUsable, Is.EqualTo(fruit.IsUsable));
+            Assert.That(newFruit.ID, Is.EqualTo(44));
+        }
 
-        //    var json = JsonConvert.SerializeObject(details);
-        //    var newDetails = JsonConvert.DeserializeObject<PlantDetails>(json);
-        //    Assert.That(newDetails.FruitAdjective, Is.EqualTo(details.FruitAdjective));
-        //    Assert.That(newDetails.FruitKnown, Is.EqualTo(details.FruitKnown));
-        //    Assert.That(newDetails.GrowthTime, Is.EqualTo(details.GrowthTime));
-        //    Assert.That(newDetails.MainName, Is.EqualTo(details.MainName));
-        //    Assert.That(newDetails.SeedAdjective, Is.EqualTo(details.SeedAdjective));
-        //    Assert.That(newDetails.SeedKnown, Is.EqualTo(details.SeedKnown));
-        //}
+        [Test]
+        public void CRT_Knife()
+        {
+            var knife = new Knife((2, 2), id: 55)
+            {
+                Name = "Sharpy",
+                Glyph = '-',
+                Adjective = "Short",
+                Quantity = 2,
+                Foreground = Color.SteelBlue,
+                IsUsable = false,
+            };
 
-        //[Test]
-        //public void CRT_Fruit()
-        //{
-        //    var details = new PlantDetails
-        //    {
-        //        FruitAdjective = "Zesty",
-        //    };
-        //    var fruit = new Fruit((0, 0), 1, details)
-        //    {
-        //        Name = "Fluffy",
-        //        Glyph = '*',
-        //        Adjective = "So",
-        //        Quantity = 120,
-        //        Foreground = Color.BlanchedAlmond,
-        //        IsUsable = false,
-        //    };
+            var json = JsonConvert.SerializeObject(knife);
+            //if(!Debugger.IsAttached) Debugger.Launch();
 
-        //    var json = JsonConvert.SerializeObject(fruit);
-        //    var newFruit = JsonConvert.DeserializeObject<Fruit>(json);
-        //    Assert.That(newFruit.Name, Is.EqualTo(fruit.Name));
-        //    Assert.That(newFruit.Adjective, Is.EqualTo(fruit.Adjective));
-        //    Assert.That(newFruit.Glyph, Is.EqualTo(fruit.Glyph));
-        //    Assert.That(newFruit.Quantity, Is.EqualTo(fruit.Quantity));
-        //    Assert.That(newFruit.Foreground, Is.EqualTo(fruit.Foreground));
-        //    Assert.That(newFruit.IsUsable, Is.EqualTo(fruit.IsUsable));
-        //}
+            var newKnife = JsonConvert.DeserializeObject<Knife>(json);
+            Assert.That(newKnife.Name, Is.EqualTo(knife.Name));
+            Assert.That(newKnife.Adjective, Is.EqualTo(knife.Adjective));
+            Assert.That(newKnife.Glyph, Is.EqualTo(knife.Glyph));
+            Assert.That(newKnife.Quantity, Is.EqualTo(knife.Quantity));
+            Assert.That(newKnife.Foreground, Is.EqualTo(knife.Foreground));
+            Assert.That(newKnife.IsUsable, Is.EqualTo(knife.IsUsable));
+            Assert.That(newKnife.ID, Is.EqualTo(55));
+        }
 
-        //[Test]
-        //public void CRT_Cell()
-        //{
-        //    var cell = new Cell
-        //    {
-        //        Background = Color.AliceBlue,
-        //        Foreground = Color.AliceBlue,
-        //        Glyph = '@',
-        //        IsVisible = true,
-        //    };
+        [Test]
+        public void CRT_Seed()
+        {
+            var seed = new Seed((2, 2), 4,  id: 66)
+            {
+                Name = "Wendy",
+                Glyph = '.',
+                Adjective = "Burred",
+                Quantity = 4,
+                Foreground = Color.Tan,
+                IsUsable = false,
+            };
 
-        //    var json = JsonConvert.SerializeObject(cell);
-        //    //System.Console.Error.WriteLine(json);
-        //    Cell newCell = JsonConvert.DeserializeObject<Cell>(json);
+            var json = JsonConvert.SerializeObject(seed);
+            //if(!Debugger.IsAttached) Debugger.Launch();
 
-        //    Assert.That(newCell, Is.Not.Null);
-        //    Assert.That(newCell.Background, Is.EqualTo(Color.AliceBlue));
-        //    Assert.That(newCell.Foreground, Is.EqualTo(Color.AliceBlue));
-        //    Assert.That(newCell.Glyph, Is.EqualTo('@'));
-        //}
+            var newSeed = JsonConvert.DeserializeObject<Seed>(json);
+            Assert.That(newSeed.Name, Is.EqualTo(seed.Name));
+            Assert.That(newSeed.Adjective, Is.EqualTo(seed.Adjective));
+            Assert.That(newSeed.Glyph, Is.EqualTo(seed.Glyph));
+            Assert.That(newSeed.Quantity, Is.EqualTo(seed.Quantity));
+            Assert.That(newSeed.Foreground, Is.EqualTo(seed.Foreground));
+            Assert.That(newSeed.IsUsable, Is.EqualTo(seed.IsUsable));
+            Assert.That(newSeed.ID, Is.EqualTo(66));
+        }
 
-        //[Test]
-        //public void CRT_TerrainType()
-        //{
-        //    var tt = new TerrainType
-        //    {
-        //        Name = "dirt road",
-        //        CanPlant = false,
-        //        CanSeeThrough = true,
-        //        CanWalkThrough = true,
-        //    };
-        //    var json = JsonConvert.SerializeObject(tt);
-        //    //System.Console.Error.WriteLine(json);
-        //    var newTT = JsonConvert.DeserializeObject<TerrainType>(json);
+        [Test]
+        public void CRT_TerrainType()
+        {
+            var tt = new TerrainType
+            {
+                Name = "dirt road",
+                CanPlant = false,
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+            };
+            var json = JsonConvert.SerializeObject(tt);
+            //System.Console.Error.WriteLine(json);
+            var newTT = JsonConvert.DeserializeObject<TerrainType>(json);
 
-        //    Assert.That(newTT.Name, Is.EqualTo(tt.Name));
-        //    Assert.That(newTT.CanPlant, Is.EqualTo(tt.CanPlant));
-        //    Assert.That(newTT.CanSeeThrough, Is.EqualTo(tt.CanSeeThrough));
-        //    Assert.That(newTT.CanWalkThrough, Is.EqualTo(tt.CanWalkThrough));
-        //}
+            Assert.That(newTT.Name, Is.EqualTo(tt.Name));
+            Assert.That(newTT.CanPlant, Is.EqualTo(tt.CanPlant));
+            Assert.That(newTT.CanSeeThrough, Is.EqualTo(tt.CanSeeThrough));
+            Assert.That(newTT.CanWalkThrough, Is.EqualTo(tt.CanWalkThrough));
+        }
 
+        [Test]
+        public void CRT_Space()
+        {
+            var space = new Space
+            {
+                IsKnown = true,
+                IsSown = true,
+                IsTilled = true
+            };
 
-        //[Test]
-        //public void CRT_Space()
-        //{
-        //    var space = new Space
-        //    {
-        //        IsKnown = true,
-        //        IsSown = true,
-        //        IsTilled = true
-        //    };
+            var json = JsonConvert.SerializeObject(space);
 
-        //    var json = JsonConvert.SerializeObject(space);
-        //    //System.Console.Error.WriteLine(json);
-        //    var newSpace = JsonConvert.DeserializeObject<Space>(json);
+            //if (!Debugger.IsAttached) Debugger.Launch();
+            var newSpace = JsonConvert.DeserializeObject<Space>(json);
 
-        //    Assert.That(newSpace.IsKnown);
-        //    Assert.That(newSpace.IsSown);
-        //    Assert.That(newSpace.IsTilled);
-        //}
+            Assert.That(newSpace.IsKnown);
+            Assert.That(newSpace.IsSown);
+            Assert.That(newSpace.IsTilled);
+        }
 
-        //[Test]
-        //public void CRT_SpaceMap()
-        //{
-        //    var map = new SpaceMap(5, 5)
-        //    {
-        //        PlayerStartPoint = (3, 3)
-        //    };
+        [Test]
+        public void CRT_SpaceMap()
+        {
+            var map = new SpaceMap(5, 5)
+            {
+                PlayerStartPoint = (3, 3)
+            };
 
-        //    map.AddItem(new Space(888), (4, 4));
+            map.AddItem(new Space(888), (4, 4));
 
-        //    var json = JsonConvert.SerializeObject(map);
-        //    Debugger.Launch();
-        //    //System.Console.Error.WriteLine(json);
-        //    var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
+            var json = JsonConvert.SerializeObject(map);
+            //Debugger.Launch();
+            //System.Console.Error.WriteLine(json);
+            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
 
-        //    Assert.That(newMap.Height, Is.EqualTo(5));
-        //    Assert.That(newMap.Width, Is.EqualTo(5));
-        //    Assert.That(newMap.PlayerStartPoint, Is.EqualTo((3, 3)));
+            Assert.That(newMap.Height, Is.EqualTo(5));
+            Assert.That(newMap.Width, Is.EqualTo(5));
+            Assert.That(newMap.PlayerStartPoint, Is.EqualTo((3, 3)));
 
-        //    var space = newMap.GetItem((4, 4));
-        //    Assert.That(space, Is.Not.Null);
-        //}
+            var space = newMap.GetItem((4, 4));
+            Assert.That(space, Is.Not.Null);
+        }
 
-        //[Test]
-        //public void CRT_BlightMap()
-        //{
-        //    //0.2: int ctor arg = deserializing workaround
-        //    var map = new BlightMap(1) { Name = "Bofungus" };
-        //    var blight = new AreaBlight(888) { Extent = 11 };
-        //    map.AddItem(blight, (7, 11));
-        //    map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
+        [Test]
+        public void CRT_AreaBlight()
+        {
+            var blight = new AreaBlight(22) { Extent = 14 };
 
-        //    var json = JsonConvert.SerializeObject(map);
-        //    //System.Console.Error.WriteLine(json);
-        //    //Debugger.Launch();
-        //    var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
+            var json = JsonConvert.SerializeObject(blight);
+            //System.Console.Error.WriteLine(json);
+            var newBlight = JsonConvert.DeserializeObject<IAreaBlight>(json);
 
-        //    Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
-        //    var entry = newMap.GetItem((7, 11));
-        //    Assert.That(entry, Is.Not.Null);
-        //    Assert.That(entry.ID, Is.EqualTo(888));
-        //}
+            Assert.That(newBlight.ID, Is.EqualTo(22));
+            Assert.That(newBlight.Extent, Is.EqualTo(14));
+        }
 
+        [Test]
+        public void CRT_BlightMap()
+        {
+            //0.2: int ctor arg = deserializing workaround
+            var map = new BlightMap(1) { Name = "Bofungus" };
+            var blight = new AreaBlight(888) { Extent = 11 };
+            map.AddItem(blight, (7, 11));
+            map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
 
-        //[Test]
-        //public void CRT_SpaceMap_down_to_Cell()
-        //{
-        //    Cell originalCell = new Cell
-        //    {
-        //        Glyph = '~',
-        //    };
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            //Debugger.Launch();
+            var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
 
-        //    var originalTerrain = new TerrainType
-        //    {
-        //        Looks = originalCell
-        //    };
+            Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
+            var entry = newMap.GetItem((7, 11));
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.ID, Is.EqualTo(888));
+        }
 
-        //    var originalSpace = new Space(888)
-        //    {
-        //        Terrain = originalTerrain
-        //    };
+        [Test]
+        public void CRT_SpaceMap_down_to_Cell()
+        {
+            Cell originalCell = new Cell
+            {
+                Glyph = '~',
+            };
 
-        //    var map = new SpaceMap(6, 6);
+            var originalTerrain = new TerrainType
+            {
+                Looks = originalCell
+            };
 
-        //    map.AddItem(originalSpace, (4, 4));
+            var originalSpace = new Space(888)
+            {
+                Terrain = originalTerrain
+            };
 
-        //    var json = JsonConvert.SerializeObject(map);
-        //    //System.Console.Error.WriteLine(json);
-        //    var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
+            var map = new SpaceMap(6, 6);
 
-        //    var space = newMap.GetItem((4, 4));
-        //    var cell = space.Terrain.Looks;
-        //    Assert.That(cell, Is.Not.Null);
-        //    Assert.That(cell.Glyph, Is.EqualTo('~'));
-        //}
+            map.AddItem(originalSpace, (4, 4));
 
-        //[Test]
-        //public void CRT_AreaBlight()
-        //{
-        //    var blight = new AreaBlight() { Extent = 14 };
+            var json = JsonConvert.SerializeObject(map);
+            //System.Console.Error.WriteLine(json);
+            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
 
-        //    var json = JsonConvert.SerializeObject(blight);
-        //    //System.Console.Error.WriteLine(json);
-        //    var newBlight = JsonConvert.DeserializeObject<AreaBlight>(json);
+            var space = newMap.GetItem((4, 4));
+            var cell = space.Terrain.Looks;
+            Assert.That(cell, Is.Not.Null);
+            Assert.That(cell.Glyph, Is.EqualTo('~'));
+        }
 
-        //    Assert.That(newBlight.Extent, Is.EqualTo(14));
-        //}
-
+        //TODO: Bring these back to use when serializing random
         //public static byte[] ObjectToByteArray(object obj)
         //{
         //    BinaryFormatter bf = new BinaryFormatter();

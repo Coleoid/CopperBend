@@ -26,8 +26,8 @@ namespace CopperBend.Model
             : base((0,0), 1, true)
         { }
 
-        public Seed(Coord position, int quantity, uint typeID)
-            : base(position, quantity, true)
+        public Seed(Coord position, int quantity, uint typeID, uint id = uint.MaxValue)
+            : base(position, quantity, true, id)
         {
             PlantDetails = PlantByID[typeID];
         }

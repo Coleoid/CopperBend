@@ -5,16 +5,11 @@ using Newtonsoft.Json.Linq;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
+using System.Diagnostics;
 
-//  This namespace encapsulates a problematic loop in the dependency graph.
-//  .Persist refers to .Model innately, it's creating domain objects.
-//  .Contract refers to .Persist, via the [JsonConverter(typeof(Converter_of_IItem))] on IItem.
-//  ...but .Contract should not refer to .Model, and now it does, transitively.
-//  There's at least one alternate way to connect the JsonConverter...
-//      "...and I had to find out WHO HE WAS."
 namespace CopperBend.Persist
 {
-    public class Converter_of_IItem : JsonConverter
+    public class JConv_IItem : JsonConverter
     {
         public override bool CanWrite => false;
         public override bool CanRead => true;
@@ -36,6 +31,7 @@ namespace CopperBend.Persist
 
         public IItem ReadJObject(JObject jOb, JsonSerializer serializer)
         {
+            var id = jOb["ID"].ToObject<uint>();
             var locnText = jOb["Location"].ToString();
             var nums = Regex.Matches(locnText, @"\d+");
             int x = int.Parse(nums[1].Value);
@@ -43,14 +39,19 @@ namespace CopperBend.Persist
             var coord = new Coord(x, y);
 
             var itemType = jOb["ItemType"].Value<string>();
-            IItem item = default(IItem);
+            IItem item = default;
             switch (itemType)
             {
             case "Item":
-                item = new Item(coord);
+                item = new Item(coord, id: id);
                 break;
             case "Knife":
-                item = new Knife(coord);
+                item = new Knife(coord, id: id);
+                break;
+                case "Fruit":
+                var quantity = jOb["Quantity"].Value<int>();
+                var details = jOb["PlantDetails"].ToObject<PlantDetails>();
+                item = new Fruit(coord, quantity, details, id);
                 break;
 
             default:

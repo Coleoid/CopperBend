@@ -5,7 +5,7 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Persist
 {
-    public class ItemMapConverter : JsonConverter
+    public class JConv_ItemMap : JsonConverter
     {
         public override bool CanWrite => false;
         public override bool CanRead => true;
@@ -25,7 +25,7 @@ namespace CopperBend.Persist
             Type objectType, object existingValue,
             JsonSerializer serializer)
         {
-            var itemConverter = new Converter_of_IItem();
+            var itemConverter = new JConv_IItem();
             ItemMap map = new ItemMap();
 
             foreach (JObject jOb in JArray.Load(reader))

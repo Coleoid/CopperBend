@@ -11,6 +11,7 @@ namespace CopperBend.Contract
         bool IsPlayer { get; set; }
 
         Color Foreground { get; }
+        Color Background { get; }
         int Glyph { get; }
 
         ICommandSource CommandSource { get; set; }

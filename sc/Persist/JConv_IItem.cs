@@ -40,13 +40,13 @@ namespace CopperBend.Persist
 
 
             var itemType = jOb["ItemType"].Value<string>();
-            IItem item = default;
+            IItem item;
             switch (itemType)
             {
             case "Item":
-                throw new Exception("Is it ever legit to do this?");
-                //item = new Item(coord, id: id);
-                //break;
+                //throw new Exception("Is it ever legit to do this?");
+                item = new Item(coord, id: id);
+                break;
             case "Knife":
                 item = new Knife(coord, id: id);
                 break;

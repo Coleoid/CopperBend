@@ -5,8 +5,10 @@ namespace CopperBend.Model
 {
     public class Player : Being
     {
-        public Player(Color foreground, Color background, int glyph = '@')
-            : base(foreground, background, glyph)
+        public override string BeingType { get; set; } = "Player";
+
+        public Player(Color foreground, Color background, int glyph = '@', uint id = uint.MaxValue)
+            : base(foreground, background, glyph, id)
         {
             IsPlayer = true;
         }

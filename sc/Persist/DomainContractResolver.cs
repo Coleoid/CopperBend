@@ -15,22 +15,11 @@ namespace CopperBend.Persist
         {
             JsonContract contract = base.CreateContract(objectType);
 
-            if (objectType == typeof(ItemMap))
-            {
-                contract.Converter = new JConv_ItemMap();
-            }
-            if (typeof(IItem).IsAssignableFrom(objectType))
-            {
-                contract.Converter = new JConv_IItem();
-            }
-            if (typeof(ISpace).IsAssignableFrom(objectType))
-            {
-                contract.Converter = new JConv_ISpace();
-            }
-            if (typeof(IAreaBlight).IsAssignableFrom(objectType))
-            {
-                contract.Converter = new JConv_IAreaBlight();
-            }
+            if (objectType == typeof(ItemMap)) contract.Converter = new JConv_ItemMap();
+            else if (typeof(IItem).IsAssignableFrom(objectType)) contract.Converter = new JConv_IItem();
+            else if (typeof(ISpace).IsAssignableFrom(objectType)) contract.Converter = new JConv_ISpace();
+            else if (typeof(IAreaBlight).IsAssignableFrom(objectType)) contract.Converter = new JConv_IAreaBlight();
+            else if (typeof(IBeing).IsAssignableFrom(objectType)) contract.Converter = new JConv_IBeing();
 
             return contract;
         }

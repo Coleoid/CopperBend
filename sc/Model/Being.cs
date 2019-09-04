@@ -8,23 +8,33 @@ using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
-    public class Being : CbEntity, IBeing, ITakeScEntity
+    public class Being : CbEntity, IBeing, ITakeScEntity, IHasID
     {
+        public virtual string BeingType { get; set; } = "Being";
+
         public int Health { get; set; }
         public int MaxHealth { get; set; }
         public char Symbol { get; set; }
 
-        public Color Foreground => ScEntity.Animation.CurrentFrame[0].Foreground;
-        public Color Background => ScEntity.Animation.CurrentFrame[0].Background;
-        public int Glyph => ScEntity.Animation.CurrentFrame[0].Glyph;
+        // admirable clarity of intent, bad mockability
+        //public Color Foreground => ScEntity.Animation.CurrentFrame[0].Foreground;
+        //public Color Background => ScEntity.Animation.CurrentFrame[0].Background;
+        //public int Glyph => ScEntity.Animation.CurrentFrame[0].Glyph;
 
-        protected Being(Color foreground, Color background, int glyph)
-            : base()
+        public Color Foreground { get; set; }
+        public Color Background { get; set; }
+        public int Glyph { get; set; }
+
+        public Being(Color foreground, Color background, int glyph, uint id = uint.MaxValue)
+            : base(id)
         {
             Health = MaxHealth = 6;
             Awareness = 6;
 
             InventoryList = new List<IItem>();
+            Foreground = foreground;
+            Background = background;
+            Glyph = glyph;
             EntityFactory.WireCbEntity(this, foreground, background, glyph);
         }
 
@@ -66,8 +76,12 @@ namespace CopperBend.Model
         {
             get => InventoryList;
         }
-        public string Name { get => ScEntity.Name; set => ScEntity.Name = value; }
-        public Point Position { get => ScEntity.Position; set => ScEntity.Position = value; }
+
+        //public string Name { get => ScEntity.Name; set => ScEntity.Name = value; }
+        //public Point Position { get => ScEntity.Position; set => ScEntity.Position = value; }
+        public string Name { get; set; }
+        public Point Position { get; set; }
+
         public SadConsole.Console Console { get => (SadConsole.Console)ScEntity; }
         public static IEntityFactory EntityFactory { get; set; }
 
@@ -80,6 +94,7 @@ namespace CopperBend.Model
                 InventoryList.Add(item);
             else
                 existingItem.Quantity += item.Quantity;
+                // and 'delete' item?
         }
 
         public IItem RemoveFromInventory(int inventorySlot)

@@ -6,6 +6,7 @@ namespace CopperBend.Model
 {
     public class Item : IItem
     {
+        public string ItemType { get; }
         public Item(Coord location, int quantity = 1, bool isUsable = false, uint id = uint.MaxValue)
         {
             ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
@@ -22,7 +23,6 @@ namespace CopperBend.Model
 
         public virtual string Name { get; set; }
         public virtual string Adjective { get; set; } = string.Empty;
-        public virtual string ItemType { get; set; } = "Item";
         public int Quantity { get; set; }
 
         public Coord Location { get; set; }

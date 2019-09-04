@@ -26,53 +26,53 @@ namespace sc_tests
             };
         }
 
-        [Test]
-        public void CRT_Item()
-        {
-            var item = new Item((0, 0))
-            {
-                Name = "Fluffy",
-                Glyph = '*',
-                Adjective = "So",
-                Quantity = 120,
-                Foreground = Color.BlanchedAlmond,
-                IsUsable = false,
-            };
+        //[Test]
+        //public void CRT_Item()
+        //{
+        //    var item = new Item((0, 0))
+        //    {
+        //        Name = "Fluffy",
+        //        Glyph = '*',
+        //        Adjective = "So",
+        //        Quantity = 120,
+        //        Foreground = Color.BlanchedAlmond,
+        //        IsUsable = false,
+        //    };
 
-            var json = JsonConvert.SerializeObject(item);
-            var newItem = JsonConvert.DeserializeObject<Item>(json);
-            Assert.That(newItem.Name, Is.EqualTo(item.Name));
-            Assert.That(newItem.Adjective, Is.EqualTo(item.Adjective));
-            Assert.That(newItem.Glyph, Is.EqualTo(item.Glyph));
-            Assert.That(newItem.Quantity, Is.EqualTo(item.Quantity));
-            Assert.That(newItem.Foreground, Is.EqualTo(item.Foreground));
-            Assert.That(newItem.IsUsable, Is.EqualTo(item.IsUsable));
-        }
+        //    var json = JsonConvert.SerializeObject(item);
+        //    var newItem = JsonConvert.DeserializeObject<Item>(json);
+        //    Assert.That(newItem.Name, Is.EqualTo(item.Name));
+        //    Assert.That(newItem.Adjective, Is.EqualTo(item.Adjective));
+        //    Assert.That(newItem.Glyph, Is.EqualTo(item.Glyph));
+        //    Assert.That(newItem.Quantity, Is.EqualTo(item.Quantity));
+        //    Assert.That(newItem.Foreground, Is.EqualTo(item.Foreground));
+        //    Assert.That(newItem.IsUsable, Is.EqualTo(item.IsUsable));
+        //}
 
-        [Test]
-        public void CRT_IItem()
-        {
-            IItem item = new Item((0, 0))
-            {
-                Name = "Fluffy",
-                Glyph = '*',
-                Adjective = "So",
-                Quantity = 120,
-                Foreground = Color.BlanchedAlmond,
-                IsUsable = false,
-            };
+        //[Test]
+        //public void CRT_IItem()
+        //{
+        //    IItem item = new Item((0, 0))
+        //    {
+        //        Name = "Fluffy",
+        //        Glyph = '*',
+        //        Adjective = "So",
+        //        Quantity = 120,
+        //        Foreground = Color.BlanchedAlmond,
+        //        IsUsable = false,
+        //    };
 
-            var json = JsonConvert.SerializeObject(item);
-            IItem newItem = JsonConvert.DeserializeObject<IItem>(json);
-            Assert.That(newItem.Name, Is.EqualTo(item.Name));
-            Assert.That(newItem.Adjective, Is.EqualTo(item.Adjective));
-            Assert.That(newItem.Glyph, Is.EqualTo(item.Glyph));
-            Assert.That(newItem.Quantity, Is.EqualTo(item.Quantity));
-            Assert.That(newItem.Foreground, Is.EqualTo(item.Foreground));
-            Assert.That(newItem.IsUsable, Is.EqualTo(item.IsUsable));
+        //    var json = JsonConvert.SerializeObject(item);
+        //    IItem newItem = JsonConvert.DeserializeObject<IItem>(json);
+        //    Assert.That(newItem.Name, Is.EqualTo(item.Name));
+        //    Assert.That(newItem.Adjective, Is.EqualTo(item.Adjective));
+        //    Assert.That(newItem.Glyph, Is.EqualTo(item.Glyph));
+        //    Assert.That(newItem.Quantity, Is.EqualTo(item.Quantity));
+        //    Assert.That(newItem.Foreground, Is.EqualTo(item.Foreground));
+        //    Assert.That(newItem.IsUsable, Is.EqualTo(item.IsUsable));
 
-            Assert.That(newItem.ItemType, Is.EqualTo("Item"));
-        }
+        //    Assert.That(newItem.ItemType, Is.EqualTo("Item"));
+        //}
 
         [Test]
         public void CRT_IItem_Knife()
@@ -197,7 +197,9 @@ namespace sc_tests
         [Test]
         public void CRT_Seed()
         {
-            var seed = new Seed((2, 2), 4,  id: 66)
+            Seed.PlantByID[11] = new PlantDetails { ID = 11, FruitAdjective = "Fresh", SeedAdjective = "Burred", FruitKnown = true };
+
+            var seed = new Seed((2, 2), 4, 11, id: 66)
             {
                 Name = "Wendy",
                 Glyph = '.',
@@ -218,6 +220,32 @@ namespace sc_tests
             Assert.That(newSeed.Foreground, Is.EqualTo(seed.Foreground));
             Assert.That(newSeed.IsUsable, Is.EqualTo(seed.IsUsable));
             Assert.That(newSeed.ID, Is.EqualTo(66));
+        }
+
+        [Test]
+        public void CRT_Hoe()
+        {
+            var hoe = new Hoe((2, 2), id: 55)
+            {
+                Name = "Faithful",
+                Glyph = '/',
+                Adjective = "Copper",
+                Quantity = 3,
+                Foreground = Color.Red,
+                IsUsable = true,
+            };
+
+            var json = JsonConvert.SerializeObject(hoe);
+            //if(!Debugger.IsAttached) Debugger.Launch();
+
+            var newHoe = JsonConvert.DeserializeObject<Hoe>(json);
+            Assert.That(newHoe.Name, Is.EqualTo(hoe.Name));
+            Assert.That(newHoe.Adjective, Is.EqualTo(hoe.Adjective));
+            Assert.That(newHoe.Glyph, Is.EqualTo(hoe.Glyph));
+            Assert.That(newHoe.Quantity, Is.EqualTo(hoe.Quantity));
+            Assert.That(newHoe.Foreground, Is.EqualTo(hoe.Foreground));
+            Assert.That(newHoe.IsUsable, Is.EqualTo(hoe.IsUsable));
+            Assert.That(newHoe.ID, Is.EqualTo(55));
         }
 
         [Test]

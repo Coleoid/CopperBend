@@ -4,10 +4,11 @@ namespace CopperBend.Model
 {
     public class Hoe : Item
     {
-        public override string Name { get => "hoe"; }
+        public override string Name { get => "Hoe"; }
+        public override string ItemType { get => "Hoe"; }
 
-        public Hoe(Coord position)
-            : base(position, 1, true)
+        public Hoe(Coord position, uint id = uint.MaxValue)
+            : base(position, 1, true, id)
         {
             Glyph = '\\';
         }

@@ -7,6 +7,7 @@ namespace CopperBend.Model
 {
     public class Seed : Item, ISeed, IScheduleAgent
     {
+        public override string ItemType { get => "Seed"; }
         public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
         public static Dictionary<string, PlantDetails> PlantByName { get; set; }
 
@@ -30,6 +31,12 @@ namespace CopperBend.Model
             : base(position, quantity, true, id)
         {
             PlantDetails = PlantByID[typeID];
+        }
+
+        public Seed(Coord position, PlantDetails details, int quantity = 1, uint id = uint.MaxValue)
+            : base(position, quantity, true, id)
+        {
+            PlantDetails = details;
         }
 
         internal Seed GetSeedFromStack()

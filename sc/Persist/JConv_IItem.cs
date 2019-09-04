@@ -38,20 +38,30 @@ namespace CopperBend.Persist
             int y = int.Parse(nums[2].Value);
             var coord = new Coord(x, y);
 
+
             var itemType = jOb["ItemType"].Value<string>();
             IItem item = default;
             switch (itemType)
             {
             case "Item":
-                item = new Item(coord, id: id);
-                break;
+                throw new Exception("Is it ever legit to do this?");
+                //item = new Item(coord, id: id);
+                //break;
             case "Knife":
                 item = new Knife(coord, id: id);
                 break;
-                case "Fruit":
+            case "Fruit":
                 var quantity = jOb["Quantity"].Value<int>();
                 var details = jOb["PlantDetails"].ToObject<PlantDetails>();
                 item = new Fruit(coord, quantity, details, id);
+                break;
+            case "Seed":
+                //quantity = jOb["Quantity"].Value<int>();
+                details = jOb["PlantDetails"].ToObject<PlantDetails>();
+                item = new Seed(coord, details, id: id);
+                break;
+            case "Hoe":
+                item = new Hoe(coord, id);
                 break;
 
             default:

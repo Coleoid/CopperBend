@@ -18,7 +18,7 @@ namespace CopperBend.Fabric
 
         public string TopSeed { get; private set; }
         public int TopSeedInt { get; private set; }
-        public AbstractGenerator TopGenerator { get; private set; }
+        public AbstractGenerator TopGenerator { get; set; }
         
         public AbstractGenerator MapTopGenerator { get; private set; }
         private Dictionary<Maps, AbstractGenerator> MapGenerators { get; set; }

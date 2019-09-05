@@ -1,8 +1,10 @@
-﻿using CopperBend.Contract;
+﻿using System.Diagnostics;
+using CopperBend.Contract;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using CopperBend.Persist;
 using CopperBend.Fabric;
+using YamlDotNet.Serialization;
 
 namespace sc_tests
 {
@@ -24,10 +26,36 @@ namespace sc_tests
         [Test]
         public void CRT_Tome_of_Chaos()
         {
-            var tome = new TomeOfChaos();
+            var tome = new TomeOfChaos("floop");
             var json = JsonConvert.SerializeObject(tome);
-            var newTome = JsonConvert.DeserializeObject<IBook>(json);
-            Assert.That(newTome, Is.TypeOf<TomeOfChaos>());
+            var newBook = JsonConvert.DeserializeObject<IBook>(json);
+            Assert.That(newBook, Is.TypeOf<TomeOfChaos>());
+            var newTome = (TomeOfChaos)newBook;
+            Assert.That(newTome.TopSeed, Is.EqualTo("floop"));
+        }
+
+        [Test]
+        public void Y_CRT_Tome_of_Chaos()
+        {
+            //if (!Debugger.IsAttached) Debugger.Launch();
+
+            var serializer = new SerializerBuilder()
+                .WithTypeConverter(new YConv_IBook())
+                .Build();
+
+            var deserializer = new DeserializerBuilder()
+                .WithTypeConverter(new YConv_IBook())
+                .Build();
+
+            var tome = new TomeOfChaos("floop");
+            var yaml = serializer.Serialize(tome);
+
+            Assert.That(yaml, Is.Not.Null);
+
+            var newBook = deserializer.Deserialize<IBook>(yaml);
+            Assert.That(newBook, Is.TypeOf<TomeOfChaos>());
+            var newTome = (TomeOfChaos)newBook;
+            Assert.That(newTome.TopSeed, Is.EqualTo("floop"));
         }
     }
 

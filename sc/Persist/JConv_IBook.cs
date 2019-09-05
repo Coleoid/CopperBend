@@ -38,7 +38,8 @@ namespace CopperBend.Persist
             switch (bookType)
             {
             case "TomeOfChaos":
-                book = new TomeOfChaos();
+                var topSeed = jOb["TopSeed"].Value<string>();
+                book = new TomeOfChaos(topSeed);
                 break;
 
             default:

@@ -38,8 +38,11 @@ namespace CopperBend.Persist
             int y = int.Parse(nums[2].Value);
             var coord = new Coord(x, y);
 
+            string distinguisher = "ItemType";
+            if (!jOb.HasValues || jOb[distinguisher] == null)
+                throw new Exception($"Unexpectedly missing a distinguisher named {distinguisher} in JObject:\n{jOb.ToString()}");
 
-            var itemType = jOb["ItemType"].Value<string>();
+            var itemType = jOb[distinguisher].Value<string>();
             IItem item;
             switch (itemType)
             {

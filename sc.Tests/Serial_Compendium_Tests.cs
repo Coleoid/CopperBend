@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using NUnit.Framework;
 using CopperBend.Persist;
+using CopperBend.Fabric;
 
 namespace sc_tests
 {

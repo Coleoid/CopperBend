@@ -29,7 +29,11 @@ namespace CopperBend.Persist
 
         public IBook ReadJObject(JObject jOb, JsonSerializer serializer)
         {
-            var bookType = jOb["BookType"].Value<string>();
+            string distinguisher = "BookType";
+            if (!jOb.HasValues || jOb[distinguisher] == null)
+                throw new Exception($"Unexpectedly missing a distinguisher named {distinguisher} in JObject:\n{jOb.ToString()}");
+
+            var bookType = jOb[distinguisher].Value<string>();
             IBook book;
             switch (bookType)
             {
@@ -38,7 +42,7 @@ namespace CopperBend.Persist
                 break;
 
             default:
-                throw new Exception($"Unknown book type [{bookType}].");
+                throw new Exception($"Don't know how to create book type [{bookType}].");
             }
 
             serializer.Populate(jOb.CreateReader(), book);

@@ -36,8 +36,12 @@ namespace CopperBend.Persist
             var glyph = jOb["Glyph"].ToObject<char>();
             var id = jOb["ID"].ToObject<uint>();
 
+            string distinguisher = "BeingType";
+            if (!jOb.HasValues || jOb[distinguisher] == null)
+                throw new Exception($"Unexpectedly missing a distinguisher named {distinguisher} in JObject:\n{jOb.ToString()}");
+
+            var beingType = jOb[distinguisher].Value<string>();
             IBeing being;
-            var beingType = jOb["BeingType"].Value<string>();
             switch (beingType)
             {
             case "Being":

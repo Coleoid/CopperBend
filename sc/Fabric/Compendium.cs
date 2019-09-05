@@ -1,4 +1,5 @@
-﻿using CopperBend.Contract;
+﻿using System;
+using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {
@@ -9,16 +10,6 @@ namespace CopperBend.Fabric
         public Herbal Herbal { get; set; }
         public SocialRegister SocialRegister { get; set; }
         public Dramaticon Dramaticon { get; set; }
-    }
-    
-    // The Tome of Chaos contains all the RNGs for the game.
-    // We have multiple RNGs with their own responsibilities, to create
-    // essentially repeatable worlds from an initial seed, regardless of
-    // the path the player takes in the world.  This should improve debug
-    // work, and demotivate savescumming to re-spin the wheel of treasure.
-    public class TomeOfChaos : IBook
-    {
-        public string BookType { get; set; } = "TomeOfChaos";
     }
 
     // The Herbal contains plant types, and what the player knows about them

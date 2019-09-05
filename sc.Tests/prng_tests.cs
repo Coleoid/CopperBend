@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using NUnit.Framework;
@@ -11,6 +12,11 @@ namespace sc_tests
     [TestFixture]
     public class prng_tests
     {
+        [OneTimeSetUp]
+        public void OTSU()
+        {
+            //if (!Debugger.IsAttached) Debugger.Launch();
+        }
         //  not legit in dontet core
         //[Test]
         //public void Serializing_dotnet_Random_keeps_sequence()

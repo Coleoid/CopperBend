@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using CopperBend.Persist;
 using CopperBend.Fabric;
+using Troschuetz.Random.Generators;
 using YamlDotNet.Serialization;
 
 namespace sc_tests
@@ -37,7 +38,7 @@ namespace sc_tests
         [Test]
         public void Y_CRT_Tome_of_Chaos()
         {
-            //if (!Debugger.IsAttached) Debugger.Launch();
+            if (!Debugger.IsAttached) Debugger.Launch();
 
             var serializer = new SerializerBuilder()
                 .WithTypeConverter(new YConv_IBook())
@@ -56,6 +57,14 @@ namespace sc_tests
             Assert.That(newBook, Is.TypeOf<TomeOfChaos>());
             var newTome = (TomeOfChaos)newBook;
             Assert.That(newTome.TopSeed, Is.EqualTo("floop"));
+            Assert.That(newTome.TopGenerator, Is.TypeOf<XorShift128Generator>());
+            Assert.That(newTome.MapTopGenerator, Is.TypeOf<XorShift128Generator>());
+            Assert.That(newTome.LearnableTopGenerator, Is.TypeOf<XorShift128Generator>());
+
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.That(newTome.LearnableRndNext(Learnables.Fruit), Is.EqualTo(tome.LearnableRndNext(Learnables.Fruit)));
+            }
         }
     }
 

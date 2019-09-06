@@ -18,39 +18,102 @@ namespace CopperBend.Persist
             return typeof(IBook).IsAssignableFrom(type);
         }
 
+        public void WriteYaml(IEmitter emitter, object value, Type type)
+        {
+            IBook book = (IBook)value;
+
+            emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
+
+            EmitNextPair("BookType", book.BookType, emitter);
+
+            switch (book.BookType)
+            {
+            case "TomeOfChaos":
+                EmitTome(book, emitter);
+                break;
+
+            //0.1.SAVE:  Write remainder of Compendium
+
+            default:
+                throw new NotImplementedException($"Not ready to Write book type [{book.BookType}].");
+            }
+
+            emitter.Emit(new MappingEnd());
+        }
+
+        private void EmitTome(IBook book, IEmitter emitter)
+        {
+            var tome = (TomeOfChaos)book;
+
+            EmitNextPair("TopSeed", tome.TopSeed, emitter);
+            EmitNextPair("TopGenerator", SerializedRNG(tome.TopGenerator), emitter);
+            EmitNextPair("MapTopGenerator", SerializedRNG(tome.MapTopGenerator), emitter);
+            EmitNextPair("LearnableTopGenerator", SerializedRNG(tome.LearnableTopGenerator), emitter);
+            EmitNextPair($"LearnableTopGenerator[{Learnables.Seed}]", SerializedRNG(tome.LearnableRndGen(Learnables.Seed)), emitter);
+
+            //0.1.SAVE:  Write remainder of Tome, these named sets are scaling... iffily.
+        }
+
+        public void EmitNextPair(string key, string value, IEmitter emitter)
+        {
+            emitter.Emit(new Scalar(null, key));
+            emitter.Emit(new Scalar(null, value));
+        }
+
         public object ReadYaml(IParser parser, Type type)
         {
-            if (!Debugger.IsAttached) Debugger.Launch();
-            TomeOfChaos tome = null;
-            string bookType = string.Empty;
+            //if (!Debugger.IsAttached) Debugger.Launch();
+            IBook book = null;
 
-            parser.Accept<MappingStart>();
-            while (parser.MoveNext() && parser.Current.GetType() == typeof(Scalar))
+            parser.Expect<MappingStart>();
+            var bookType = getValueNext("BookType", parser);
+
+            switch (bookType)
             {
-                string label = getScalarString(parser);
-                parser.MoveNext();
-                switch (label)
-                {
-                case "BookType":
-                    bookType = getScalarString(parser);
-                    break;
+            case "TomeOfChaos":
+                book = ParseTome(parser);
+                break;
 
-                case "TopSeed":
-                    tome = new TomeOfChaos(getScalarString(parser));
-                    break;
+            //0.1.SAVE:  Read remainder of Compendium
 
-                case "TopGenerator":
-                    string rng_b64 = getScalarString(parser);
-                    tome.TopGenerator = RngFromBase64(rng_b64);
-                    break;
-
-                default:
-                    throw new NotImplementedException($"Not ready for property {label}.");
-                }
+            default:
+                throw new NotImplementedException($"Not ready to Read book type [{bookType}].");
             }
 
             parser.Expect<MappingEnd>();
+            return book;
+        }
+
+        private TomeOfChaos ParseTome(IParser parser)
+        {
+            TomeOfChaos tome = null;
+
+            var topSeed = getValueNext("TopSeed", parser);
+            tome = new TomeOfChaos(topSeed);
+
+            var rng_b64 = getValueNext("TopGenerator", parser);
+            tome.TopGenerator = RngFromBase64(rng_b64);
+
+            //0.1.SAVE: Parse out the remaining RNGs
+
             return tome;
+        }
+
+        private string getValueNext(string valueName, IParser parser)
+        {
+            ExpectScalar(parser, valueName);
+            parser.MoveNext();
+            var val = getScalarString(parser);
+            parser.MoveNext();
+            return val;
+        }
+
+        private void ExpectScalar(IParser parser, string expectedString)
+        {
+            string label = getScalarString(parser);
+
+            if (label != expectedString)
+                throw new Exception($"Expected '{expectedString}', got '{label}'.");
         }
 
         private AbstractGenerator RngFromBase64(string rng_b64)
@@ -76,28 +139,6 @@ namespace CopperBend.Persist
             var scalar = parser.Current as Scalar;
 
             return scalar.Value;
-        }
-
-        public void WriteYaml(IEmitter emitter, object value, Type type)
-        {
-            IBook book = (IBook) value;
-
-            emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
-            emitter.Emit(new Scalar(null, "BookType"));
-            emitter.Emit(new Scalar(null, book.BookType));
-
-            if (book.BookType == "TomeOfChaos")
-            {
-                var tome = (TomeOfChaos)book;
-
-                emitter.Emit(new Scalar(null, "TopSeed"));
-                emitter.Emit(new Scalar(null, tome.TopSeed));
-
-                emitter.Emit(new Scalar(null, "TopGenerator"));
-                emitter.Emit(new Scalar(null, SerializedRNG(tome.TopGenerator)));
-            }
-
-            emitter.Emit(new MappingEnd());
         }
 
         public string SerializedRNG(AbstractGenerator generator)

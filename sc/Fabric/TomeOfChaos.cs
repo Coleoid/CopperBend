@@ -20,11 +20,10 @@ namespace CopperBend.Fabric
         public int TopSeedInt { get; private set; }
         public AbstractGenerator TopGenerator { get; set; }
         
-        public AbstractGenerator MapTopGenerator { get; private set; }
+        public AbstractGenerator LearnableGenerator { get; set; }
+        public AbstractGenerator MapTopGenerator { get; set; }
         private Dictionary<Maps, AbstractGenerator> MapGenerators { get; set; }
 
-        public AbstractGenerator LearnableTopGenerator { get; private set; }
-        private Dictionary<Learnables, AbstractGenerator> LearnableGenerators { get; set; }
 
         public TomeOfChaos()
             : this("must become better soon")
@@ -42,18 +41,13 @@ namespace CopperBend.Fabric
 
             // The order of each group of 'new ...Next())' calls matters for
             // repeatability, which affects saved games and debug dumps.
+            LearnableGenerator = new XorShift128Generator(TopGenerator.Next());
             MapTopGenerator = new XorShift128Generator(TopGenerator.Next());
-            LearnableTopGenerator = new XorShift128Generator(TopGenerator.Next());
-
-            MapGenerators = new Dictionary<Maps, AbstractGenerator>();
-            MapGenerators[Maps.TackerFarm] = new XorShift128Generator(MapTopGenerator.Next());
-            MapGenerators[Maps.TownBastion] = new XorShift128Generator(MapTopGenerator.Next());
-
-            LearnableGenerators = new Dictionary<Learnables, AbstractGenerator>();
-            LearnableGenerators[Learnables.Seed] = new XorShift128Generator(LearnableTopGenerator.Next());
-            LearnableGenerators[Learnables.Fruit] = new XorShift128Generator(LearnableTopGenerator.Next());
-            LearnableGenerators[Learnables.Potion] = new XorShift128Generator(LearnableTopGenerator.Next());
-            LearnableGenerators[Learnables.Scroll] = new XorShift128Generator(LearnableTopGenerator.Next());
+            MapGenerators = new Dictionary<Maps, AbstractGenerator>
+            {
+                [Maps.TackerFarm] = new XorShift128Generator(MapTopGenerator.Next()),
+                [Maps.TownBastion] = new XorShift128Generator(MapTopGenerator.Next())
+            };
         }
 
         protected internal virtual AbstractGenerator MapRndGen(Maps map)
@@ -66,14 +60,9 @@ namespace CopperBend.Fabric
             return MapRndGen(map).Next();
         }
 
-        protected internal virtual AbstractGenerator LearnableRndGen(Learnables Learnable)
+        public int LearnableRndNext()
         {
-            return LearnableGenerators[Learnable];
-        }
-
-        public int LearnableRndNext(Learnables Learnable)
-        {
-            return LearnableRndGen(Learnable).Next();
+            return LearnableGenerator.Next();
         }
     }
 }

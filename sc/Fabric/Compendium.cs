@@ -1,5 +1,4 @@
-﻿using System;
-using CopperBend.Contract;
+﻿using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {
@@ -32,7 +31,7 @@ namespace CopperBend.Fabric
         public string BookType { get; set; } = "Dramaticon";
     }
 
-    //  ===  Second wave below, current plans don't immediately need these
+    #region ===  Second wave below, current plans don't immediately need these
 
     // Creatures
     public class Bestiary : IBook
@@ -53,4 +52,5 @@ namespace CopperBend.Fabric
     {
         public string BookType { get; set; } = "NamestOfLames";
     }
+    #endregion
 }

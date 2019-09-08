@@ -56,31 +56,14 @@ namespace sc.Tests.Books
             var tome_1 = new TomeOfChaos(topSeed + "a");
             var tome_2 = new TomeOfChaos(topSeed + "b");
 
-            int next_se_1 = tome_1.LearnableRndNext(Learnables.Seed);
-            int next_se_2 = tome_2.LearnableRndNext(Learnables.Seed);
+            int next_se_1 = tome_1.LearnableRndNext();
+            int next_se_2 = tome_2.LearnableRndNext();
 
-            int next_sc_1 = tome_1.LearnableRndNext(Learnables.Scroll);
-            int next_sc_2 = tome_2.LearnableRndNext(Learnables.Scroll);
+            int next_sc_1 = tome_1.LearnableRndNext();
+            int next_sc_2 = tome_2.LearnableRndNext();
 
             Assert.That(next_sc_1, Is.Not.EqualTo(next_se_1));
             Assert.That(next_sc_2, Is.Not.EqualTo(next_se_2));
-        }
-
-        [TestCase("A")]
-        [TestCase("B")]
-        public void LearnableSeeds_remain_stable_when_used_in_different_orders(string topSeed)
-        {
-            var tome_1 = new TomeOfChaos(topSeed);
-            var tome_2 = new TomeOfChaos(topSeed);
-
-            int next_fr_1 = tome_1.LearnableRndNext(Learnables.Fruit);
-            int next_po_1 = tome_1.LearnableRndNext(Learnables.Potion);
-
-            int next_po_2 = tome_2.LearnableRndNext(Learnables.Potion);
-            int next_fr_2 = tome_2.LearnableRndNext(Learnables.Fruit);
-
-            Assert.That(next_po_1, Is.EqualTo(next_po_2));
-            Assert.That(next_fr_1, Is.EqualTo(next_fr_2));
         }
     }
 }

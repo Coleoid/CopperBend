@@ -47,9 +47,8 @@ namespace CopperBend.Persist
 
             EmitNextPair("TopSeed", tome.TopSeed, emitter);
             EmitNextPair("TopGenerator", SerializedRNG(tome.TopGenerator), emitter);
+            EmitNextPair("LearnableGenerator", SerializedRNG(tome.LearnableGenerator), emitter);
             EmitNextPair("MapTopGenerator", SerializedRNG(tome.MapTopGenerator), emitter);
-            EmitNextPair("LearnableTopGenerator", SerializedRNG(tome.LearnableTopGenerator), emitter);
-            EmitNextPair($"LearnableTopGenerator[{Learnables.Seed}]", SerializedRNG(tome.LearnableRndGen(Learnables.Seed)), emitter);
 
             //0.1.SAVE:  Write remainder of Tome, these named sets are scaling... iffily.
         }
@@ -93,6 +92,12 @@ namespace CopperBend.Persist
 
             var rng_b64 = getValueNext("TopGenerator", parser);
             tome.TopGenerator = RngFromBase64(rng_b64);
+
+            rng_b64 = getValueNext("LearnableGenerator", parser);
+            tome.LearnableGenerator = RngFromBase64(rng_b64);
+
+            rng_b64 = getValueNext("MapTopGenerator", parser);
+            tome.MapTopGenerator = RngFromBase64(rng_b64);
 
             //0.1.SAVE: Parse out the remaining RNGs
 

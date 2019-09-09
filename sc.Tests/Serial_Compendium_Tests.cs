@@ -66,6 +66,40 @@ namespace sc_tests
                 Assert.That(newTome.LearnableRndNext(), Is.EqualTo(tome.LearnableRndNext()));
             }
         }
+
+        [Test]
+        public void Y_CRT_Compendium()
+        {
+            var serializer = new SerializerBuilder()
+                .WithTypeConverter(new YConv_IBook())
+                .Build();
+
+            var deserializer = new DeserializerBuilder()
+                .WithTypeConverter(new YConv_IBook())
+                .Build();
+
+            var compendium = new Compendium
+            {
+                TomeOfChaos = new TomeOfChaos("gloop"),
+                Herbal = new Herbal(),
+                SocialRegister = new SocialRegister(),
+                Dramaticon = new Dramaticon(),
+            };
+
+            //if (!Debugger.IsAttached) Debugger.Launch();
+            var yaml = serializer.Serialize(compendium);
+
+            Assert.That(yaml, Is.Not.Null);
+
+            var newBook = deserializer.Deserialize<IBook>(yaml);
+            Assert.That(newBook, Is.TypeOf<Compendium>());
+            var newCompendium = (Compendium)newBook;
+            Assert.That(newCompendium.BookType, Is.EqualTo("Compendium"));
+            Assert.That(newCompendium.TomeOfChaos.TopSeed, Is.EqualTo("gloop"));
+            Assert.That(newCompendium.Herbal, Is.Not.Null);
+            Assert.That(newCompendium.SocialRegister, Is.Not.Null);
+            Assert.That(newCompendium.Dramaticon, Is.Not.Null);
+        }
     }
 
 }

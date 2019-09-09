@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using Troschuetz.Random.Generators;
 using YamlDotNet.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using CopperBend.Contract;
 using CopperBend.Fabric;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace CopperBend.Persist
 {
@@ -24,12 +24,29 @@ namespace CopperBend.Persist
 
             emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
 
-            EmitNextPair("BookType", book.BookType, emitter);
+            EmitKVP(emitter, "BookType", book.BookType);
 
             switch (book.BookType)
             {
+            case "Compendium":
+                //emitter.Emit(new Scalar(null, "Compendium"));
+                EmitCompendium(emitter, book);
+                break;
+
             case "TomeOfChaos":
-                EmitTome(book, emitter);
+                EmitTome(emitter, book);
+                break;
+
+            case "Herbal":
+                EmitHerbal(emitter, book);
+                break;
+
+            case "SocialRegister":
+                EmitSocialRegister(emitter, book);
+                break;
+
+            case "Dramaticon":
+                EmitDramaticon(emitter, book);
                 break;
 
             //0.1.SAVE:  Write remainder of Compendium
@@ -41,19 +58,60 @@ namespace CopperBend.Persist
             emitter.Emit(new MappingEnd());
         }
 
-        private void EmitTome(IBook book, IEmitter emitter)
+        private void EmitCompendium(IEmitter emitter, IBook book)
+        {
+            var compendium = (Compendium)book;
+
+            if (compendium.TomeOfChaos != null)
+            {
+                emitter.Emit(new Scalar(null, "TomeOfChaos"));
+                WriteYaml(emitter, compendium.TomeOfChaos, typeof(TomeOfChaos));
+            }
+
+            if (compendium.Herbal != null)
+            {
+                emitter.Emit(new Scalar(null, "Herbal"));
+                WriteYaml(emitter, compendium.Herbal, typeof(Herbal));
+            }
+
+            if (compendium.SocialRegister != null)
+            {
+                emitter.Emit(new Scalar(null, "SocialRegister"));
+                WriteYaml(emitter, compendium.SocialRegister, typeof(SocialRegister));
+            }
+
+            if (compendium.Dramaticon != null)
+            {
+                emitter.Emit(new Scalar(null, "Dramaticon"));
+                WriteYaml(emitter, compendium.Dramaticon, typeof(Dramaticon));
+            }
+        }
+
+        private void EmitTome(IEmitter emitter, IBook book)
         {
             var tome = (TomeOfChaos)book;
 
-            EmitNextPair("TopSeed", tome.TopSeed, emitter);
-            EmitNextPair("TopGenerator", SerializedRNG(tome.TopGenerator), emitter);
-            EmitNextPair("LearnableGenerator", SerializedRNG(tome.LearnableGenerator), emitter);
-            EmitNextPair("MapTopGenerator", SerializedRNG(tome.MapTopGenerator), emitter);
+            EmitKVP(emitter, "TopSeed", tome.TopSeed);
+            EmitKVP(emitter, "TopGenerator", SerializedRNG(tome.TopGenerator));
+            EmitKVP(emitter, "LearnableGenerator", SerializedRNG(tome.LearnableGenerator));
+            EmitKVP(emitter, "MapTopGenerator", SerializedRNG(tome.MapTopGenerator));
 
             //0.1.SAVE:  Write remainder of Tome, these named sets are scaling... iffily.
         }
 
-        public void EmitNextPair(string key, string value, IEmitter emitter)
+        private void EmitHerbal(IEmitter emitter, IBook book)
+        {
+        }
+
+        private void EmitSocialRegister(IEmitter emitter, IBook book)
+        {
+        }
+
+        private void EmitDramaticon(IEmitter emitter, IBook book)
+        {
+        }
+
+        public void EmitKVP(IEmitter emitter, string key, string value)
         {
             emitter.Emit(new Scalar(null, key));
             emitter.Emit(new Scalar(null, value));
@@ -65,12 +123,28 @@ namespace CopperBend.Persist
             IBook book = null;
 
             parser.Expect<MappingStart>();
-            var bookType = getValueNext("BookType", parser);
+            var bookType = GetValueNext(parser, "BookType");
 
             switch (bookType)
             {
+            case "Compendium":
+                book = ParseCompendium(parser);
+                break;
+
             case "TomeOfChaos":
                 book = ParseTome(parser);
+                break;
+
+            case "Herbal":
+                book = ParseHerbal(parser);
+                break;
+
+            case "SocialRegister":
+                book = ParseRegister(parser);
+                break;
+
+            case "Dramaticon":
+                book = ParseDramaticon(parser);
                 break;
 
             //0.1.SAVE:  Read remainder of Compendium
@@ -83,20 +157,70 @@ namespace CopperBend.Persist
             return book;
         }
 
+        private IBook ParseHerbal(IParser parser)
+        {
+            Herbal herbal = new Herbal();
+            return herbal;
+        }
+
+        private IBook ParseRegister(IParser parser)
+        {
+            SocialRegister socialRegister = new SocialRegister();
+            return socialRegister;
+        }
+
+        private IBook ParseDramaticon(IParser parser)
+        {
+            Dramaticon dramaticon = new Dramaticon();
+            return dramaticon;
+        }
+
+        private IBook ParseCompendium(IParser parser)
+        {
+            Compendium compendium = new Compendium();
+            while (parser.Peek<Scalar>() != null)
+            {
+                string next = GetScalar(parser);
+                switch (next)
+                {
+                case "TomeOfChaos":
+                    compendium.TomeOfChaos = (TomeOfChaos)ReadYaml(parser, typeof(TomeOfChaos));
+                    break;
+
+                case "Herbal":
+                    compendium.Herbal = (Herbal)ReadYaml(parser, typeof(Herbal));
+                    break;
+
+                case "SocialRegister":
+                    compendium.SocialRegister = (SocialRegister)ReadYaml(parser, typeof(SocialRegister));
+                    break;
+
+                case "Dramaticon":
+                    compendium.Dramaticon = (Dramaticon)ReadYaml(parser, typeof(Dramaticon));
+                    break;
+
+                default:
+                    throw new NotImplementedException($"Not ready to parse [{next}] into Compendium.");
+                }
+            }
+
+            return compendium;
+        }
+
         private TomeOfChaos ParseTome(IParser parser)
         {
             TomeOfChaos tome = null;
 
-            var topSeed = getValueNext("TopSeed", parser);
+            var topSeed = GetValueNext(parser, "TopSeed");
             tome = new TomeOfChaos(topSeed);
 
-            var rng_b64 = getValueNext("TopGenerator", parser);
+            var rng_b64 = GetValueNext(parser, "TopGenerator");
             tome.TopGenerator = RngFromBase64(rng_b64);
 
-            rng_b64 = getValueNext("LearnableGenerator", parser);
+            rng_b64 = GetValueNext(parser, "LearnableGenerator");
             tome.LearnableGenerator = RngFromBase64(rng_b64);
 
-            rng_b64 = getValueNext("MapTopGenerator", parser);
+            rng_b64 = GetValueNext(parser, "MapTopGenerator");
             tome.MapTopGenerator = RngFromBase64(rng_b64);
 
             //0.1.SAVE: Parse out the remaining RNGs
@@ -104,21 +228,23 @@ namespace CopperBend.Persist
             return tome;
         }
 
-        private string getValueNext(string valueName, IParser parser)
+        private string GetValueNext(IParser parser, string valueName)
         {
-            ExpectScalar(parser, valueName);
-            parser.MoveNext();
-            var val = getScalarString(parser);
-            parser.MoveNext();
+            string label = GetScalar(parser);
+            if (label != valueName)
+                throw new Exception($"Expected '{valueName}', got '{label}'.");
+
+            var val = GetScalar(parser);
             return val;
         }
 
-        private void ExpectScalar(IParser parser, string expectedString)
+        private string GetScalar(IParser parser)
         {
-            string label = getScalarString(parser);
+            parser.Accept<Scalar>();
+            var scalar = parser.Current as Scalar;
+            parser.MoveNext();
 
-            if (label != expectedString)
-                throw new Exception($"Expected '{expectedString}', got '{label}'.");
+            return scalar.Value;
         }
 
         private AbstractGenerator RngFromBase64(string rng_b64)
@@ -136,14 +262,6 @@ namespace CopperBend.Persist
                 var obj = binForm.Deserialize(memStream);
                 return obj;
             }
-        }
-
-        private string getScalarString(IParser parser)
-        {
-            parser.Accept<Scalar>();
-            var scalar = parser.Current as Scalar;
-
-            return scalar.Value;
         }
 
         public string SerializedRNG(AbstractGenerator generator)

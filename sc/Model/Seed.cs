@@ -8,8 +8,7 @@ namespace CopperBend.Model
     public class Seed : Item, ISeed, IScheduleAgent
     {
         public override string ItemType { get => "Seed"; }
-        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
-        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+        public static Herbal Herbal { get; set; }
 
         public PlantDetails PlantDetails;
 
@@ -30,7 +29,7 @@ namespace CopperBend.Model
         public Seed(Coord position, int quantity, uint typeID, uint id = uint.MaxValue)
             : base(position, quantity, true, id)
         {
-            PlantDetails = PlantByID[typeID];
+            PlantDetails = Herbal.PlantByID[typeID];
         }
 
         public Seed(Coord position, PlantDetails details, int quantity = 1, uint id = uint.MaxValue)

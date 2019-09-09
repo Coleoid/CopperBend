@@ -21,7 +21,7 @@ namespace CopperBend.Engine.tests
         private CommandDispatcher _dispatcher = null;
         private ISchedule __schedule = null;
         private GameState _gameState = null;
-        private Describer __describer = null;
+        private IDescriber __describer = null;
         private IMessageLogWindow __messageOutput = null;
 
         [OneTimeSetUp]
@@ -51,7 +51,7 @@ namespace CopperBend.Engine.tests
         {
             __schedule = Substitute.For<ISchedule>();
             _gameState = new GameState();
-            __describer = Substitute.For<Describer>(88);
+            __describer = Substitute.For<IDescriber>();
             __messageOutput = Substitute.For<IMessageLogWindow>();
 
             //_gameState.Map = CreateSmallTestMap();
@@ -104,7 +104,7 @@ namespace CopperBend.Engine.tests
             Being.EntityFactory = new EntityFactory();
 
             var actor = new Player(Color.AliceBlue, Color.Black);
-            var item = new Fruit((0, 0), 1, Fruit.PlantByName["Healer"]);
+            var item = new Fruit((0, 0), 1, Fruit.Herbal.PlantByName["Healer"]);
             actor.AddToInventory(item);
 
             var cmd = new Command(action, direction, item);

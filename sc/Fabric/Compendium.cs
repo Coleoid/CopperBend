@@ -1,4 +1,6 @@
-﻿using CopperBend.Contract;
+﻿using System.Collections.Generic;
+using CopperBend.Contract;
+using GoRogue;
 
 namespace CopperBend.Fabric
 {
@@ -9,6 +11,7 @@ namespace CopperBend.Fabric
         public Herbal Herbal { get; set; }
         public SocialRegister SocialRegister { get; set; }
         public Dramaticon Dramaticon { get; set; }
+        public IDGenerator IDGenerator { get; internal set; }
     }
 
     // The Herbal contains plant types, and what the player knows about them
@@ -16,6 +19,8 @@ namespace CopperBend.Fabric
     public class Herbal : IBook
     {
         public string BookType { get; set; } = "Herbal";
+        public Dictionary<uint, PlantDetails> PlantByID { get; internal set; }
+        public Dictionary<string, PlantDetails> PlantByName { get; internal set; }
     }
 
     // All significant beings, their current state and relationships

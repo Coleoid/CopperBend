@@ -17,9 +17,9 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Can_init_plant_repos()
         {
-            Seed.PlantByName = null;
+            Seed.Herbal = null;
             Engine.InitializePlantRepos();
-            Assert.That(Seed.PlantByName, Is.Not.Null);
+            Assert.That(Seed.Herbal, Is.Not.Null);
         }
     }
 }

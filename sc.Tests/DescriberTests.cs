@@ -1,3 +1,4 @@
+using CopperBend.Fabric;
 using CopperBend.Model;
 using GoRogue;
 using NUnit.Framework;
@@ -12,6 +13,7 @@ namespace CopperBend.Engine.tests
         {
             Engine.InitializeIDGenerator();
             Engine.InitializePlantRepos();
+            Describer.TomeOfChaos = new TomeOfChaos();
         }
 
         [TestCase(1, "", "rock")]

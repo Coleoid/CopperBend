@@ -19,7 +19,7 @@ namespace CopperBend.Engine
         private IItemMap ItemMap => GameState.Map.ItemMap;
         private IBlightMap BlightMap => GameState.Map.BlightMap;
 
-        private Describer Describer;
+        private IDescriber Describer;
         private IMessageLogWindow MessageLog;
         private ILog log;
 
@@ -29,7 +29,7 @@ namespace CopperBend.Engine
         public CommandDispatcher(
             ISchedule schedule,
             IGameState gameState,
-            Describer describer,
+            IDescriber describer,
             IMessageLogWindow messageLog
         )
         {

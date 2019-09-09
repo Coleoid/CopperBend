@@ -196,7 +196,7 @@ namespace sc_tests
         [Test]
         public void CRT_Seed()
         {
-            Seed.PlantByID[11] = new PlantDetails
+            Seed.Herbal.PlantByID[11] = new PlantDetails
                 {ID = 11, FruitAdjective = "Fresh", SeedAdjective = "Burred", FruitKnown = true};
 
             var seed = new Seed((2, 2), 4, 11, id: 66)

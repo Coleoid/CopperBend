@@ -2,15 +2,14 @@
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
     public class Fruit : Item
     {
         public override string ItemType { get => "Fruit"; }
-
-        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
-        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+        public static Herbal Herbal { get; set; }
 
         public PlantDetails PlantDetails;
 

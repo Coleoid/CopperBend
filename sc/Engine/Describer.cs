@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CopperBend.Contract;
+using CopperBend.Fabric;
+using Troschuetz.Random.Generators;
 
 namespace CopperBend.Engine
 {
@@ -17,18 +19,16 @@ namespace CopperBend.Engine
         NoAdjective = 16,
     }
 
-    public class Describer
+    public class Describer : IDescriber
     {
-        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
-        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+        public static Herbal Herbal { get; set; }
+        public static TomeOfChaos TomeOfChaos { get; set; }
 
+        private AbstractGenerator rnd;
 
-        private Random rnd;
-
-        public Describer(int randomSeed = 88) //0.1.SAVE  better RNG system
+        public Describer()
         {
-            //TODO: Game-wide randomizer seed management
-            rnd = new Random(randomSeed);
+            rnd = TomeOfChaos.LearnableGenerator;
 
             ScrambleSeeds();
             ScrambleFruit();
@@ -81,9 +81,9 @@ namespace CopperBend.Engine
             var shuffled = SeedAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
 
-            foreach (var key in PlantByID.Keys)
+            foreach (var key in Herbal.PlantByID.Keys)
             {
-                PlantByID[key].SeedAdjective = shuffled[0];
+                Herbal.PlantByID[key].SeedAdjective = shuffled[0];
                 shuffled.RemoveAt(0);
             }
         }
@@ -125,9 +125,9 @@ namespace CopperBend.Engine
             var shuffled = FruitAdjectives
                 .OrderBy(d => rnd.Next()).ToList();
 
-            foreach (var key in PlantByID.Keys)
+            foreach (var key in Herbal.PlantByID.Keys)
             {
-                PlantByID[key].FruitAdjective = shuffled[0];
+                Herbal.PlantByID[key].FruitAdjective = shuffled[0];
                 shuffled.RemoveAt(0);
             }
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CopperBend.Application;
 using Size = System.Drawing.Size;
 using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
@@ -141,7 +140,7 @@ namespace CopperBend.Engine
             };
             player.AddComponent(new EntityViewSyncComponent());
             player.AddToInventory(new Hoe((0,0)));
-            player.AddToInventory(new Seed((0,0), 2, PlantByName["Healer"].ID));
+            player.AddToInventory(new Seed((0,0), 2, Compendium.Herbal.PlantByName["Healer"].ID));
 
             log.Debug("Created player.");
             return player;
@@ -399,36 +398,49 @@ namespace CopperBend.Engine
 
     public partial class Engine
     {
-        public static void InitializeIDGenerator()
+        private static Compendium _compendium;
+        public static Compendium Compendium
         {
-            // On this path, each new IDed type needs addition here,
-            // yet no IDs will ever clash.  I like this tradeoff.
-            var IDGenerator = new IDGenerator();
-
-            CbEntity.IDGenerator = IDGenerator;
-            Item.IDGenerator = IDGenerator;
-            Space.IDGenerator = IDGenerator;
-            AreaBlight.IDGenerator = IDGenerator;
+            get
+            {
+                if (_compendium == null)
+                    _compendium = new Compendium();
+                return _compendium;
+            }
+            set { _compendium = value; }
         }
 
-        public static Dictionary<uint, PlantDetails> PlantByID { get; set; }
-        public static Dictionary<string, PlantDetails> PlantByName { get; set; }
+        public static void InitializeIDGenerator()
+        {
+            Compendium.IDGenerator = new IDGenerator();
+
+            // On this path, each new IDed type needs addition here,
+            // yet no IDs will ever clash.  I like this tradeoff.
+            CbEntity.IDGenerator = Compendium.IDGenerator;
+            Item.IDGenerator = Compendium.IDGenerator;
+            Space.IDGenerator = Compendium.IDGenerator;
+            AreaBlight.IDGenerator = Compendium.IDGenerator;
+        }
 
         public static void InitializePlantRepos()
         {
-            PlantByID = new Dictionary<uint, PlantDetails>();
-            PlantByName = new Dictionary<string, PlantDetails>();
+            Herbal herbal = new Herbal();
+            Compendium.Herbal = herbal;
+
+            herbal.PlantByID = new Dictionary<uint, PlantDetails>();
+            herbal.PlantByName = new Dictionary<string, PlantDetails>();
 
             PlantDetails plant = null;
 
+            //0.1.WORLD  Flesh the plant list out, and tuck it into YAML config.
             plant = new PlantDetails
             {
                 ID = 1,
                 MainName = "Boomer",
                 GrowthTime = 400
             };
-            PlantByID[plant.ID] = plant;
-            PlantByName[plant.MainName] = plant;
+            herbal.PlantByID[plant.ID] = plant;
+            herbal.PlantByName[plant.MainName] = plant;
 
             plant = new PlantDetails
             {
@@ -436,8 +448,8 @@ namespace CopperBend.Engine
                 MainName = "Healer",
                 GrowthTime = 400
             };
-            PlantByID[plant.ID] = plant;
-            PlantByName[plant.MainName] = plant;
+            herbal.PlantByID[plant.ID] = plant;
+            herbal.PlantByName[plant.MainName] = plant;
 
             plant = new PlantDetails
             {
@@ -445,15 +457,12 @@ namespace CopperBend.Engine
                 MainName = "Thornfriend",
                 GrowthTime = 400
             };
-            PlantByID[plant.ID] = plant;
-            PlantByName[plant.MainName] = plant;
+            herbal.PlantByID[plant.ID] = plant;
+            herbal.PlantByName[plant.MainName] = plant;
 
-            Seed.PlantByID = PlantByID;
-            Seed.PlantByName = PlantByName;
-            Fruit.PlantByID = PlantByID;
-            Fruit.PlantByName = PlantByName;
-            Describer.PlantByID = PlantByID;
-            Describer.PlantByName = PlantByName;
+            Seed.Herbal = herbal;
+            Fruit.Herbal = herbal;
+            Describer.Herbal = herbal;
         }
     }
 }

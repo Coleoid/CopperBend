@@ -76,20 +76,21 @@ namespace CopperBend.Engine
             //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
             //SadConsole.Global.FontDefault = font;
             Describer describer = new Describer();
+
+            //if (TestMode)
+            //{
+            //    var testRunner = new GameRunningTestRunner();
+            //    Schedule.AddAgent(testRunner, 1);
+            //}
+            //else
+            //{
+                Being.EntityFactory = new EntityFactory();
+            //}
+
             Schedule = new Schedule();
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             //Player.Font = Font;
             Schedule.AddAgent(Player, 12);
-
-            if (TestMode)
-            {
-                var testRunner = new GameRunningTestRunner();
-                Schedule.AddAgent(testRunner, 1);
-            }
-            else
-            {
-                Being.EntityFactory = new EntityFactory();
-            }
 
             var builder = new UIBuilder(GameSize, null); //font
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
@@ -104,10 +105,13 @@ namespace CopperBend.Engine
             Children.Add(MessageLog);
             MessageLog.Show();
 
+
+
             GameState = new GameState
             {
                 Player = Player,
-                Map = FullMap
+                Map = FullMap,
+                Tome = new TomeOfChaos(),
             };
 
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)

@@ -6,5 +6,6 @@ namespace CopperBend.Fabric
     {
         public ICompoundMap Map { get; set; }
         public IBeing Player { get; set; }
+        public TomeOfChaos Tome { get; internal set; }
     }
 }

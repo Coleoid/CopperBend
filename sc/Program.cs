@@ -13,6 +13,9 @@ namespace CopperBend.Application
         [Option("-t|--Test")]
         public bool TestMode { get; }
 
+        [Option("-s|--seed")]
+        public string InitialSeed { get; } = null;
+
         // main() should boil down to:
         //public static int Main(string[] args) => CommandLineApplication.Execute<Program>(args);
 

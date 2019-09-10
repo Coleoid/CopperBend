@@ -20,7 +20,7 @@ namespace CopperBend.Persist
             else if (typeof(ISpace).IsAssignableFrom(objectType)) contract.Converter = new JConv_ISpace();
             else if (typeof(IAreaBlight).IsAssignableFrom(objectType)) contract.Converter = new JConv_IAreaBlight();
             else if (typeof(IBeing).IsAssignableFrom(objectType)) contract.Converter = new JConv_IBeing();
-            else if (typeof(IBook).IsAssignableFrom(objectType)) contract.Converter = new JConv_IBook();
+            //else if (typeof(IBook).IsAssignableFrom(objectType)) contract.Converter = new JConv_IBook();
 
             return contract;
         }

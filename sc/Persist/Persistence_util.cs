@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 using Troschuetz.Random.Generators;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -27,6 +29,30 @@ namespace CopperBend.Persist
             parser.MoveNext();
 
             return scalar.Value;
+        }
+
+        public void EmitKVP(IEmitter emitter, string key, string value)
+        {
+            emitter.Emit(new Scalar(null, key));
+            emitter.Emit(new Scalar(null, value));
+        }
+
+        public Color Color_FromString(string text)
+        {
+            var match = Regex.Match(text, @"R:(\d+) G:(\d+) B:(\d+) A:(\d+)");
+            int r = int.Parse(match.Groups[1].Value);
+            int g = int.Parse(match.Groups[2].Value);
+            int b = int.Parse(match.Groups[3].Value);
+            int a = int.Parse(match.Groups[4].Value);
+            return new Color(r, g, b, a);
+        }
+
+        public Point Point_FromString(string text)
+        {
+            var match = Regex.Match(text, @"X:(\d+) Y:(\d+)");
+            int x = int.Parse(match.Groups[1].Value);
+            int y = int.Parse(match.Groups[2].Value);
+            return new Point(x, y);
         }
 
         public AbstractGenerator RngFromBase64(string rng_b64)

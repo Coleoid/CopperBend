@@ -106,12 +106,6 @@ namespace CopperBend.Persist
         {
         }
 
-        public void EmitKVP(IEmitter emitter, string key, string value)
-        {
-            emitter.Emit(new Scalar(null, key));
-            emitter.Emit(new Scalar(null, value));
-        }
-
         public object ReadYaml(IParser parser, Type type)
         {
             //if (!Debugger.IsAttached) Debugger.Launch();

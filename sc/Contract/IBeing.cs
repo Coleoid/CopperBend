@@ -13,6 +13,7 @@ namespace CopperBend.Contract
         Color Foreground { get; }
         Color Background { get; }
         int Glyph { get; }
+        string BeingType { get; set; }
 
         ICommandSource CommandSource { get; set; }
 

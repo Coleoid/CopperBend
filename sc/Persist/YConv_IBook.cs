@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using Troschuetz.Random.Generators;
 using YamlDotNet.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -11,7 +8,7 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Persist
 {
-    public class YConv_IBook : IYamlTypeConverter
+    public class YConv_IBook : Persistence_util, IYamlTypeConverter
     {
         public bool Accepts(Type type)
         {
@@ -48,8 +45,6 @@ namespace CopperBend.Persist
             case "Dramaticon":
                 EmitDramaticon(emitter, book);
                 break;
-
-            //0.1.SAVE:  Write remainder of Compendium
 
             default:
                 throw new NotImplementedException($"Not ready to Write book type [{book.BookType}].");
@@ -226,59 +221,6 @@ namespace CopperBend.Persist
             //0.1.SAVE: Parse out the remaining RNGs
 
             return tome;
-        }
-
-        private string GetValueNext(IParser parser, string valueName)
-        {
-            string label = GetScalar(parser);
-            if (label != valueName)
-                throw new Exception($"Expected '{valueName}', got '{label}'.");
-
-            var val = GetScalar(parser);
-            return val;
-        }
-
-        private string GetScalar(IParser parser)
-        {
-            parser.Accept<Scalar>();
-            var scalar = parser.Current as Scalar;
-            parser.MoveNext();
-
-            return scalar.Value;
-        }
-
-        private AbstractGenerator RngFromBase64(string rng_b64)
-        {
-            byte[] rng_bytes = Convert.FromBase64String(rng_b64);
-            var rng = (XorShift128Generator)ByteArrayToObject(rng_bytes);
-            return rng;
-        }
-
-        public static Object ByteArrayToObject(byte[] arrBytes)
-        {
-            using (var memStream = new MemoryStream(arrBytes))
-            {
-                var binForm = new BinaryFormatter();
-                var obj = binForm.Deserialize(memStream);
-                return obj;
-            }
-        }
-
-        public string SerializedRNG(AbstractGenerator generator)
-        {
-            byte[] gen_bytes = ObjectToByteArray(generator);
-            string gen_b64 = Convert.ToBase64String(gen_bytes);
-            return gen_b64;
-        }
-
-        public static byte[] ObjectToByteArray(Object obj)
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            using (var ms = new MemoryStream())
-            {
-                bf.Serialize(ms, obj);
-                return ms.ToArray();
-            }
         }
     }
 }

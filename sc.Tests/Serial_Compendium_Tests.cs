@@ -77,6 +77,26 @@ namespace sc_tests
                 Assert.That(newTome.LearnableRndNext(), Is.EqualTo(tome.LearnableRndNext()));
             }
         }
+
+        [Test]
+        public void CRT_Herbal()
+        {
+            //if (!Debugger.IsAttached) Debugger.Launch();
+
+            var herbal = new Herbal();
+            var yaml = _serializer.Serialize(herbal);
+
+            Assert.That(yaml, Is.Not.Null);
+
+            var newBook = _deserializer.Deserialize<IBook>(yaml);
+            Assert.That(newBook, Is.TypeOf<Herbal>());
+            var newHerbal = (Herbal)newBook;
+
+            Assert.That(newHerbal.PlantByID[1].MainName, Is.EqualTo("Thornfriend"));
+            //Assert.That(newHerbal.TopGenerator, Is.TypeOf<XorShift128Generator>());
+            //Assert.That(newHerbal.LearnableGenerator, Is.TypeOf<XorShift128Generator>());
+            //Assert.That(newHerbal.MapTopGenerator, Is.TypeOf<XorShift128Generator>());
+        }
     }
 
 }

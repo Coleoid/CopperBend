@@ -96,6 +96,30 @@ namespace CopperBend.Persist
 
         private void EmitHerbal(IEmitter emitter, IBook book)
         {
+            var herbal = (Herbal)book;
+
+            foreach (var key in herbal.PlantByID.Keys)
+            {
+                EmitKVP(emitter, "Plant", key.ToString());
+
+                emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
+
+                EmitPlantDetails(emitter, herbal.PlantByID[key]);
+
+                emitter.Emit(new MappingEnd());
+            }
+        }
+
+        private void EmitPlantDetails(IEmitter emitter, PlantDetails plantDetails)
+        {
+            EmitKVP(emitter, "ID", plantDetails.ID.ToString());
+            EmitKVP(emitter, "MainName", plantDetails.MainName);
+            EmitKVP(emitter, "FruitAdjective", plantDetails.FruitAdjective);
+            EmitKVP(emitter, "FruitKnown", plantDetails.FruitKnown.ToString());
+            EmitKVP(emitter, "SeedAdjective", plantDetails.SeedAdjective);
+            EmitKVP(emitter, "SeedKnown", plantDetails.SeedKnown.ToString());
+            EmitKVP(emitter, "GrowthTime", plantDetails.GrowthTime.ToString());
+            //EmitKVP(emitter, "Uses", plantDetails.Uses);
         }
 
         private void EmitSocialRegister(IEmitter emitter, IBook book)

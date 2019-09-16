@@ -179,16 +179,6 @@ namespace CopperBend.Engine
             return true;
         }
 
-        public enum DamageType
-        {
-            Unset = 0,
-            AreaBlight,
-            Player,
-            Impact_point,
-            Impact_edge,
-            Impact_blunt,
-        }
-
         public void Damage(IDestroyable target, IItem source)
         {
             int amount = DamageToTargetFromItem(target, source);

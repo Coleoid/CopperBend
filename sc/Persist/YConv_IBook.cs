@@ -10,6 +10,7 @@ namespace CopperBend.Persist
 {
     public class YConv_IBook : Persistence_util, IYamlTypeConverter
     {
+        #region IYamlTypeConverter
         public bool Accepts(Type type)
         {
             return typeof(IBook).IsAssignableFrom(type);
@@ -53,6 +54,48 @@ namespace CopperBend.Persist
             emitter.Emit(new MappingEnd());
         }
 
+        public object ReadYaml(IParser parser, Type type)
+        {
+            //if (!Debugger.IsAttached) Debugger.Launch();
+            IBook book = null;
+
+            parser.Expect<MappingStart>();
+            var bookType = GetValueNext(parser, "BookType");
+
+            switch (bookType)
+            {
+            case "Compendium":
+                book = ParseCompendium(parser);
+                break;
+
+            case "TomeOfChaos":
+                book = ParseTome(parser);
+                break;
+
+            case "Herbal":
+                book = ParseHerbal(parser);
+                break;
+
+            case "SocialRegister":
+                book = ParseSocialRegister(parser);
+                break;
+
+            case "Dramaticon":
+                book = ParseDramaticon(parser);
+                break;
+
+            //0.1.SAVE:  Read remainder of Compendium
+
+            default:
+                throw new NotImplementedException($"Not ready to Read book type [{bookType}].");
+            }
+
+            parser.Expect<MappingEnd>();
+            return book;
+        }
+        #endregion
+
+        #region Compendium
         private void EmitCompendium(IEmitter emitter, IBook book)
         {
             var compendium = (Compendium)book;
@@ -80,112 +123,6 @@ namespace CopperBend.Persist
                 emitter.Emit(new Scalar(null, "Dramaticon"));
                 WriteYaml(emitter, compendium.Dramaticon, typeof(Dramaticon));
             }
-        }
-
-        private void EmitTome(IEmitter emitter, IBook book)
-        {
-            var tome = (TomeOfChaos)book;
-
-            EmitKVP(emitter, "TopSeed", tome.TopSeed);
-            EmitKVP(emitter, "TopGenerator", SerializedRNG(tome.TopGenerator));
-            EmitKVP(emitter, "LearnableGenerator", SerializedRNG(tome.LearnableGenerator));
-            EmitKVP(emitter, "MapTopGenerator", SerializedRNG(tome.MapTopGenerator));
-
-            //0.1.SAVE:  Write remainder of Tome, these named sets are scaling... iffily.
-        }
-
-        private void EmitHerbal(IEmitter emitter, IBook book)
-        {
-            var herbal = (Herbal)book;
-
-            foreach (var key in herbal.PlantByID.Keys)
-            {
-                EmitKVP(emitter, "Plant", key.ToString());
-
-                emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
-
-                EmitPlantDetails(emitter, herbal.PlantByID[key]);
-
-                emitter.Emit(new MappingEnd());
-            }
-        }
-
-        private void EmitPlantDetails(IEmitter emitter, PlantDetails plantDetails)
-        {
-            EmitKVP(emitter, "ID", plantDetails.ID.ToString());
-            EmitKVP(emitter, "MainName", plantDetails.MainName);
-            EmitKVP(emitter, "FruitAdjective", plantDetails.FruitAdjective);
-            EmitKVP(emitter, "FruitKnown", plantDetails.FruitKnown.ToString());
-            EmitKVP(emitter, "SeedAdjective", plantDetails.SeedAdjective);
-            EmitKVP(emitter, "SeedKnown", plantDetails.SeedKnown.ToString());
-            EmitKVP(emitter, "GrowthTime", plantDetails.GrowthTime.ToString());
-            //EmitKVP(emitter, "Uses", plantDetails.Uses);
-        }
-
-        private void EmitSocialRegister(IEmitter emitter, IBook book)
-        {
-        }
-
-        private void EmitDramaticon(IEmitter emitter, IBook book)
-        {
-        }
-
-        public object ReadYaml(IParser parser, Type type)
-        {
-            //if (!Debugger.IsAttached) Debugger.Launch();
-            IBook book = null;
-
-            parser.Expect<MappingStart>();
-            var bookType = GetValueNext(parser, "BookType");
-
-            switch (bookType)
-            {
-            case "Compendium":
-                book = ParseCompendium(parser);
-                break;
-
-            case "TomeOfChaos":
-                book = ParseTome(parser);
-                break;
-
-            case "Herbal":
-                book = ParseHerbal(parser);
-                break;
-
-            case "SocialRegister":
-                book = ParseRegister(parser);
-                break;
-
-            case "Dramaticon":
-                book = ParseDramaticon(parser);
-                break;
-
-            //0.1.SAVE:  Read remainder of Compendium
-
-            default:
-                throw new NotImplementedException($"Not ready to Read book type [{bookType}].");
-            }
-
-            parser.Expect<MappingEnd>();
-            return book;
-        }
-
-        private IBook ParseHerbal(IParser parser)
-        {
-            Herbal herbal = new Herbal();
-            return herbal;
-        }
-
-        private IBook ParseRegister(IParser parser)
-        {
-            SocialRegister socialRegister = new SocialRegister();
-            return socialRegister;
-        }
-
-        private IBook ParseDramaticon(IParser parser)
-        {
-            Dramaticon dramaticon = new Dramaticon();
-            return dramaticon;
         }
 
         private IBook ParseCompendium(IParser parser)
@@ -219,6 +156,20 @@ namespace CopperBend.Persist
 
             return compendium;
         }
+        #endregion
+
+        #region TomeOfChaos
+        private void EmitTome(IEmitter emitter, IBook book)
+        {
+            var tome = (TomeOfChaos)book;
+
+            EmitKVP(emitter, "TopSeed", tome.TopSeed);
+            EmitKVP(emitter, "TopGenerator", SerializedRNG(tome.TopGenerator));
+            EmitKVP(emitter, "LearnableGenerator", SerializedRNG(tome.LearnableGenerator));
+            EmitKVP(emitter, "MapTopGenerator", SerializedRNG(tome.MapTopGenerator));
+
+            //0.1.SAVE:  Write remainder of Tome, these named sets are scaling... iffily.
+        }
 
         private TomeOfChaos ParseTome(IParser parser)
         {
@@ -240,5 +191,89 @@ namespace CopperBend.Persist
 
             return tome;
         }
+        #endregion
+
+        #region Herbal
+        private void EmitHerbal(IEmitter emitter, IBook book)
+        {
+            var herbal = (Herbal)book;
+
+            foreach (var key in herbal.PlantByID.Keys)
+            {
+                emitter.Emit(new Scalar("Plant"));
+                emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
+
+                EmitPlantDetails(emitter, herbal.PlantByID[key]);
+
+                emitter.Emit(new MappingEnd());
+            }
+        }
+
+        private IBook ParseHerbal(IParser parser)
+        {
+            Herbal herbal = new Herbal();
+
+            while (parser.Peek<Scalar>()?.Value == "Plant")
+            {
+                parser.Expect<Scalar>();
+                parser.Expect<MappingStart>();
+
+                herbal.AddPlant(ParsePlantDetails(parser));
+
+                parser.Expect<MappingEnd>();
+            }
+
+            return herbal;
+        }
+
+        private void EmitPlantDetails(IEmitter emitter, PlantDetails plantDetails)
+        {
+            EmitKVP(emitter, "ID", plantDetails.ID.ToString());
+            EmitKVP(emitter, "MainName", plantDetails.MainName);
+            EmitKVP(emitter, "FruitAdjective", plantDetails.FruitAdjective);
+            EmitKVP(emitter, "FruitKnown", plantDetails.FruitKnown.ToString());
+            EmitKVP(emitter, "SeedAdjective", plantDetails.SeedAdjective);
+            EmitKVP(emitter, "SeedKnown", plantDetails.SeedKnown.ToString());
+            EmitKVP(emitter, "GrowthTime", plantDetails.GrowthTime.ToString());
+            //EmitKVP(emitter, "Uses", plantDetails.Uses);
+        }
+
+        private PlantDetails ParsePlantDetails(IParser parser)
+        {
+            var details = new PlantDetails();
+
+            details.ID = uint.Parse(GetValueNext(parser, "ID"));
+            details.MainName = GetValueNext(parser, "MainName");
+            details.FruitAdjective = GetValueNext(parser, "FruitAdjective");
+            details.FruitKnown = bool.Parse(GetValueNext(parser, "FruitKnown"));
+            details.SeedAdjective = GetValueNext(parser, "SeedAdjective");
+            details.SeedKnown = bool.Parse(GetValueNext(parser, "SeedKnown"));
+            details.GrowthTime = int.Parse(GetValueNext(parser, "GrowthTime"));
+
+            return details;
+        }
+        #endregion
+
+        #region ...remainder...
+        private void EmitSocialRegister(IEmitter emitter, IBook book)
+        {
+        }
+
+        private IBook ParseSocialRegister(IParser parser)
+        {
+            SocialRegister socialRegister = new SocialRegister();
+            return socialRegister;
+        }
+
+        private void EmitDramaticon(IEmitter emitter, IBook book)
+        {
+        }
+
+        private IBook ParseDramaticon(IParser parser)
+        {
+            Dramaticon dramaticon = new Dramaticon();
+            return dramaticon;
+        }
+        #endregion
     }
 }

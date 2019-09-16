@@ -10,31 +10,10 @@ namespace CopperBend.Persist
 {
     public class YConv_IBeing : Persistence_util, IYamlTypeConverter
     {
+        #region IYamlTypeConverter
         public bool Accepts(Type type)
         {
             return typeof(IBeing).IsAssignableFrom(type);
-        }
-
-        public object ReadYaml(IParser parser, Type type)
-        {
-            //if (!Debugger.IsAttached) Debugger.Launch();
-            IBeing being = null;
-
-            parser.Expect<MappingStart>();
-            var beingType = GetValueNext(parser, "BeingType");
-
-            switch (beingType)
-            {
-            case "Being":
-                being = ParseBeing(parser);
-                break;
-
-            default:
-                throw new NotImplementedException($"Not ready to Read being type [{beingType}].");
-            }
-
-            parser.Expect<MappingEnd>();
-            return being;
         }
 
         public void WriteYaml(IEmitter emitter, object value, Type type)
@@ -67,6 +46,29 @@ namespace CopperBend.Persist
 
             emitter.Emit(new MappingEnd());
         }
+
+        public object ReadYaml(IParser parser, Type type)
+        {
+            //if (!Debugger.IsAttached) Debugger.Launch();
+            IBeing being = null;
+
+            parser.Expect<MappingStart>();
+            var beingType = GetValueNext(parser, "BeingType");
+
+            switch (beingType)
+            {
+            case "Being":
+                being = ParseBeing(parser);
+                break;
+
+            default:
+                throw new NotImplementedException($"Not ready to Read being type [{beingType}].");
+            }
+
+            parser.Expect<MappingEnd>();
+            return being;
+        }
+        #endregion
 
         private void EmitBeing(IEmitter emitter, IBeing iBeing)
         {

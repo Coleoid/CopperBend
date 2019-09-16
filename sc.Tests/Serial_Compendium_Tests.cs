@@ -4,6 +4,7 @@ using YamlDotNet.Serialization;
 using CopperBend.Contract;
 using CopperBend.Persist;
 using CopperBend.Fabric;
+using System.Diagnostics;
 
 namespace sc_tests
 {
@@ -84,6 +85,31 @@ namespace sc_tests
             //if (!Debugger.IsAttached) Debugger.Launch();
 
             var herbal = new Herbal();
+            var thorny = new PlantDetails
+            {
+                ID = 77,
+                MainName = "Thornfriend",
+                FruitAdjective = "Luminous",
+                FruitKnown = true,
+                SeedAdjective = "Knobbly",
+                SeedKnown = true,
+                GrowthTime = 234,
+            };
+
+            var boomy = new PlantDetails
+            {
+                ID = 88,
+                MainName = "Boomer",
+                FruitAdjective = "Singed",
+                FruitKnown = false,
+                SeedAdjective = "Dark",
+                SeedKnown = false,
+                GrowthTime = 432,
+            };
+
+            herbal.AddPlant(thorny);
+            herbal.AddPlant(boomy);
+            
             var yaml = _serializer.Serialize(herbal);
 
             Assert.That(yaml, Is.Not.Null);
@@ -92,10 +118,9 @@ namespace sc_tests
             Assert.That(newBook, Is.TypeOf<Herbal>());
             var newHerbal = (Herbal)newBook;
 
-            Assert.That(newHerbal.PlantByID[1].MainName, Is.EqualTo("Thornfriend"));
-            //Assert.That(newHerbal.TopGenerator, Is.TypeOf<XorShift128Generator>());
-            //Assert.That(newHerbal.LearnableGenerator, Is.TypeOf<XorShift128Generator>());
-            //Assert.That(newHerbal.MapTopGenerator, Is.TypeOf<XorShift128Generator>());
+            var newDetail = newHerbal.PlantByID[77];
+            Assert.That(newDetail.MainName, Is.EqualTo("Thornfriend"));
+            //...
         }
     }
 

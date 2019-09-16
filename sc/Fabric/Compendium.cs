@@ -21,6 +21,18 @@ namespace CopperBend.Fabric
         public string BookType { get; set; } = "Herbal";
         public Dictionary<uint, PlantDetails> PlantByID { get; internal set; }
         public Dictionary<string, PlantDetails> PlantByName { get; internal set; }
+
+        public Herbal()
+        {
+            PlantByID = new Dictionary<uint, PlantDetails>();
+            PlantByName = new Dictionary<string, PlantDetails>();
+        }
+
+        public void AddPlant(PlantDetails plant)
+        {
+            PlantByID[plant.ID] = plant;
+            PlantByName[plant.MainName] = plant;
+        }
     }
 
     // All significant beings, their current state and relationships

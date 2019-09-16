@@ -210,24 +210,26 @@ namespace CopperBend.Engine
             Damage(target, amount);
         }
 
-        // to collect modifiers to damage from type
+        //0.1.DMG  incorporate more damage modification cases
         public void Damage(IDestroyable target, DamageType type, int amount)
         {
+            //  Our hero is oddly resistant to the effects of the blight
             if (type == DamageType.AreaBlight && target is Player)
             {
-                //0.2.DMG  create more sophisticated player blight resistance
+                //0.2.DMG  Refine player blight resistancee
                 amount = Math.Clamp(amount / 10, 1, 3);
             }
-            //0.1.DMG  relocate more cases from elsewhere to here
             Damage(target, amount);
         }
 
         public void Damage(IDestroyable target, int amount)
         {
             target.Hurt(amount);
+
+            //  Perhaps this difference in implementation isn't useful
             if (target is AreaBlight blight)
             {
-                if (blight.Extent == 0)
+                if (blight.Extent < 1)
                 {
                     GameState.Map.BlightMap.RemoveItem(blight);
                 }
@@ -236,8 +238,7 @@ namespace CopperBend.Engine
             if (target.Health < 1)
             {
                 //  Is this the afterlife?
-                //  Some things 
-                //TODO:  Remove?  Put on list to be
+                //0.1:  Remove target being from schedule?  Put on list to be reaped elsewhen?
             }
         }
 

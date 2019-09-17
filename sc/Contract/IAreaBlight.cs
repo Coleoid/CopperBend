@@ -52,6 +52,17 @@ namespace CopperBend.Contract
 
     public interface IDefenseMethod
     {
+        Dictionary<DamageType, string> DamageResistances { get; set; }
+    }
+
+    public class DefenseMethod : IDefenseMethod
+    {
+        public Dictionary<DamageType, string> DamageResistances { get; set; }
+
+        public DefenseMethod()
+        {
+            DamageResistances = new Dictionary<DamageType, string>();
+        }
     }
 
     public interface IAttackEffect
@@ -99,7 +110,7 @@ namespace CopperBend.Contract
     {
         public void some()
         {
-            // Brekka-onu's flame hammer
+            // Brekka-onu's Flame Hammer
             var bfh = new AttackMethod();
             var impact = new AttackEffect
             {
@@ -109,10 +120,18 @@ namespace CopperBend.Contract
             var flame = new AttackEffect
             {
                 DamageType = DamageType.Fire,
-                DamageRange = "1d2 + 2"
+                DamageRange = "1d4 + 2"
             };
             bfh.AttackEffects.Add(impact);
             bfh.AttackEffects.Add(flame);
+
+            var leather_armor = new DefenseMethod();
+            leather_armor.DamageResistances[DamageType.Impact_blunt] = "1/4 max 4";
+            leather_armor.DamageResistances[DamageType.Fire] = "2/3 max 3";
+
+            var ring_armor = new DefenseMethod();
+            ring_armor.DamageResistances[DamageType.Impact_blunt] = "1/2 max 6";
+            ring_armor.DamageResistances[DamageType.Fire] = "2/3 max 5";
         }
     }
 }

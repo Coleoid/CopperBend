@@ -150,7 +150,7 @@ namespace CopperBend.Engine
             {
                 Message(being, Msgs.BarehandBlightDamage);
                 Damage(being, targetBlight);
-                Damage(targetBlight, DamageType.Player, 6);
+                Damage(targetBlight, DamageType.Nature_plant, 6);
                 GameState.Map.CoordsWithChanges.Add(newPosition);
 
                 bool damageSpread = false;
@@ -159,7 +159,7 @@ namespace CopperBend.Engine
                     IAreaBlight blight = BlightMap.GetItem(neighbor);
                     if (blight?.Extent > 0)
                     {
-                        Damage(blight, DamageType.Player, 3);
+                        Damage(blight, DamageType.Nature_plant, 3);
                         GameState.Map.CoordsWithChanges.Add(neighbor);
                         damageSpread = true;
                     }
@@ -191,7 +191,7 @@ namespace CopperBend.Engine
 
             int amount = half + new Random().Next(half) + 1;  //0.1.SAVE  need to use managed random
 
-            Damage(target, DamageType.AreaBlight, amount);
+            Damage(target, DamageType.Blight_toxin, amount);
         }
 
         public void Damage(IDestroyable target, IBeing source)
@@ -204,7 +204,7 @@ namespace CopperBend.Engine
         public void Damage(IDestroyable target, DamageType type, int amount)
         {
             //  Our hero is oddly resistant to the effects of the blight
-            if (type == DamageType.AreaBlight && target is Player)
+            if (type == DamageType.Blight_toxin && target is Player)
             {
                 //0.2.DMG  Refine player blight resistancee
                 amount = Math.Clamp(amount / 10, 1, 3);

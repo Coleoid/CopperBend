@@ -34,8 +34,20 @@ namespace CopperBend.Contract
 
     public interface IAttackMethod
     {
-        List<IAttackEffect> Effects { get; set; }
+        List<IAttackEffect> AttackEffects { get; set; }
         List<IAttackModifier> AttackModifiers { get; set; }
+    }
+
+    public class AttackMethod : IAttackMethod
+    {
+        public List<IAttackEffect> AttackEffects { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public List<IAttackModifier> AttackModifiers { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+        public AttackMethod()
+        {
+            AttackEffects = new List<IAttackEffect>();
+            AttackModifiers = new List<IAttackModifier>();
+        }
     }
 
     public interface IDefenseMethod
@@ -46,6 +58,16 @@ namespace CopperBend.Contract
     {
         DamageType DamageType { get; set; }
         string DamageRange { get; set; }
+    }
+
+    public class AttackEffect : IAttackEffect
+    {
+        public DamageType DamageType { get; set; }
+        public string DamageRange { get; set; }
+
+        public AttackEffect()
+        {
+        }
     }
 
     public interface IAttackModifier
@@ -61,12 +83,36 @@ namespace CopperBend.Contract
     public enum DamageType
     {
         Unset = 0,
-        AreaBlight,
-        Player,
-        Impact_point,
-        Impact_edge,
         Impact_blunt,
+        Impact_edge,
+        Impact_point,
+        Blight_toxin,
+        Nature_plant,
+        Fire,
+        Lightning,
+        Light,
+        Water,
     }
 
 
+    public class Demo_attdef_construction
+    {
+        public void some()
+        {
+            // Brekka-onu's flame hammer
+            var bfh = new AttackMethod();
+            var impact = new AttackEffect
+            {
+                DamageType = DamageType.Impact_blunt,
+                DamageRange = "2d5 + 2"
+            };
+            var flame = new AttackEffect
+            {
+                DamageType = DamageType.Fire,
+                DamageRange = "1d2 + 2"
+            };
+            bfh.AttackEffects.Add(impact);
+            bfh.AttackEffects.Add(flame);
+        }
+    }
 }

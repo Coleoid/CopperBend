@@ -1,69 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
+using CopperBend.Contract;
+using CopperBend.Model;
 
 namespace sc.Tests
 {
+    /* === Attack Phases
+     *
+     * 0. Build attack
+     * 0.1. Choose attack and defense methods
+     * 0.2. Resolve those choices plus passives to effects and mods
+     * 1. Calc attack
+     * 1.1. Apply attack mods
+     * 1.2. Roll damage
+     * 1.3. Check for triggered effects
+     *      (may return us to 1.1 or 1.2)
+     * 2. Calc defense
+     * 2.1. Apply defense mods
+     * 2.2. Apply to attack effects
+     * 2.3. Check for triggered effects
+     *      (may return us to 2.1 or 2.2)
+     *  dodge, parry/deflect
+     *  block, armor
+     * 3. Resolve to a set of effects (damage, ...)
+     * 4. post-attack effects
+     *  apply damage
+     *  death, destruction, incapacitation
+     *  morale, damage over time, ...
+     *  use of resources
+     *  experience
+     *
+     */
+
+
+    // Can offset an attack by a constant
+    // Can scale an attack by a ratio
+    // Can offset a defense by a constant
+    // Can scale a defense by a ratio
+    // Can (set|offset) (lower|upper) bound on a defense
+
     [TestFixture]
     public class AttackSystem_Tests
     {
         [Test]
-        public void Can_block_fraction()
+        public void some()
         {
-            //if (!Debugger.IsAttached) Debugger.Launch();
-            int raw_damage = 9;
-
-            string block_fraction = "1/3";
-            int taken = BlockFraction(raw_damage, block_fraction);
-            Assert.That(taken, Is.EqualTo(6));
-        }
-
-        [Test]
-        public void Can_block_fraction_with_max()
-        {
-            //if (!Debugger.IsAttached) Debugger.Launch();
-            int raw_damage = 9;
-
-            string block_fraction = "1/3 max 2";
-            int taken = BlockFraction(raw_damage, block_fraction);
-            Assert.That(taken, Is.EqualTo(7));
-        }
-
-        //0.1.DMG  Handles fraction and max, yet excessively fragile
-        private int BlockFraction(int raw_damage, string block_fraction)
-        {
-            var match = Regex.Match(block_fraction, @"(\d+)/(\d+)(?: max (\d+))?");
-            double num = double.Parse(match.Groups[1].Value);
-            double den = double.Parse(match.Groups[2].Value);
-            double frac = num / den;
-
-            int blocked = (int) Math.Round(raw_damage * frac);
-            if (!string.IsNullOrEmpty(match.Groups[3].Value))
+            // Brekka-onu's Flame Hammer
+            var bfh = new AttackMethod();
+            var impact = new AttackEffect
             {
-                int max = int.Parse(match.Groups[3].Value);
-                blocked = Math.Min(blocked, max);
-            }
+                DamageType = DamageType.Impact_blunt,
+                DamageRange = "2d5 + 2"
+            };
+            var flame = new AttackEffect
+            {
+                DamageType = DamageType.Fire,
+                DamageRange = "1d4 + 2"
+            };
+            bfh.AttackEffects.Add(impact);
+            bfh.AttackEffects.Add(flame);
 
-            return raw_damage - blocked;
+            var leather_armor = new DefenseMethod();
+            leather_armor.DamageResistances[DamageType.Impact_blunt] = "1/4 ..4";
+            leather_armor.DamageResistances[DamageType.Fire] = "2/3 ..3";
+
+            var ring_armor = new DefenseMethod();
+            ring_armor.DamageResistances[DamageType.Impact_blunt] = "1/2 ..6";
+            ring_armor.DamageResistances[DamageType.Fire] = "2/3 ..5";
         }
-
-        /*
-         * 1. Apply pre-attack buffs
-         * 2. Apply defensive methods
-         *  dodge, parry/deflect
-         *  block, armor
-         * 3. Resolve to a set of effects (damage, ...)
-         * 4. post-attack effects
-         *  apply damage
-         *  death, destruction, incapacitation
-         *  morale, damage over time, ...
-         *  use of resources
-         *  experience
-         *
-         */
     }
 }

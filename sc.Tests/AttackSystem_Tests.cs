@@ -1,8 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using CopperBend.Contract;
 using CopperBend.Model;
+using CopperBend.Engine;
 
 namespace sc.Tests
 {
@@ -10,6 +11,9 @@ namespace sc.Tests
      *
      * 0. Build attack
      * 0.1. Choose attack and defense methods
+     *      multiple 
+     *      dodge, parry/deflect  (big soft spot in my design right now)
+     *      block, armor
      * 0.2. Resolve those choices plus passives to effects and mods
      * 1. Calc attack
      * 1.1. Apply attack mods
@@ -21,15 +25,14 @@ namespace sc.Tests
      * 2.2. Apply to attack effects
      * 2.3. Check for triggered effects
      *      (may return us to 2.1 or 2.2)
-     *  dodge, parry/deflect
-     *  block, armor
-     * 3. Resolve to a set of effects (damage, ...)
+     * 3. Resolve to a set of effects (damage of different types, ...)
      * 4. post-attack effects
-     *  apply damage
-     *  death, destruction, incapacitation
-     *  morale, damage over time, ...
-     *  use of resources
-     *  experience
+     *    damage
+     *    death or destruction? => clean up
+     *    incapacitation or other 'status' effects (morale, confusion)
+     *    damage over time, other temporary effects...
+     *    spend (gain?) resources
+     *    attacker and defender gain experience
      *
      */
 
@@ -43,31 +46,99 @@ namespace sc.Tests
     [TestFixture]
     public class AttackSystem_Tests
     {
-        [Test]
-        public void some()
+        AttackMethod tac;
+        AttackEffect tac_impact;
+        AttackEffect tac_flame;
+
+        AttackMethod bfh;
+        AttackEffect bfh_impact;
+        AttackEffect bfh_flame;
+
+        DefenseMethod leather_armor;
+        DefenseMethod ring_armor;
+
+
+        [SetUp]
+        public void SetUp()
         {
-            // Brekka-onu's Flame Hammer
-            var bfh = new AttackMethod();
-            var impact = new AttackEffect
+            // Torch as club
+            tac = new AttackMethod();
+            tac_impact = new AttackEffect
             {
                 DamageType = DamageType.Impact_blunt,
-                DamageRange = "2d5 + 2"
+                DamageRange = "1d5"
             };
-            var flame = new AttackEffect
+            tac_flame = new AttackEffect
+            {
+                DamageType = DamageType.Fire,
+                DamageRange = "1d3 - 1"
+            };
+            tac.AttackEffects.Add(tac_impact);
+            tac.AttackEffects.Add(tac_flame);
+
+            // Brekka-onu's Flame Hammer
+            bfh = new AttackMethod();
+            bfh_impact = new AttackEffect
+            {
+                DamageType = DamageType.Impact_blunt,
+                DamageRange = "2d6 + 2"
+            };
+            bfh_flame = new AttackEffect
             {
                 DamageType = DamageType.Fire,
                 DamageRange = "1d4 + 2"
             };
-            bfh.AttackEffects.Add(impact);
-            bfh.AttackEffects.Add(flame);
+            bfh.AttackEffects.Add(bfh_impact);
+            bfh.AttackEffects.Add(bfh_flame);
 
-            var leather_armor = new DefenseMethod();
+            leather_armor = new DefenseMethod();
             leather_armor.DamageResistances[DamageType.Impact_blunt] = "1/4 ..4";
             leather_armor.DamageResistances[DamageType.Fire] = "2/3 ..3";
 
-            var ring_armor = new DefenseMethod();
+            ring_armor = new DefenseMethod();
             ring_armor.DamageResistances[DamageType.Impact_blunt] = "1/2 ..6";
             ring_armor.DamageResistances[DamageType.Fire] = "2/3 ..5";
+        }
+
+        [Test]
+        public void Damage_within_expected_ranges()
+        {
+            var asys = new AttackSystem();
+            bool rolled_min = false;
+            bool rolled_max = false;
+            for (int i = 0; i < 1000; i++)
+            {
+                int damage = asys.Roll_damage(bfh_impact);
+                if (damage == 4) rolled_min = true;
+                if (damage == 14) rolled_max = true;
+                Assert.That(damage, Is.GreaterThanOrEqualTo(4));
+                Assert.That(damage, Is.LessThanOrEqualTo(14));
+            }
+
+            // Technically a nondeterministic test, so, technically, evil.
+            Assert.That(rolled_min, "the odds of not rolling min in 1000 are 5.8e-13, or 1.7 trillion to one.");
+            Assert.That(rolled_max, "the odds of not rolling max in 1000 are 5.8e-13, or 1.7 trillion to one.");
+        }
+
+        [Test]
+        public void Can_resist_a_set_of_AttackDamages()
+        {
+            var asys = new AttackSystem();
+            List<AttackDamage> damages = new List<AttackDamage>
+            {
+                new AttackDamage {Initial = 9, Current = 9, Type = DamageType.Impact_blunt},
+                new AttackDamage {Initial = 5, Current = 5, Type = DamageType.Fire},
+                new AttackDamage {Initial = 1, Current = 1, Type = DamageType.Impact_edge},
+            };
+            
+            asys.Resist_damages(damages, leather_armor);
+
+            Assert.That(damages[0].Initial, Is.EqualTo(9));
+            Assert.That(damages[0].Current, Is.EqualTo(7));
+            Assert.That(damages[1].Initial, Is.EqualTo(5));
+            Assert.That(damages[1].Current, Is.EqualTo(2));
+            Assert.That(damages[2].Initial, Is.EqualTo(1));
+            Assert.That(damages[2].Current, Is.EqualTo(1));
         }
     }
 }

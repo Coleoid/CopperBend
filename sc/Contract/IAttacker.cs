@@ -56,6 +56,7 @@ namespace CopperBend.Contract
     public enum DamageType
     {
         Unset = 0,
+        Not_otherwise_specified,  //0.2: Use this type as fallback
         Impact_blunt,
         Impact_edge,
         Impact_point,
@@ -66,5 +67,6 @@ namespace CopperBend.Contract
         Light,
         Water,
     }
+    //1.+: Add categories, perhaps physical, energetic, magical, and vital.
 
 }

@@ -10,7 +10,8 @@ namespace CopperBend.Fabric
         public int Offset { get; set; }
         public int UBound { get; set; }
         public int LBound { get; set; }
-        
+        public MidpointRounding MidpointRounding { get; set; } = MidpointRounding.AwayFromZero;
+
         // Set this true when, e.g., we cannot block more damage than came in
         public bool InputMovesClamp { get; set; }
 
@@ -47,17 +48,16 @@ namespace CopperBend.Fabric
                 : int.Parse(maxText);
         }
 
-        public int Apply(int input, MidpointRounding midpointRounding = MidpointRounding.AwayFromZero)
+        public int Apply(int input)
         {
-            double raw = (input * Numerator) / (double) Denominator;
-            int result = (int) Math.Round(raw, midpointRounding);
-            result += Offset;
-
             var lBound = InputMovesClamp ? Math.Min(input, LBound) : LBound;
             var uBound = InputMovesClamp ? Math.Max(input, UBound) : UBound;
 
-            result = Math.Max(result, lBound); // result is not lower than lower bound
-            result = Math.Min(result, uBound); // result is not higher than upper bound
+            double raw = (input * Numerator) / (double) Denominator;
+            int result = (int) Math.Round(raw, MidpointRounding);
+            result += Offset;
+
+            result = Math.Clamp(result, lBound, uBound);
 
             return result;
         }

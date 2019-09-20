@@ -35,4 +35,11 @@ namespace CopperBend.Model
         }
     }
 
+    public class AttackDamage
+    {
+        public DamageType Type { get; set; }
+        public int Initial { get; set; }
+        public int Current { get; set; }
+    }
+
 }

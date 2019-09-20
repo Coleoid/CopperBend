@@ -179,6 +179,7 @@ namespace CopperBend.Engine
             return true;
         }
 
+        //0.1.DMG  Rewrite these damage methods to work with the AttackSystem
         public void Damage(IDestroyable target, IItem source)
         {
             int amount = DamageToTargetFromItem(target, source);
@@ -189,7 +190,7 @@ namespace CopperBend.Engine
         {
             int half = source.Extent * 5;
 
-            int amount = half + new Random().Next(half) + 1;  //0.1.SAVE  need to use managed random
+            int amount = half + new Random().Next(half) + 1;  //0.1.DMG  need to use managed random
 
             Damage(target, DamageType.Blight_toxin, amount);
         }
@@ -200,13 +201,11 @@ namespace CopperBend.Engine
             Damage(target, amount);
         }
 
-        //0.1.DMG  incorporate more damage modification cases
         public void Damage(IDestroyable target, DamageType type, int amount)
         {
             //  Our hero is oddly resistant to the effects of the blight
             if (type == DamageType.Blight_toxin && target is Player)
             {
-                //0.2.DMG  Refine player blight resistancee
                 amount = Math.Clamp(amount / 10, 1, 3);
             }
             Damage(target, amount);
@@ -216,7 +215,6 @@ namespace CopperBend.Engine
         {
             target.Hurt(amount);
 
-            //  Perhaps this difference in implementation isn't useful
             if (target is AreaBlight blight)
             {
                 if (blight.Extent < 1)
@@ -227,8 +225,8 @@ namespace CopperBend.Engine
 
             if (target.Health < 1)
             {
-                //  Is this the afterlife?
-                //0.1:  Remove target being from schedule?  Put on list to be reaped elsewhen?
+                //  Is this an angel?  (ツ)_/¯  🦋
+                //0.1.DMG  Dead/destroyed:  Remove here and now?  Put on list to be reaped elsewhen?
             }
         }
 

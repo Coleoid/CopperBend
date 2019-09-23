@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using log4net;
 using SadConsole.Input;
@@ -23,8 +24,8 @@ namespace CopperBend.Engine
         private IMessageLogWindow MessageLog;
         private ILog log;
 
-        private Action<AsciiKey> NextStep = null;
-        private bool InMultiStepCommand => NextStep != null;
+        // becomes external dependency soon
+        public AttackSystem AttackSystem { get; set; }
 
         public CommandDispatcher(
             ISchedule schedule,
@@ -37,6 +38,8 @@ namespace CopperBend.Engine
             GameState = gameState;
             Describer = describer;
             MessageLog = messageLog;
+            AttackSystem = new AttackSystem();
+
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
 

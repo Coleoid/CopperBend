@@ -65,7 +65,7 @@ namespace sc.Tests
             tac = new AttackMethod();
             tac_impact = new AttackEffect
             {
-                DamageType = DamageType.Impact_blunt,
+                DamageType = DamageType.Physical_blunt_hit,
                 DamageRange = "1d5"
             };
             tac_flame = new AttackEffect
@@ -80,7 +80,7 @@ namespace sc.Tests
             bfh = new AttackMethod();
             bfh_impact = new AttackEffect
             {
-                DamageType = DamageType.Impact_blunt,
+                DamageType = DamageType.Physical_blunt_hit,
                 DamageRange = "2d6 + 2"
             };
             bfh_flame = new AttackEffect
@@ -92,11 +92,11 @@ namespace sc.Tests
             bfh.AttackEffects.Add(bfh_flame);
 
             leather_armor = new DefenseMethod();
-            leather_armor.DamageResistances[DamageType.Impact_blunt] = "1/4 ..4";
+            leather_armor.DamageResistances[DamageType.Physical_blunt_hit] = "1/4 ..4";
             leather_armor.DamageResistances[DamageType.Fire] = "2/3 ..3";
 
             ring_armor = new DefenseMethod();
-            ring_armor.DamageResistances[DamageType.Impact_blunt] = "1/2 ..6";
+            ring_armor.DamageResistances[DamageType.Physical_blunt_hit] = "1/2 ..6";
             ring_armor.DamageResistances[DamageType.Fire] = "2/3 ..5";
         }
 
@@ -126,9 +126,9 @@ namespace sc.Tests
             var asys = new AttackSystem();
             List<AttackDamage> damages = new List<AttackDamage>
             {
-                new AttackDamage {Initial = 9, Current = 9, Type = DamageType.Impact_blunt},
+                new AttackDamage {Initial = 9, Current = 9, Type = DamageType.Physical_blunt_hit},
                 new AttackDamage {Initial = 5, Current = 5, Type = DamageType.Fire},
-                new AttackDamage {Initial = 1, Current = 1, Type = DamageType.Impact_edge},
+                new AttackDamage {Initial = 1, Current = 1, Type = DamageType.Physical_edge_hit},
             };
             
             asys.Resist_damages(damages, leather_armor);

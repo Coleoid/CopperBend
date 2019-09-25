@@ -13,6 +13,9 @@ namespace CopperBend.Model
             AttackEffects = new List<IAttackEffect>();
             AttackModifiers = new List<IModifier>();
         }
+
+        public void AddEffect(IAttackEffect effect) => AttackEffects.Add(effect);
+        public void AddModifier(IModifier modifier) => AttackModifiers.Add(modifier);
     }
 
     public class DefenseMethod : IDefenseMethod

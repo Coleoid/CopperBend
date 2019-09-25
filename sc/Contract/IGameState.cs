@@ -1,9 +1,13 @@
-﻿namespace CopperBend.Contract
+﻿using GoRogue;
+
+namespace CopperBend.Contract
 {
     public interface IGameState
     {
         ICompoundMap Map { get; }
         IBeing Player { get; }
+
+        void DirtyCoord(Coord newPosition);
         //0.2.SAVE  include beings and items on levels
         //0.2.SAVE  Player basics:  health & energy, items, experience
         //0.2.SAVE  include player knowledge repos

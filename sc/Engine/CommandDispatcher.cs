@@ -146,59 +146,49 @@ namespace CopperBend.Engine
             return Do_DirectionMove(being, newPosition);
         }
 
+        //0.1  Wrong place.  Collect a volume of standard effects?
+        AttackEffect lifeChampion = new AttackEffect
+        {
+            DamageType = DamageType.Nature_itself,
+            DamageRange = "2d3+4"  // 6-10
+        };
+
         private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, IAreaBlight targetBlight)
         {
             var attackMethod = new AttackMethod();
             //fs var attackMethod = being.GetCurrentAttack();
 
-            //fs attackMethod.AttackEffects.Add(being.CurrentAttack);
             if (being.IsPlayer && being.WieldedTool == null && being.Gloves == null)
             {
-                var lifeChampion = new AttackEffect
-                {
-                    DamageType = DamageType.Nature_plant,
-                    DamageRange = "2d4+3"
-                };
-                attackMethod.AttackEffects.Add(lifeChampion);
-
+                attackMethod.AddEffect(lifeChampion);
                 Message(being, Msgs.BarehandBlightDamage);
             }
 
             AttackSystem.Damage(being, attackMethod, targetBlight, null);
+            GameState.DirtyCoord(newPosition);
 
 
-
-            //0.2  wants smoother ux
-            if (being.WieldedTool == null && being.Gloves == null)
+            #region Champion damage to blight spreads
+            //TODO:  Think about effects spreading (Over time?  Pct chance?)
+            // flammables have % to catch fire when neighbor on fire, checked on schedule
+            bool damageSpread = false;
+            foreach (Coord neighbor in newPosition.Neighbors())
             {
-                Message(being, Msgs.BarehandBlightDamage);
-
-                Damage(being, targetBlight);
-                Damage(targetBlight, DamageType.Nature_plant, 6);
-                GameState.Map.CoordsWithChanges.Add(newPosition);
-
-                bool damageSpread = false;
-                foreach (Coord neighbor in newPosition.Neighbors())
+                IAreaBlight blight = BlightMap.GetItem(neighbor);
+                if (blight?.Extent > 0)
                 {
-                    IAreaBlight blight = BlightMap.GetItem(neighbor);
-                    if (blight?.Extent > 0)
-                    {
-                        Damage(blight, DamageType.Nature_plant, 3);
-                        GameState.Map.CoordsWithChanges.Add(neighbor);
-                        damageSpread = true;
-                    }
+                    Damage(blight, DamageType.Nature_plant, 3);
+                    GameState.DirtyCoord(neighbor);
+                    damageSpread = true;
                 }
-
-                if (damageSpread)
-                    Message(being, Msgs.BlightDamageSpreads);
-            }
-            else
-            {
-                Damage(targetBlight, being.WieldedTool);
-                GameState.Map.CoordsWithChanges.Add(newPosition);
             }
 
-            ScheduleAgent(being, 24);
+            if (damageSpread)
+                Message(being, Msgs.BlightDamageSpreads);
+            #endregion
+
+
+            ScheduleAgent(being, 24);  //0.1 not all attacks should take 24 ticks
             being.HasClearedBlightBefore = true;
             return true;
         }
@@ -282,6 +272,22 @@ namespace CopperBend.Engine
             BlightDamageSpreads
         }
 
+        /// <summary>
+        /// Has this message not been seen before in this game run?
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool FirstTimeFor(Msgs key)
+        {
+            return true;  //0.1
+        }
+
+        /// <summary>
+        /// This allows messages to adapt based on the Being involved and
+        /// what messages have already been seen, how many times, et c.
+        /// </summary>
+        /// <param name="being"></param>
+        /// <param name="messageKey"></param>
         public void Message(IBeing being, Msgs messageKey)
         {
             Guard.Against(messageKey == Msgs.Unset, "Must set message key");
@@ -290,8 +296,10 @@ namespace CopperBend.Engine
             switch (messageKey)
             {
             case Msgs.BarehandBlightDamage:
+                //0.2  promote to alert, the first time, general damage message later
                 WriteLine("I tear it off the ground.  Burns... my hands start bleeding.  Acid?");
-                if (!being.HasClearedBlightBefore)
+
+                if (FirstTimeFor(messageKey))
                 {
                     WriteLine("Where I touched it, the stuff is crumbling.");
                 }
@@ -302,7 +310,9 @@ namespace CopperBend.Engine
                 break;
 
             default:
-                throw new Exception($"Must code message for key [{messageKey}].");
+                var need_message_for_key = $"Must code message for key [{messageKey}].";
+                WriteLine(need_message_for_key);
+                throw new Exception(need_message_for_key);
             }
         }
 

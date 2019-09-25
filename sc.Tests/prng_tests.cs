@@ -2,10 +2,10 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using NUnit.Framework;
 using Troschuetz.Random.Generators;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using NUnit.Framework;
 
 namespace sc_tests
 {

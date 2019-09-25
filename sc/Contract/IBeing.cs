@@ -4,7 +4,7 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    public interface IBeing : IDestroyable, IScheduleAgent, IHasID
+    public interface IBeing : IDestroyable, IScheduleAgent, IHasID, IAttacker, IDefender
     {
         string Name { get; set; }
         int Awareness { get; set; }
@@ -21,7 +21,7 @@ namespace CopperBend.Contract
         Microsoft.Xna.Framework.Point Position { get; set; }
         void MoveTo(Coord position);
 
-        IEnumerable<IItem> Inventory { get; }
+        IReadOnlyCollection<IItem> Inventory { get; }
         void AddToInventory(IItem item);
         IItem RemoveFromInventory(int inventorySlot);
         IItem RemoveFromInventory(IItem item);

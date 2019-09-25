@@ -1,7 +1,7 @@
 ﻿using System;
+using CopperBend.Fabric;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using CopperBend.Fabric;
 
 namespace sc.Tests
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
-using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
 
@@ -55,6 +55,27 @@ namespace CopperBend.Model
 
         public ICommandSource CommandSource { get; set; }
 
+        //  IAttacker
+        public IAttackMethod GetAttackMethod(IDefender defender)
+        {
+            throw new NotImplementedException();
+        }
+        public List<IModifier> GetAttackModifiers(IDefender defender, IAttackMethod method)
+        {
+            throw new NotImplementedException();
+        }
+
+        //  IDefender
+        public IDefenseMethod GetDefenseMethod(IAttackMethod method)
+        {
+            throw new NotImplementedException();
+        }
+        public List<IModifier> GetDefenseModifiers(IAttacker attacker, IAttackMethod method)
+        {
+            throw new NotImplementedException();
+        }
+
+
         public IItem WieldedTool { get; internal set; }
         public IItem Gloves { get; internal set; }
 
@@ -64,17 +85,16 @@ namespace CopperBend.Model
         
         internal void CmdDirection(CmdDirection direction)
         {
-            //log.Debug($"got CmdDirection({direction})");
-            Controls.ScheduleAgent(this, 12); //0.0
+            Controls.ScheduleAgent(this, 12); //0.1
         }
 
 
         //  Inventory has extra game effects, so I want to be sure I
         //  don't casually add/remove directly from the list, from outside.
         private List<IItem> InventoryList;
-        public IEnumerable<IItem> Inventory
+        public IReadOnlyCollection<IItem> Inventory
         {
-            get => InventoryList;
+            get => new ReadOnlyCollection<IItem>(InventoryList);
         }
 
         //public string Name { get => ScEntity.Name; set => ScEntity.Name = value; }

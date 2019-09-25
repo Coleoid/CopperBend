@@ -6,12 +6,12 @@ namespace CopperBend.Model
     public class AttackMethod : IAttackMethod
     {
         public List<IAttackEffect> AttackEffects { get; set; }
-        public List<IAttackModifier> AttackModifiers { get; set; }
+        public List<IModifier> AttackModifiers { get; set; }
 
         public AttackMethod()
         {
             AttackEffects = new List<IAttackEffect>();
-            AttackModifiers = new List<IAttackModifier>();
+            AttackModifiers = new List<IModifier>();
         }
     }
 

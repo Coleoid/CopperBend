@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
-using NUnit.Framework.Internal;
 using CopperBend.Contract;
 using CopperBend.Model;
 using CopperBend.Engine;
+using NUnit.Framework;
+using NUnit.Framework.Internal;
 
 namespace sc.Tests
 {

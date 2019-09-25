@@ -3,14 +3,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.IO;
 using Microsoft.Xna.Framework;
-using NUnit.Framework;
-using NSubstitute;
 using log4net.Config;
 using log4net;
 using log4net.Repository;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using NUnit.Framework;
+using NSubstitute;
 
 namespace CopperBend.Engine.tests
 {

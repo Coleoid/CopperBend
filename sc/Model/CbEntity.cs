@@ -1,10 +1,11 @@
-﻿using GoRogue;
+﻿using SadConsole.Entities;
+using GoRogue;
 
 namespace CopperBend.Model
 {
     public abstract class CbEntity : IHasID
     {
-        public SadConsole.Entities.IEntity ScEntity { get; set; } = null;
+        public IEntity ScEntity { get; set; } = null;
 
         protected CbEntity(uint id = uint.MaxValue)
         {

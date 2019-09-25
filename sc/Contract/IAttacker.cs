@@ -8,28 +8,23 @@ namespace CopperBend.Contract
     //  Do the individual IAttacker/IDefenders decide which effectss to apply, or do
     // they simply send their whole list?
     //  I expect we want the combo/filter logic outside of the combatants.
-    //  An effect which lasts a certain number of uses should not be triggered on being
-    // supplied, so the WasUsed() is called when resolution determines an effect is
-    // active in the attack being resolved.
 
     public interface IAttacker
     {
         IAttackMethod GetAttackMethod(IDefender defender);
-        List<IAttackModifier> BuffAttack(IAttackMethod method, IDefender defender);
-        List<IDefenseModifier> DebuffDefense(IDefenseMethod method, IAttacker defender);
+        List<IModifier> GetAttackModifiers(IDefender defender, IAttackMethod method);
     }
 
     public interface IDefender
     {
         IDefenseMethod GetDefenseMethod(IAttackMethod method);
-        List<IAttackModifier> DebuffAttack(IAttackMethod method, IAttacker attacker);
-        List<IDefenseModifier> BuffDefense(IDefenseMethod method, IAttacker attacker);
+        List<IModifier> GetDefenseModifiers(IAttacker attacker, IAttackMethod method);
     }
 
     public interface IAttackMethod
     {
         List<IAttackEffect> AttackEffects { get; set; }
-        List<IAttackModifier> AttackModifiers { get; set; }
+        List<IModifier> AttackModifiers { get; set; }
     }
 
     public interface IDefenseMethod
@@ -41,6 +36,17 @@ namespace CopperBend.Contract
     {
         DamageType DamageType { get; set; }
         string DamageRange { get; set; }
+    }
+
+    public interface IModifier
+    {
+        /// <summary>
+        /// Some modifiers are expended, like "blocks a total of 80 damage" or
+        /// "Sharpness enchantment wears off after five hits".  Used modifiers
+        /// get WasUsed(amount) calls that they do what they want with.
+        /// </summary>
+        /// <param name="amount">how much effect the modifier had</param>
+        void WasUsed(int amount);
     }
 
     public interface IAttackModifier

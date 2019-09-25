@@ -55,7 +55,8 @@ namespace CopperBend.Engine
             //  e.g., Rage:  x 1.5 damage, x .75 defense, x 2.5 fatigue
             //  defense debuff applied during resist_damages
             //  fatigue multiplier applied in step 5
-            //  ...these go way beyond modifying the AttackMethod.
+            //  ...these go way beyond modifying the AttackMethod.  Time to think again.
+
 
             // = 2.B. Roll Damage
             damages = RollDamages(attack);

@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
-using NUnit.Framework;
+﻿using SadConsole;
+using Newtonsoft.Json;
 using CopperBend.Contract;
 using CopperBend.Fabric;
-using SadConsole;
+using CopperBend.Model;
+using NUnit.Framework;
 
 namespace sc_tests
 {

@@ -1,10 +1,10 @@
-﻿using NUnit.Framework;
+﻿using System.Diagnostics;
 using Troschuetz.Random.Generators;
 using YamlDotNet.Serialization;
 using CopperBend.Contract;
 using CopperBend.Persist;
 using CopperBend.Fabric;
-using System.Diagnostics;
+using NUnit.Framework;
 
 namespace sc_tests
 {

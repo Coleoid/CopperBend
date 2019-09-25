@@ -1,6 +1,6 @@
+using GoRogue;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using GoRogue;
 using NUnit.Framework;
 
 namespace CopperBend.Engine.tests

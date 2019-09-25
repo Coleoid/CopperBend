@@ -148,10 +148,31 @@ namespace CopperBend.Engine
 
         private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, IAreaBlight targetBlight)
         {
+            var attackMethod = new AttackMethod();
+            //fs var attackMethod = being.GetCurrentAttack();
+
+            //fs attackMethod.AttackEffects.Add(being.CurrentAttack);
+            if (being.IsPlayer && being.WieldedTool == null && being.Gloves == null)
+            {
+                var lifeChampion = new AttackEffect
+                {
+                    DamageType = DamageType.Nature_plant,
+                    DamageRange = "2d4+3"
+                };
+                attackMethod.AttackEffects.Add(lifeChampion);
+
+                Message(being, Msgs.BarehandBlightDamage);
+            }
+
+            AttackSystem.Damage(being, attackMethod, targetBlight, null);
+
+
+
             //0.2  wants smoother ux
             if (being.WieldedTool == null && being.Gloves == null)
             {
                 Message(being, Msgs.BarehandBlightDamage);
+
                 Damage(being, targetBlight);
                 Damage(targetBlight, DamageType.Nature_plant, 6);
                 GameState.Map.CoordsWithChanges.Add(newPosition);

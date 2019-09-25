@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CopperBend.Contract
 {
-    public interface IAreaBlight : IHasID, IDestroyable
+    public interface IAreaBlight : IHasID, IDestroyable, IAttacker, IDefender
     {
         int Extent { get; set; }
     }

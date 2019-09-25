@@ -1,12 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
-using NUnit.Framework;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using System.Linq;
 using CopperBend.Persist;
-using System.Diagnostics;
+using NUnit.Framework;
 
 namespace sc_tests
 {

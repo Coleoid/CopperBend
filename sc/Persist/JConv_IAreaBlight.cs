@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Model;
 
 namespace CopperBend.Persist
 {

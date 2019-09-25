@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
 using Microsoft.Xna.Framework;
-using NUnit.Framework;
-using NSubstitute;
 using YamlDotNet.Serialization;
 using CopperBend.Contract;
 using CopperBend.Model;
 using CopperBend.Persist;
+using NSubstitute;
+using NUnit.Framework;
 
 namespace sc_tests
 {

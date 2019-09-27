@@ -42,12 +42,40 @@ namespace CopperBend.Engine
 
      */
 
+
     public class AttackSystem
     {
+        public IControlPanel Panel { get; set; }
+
+        //0.1  Wrong place.  Collect a volume of standard effects?
+        AttackEffect lifeChampion = new AttackEffect
+        {
+            DamageType = DamageType.Nature_itself,
+            DamageRange = "2d3+4" // 6-10
+        };
+
+        public AttackMethod ChooseAttack(IBeing attacker, IDefender defender)
+        {
+            var attackMethod = new AttackMethod();
+
+            if (defender is AreaBlight)
+            {
+                if (attacker.IsPlayer && attacker.WieldedTool == null && attacker.Gloves == null)
+                {
+                    attackMethod.AddEffect(lifeChampion);
+                    Message(attacker, Messages.BarehandBlightDamage);
+                }
+            }
+
+
+            return attackMethod;
+        }
+
+
         public void Damage(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
         {
             IEnumerable<AttackDamage> damages;
-            
+
             //TODO:  Check if the attacker has any modifiers to the AttackMethod
             //  e.g., Aura of Smite Sauce:  +2 to Impact_blunt, +2 against Unholy
             //  benefits apply after rolling damage?
@@ -60,7 +88,7 @@ namespace CopperBend.Engine
 
             // = 2.B. Roll Damage
             damages = RollDamages(attack);
-            
+
             // = 3.B.
             Resist_damages(damages, defense);
         }
@@ -98,9 +126,61 @@ namespace CopperBend.Engine
                     var resisted = new ClampedRatio(resistance).Apply(damage.Current);
                     damage.Current -= Math.Clamp(resisted, 0, damage.Current);
                 }
+
                 //TODO:  Add fallback to DamageType.Not_otherwise_specified
             }
         }
 
+        #region Messages
+
+
+        /// <summary>
+        /// Has this message not been seen before in this game run?
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool FirstTimeFor(Messages key)
+        {
+            return true; //0.1
+        }
+
+        /// <summary>
+        /// This allows messages to adapt based on the Being involved and
+        /// what messages have already been seen, how many times, et c.
+        /// </summary>
+        /// <param name="being"></param>
+        /// <param name="messageKey"></param>
+        public void Message(IBeing being, Messages messageKey)
+        {
+            Guard.Against(messageKey == Messages.Unset, "Must set message key");
+            if (!being.IsPlayer) return;
+
+            switch (messageKey)
+            {
+            case Messages.BarehandBlightDamage:
+                //0.2  promote to alert, the first time, general damage message later
+                Panel.WriteLine("I tear it off the ground.  Burns... my hands start bleeding.  Acid?");
+
+                if (FirstTimeFor(messageKey))
+                {
+                    Panel.WriteLine("Where I touched it, the stuff is crumbling.");
+                }
+
+                break;
+
+            case Messages.BlightDamageSpreads:
+                Panel.WriteLine("The damage to this stuff spreads outward.  Good.");
+                break;
+
+            default:
+                var need_message_for_key = $"Must code message for key [{messageKey}].";
+                Panel.WriteLine(need_message_for_key);
+                throw new Exception(need_message_for_key);
+            }
+        }
+
+        #endregion
+
     }
+
 }

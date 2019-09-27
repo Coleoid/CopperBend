@@ -6,4 +6,12 @@
         TackerFarm,
         TownBastion,
     }
+
+    public enum Messages
+    {
+        Unset = 0,
+        BarehandBlightDamage,
+        BlightDamageSpreads
+    }
+
 }

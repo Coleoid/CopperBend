@@ -39,6 +39,7 @@ namespace CopperBend.Engine
             Describer = describer;
             MessageLog = messageLog;
             AttackSystem = new AttackSystem();
+            AttackSystem.Panel = this;
 
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
@@ -146,23 +147,11 @@ namespace CopperBend.Engine
             return Do_DirectionMove(being, newPosition);
         }
 
-        //0.1  Wrong place.  Collect a volume of standard effects?
-        AttackEffect lifeChampion = new AttackEffect
-        {
-            DamageType = DamageType.Nature_itself,
-            DamageRange = "2d3+4"  // 6-10
-        };
 
         private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, IAreaBlight targetBlight)
         {
             var attackMethod = new AttackMethod();
-            //fs var attackMethod = being.GetCurrentAttack();
-
-            if (being.IsPlayer && being.WieldedTool == null && being.Gloves == null)
-            {
-                attackMethod.AddEffect(lifeChampion);
-                Message(being, Msgs.BarehandBlightDamage);
-            }
+            //fs: var attackMethod = AttackSystem.ChooseAttack(being, target);
 
             AttackSystem.Damage(being, attackMethod, targetBlight, null);
             GameState.DirtyCoord(newPosition);
@@ -171,6 +160,7 @@ namespace CopperBend.Engine
             #region Champion damage to blight spreads
             //TODO:  Think about effects spreading (Over time?  Pct chance?)
             // flammables have % to catch fire when neighbor on fire, checked on schedule
+            // cloud of poison gas
             bool damageSpread = false;
             foreach (Coord neighbor in newPosition.Neighbors())
             {
@@ -184,7 +174,7 @@ namespace CopperBend.Engine
             }
 
             if (damageSpread)
-                Message(being, Msgs.BlightDamageSpreads);
+                AttackSystem.Message(being, Messages.BlightDamageSpreads);
             #endregion
 
 
@@ -240,7 +230,7 @@ namespace CopperBend.Engine
             if (target.Health < 1)
             {
                 //  Is this an angel?  (ツ)_/¯  🦋
-                //0.1.DMG  Dead/destroyed:  Remove here and now?  Put on list to be reaped elsewhen?
+                //0.1.DMG  Dead/destroyed:  Remove here and now?  Put on list to be reaped later?
             }
         }
 
@@ -265,56 +255,6 @@ namespace CopperBend.Engine
             return 4;
         }
 
-        public enum Msgs
-        {
-            Unset = 0,
-            BarehandBlightDamage,
-            BlightDamageSpreads
-        }
-
-        /// <summary>
-        /// Has this message not been seen before in this game run?
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public bool FirstTimeFor(Msgs key)
-        {
-            return true;  //0.1
-        }
-
-        /// <summary>
-        /// This allows messages to adapt based on the Being involved and
-        /// what messages have already been seen, how many times, et c.
-        /// </summary>
-        /// <param name="being"></param>
-        /// <param name="messageKey"></param>
-        public void Message(IBeing being, Msgs messageKey)
-        {
-            Guard.Against(messageKey == Msgs.Unset, "Must set message key");
-            if (!being.IsPlayer) return;
-
-            switch (messageKey)
-            {
-            case Msgs.BarehandBlightDamage:
-                //0.2  promote to alert, the first time, general damage message later
-                WriteLine("I tear it off the ground.  Burns... my hands start bleeding.  Acid?");
-
-                if (FirstTimeFor(messageKey))
-                {
-                    WriteLine("Where I touched it, the stuff is crumbling.");
-                }
-                break;
-
-            case Msgs.BlightDamageSpreads:
-                WriteLine("The damage to this stuff spreads outward.  Good.");
-                break;
-
-            default:
-                var need_message_for_key = $"Must code message for key [{messageKey}].";
-                WriteLine(need_message_for_key);
-                throw new Exception(need_message_for_key);
-            }
-        }
 
         private bool Do_DirectionMove(IBeing being, Coord newPosition)
         {

@@ -2,6 +2,7 @@ using GoRogue;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using NUnit.Framework;
+using CopperBend.Contract;
 
 namespace CopperBend.Engine.tests
 {
@@ -11,9 +12,7 @@ namespace CopperBend.Engine.tests
         [OneTimeSetUp]
         public void SetUp()
         {
-            Engine.InitializeIDGenerator();
-            Engine.InitializePlantRepos();
-            Describer.TomeOfChaos = new TomeOfChaos();
+            Engine.InitializeMetaphysics("seed");
         }
 
         [TestCase(1, "", "rock")]

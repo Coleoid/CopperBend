@@ -17,6 +17,7 @@ namespace sc_tests
         [SetUp]
         public void SetUp()
         {
+            Item.IDGenerator = new GoRogue.IDGenerator();
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,

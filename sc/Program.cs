@@ -16,24 +16,12 @@ namespace CopperBend.Application
         [Option("-s|--seed")]
         public string InitialSeed { get; } = null;
 
-        // main() should boil down to:
-        //public static int Main(string[] args) => CommandLineApplication.Execute<Program>(args);
-
         public static int Main(string[] args)
         {
             return CommandLineApplication.Execute<Program>(args);
-            //var app = new CommandLineApplication();
-
-            //app.HelpOption();
-            //return app.Execute(args);
         }
 
         public void OnExecute()
-        {
-            RunGame();
-        }
-
-        public void RunGame()
         {
             ILog log;
             var repo = LogManager.CreateRepository("CB");
@@ -52,7 +40,7 @@ namespace CopperBend.Application
 
                 //  Engine is now a console, which cannot be created before .Run() below.
                 //  .OnInitialize must be set before .Run is called.
-                Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight, TestMode);
+                Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight, InitialSeed);
                 Game.Instance.Window.Title = "Copper Bend";
                 Game.Instance.Run();
             }

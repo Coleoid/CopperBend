@@ -10,7 +10,7 @@ namespace CopperBend.Engine.Tests
         public void Can_init_ID_generator_service()
         {
             Item.IDGenerator = null;
-            Engine.InitializeIDGenerator();
+            Engine.InitializeMetaphysics("seed");
             Assert.That(Item.IDGenerator, Is.Not.Null);
         }
 

@@ -4,12 +4,19 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using NUnit.Framework;
+using CopperBend.Engine;
 
 namespace sc_tests
 {
     [TestFixture]
     public class Serial_Map_Tests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Engine.InitializeMetaphysics("seed");
+        }
+
         [Test]
         public void CRT_TerrainType()
         {

@@ -13,6 +13,7 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using System.Text;
 
 namespace CopperBend.Engine
 {
@@ -35,10 +36,9 @@ namespace CopperBend.Engine
         private GameState GameState;
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
-        private bool TestMode;
 
         #region Init
-        public Engine(int gameWidth, int gameHeight, bool testMode = false)
+        public Engine(int gameWidth, int gameHeight, string topSeed = null)
             : base()
         {
             log = LogManager.GetLogger("CB", "CB.Engine");
@@ -55,17 +55,34 @@ namespace CopperBend.Engine
             InputQueue = new Queue<AsciiKey>();
             ModeStack = new Stack<EngineMode>();
             CallbackStack = new Stack<Func<bool>>();
-            TestMode = testMode;
 
-            Init();
+            if (topSeed == null)
+            {
+                string clearLetters = "bcdefghjkmnpqrstvwxyz";
+                var r = new Random();
+                var b = new StringBuilder();
+                b.Append(clearLetters[r.Next(0, 20)]);
+                b.Append(clearLetters[r.Next(0, 20)]);
+                b.Append('-');
+                b.Append(clearLetters[r.Next(0, 20)]);
+                b.Append(clearLetters[r.Next(0, 20)]);
+                b.Append('-');
+                b.Append(clearLetters[r.Next(0, 20)]);
+                b.Append(clearLetters[r.Next(0, 20)]);
+
+                topSeed = b.ToString();
+            }
+
+            Init(topSeed);
         }
 
         private ICompoundMap FullMap;
-        public void Init()
+        public void Init(string topSeed)
         {
             PushEngineMode(EngineMode.StartUp, null);
-            InitializeIDGenerator();
-            InitializePlantRepos();
+
+            log.Info($"Top seed:  {topSeed}");
+            InitializeMetaphysics(topSeed);
 
             var loader = new Persist.MapLoader();  //TODO: IoC
             FullMap = loader.FarmMap();
@@ -410,10 +427,26 @@ namespace CopperBend.Engine
             set { _compendium = value; }
         }
 
+        public static void InitializeMetaphysics(string topSeed)
+        {
+            InitializeCompendium(topSeed);
+            InitializeIDGenerator();
+        }
+
+        public static void InitializeCompendium(string topSeed)
+        {
+            Compendium.TomeOfChaos = new TomeOfChaos(topSeed);
+            Compendium.IDGenerator = new IDGenerator();
+            Compendium.Herbal = InitializePlantRepos();
+
+            //move
+            Describer.Herbal = Compendium.Herbal;
+            Describer.TomeOfChaos = Compendium.TomeOfChaos;
+        }
+
+        // may become simply propagating Compendium
         public static void InitializeIDGenerator()
         {
-            Compendium.IDGenerator = new IDGenerator();
-
             // On this path, each new IDed type needs addition here,
             // yet no IDs will ever clash.  I like this tradeoff.
             CbEntity.IDGenerator = Compendium.IDGenerator;
@@ -422,10 +455,9 @@ namespace CopperBend.Engine
             AreaBlight.IDGenerator = Compendium.IDGenerator;
         }
 
-        public static void InitializePlantRepos()
+        public static Herbal InitializePlantRepos()
         {
             Herbal herbal = new Herbal();
-            Compendium.Herbal = herbal;
 
             herbal.PlantByID = new Dictionary<uint, PlantDetails>();
             herbal.PlantByName = new Dictionary<string, PlantDetails>();
@@ -463,6 +495,8 @@ namespace CopperBend.Engine
             Seed.Herbal = herbal;
             Fruit.Herbal = herbal;
             Describer.Herbal = herbal;
+
+            return herbal;
         }
     }
 }

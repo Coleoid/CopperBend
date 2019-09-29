@@ -39,7 +39,7 @@ namespace CopperBend.Fabric
             }
             TopGenerator = new XorShift128Generator(TopSeedInt);
 
-            // The order of each group of 'new ...Next())' calls matters for
+            // The order of calls to a generator matters for
             // repeatability, which affects saved games and debug dumps.
             LearnableGenerator = new XorShift128Generator(TopGenerator.Next());
             MapTopGenerator = new XorShift128Generator(TopGenerator.Next());

@@ -45,7 +45,7 @@ namespace CopperBend.Engine.tests
                 Name = "rock",
                 Adjective = adjective,
             };
-            var desc = describer.Describe(item, DescMods.DefiniteArticle);
+            var desc = describer.Describe(item, DescMods.Article | DescMods.Definite);
             Assert.That(desc, Is.EqualTo(expected));
         }
 
@@ -63,7 +63,7 @@ namespace CopperBend.Engine.tests
                 Name = "rock",
                 Adjective = adjective,
             };
-            var desc = describer.Describe(item, DescMods.IndefiniteArticle);
+            var desc = describer.Describe(item, DescMods.Article);
             Assert.That(desc, Is.EqualTo(expected));
         }
 
@@ -97,7 +97,7 @@ namespace CopperBend.Engine.tests
                 Name = "rock",
                 Adjective = adjective,
             };
-            var desc = describer.Describe(item, DescMods.Quantity | DescMods.IndefiniteArticle);
+            var desc = describer.Describe(item, DescMods.Quantity | DescMods.Article);
             Assert.That(desc, Is.EqualTo(expected));
         }
 
@@ -166,6 +166,52 @@ namespace CopperBend.Engine.tests
         //    desc = describer.Describe(item);
         //    Assert.That(desc, Is.EqualTo("healer fruit"));
         //}
+
+        [TestCase("apple", true)]
+        [TestCase("Bear", false)]
+        [TestCase("Electron", true)]
+        [TestCase("imp", true)]
+        [TestCase("keen gaze", false)]
+        [TestCase("only move", true)]
+        [TestCase("yellow star", false)] // leading Y is consonant, 99% +
+        [TestCase("understanding", true)]
+        [TestCase("imp", true)]
+        public void HasLVS_normal_cases(string word, bool hasLeadingVowelSound)
+        {
+            Assert.That(Describer.HasLeadingVowelSound(word), Is.EqualTo(hasLeadingVowelSound));
+        }
+
+        [TestCase("universe")]
+        [TestCase("unit")]
+        [TestCase("one")]
+        [TestCase("use")]
+        [TestCase("user")]
+        [TestCase("utensil")]
+        [TestCase("ewe")]
+        [TestCase("ewer")]
+        [TestCase("euphoric")]
+        public void HasLVS_vowel_with_consonant_sound(string word)
+        {
+            Assert.That(Describer.HasLeadingVowelSound(word), Is.False);
+        }
+
+        [TestCase("yttrium")]
+        [TestCase("Ymir")]
+        [TestCase("honest child")]
+        [TestCase("herbal remedy")]
+        [TestCase("heir")]
+        public void HasLVS_consonant_with_vowel_sound(string word)
+        {
+            Assert.That(Describer.HasLeadingVowelSound(word));
+        }
+
+        [TestCase("unimportant", true)]
+        [TestCase("honey", false)]
+        [TestCase("hierarchy", false)]
+        public void HasLVS_normal_but_similar_to_unusual(string word, bool hasLeadingVowelSound)
+        {
+            Assert.That(Describer.HasLeadingVowelSound(word), Is.EqualTo(hasLeadingVowelSound));
+        }
 
     }
 }

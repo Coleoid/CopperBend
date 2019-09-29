@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using log4net;
-using SadConsole.Input;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
@@ -283,9 +281,8 @@ namespace CopperBend.Engine
 
             if (!SpaceMap.CanWalkThrough(newPosition))
             {
-                var np = Describer.Describe(space.Terrain.Name, DescMods.IndefiniteArticle);
-                if (being.IsPlayer)
-                    MessageLog.WriteLine($"I can't walk through {np}.");
+                var np = Describer.Describe(space.Terrain.Name, DescMods.Article);
+                WriteLineIfPlayer(being, $"I can't walk through {np}.");
                 
                 ClearPendingInput();
                 return false;
@@ -319,7 +316,7 @@ namespace CopperBend.Engine
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
-                    var np = Describer.Describe(item, DescMods.IndefiniteArticle);
+                    var np = Describer.Describe(item, DescMods.Article);
                     MessageLog.WriteLine($"There {beVerb} {np} here.");
                 }
                 else

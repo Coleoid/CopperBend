@@ -153,7 +153,7 @@ namespace CopperBend.Engine
                 }
                 else
                 {
-                    WriteLine($"I can't eat or drink {Describer.Describe(item, DescMods.IndefiniteArticle)}.");
+                    WriteLine($"I can't eat or drink {Describer.Describe(item, DescMods.Article)}.");
                 }
             }
             else

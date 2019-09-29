@@ -1,6 +1,4 @@
-﻿using CopperBend.Contract;
-
-namespace CopperBend.Engine
+﻿namespace CopperBend.Contract
 {
     public interface IDescriber
     {

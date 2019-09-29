@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CopperBend.Contract;
@@ -8,16 +7,6 @@ using Troschuetz.Random.Generators;
 
 namespace CopperBend.Engine
 {
-    [Flags]
-    public enum DescMods
-    {
-        None = 0,
-        DefiniteArticle = 1,
-        IndefiniteArticle = 2,  // definite and indefinite don't fit Flags model perfectly.  Le oh well.
-        Quantity = 4,
-        LeadingCapital = 8,
-        NoAdjective = 16,
-    }
 
     public class Describer : IDescriber
     {
@@ -141,43 +130,64 @@ namespace CopperBend.Engine
         {
             string art = string.Empty;
 
-            if (mods.HasFlag(DescMods.Quantity))
-                art = quantity.ToString();
-
             adj = mods.HasFlag(DescMods.NoAdjective) ? "" : adj;
-            if (adj.Length > 0) adj = adj + " ";
-
-            var s = (quantity == 1) ? "" : "s";
+            if (adj.Length > 0) adj += " ";
 
 
-            if (mods.HasFlag(DescMods.DefiniteArticle))
+
+            if (mods.HasFlag(DescMods.Article))
             {
-                art = "the";
-            }
-            else if (mods.HasFlag(DescMods.IndefiniteArticle))
-            {
-                if (quantity == 1)
+                if (mods.HasFlag(DescMods.Definite))
                 {
-                    bool vowelSound = Regex.Match(adj, "^[aeiouy]", RegexOptions.IgnoreCase).Success;
-                    art = vowelSound ? "an" : "a";
+                    art = "the ";
                 }
                 else
                 {
-                    if (!mods.HasFlag(DescMods.Quantity))
-                        art = "some";
+                    if (quantity == 1)
+                    {
+                        var leadingWord = adj.Length > 0 ? adj : name;
+                        bool leadingVowel = HasLeadingVowelSound(leadingWord);
+                        art = leadingVowel ? "an " : "a ";
+                    }
+                    else
+                    {
+                        art = mods.HasFlag(DescMods.Quantity) ? $"{quantity} " : "some ";
+                    }
                 }
             }
-
-            if (art.Length > 0) art = art + " ";
-
-            var description = $"{art}{adj}{name}{s}";
-            if (mods.HasFlag(DescMods.LeadingCapital))
+            else
             {
-                description = description.Substring(0, 1).ToUpper()
-                    + description.Substring(1);
+                art = mods.HasFlag(DescMods.Quantity) ? $"{quantity} " : "";
+            }
+
+            var s = (quantity == 1) ? "" : "s";
+            var description = $"{art}{adj}{name}{s}";
+
+            if (mods.HasFlag(DescMods.LeadingCapital) && !string.IsNullOrEmpty(description))
+            {
+                description = char.ToUpper(description[0]) + description.Substring(1);
             }
 
             return description;
+        }
+
+        public static bool HasLeadingVowelSound(string meetingWord)
+        {
+            //0.K:  Incomplete by design, trivial to extend as needed.
+            var exceptions = new List<(string, bool)>
+            {
+                ("^h(erb|onor|our|onest|eir)", true),
+                ("^uni(que|t|vers|form)", false),
+                ("^u(tens|se|vers|form)", false),
+                ("^e(we|uph)", false),
+                ("^one", false),
+                ("^y(tt|gg|mir)", true), // because norse elementalists
+            };
+
+            foreach (var (pattern, hasLVS) in exceptions)
+                if (Regex.Match(meetingWord, pattern, RegexOptions.IgnoreCase).Success) return hasLVS;
+
+            return Regex.Match(meetingWord, "^[aeiou]", RegexOptions.IgnoreCase).Success;
         }
     }
 }

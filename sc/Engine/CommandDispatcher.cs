@@ -38,8 +38,7 @@ namespace CopperBend.Engine
             GameState = gameState;
             Describer = describer;
             MessageLog = messageLog;
-            AttackSystem = new AttackSystem();
-            AttackSystem.Panel = this;
+            AttackSystem = new AttackSystem(this);
 
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }

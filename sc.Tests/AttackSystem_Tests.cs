@@ -103,7 +103,7 @@ namespace sc.Tests
         [Test]
         public void Damage_within_expected_ranges()
         {
-            var asys = new AttackSystem();
+            var asys = new AttackSystem(null);
             bool rolled_min = false;
             bool rolled_max = false;
             for (int i = 0; i < 1000; i++)
@@ -123,7 +123,7 @@ namespace sc.Tests
         [Test]
         public void Can_resist_a_set_of_AttackDamages()
         {
-            var asys = new AttackSystem();
+            var asys = new AttackSystem(null);
             List<AttackDamage> damages = new List<AttackDamage>
             {
                 new AttackDamage {Initial = 9, Current = 9, Type = DamageType.Physical_blunt_hit},

@@ -47,8 +47,13 @@ namespace CopperBend.Engine
     {
         public IControlPanel Panel { get; set; }
 
+        public AttackSystem(IControlPanel panel)
+        {
+            Panel = panel;
+        }
+
         //0.1  Wrong place.  Collect a volume of standard effects?
-        AttackEffect lifeChampion = new AttackEffect
+        readonly AttackEffect lifeChampion = new AttackEffect
         {
             DamageType = DamageType.Nature_itself,
             DamageRange = "2d3+4" // 6-10

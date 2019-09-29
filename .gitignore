@@ -11,3 +11,4 @@ obj
 /deploy/*.log
 **/packages/**/*.*
 App/App.csproj.user
+sc/cb.log

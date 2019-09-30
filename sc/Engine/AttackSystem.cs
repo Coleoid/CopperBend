@@ -8,40 +8,69 @@ using System.Linq;
 
 namespace CopperBend.Engine
 {
+
     /*
 
-1.  Build attack
-    A.  Choose attack and defense methods
-        multiple types of damage possible per attack
-        dodge, parry/deflect  (big soft spot in my design right now)
-        block (strength + tool)
-        armor/resistance
+Build attack
+    Choose attack method
+        0.1: Currently only single attack from Wielded tool
+            Completely inadequate for creatures
+            Eventually inadequate for tool-users
+        Filtered by affordable (somehow in UI)
+        Multiple types of damage possible per attack
+        ? Choosable (in UI) modifiers
+            Competency, special ability, gear, ...?
+            How does this come from data through the UI?
+        Pay resource costs
 
-        choosable modifiers due to general skill, special ability, hardware?
-            ? from data to UI...
-    B.  Resolve those choices to (att|def) effects and (att|def) mods
-2. Calc attack
-    A.  Apply attack mods
-    B.  Roll damage
-    C.  Check for triggered effects
-        (may return us to 1.1 or 1.2)
-3.  Calc defense
-    A.  Apply defense mods
-    B.  Apply to attack effects
-    C.  Check for triggered effects
-            May return us to 3.A. or 3.B.
-            May create a new attack
+    Choose defense method  (missing from my design 30 Sep 19)
+        Filtered by affordable
+        Dodge, parry/deflect
+        Block (strength + tool)
+        Armor or similar resistance
+        Pay resource costs
 
-4.  Resolve to a set of effects (damage of different types, ...)
-5.  Apply post-attack effects
-        Register damage (death or destruction? => clean up)
-        Time range effects
-            'status' effects (stun, fear, confusion)
-            damage over time, ...
-        Spend (gain?) resources
-        attacker and defender gain experience
+    Queue the attack  //  QueueAttack(a, am, d, dm)
 
-     */
+
+For each queued attack  //  ResolveAttackQueue()
+
+    Probably cancel if defender destroyed
+    Perhaps cancel if attacker destroyed
+
+    Calc attack
+        Apply attack mods
+        Roll damage
+        Check for triggered effects
+            May add more Attacks to the queue
+
+    Calc defense
+        Apply dodge/deflect/nullify defenses
+        Apply resistance/armor to type of attack effect
+        Apply to attack effects
+        Check for triggered effects
+            May add more Attacks to the queue
+
+    Resolve effects (damage of different types, ...)
+
+        Directly adjust values
+            Damage body, conciousness, nerve, ...
+                May add target to Destroyed list
+            Experience for attacker and defender
+
+        Apply extended effects
+            Status effects (stun, fear, haste, ...)
+            Damage over time (burn, bleed, tox, ...)
+
+Apply post-attack effects
+
+    Convert Destroyed list
+        Remove from schedule
+        Remove from being, blight, or item map
+        Drop items (roll for loot?)
+        Check story line / quest triggers
+
+    */
 
     public class Attack
     {

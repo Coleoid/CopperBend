@@ -131,12 +131,14 @@ namespace CopperBend.Engine
             var newPosition = CoordInDirection(being.Position, direction);
 
             IDefender target = BeingMap.GetItems(newPosition).FirstOrDefault();
-            if (target != null) return Do_Attack(being, target, newPosition);
 
-            var blight = BlightMap.GetItem(newPosition);
-            if (blight?.Health > 0) return Do_Attack(being, blight, newPosition);
+            if (target == null)
+                target = BlightMap.GetItem(newPosition);
 
-            return Do_DirectionMove(being, newPosition);
+            if (target == null)
+                return Do_DirectionMove(being, newPosition);
+
+            return Do_Attack(being, target, newPosition);
         }
 
 
@@ -147,7 +149,7 @@ namespace CopperBend.Engine
             AttackSystem.ResolveAttackQueue();
 
             GameState.DirtyCoord(position);
-            ScheduleAgent(being, 12);  //0.1 attack time spent should vary
+            ScheduleAgent(being, 12);  //0.2 attack time spent should vary
             return true;
         }
 

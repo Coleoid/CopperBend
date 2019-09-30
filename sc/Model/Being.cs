@@ -70,7 +70,7 @@ namespace CopperBend.Model
                 if (IsPlayer && WieldedTool == null && Gloves == null)
                 {
                     attack.AddEffect(lifeChampion);
-                    //Message(this, Messages.BarehandBlightDamage);
+                    //TODO: can message from Being: Message(this, Messages.BarehandBlightDamage);
                 }
             }
 

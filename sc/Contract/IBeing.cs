@@ -33,5 +33,6 @@ namespace CopperBend.Contract
         bool HasClearedBlightBefore { get; set; }
 
         void GiveCommand();
-    }
+
+        IAttackMethod GetAttackMethod(IDefender defender);    }
 }

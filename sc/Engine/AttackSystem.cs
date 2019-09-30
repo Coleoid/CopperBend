@@ -43,6 +43,13 @@ namespace CopperBend.Engine
 
      */
 
+    public class Attack
+    {
+        public IAttacker Attacker { get; set; }
+        public IAttackMethod AttackMethod { get; set; }
+        public IDefender Defender { get; set; }
+        public IDefenseMethod DefenseMethod { get; set; }
+    }
 
     public class AttackSystem
     {
@@ -50,35 +57,37 @@ namespace CopperBend.Engine
         {
             Panel = panel;
             Destroyed = new List<IDestroyable>();
+            AttackQueue = new Queue<Attack>();
         }
 
         public IControlPanel Panel { get; set; }
         public List<IDestroyable> Destroyed { get; set; }
+        public Queue<Attack> AttackQueue { get; set; }
 
-
-        //0.1  Wrong place.  Collect a volume of standard effects?
-        readonly AttackEffect lifeChampion = new AttackEffect
+        public void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
         {
-            DamageType = DamageType.Nature_itself,
-            DamageRange = "2d3+4" // 6-10
-        };
+            AddAttack(new Attack {
+                Attacker = attacker,
+                AttackMethod = attack,
+                Defender = defender,
+                DefenseMethod = defense
+            });
+        }
+        public void AddAttack(Attack attack) => AttackQueue.Enqueue(attack);
 
-        public IAttackMethod ChooseAttack(IBeing attacker, IDefender defender)
+        
+        public void ResolveAttackQueue()
         {
-            IAttackMethod attackMethod = attacker.GetAttackMethod(defender);
-
-            if (defender is AreaBlight)
+            while (AttackQueue.Peek() != null)
             {
-                if (attacker.IsPlayer && attacker.WieldedTool == null && attacker.Gloves == null)
-                {
-                    attackMethod.AddEffect(lifeChampion);
-                    Message(attacker, Messages.BarehandBlightDamage);
-                }
+                ResolveAttack(AttackQueue.Dequeue());
             }
-
-            return attackMethod;
         }
 
+        public void ResolveAttack(Attack attack)
+        {
+            Damage(attack.Attacker, attack.AttackMethod, attack.Defender, attack.DefenseMethod);
+        }
 
         public void Damage(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
         {
@@ -156,7 +165,7 @@ namespace CopperBend.Engine
             var damages = new List<AttackDamage>();
             foreach (var effect in attack.AttackEffects)
             {
-                var roll = Roll_damage(effect);
+                var roll = RollDamage(effect);
                 var damage = new AttackDamage
                 {
                     Type = effect.DamageType,
@@ -169,7 +178,7 @@ namespace CopperBend.Engine
             return damages;
         }
 
-        public int Roll_damage(IAttackEffect effect)
+        public int RollDamage(IAttackEffect effect)
         {
             return Dice.Roll(effect.DamageRange);
         }
@@ -194,23 +203,21 @@ namespace CopperBend.Engine
 
         #region Messages
 
-
-        /// <summary>
-        /// Has this message not been seen before in this game run?
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        Dictionary<Messages, bool> SeenMessages { get; set; } = new Dictionary<Messages, bool>();
+        /// <summary> First time running across this message in this game run? </summary>
         public bool FirstTimeFor(Messages key)
         {
-            return true; //0.1
+            var firstTime = !SeenMessages.ContainsKey(key);
+            if (firstTime)
+                SeenMessages.Add(key, true);
+
+            return firstTime;
         }
 
         /// <summary>
         /// This allows messages to adapt based on the Being involved and
         /// what messages have already been seen, how many times, et c.
         /// </summary>
-        /// <param name="being"></param>
-        /// <param name="messageKey"></param>
         public void Message(IBeing being, Messages messageKey)
         {
             Guard.Against(messageKey == Messages.Unset, "Must set message key");
@@ -219,12 +226,15 @@ namespace CopperBend.Engine
             switch (messageKey)
             {
             case Messages.BarehandBlightDamage:
-                //0.2  promote to alert, the first time, general damage message later
-                Panel.WriteLine("I tear it off the ground.  Burns... my hands start bleeding.  Acid?");
-
                 if (FirstTimeFor(messageKey))
                 {
-                    Panel.WriteLine("Where I touched it, the stuff is crumbling.");
+                    //0.2  promote to alert
+                    Panel.WriteLine("I tear a chunk off the ground.  It fights back--burns my hands.");
+                    Panel.WriteLine("The stuff withers away from where I grab it.");
+                }
+                else
+                {
+                    Panel.WriteLine("I hit it, and the stuff withers.");
                 }
 
                 break;
@@ -241,7 +251,6 @@ namespace CopperBend.Engine
         }
 
         #endregion
-
     }
 
 }

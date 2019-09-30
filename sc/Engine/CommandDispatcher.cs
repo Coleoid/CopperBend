@@ -130,8 +130,8 @@ namespace CopperBend.Engine
         {
             var newPosition = CoordInDirection(being.Position, direction);
 
-            IBeing targetBeing = BeingMap.GetItems(newPosition).FirstOrDefault();
-            if (targetBeing != null) return Do_Attack(being, targetBeing, newPosition);
+            IDefender target = BeingMap.GetItems(newPosition).FirstOrDefault();
+            if (target != null) return Do_Attack(being, target, newPosition);
 
             var blight = BlightMap.GetItem(newPosition);
             if (blight?.Health > 0) return Do_Attack(being, blight, newPosition);
@@ -142,8 +142,9 @@ namespace CopperBend.Engine
 
         private bool Do_Attack(IBeing being, IDefender target, Coord position)
         {
-            var attackMethod = AttackSystem.ChooseAttack(being, target);
-            AttackSystem.Damage(being, attackMethod, target, null);
+            var attackMethod = being.GetAttackMethod(target);
+            AttackSystem.AddAttack(being, attackMethod, target, null); //0.1: need defense
+            AttackSystem.ResolveAttackQueue();
 
             GameState.DirtyCoord(position);
             ScheduleAgent(being, 12);  //0.1 attack time spent should vary

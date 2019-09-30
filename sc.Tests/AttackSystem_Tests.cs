@@ -108,7 +108,7 @@ namespace sc.Tests
             bool rolled_max = false;
             for (int i = 0; i < 1000; i++)
             {
-                int damage = asys.Roll_damage(bfh_impact);
+                int damage = asys.RollDamage(bfh_impact);
                 if (damage == 4) rolled_min = true;
                 if (damage == 14) rolled_max = true;
                 Assert.That(damage, Is.GreaterThanOrEqualTo(4));

@@ -8,9 +8,9 @@ namespace CopperBend.Engine
     {
         public EntityFactory() { }
 
-        public void WireCbEntity(ITakeScEntity cb, Color foreground, Color background, int glyph)
+        public IEntity WireCbEntity(ITakeScEntity cb)
         {
-            cb.ScEntity = NewSCEntity(foreground, background, glyph);
+            return NewSCEntity(cb.Foreground, cb.Background, cb.Glyph);
         }
 
         private IEntity NewSCEntity(Color foreground, Color background, int glyph)

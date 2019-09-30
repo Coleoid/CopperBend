@@ -83,14 +83,14 @@ namespace sc_tests
         [Test]
         public void CRT_AreaBlight()
         {
-            var blight = new AreaBlight(22) { Extent = 14 };
+            var blight = new AreaBlight(22) { Health = 14 };
 
             var json = JsonConvert.SerializeObject(blight);
             //System.Console.Error.WriteLine(json);
             var newBlight = JsonConvert.DeserializeObject<IAreaBlight>(json);
 
             Assert.That(newBlight.ID, Is.EqualTo(22));
-            Assert.That(newBlight.Extent, Is.EqualTo(14));
+            Assert.That(newBlight.Health, Is.EqualTo(14));
         }
 
         [Test]
@@ -98,9 +98,9 @@ namespace sc_tests
         {
             //0.2: int ctor arg = deserializing workaround
             var map = new BlightMap(1) { Name = "Bofungus" };
-            var blight = new AreaBlight(888) { Extent = 11 };
+            var blight = new AreaBlight(888) { Health = 11 };
             map.AddItem(blight, (7, 11));
-            map.AddItem(new AreaBlight() { Extent = 8 }, (7, 12));
+            map.AddItem(new AreaBlight() { Health = 8 }, (7, 12));
 
             var json = JsonConvert.SerializeObject(map);
             //System.Console.Error.WriteLine(json);

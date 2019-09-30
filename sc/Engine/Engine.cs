@@ -151,6 +151,7 @@ namespace CopperBend.Engine
             player.AddToInventory(new Seed((0,0), 2, Compendium.Herbal.PlantByName["Healer"].ID));
 
             log.Debug("Created player.");
+            player.Console.Position = playerLocation;
             return player;
         }
         #endregion

@@ -131,7 +131,7 @@ namespace sc.Tests
                 new AttackDamage {Initial = 1, Current = 1, Type = DamageType.Physical_edge_hit},
             };
             
-            asys.Resist_damages(damages, leather_armor);
+            asys.ResistDamages(damages, leather_armor);
 
             Assert.That(damages[0].Initial, Is.EqualTo(9));
             Assert.That(damages[0].Current, Is.EqualTo(7));

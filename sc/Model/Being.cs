@@ -11,15 +11,11 @@ namespace CopperBend.Model
     public class Being : CbEntity, IBeing, ITakeScEntity, IHasID
     {
         public virtual string BeingType { get; set; } = "Being";
+        public static IEntityFactory EntityFactory { get; set; }
 
         public int Health { get; set; }
         public int MaxHealth { get; set; }
         public char Symbol { get; set; }
-
-        // admirable clarity of intent, bad mockability
-        //public Color Foreground => ScEntity.Animation.CurrentFrame[0].Foreground;
-        //public Color Background => ScEntity.Animation.CurrentFrame[0].Background;
-        //public int Glyph => ScEntity.Animation.CurrentFrame[0].Glyph;
 
         public Color Foreground { get; set; }
         public Color Background { get; set; }
@@ -35,10 +31,13 @@ namespace CopperBend.Model
             Foreground = foreground;
             Background = background;
             Glyph = glyph;
-            EntityFactory.WireCbEntity(this, foreground, background, glyph);
+            ScEntity = EntityFactory.WireCbEntity(this);
         }
 
-        internal IControlPanel Controls { get; set; }
+        //public Point Position { get; set; }
+        public Point Position { get => ScEntity.Position; set => ScEntity.Position = value; }
+
+        public SadConsole.Console Console { get => (SadConsole.Console)ScEntity; }
 
         //  IBeing
         public void MoveTo(Coord point)
@@ -83,12 +82,6 @@ namespace CopperBend.Model
         
         public bool HasClearedBlightBefore { get; set; }
         
-        internal void CmdDirection(CmdDirection direction)
-        {
-            Controls.ScheduleAgent(this, 12); //0.1
-        }
-
-
         //  Inventory has extra game effects, so I want to be sure I
         //  don't casually add/remove directly from the list, from outside.
         private List<IItem> InventoryList;
@@ -98,13 +91,8 @@ namespace CopperBend.Model
         }
 
         //public string Name { get => ScEntity.Name; set => ScEntity.Name = value; }
-        //public Point Position { get => ScEntity.Position; set => ScEntity.Position = value; }
         public string Name { get; set; }
-        public Point Position { get; set; }
-
-        public SadConsole.Console Console { get => (SadConsole.Console)ScEntity; }
-        public static IEntityFactory EntityFactory { get; set; }
-
+        
         public void AddToInventory(IItem item)
         {
             //0.2.INV  limit stack size of some items

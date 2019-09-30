@@ -6,6 +6,7 @@ using CopperBend.Model;
 using CopperBend.Persist;
 using NSubstitute;
 using NUnit.Framework;
+using SadConsole.Entities;
 
 namespace sc_tests
 {
@@ -26,7 +27,10 @@ namespace sc_tests
                 .WithTypeConverter(new YConv_IBeing())
                 .Build();
 
-            Being.EntityFactory = Substitute.For<IEntityFactory>();
+            var entityFactory = Substitute.For<IEntityFactory>();
+            entityFactory.WireCbEntity(Arg.Any<ITakeScEntity>())
+                .Returns(Substitute.For<IEntity>());
+            Being.EntityFactory = entityFactory;
         }
 
         [Test]

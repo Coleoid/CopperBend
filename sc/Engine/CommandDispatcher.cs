@@ -143,40 +143,9 @@ namespace CopperBend.Engine
         private bool Do_Attack(IBeing being, IDefender target, Coord position)
         {
             var attackMethod = AttackSystem.ChooseAttack(being, target);
-
             AttackSystem.Damage(being, attackMethod, target, null);
+
             GameState.DirtyCoord(position);
-
-            if (target is IAreaBlight blight)
-            {
-                #region Champion damage to blight spreads
-
-                AttackMethod blightSmite = new AttackMethod();
-                blightSmite.AddEffect(new AttackEffect {
-                    DamageType = DamageType.Nature_itself,
-                    DamageRange = "2d2"
-                });
-
-                //TODO:  Generalize effects spreading
-                //  Over time?  Pct chance?  Weakening?
-                //  Flammables, poison gas, blight smite, ...
-                bool damageSpread = false;
-                foreach (Coord coord in position.Neighbors())
-                {
-                    IAreaBlight nBlight = BlightMap.GetItem(coord);
-                    if (nBlight?.Health > 0)
-                    {
-                        AttackSystem.Damage(being, blightSmite, nBlight, null);
-                        GameState.DirtyCoord(coord);
-                        damageSpread = true;
-                    }
-                }
-
-                if (damageSpread)
-                    AttackSystem.Message(being, Messages.BlightDamageSpreads);
-                #endregion
-            }
-
             ScheduleAgent(being, 12);  //0.1 attack time spent should vary
             return true;
         }

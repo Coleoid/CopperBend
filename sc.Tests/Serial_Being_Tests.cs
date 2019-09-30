@@ -28,7 +28,7 @@ namespace sc_tests
                 .Build();
 
             var entityFactory = Substitute.For<IEntityFactory>();
-            entityFactory.WireCbEntity(Arg.Any<ITakeScEntity>())
+            entityFactory.GetSadCon(Arg.Any<IGetSadCon>())
                 .Returns(Substitute.For<IEntity>());
             Being.EntityFactory = entityFactory;
         }

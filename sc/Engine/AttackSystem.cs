@@ -56,7 +56,6 @@ namespace CopperBend.Engine
         public List<IDestroyable> Destroyed { get; set; }
 
 
-
         //0.1  Wrong place.  Collect a volume of standard effects?
         readonly AttackEffect lifeChampion = new AttackEffect
         {
@@ -64,9 +63,9 @@ namespace CopperBend.Engine
             DamageRange = "2d3+4" // 6-10
         };
 
-        public AttackMethod ChooseAttack(IBeing attacker, IDefender defender)
+        public IAttackMethod ChooseAttack(IBeing attacker, IDefender defender)
         {
-            var attackMethod = new AttackMethod();
+            IAttackMethod attackMethod = attacker.GetAttackMethod(defender);
 
             if (defender is AreaBlight)
             {
@@ -76,7 +75,6 @@ namespace CopperBend.Engine
                     Message(attacker, Messages.BarehandBlightDamage);
                 }
             }
-
 
             return attackMethod;
         }
@@ -135,9 +133,6 @@ namespace CopperBend.Engine
 
             MessageDamage(target, damages);
 
-            if (target.Health > 0)
-            {
-            }
             if (target.Health < 1)
             {
                 //  Is this an angel?  (ツ)_/¯  🦋
@@ -149,7 +144,7 @@ namespace CopperBend.Engine
         {
             if (target.Health > 0)
             {
-                //Message(attacker)
+                //Message(attacker, Messages.BarehandBlightDamage);
             }
             else
             {

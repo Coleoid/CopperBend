@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CopperBend.Model;
 
 namespace CopperBend.Contract
 {
@@ -25,6 +26,7 @@ namespace CopperBend.Contract
     {
         List<IAttackEffect> AttackEffects { get; set; }
         List<IModifier> AttackModifiers { get; set; }
+        void AddEffect(IAttackEffect effect);
     }
 
     public interface IDefenseMethod

@@ -8,7 +8,7 @@ using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
-    public class Being : CbEntity, IBeing, ITakeScEntity, IHasID
+    public class Being : CbEntity, IBeing, IGetSadCon, IHasID
     {
         public virtual string BeingType { get; set; } = "Being";
         public static IEntityFactory EntityFactory { get; set; }
@@ -31,18 +31,17 @@ namespace CopperBend.Model
             Foreground = foreground;
             Background = background;
             Glyph = glyph;
-            ScEntity = EntityFactory.WireCbEntity(this);
+            SadConEntity = EntityFactory.GetSadCon(this);
         }
 
-        //public Point Position { get; set; }
-        public Point Position { get => ScEntity.Position; set => ScEntity.Position = value; }
+        public Point Position { get => SadConEntity.Position; set => SadConEntity.Position = value; }
 
-        public SadConsole.Console Console { get => (SadConsole.Console)ScEntity; }
+        public SadConsole.Console Console { get => (SadConsole.Console)SadConEntity; }
 
         //  IBeing
         public void MoveTo(Coord point)
         {
-            ScEntity.Position = point;
+            SadConEntity.Position = point;
         }
 
         public int Awareness { get; set; }
@@ -54,10 +53,28 @@ namespace CopperBend.Model
 
         public ICommandSource CommandSource { get; set; }
 
+
+        //0.1  Wrong place.  Collect a volume of standard effects?
+        readonly AttackEffect lifeChampion = new AttackEffect
+        {
+            DamageType = DamageType.Nature_itself,
+            DamageRange = "2d3+4" // 6-10
+        };
+
         //  IAttacker
         public IAttackMethod GetAttackMethod(IDefender defender)
         {
-            throw new NotImplementedException();
+            var attack = WieldedTool?.AttackMethod ?? new AttackMethod();
+            if (defender is AreaBlight)
+            {
+                if (IsPlayer && WieldedTool == null && Gloves == null)
+                {
+                    attack.AddEffect(lifeChampion);
+                    //Message(this, Messages.BarehandBlightDamage);
+                }
+            }
+
+            return attack;
         }
         public List<IModifier> GetAttackModifiers(IDefender defender, IAttackMethod method)
         {

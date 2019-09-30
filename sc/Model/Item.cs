@@ -6,17 +6,22 @@ namespace CopperBend.Model
 {
     public class Item : IItem
     {
+        public static IDGenerator IDGenerator;
         public virtual string ItemType { get; } = "Item";
+        public uint ID { get; private set; }
+
         public Item(Coord location, int quantity = 1, bool isUsable = false, uint id = uint.MaxValue)
         {
             ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
             Location = location;
             Quantity = quantity;
             IsUsable = isUsable;
+
+            AttackMethod = new AttackMethod(DamageType.Physical_blunt_hit, "1d4");
         }
 
-        public static IDGenerator IDGenerator;
-        public uint ID { get; private set; }
+        public IAttackMethod AttackMethod { get; set; }
+
 
         public Color Foreground { get; set; }
         public int Glyph { get; set; }

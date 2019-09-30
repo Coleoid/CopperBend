@@ -8,7 +8,7 @@ namespace CopperBend.Engine
     {
         public EntityFactory() { }
 
-        public IEntity WireCbEntity(ITakeScEntity cb)
+        public IEntity GetSadCon(IGetSadCon cb)
         {
             return NewSCEntity(cb.Foreground, cb.Background, cb.Glyph);
         }

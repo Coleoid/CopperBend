@@ -23,6 +23,7 @@ namespace CopperBend.Contract
         bool IsConsumable { get; }
         string ConsumeVerb { get; }
         string Adjective { get; set; }
+        IAttackMethod AttackMethod { get; }
 
         bool StacksWith(IItem item);
     }

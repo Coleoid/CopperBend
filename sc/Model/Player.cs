@@ -15,7 +15,7 @@ namespace CopperBend.Model
 
         internal void AddComponent(IConsoleComponent component)
         {
-            ScEntity.Components.Add(component);
+            SadConEntity.Components.Add(component);
         }
     }
 }

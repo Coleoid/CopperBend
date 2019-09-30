@@ -8,13 +8,28 @@ namespace CopperBend.Model
         public List<IAttackEffect> AttackEffects { get; set; }
         public List<IModifier> AttackModifiers { get; set; }
 
+        public AttackMethod(DamageType type, string range)
+            : this()
+        {
+            AddEffect(type, range);
+        }
+
         public AttackMethod()
         {
             AttackEffects = new List<IAttackEffect>();
             AttackModifiers = new List<IModifier>();
         }
 
+        public void AddEffect(DamageType type, string range)
+        {
+            AddEffect(new AttackEffect
+            {
+                DamageType = type,
+                DamageRange = range
+            });
+        }
         public void AddEffect(IAttackEffect effect) => AttackEffects.Add(effect);
+
         public void AddModifier(IModifier modifier) => AttackModifiers.Add(modifier);
     }
 

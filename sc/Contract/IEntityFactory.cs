@@ -5,14 +5,14 @@ namespace CopperBend.Contract
 {
     public interface IEntityFactory
     {
-        IEntity WireCbEntity(ITakeScEntity cb);
+        IEntity GetSadCon(IGetSadCon cb);
     }
 
-    public interface ITakeScEntity
+    public interface IGetSadCon
     {
         Color Foreground { get; set; }
         Color Background { get; set; }
         int Glyph { get; set; }
-        IEntity ScEntity { get; set; }
+        IEntity SadConEntity { get; set; }
     }
 }

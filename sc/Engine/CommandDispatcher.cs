@@ -57,8 +57,9 @@ namespace CopperBend.Engine
                 break;
 
             case ScheduleAction.Unset:
+                //0.2.DEBUG: create a schedule dump routine, add it to exceptions
                 throw new Exception("Unset action got into schedule somehow.");
-            
+
             default:
                 throw new Exception($"Need to write Dispatch() case for ScheduleAction.{nextAction.Action}.");
             }
@@ -130,55 +131,59 @@ namespace CopperBend.Engine
             var newPosition = CoordInDirection(being.Position, direction);
 
             IBeing targetBeing = BeingMap.GetItems(newPosition).FirstOrDefault();
-            if (targetBeing != null)
-            {
-                return Do_DirectionAttack(being, targetBeing);
-            }
+            if (targetBeing != null) return Do_Attack(being, targetBeing, newPosition);
 
             var blight = BlightMap.GetItem(newPosition);
-            if (blight?.Extent > 0)
-            {
-                return Do_DirectionClearBlight(being, newPosition, blight);
-            }
+            if (blight?.Health > 0) return Do_Attack(being, blight, newPosition);
 
             return Do_DirectionMove(being, newPosition);
         }
 
 
-        private bool Do_DirectionClearBlight(IBeing being, Coord newPosition, IAreaBlight targetBlight)
+        private bool Do_Attack(IBeing being, IDefender target, Coord position)
         {
-            var attackMethod = new AttackMethod();
-            //fs: var attackMethod = AttackSystem.ChooseAttack(being, target);
+            var attackMethod = AttackSystem.ChooseAttack(being, target);
 
-            AttackSystem.Damage(being, attackMethod, targetBlight, null);
-            GameState.DirtyCoord(newPosition);
+            AttackSystem.Damage(being, attackMethod, target, null);
+            GameState.DirtyCoord(position);
 
-
-            #region Champion damage to blight spreads
-            //TODO:  Think about effects spreading (Over time?  Pct chance?)
-            // flammables have % to catch fire when neighbor on fire, checked on schedule
-            // cloud of poison gas
-            bool damageSpread = false;
-            foreach (Coord neighbor in newPosition.Neighbors())
+            if (target is IAreaBlight blight)
             {
-                IAreaBlight blight = BlightMap.GetItem(neighbor);
-                if (blight?.Extent > 0)
+                #region Champion damage to blight spreads
+
+                AttackMethod blightSmite = new AttackMethod();
+                blightSmite.AddEffect(new AttackEffect {
+                    DamageType = DamageType.Nature_itself,
+                    DamageRange = "2d2"
+                });
+
+                //TODO:  Generalize effects spreading
+                //  Over time?  Pct chance?  Weakening?
+                //  Flammables, poison gas, blight smite, ...
+                bool damageSpread = false;
+                foreach (Coord coord in position.Neighbors())
                 {
-                    Damage(blight, DamageType.Nature_plant, 3);
-                    GameState.DirtyCoord(neighbor);
-                    damageSpread = true;
+                    IAreaBlight nBlight = BlightMap.GetItem(coord);
+                    if (nBlight?.Health > 0)
+                    {
+                        AttackSystem.Damage(being, blightSmite, nBlight, null);
+                        GameState.DirtyCoord(coord);
+                        damageSpread = true;
+                    }
                 }
+
+                if (damageSpread)
+                    AttackSystem.Message(being, Messages.BlightDamageSpreads);
+                #endregion
             }
 
-            if (damageSpread)
-                AttackSystem.Message(being, Messages.BlightDamageSpreads);
-            #endregion
-
-
-            ScheduleAgent(being, 24);  //0.1 not all attacks should take 24 ticks
-            being.HasClearedBlightBefore = true;
+            ScheduleAgent(being, 12);  //0.1 attack time spent should vary
             return true;
         }
+
+        //0.0.DMG:  Our hero is oddly resistant to the effects of the blight
+
+
 
         //0.1.DMG  Rewrite these damage methods to work with the AttackSystem
         public void Damage(IDestroyable target, IItem source)
@@ -189,7 +194,7 @@ namespace CopperBend.Engine
 
         public void Damage(IDestroyable target, IAreaBlight source)
         {
-            int half = source.Extent * 5;
+            int half = source.Health * 5;
 
             int amount = half + new Random().Next(half) + 1;  //0.1.DMG  need to use managed random
 
@@ -204,7 +209,6 @@ namespace CopperBend.Engine
 
         public void Damage(IDestroyable target, DamageType type, int amount)
         {
-            //  Our hero is oddly resistant to the effects of the blight
             if (type == DamageType.Blight_toxin && target is Player)
             {
                 amount = Math.Clamp(amount / 10, 1, 3);
@@ -218,7 +222,7 @@ namespace CopperBend.Engine
 
             if (target is AreaBlight blight)
             {
-                if (blight.Extent < 1)
+                if (blight.Health < 1)
                 {
                     GameState.Map.BlightMap.RemoveItem(blight);
                 }
@@ -324,16 +328,6 @@ namespace CopperBend.Engine
                 } //  Nothing here, report nothing
             }
 
-            return true;
-        }
-
-        private bool Do_DirectionAttack(IBeing being, IBeing target)
-        {
-            //0.1.DMG  instead decide damage and speed via attack & defense info
-            target.Hurt(2);
-            ScheduleAgent(being, 12);
-            //var conflictSystem = new ConflictSystem(Window, Map, Schedule);
-            //conflictSystem.Attack("Wah!", 2, targetActor);
             return true;
         }
         #endregion

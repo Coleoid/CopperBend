@@ -15,7 +15,7 @@ namespace CopperBend.Contract
         List<IModifier> GetAttackModifiers(IDefender defender, IAttackMethod method);
     }
 
-    public interface IDefender
+    public interface IDefender : IDestroyable
     {
         IDefenseMethod GetDefenseMethod(IAttackMethod method);
         List<IModifier> GetDefenseModifiers(IAttacker attacker, IAttackMethod method);
@@ -48,35 +48,4 @@ namespace CopperBend.Contract
         /// <param name="amount">how much effect the modifier had</param>
         void WasUsed(int amount);
     }
-
-    public interface IAttackModifier
-    {
-        void WasUsed(int amount);
-    }
-
-    public interface IDefenseModifier
-    {
-        void WasUsed(int amount);
-    }
-
-    public enum DamageType
-    {
-        Unset = 0,
-        Not_otherwise_specified,  //0.2: Use this type as fallback
-        Physical_blunt_hit,
-        Physical_edge_hit,
-        Physical_point_hit,
-        Physical_shear,
-        Fire,
-        Lightning,
-        Light,
-        Water,
-        Nature_plant,
-        Nature_itself,
-        Nature_toxin,
-        Blight_spark,
-        Blight_toxin,
-    }
-    //1.+: Add categories, perhaps physical, energetic, magical, and vital.
-
 }

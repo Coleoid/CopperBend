@@ -88,7 +88,7 @@ namespace CopperBend.Engine
             var newPosition = Controls.CoordInDirection(being.Position, dir);
             
             var targetBlight = GameState.Map.BlightMap.GetItem(newPosition);
-            if (targetBlight?.Extent > 0)
+            if (targetBlight?.Health > 0)
             {
                 //0.1.STORY  improve impact of this landmark event
                 if (!being.HasClearedBlightBefore)

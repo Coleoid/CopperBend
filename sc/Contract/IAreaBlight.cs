@@ -5,6 +5,5 @@ namespace CopperBend.Contract
 {
     public interface IAreaBlight : IHasID, IDestroyable, IAttacker, IDefender
     {
-        int Extent { get; set; }
     }
 }

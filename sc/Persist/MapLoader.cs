@@ -245,7 +245,7 @@ namespace CopperBend.Persist
                         int extent = isD ? int.Parse(symbol) : 0;
 
 
-                        map.BlightMap.AddItem(new AreaBlight {Extent = extent}, (x + x_off, y + y_off));
+                        map.BlightMap.AddItem(new AreaBlight {Health = extent}, (x + x_off, y + y_off));
                     }
                 }
             }

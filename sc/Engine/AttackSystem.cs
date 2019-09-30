@@ -4,6 +4,7 @@ using GoRogue.DiceNotation;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using System.Linq;
 
 namespace CopperBend.Engine
 {
@@ -45,12 +46,16 @@ namespace CopperBend.Engine
 
     public class AttackSystem
     {
-        public IControlPanel Panel { get; set; }
-
         public AttackSystem(IControlPanel panel)
         {
             Panel = panel;
+            Destroyed = new List<IDestroyable>();
         }
+
+        public IControlPanel Panel { get; set; }
+        public List<IDestroyable> Destroyed { get; set; }
+
+
 
         //0.1  Wrong place.  Collect a volume of standard effects?
         readonly AttackEffect lifeChampion = new AttackEffect
@@ -95,7 +100,60 @@ namespace CopperBend.Engine
             damages = RollDamages(attack);
 
             // = 3.B.
-            Resist_damages(damages, defense);
+            ResistDamages(damages, defense);
+
+            // = 5.A.
+            RegisterDamage(defender, damages);
+
+            ReapDestroyed();
+        }
+
+        public void ReapDestroyed()
+        {
+            // remove from whichever map
+            // remove from schedule
+            // drop items
+            // give experience
+            // show destruction/kill message
+
+            //GameState.Map.BlightMap.RemoveItem(blight);
+            //0.0: give fight/kill experience
+
+            //TODO: Destruction/kill messages
+            // Your hands destroy the blight
+            // The blight burns to a crisp
+            // The green sparks destroy the blight
+
+        }
+
+        public void RegisterDamage(IDestroyable target, IEnumerable<AttackDamage> damages)
+        {
+            int amount = damages.Sum(d => d.Current);
+            if (amount < 1) return;
+
+            target.Hurt(amount);
+
+            MessageDamage(target, damages);
+
+            if (target.Health > 0)
+            {
+            }
+            if (target.Health < 1)
+            {
+                //  Is this an angel?  (ツ)_/¯  🦋
+                //AddDestroyed(target, damages);
+            }
+        }
+
+        private void MessageDamage(IDestroyable target, IEnumerable<AttackDamage> damages)
+        {
+            if (target.Health > 0)
+            {
+                //Message(attacker)
+            }
+            else
+            {
+            }
         }
 
         public IEnumerable<AttackDamage> RollDamages(IAttackMethod attack)
@@ -121,11 +179,14 @@ namespace CopperBend.Engine
             return Dice.Roll(effect.DamageRange);
         }
 
-        public void Resist_damages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
+        public void ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
         {
+            Dictionary<DamageType, string> resistances = defense?.DamageResistances;
+            if (resistances == null)
+                resistances = new Dictionary<DamageType, string>();
             foreach (var damage in damages)
             {
-                if (defense.DamageResistances.ContainsKey(damage.Type))
+                if (resistances.ContainsKey(damage.Type))
                 {
                     var resistance = defense.DamageResistances[damage.Type];
                     var resisted = new ClampedRatio(resistance).Apply(damage.Current);

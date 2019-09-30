@@ -1,5 +1,4 @@
 ﻿using System;
-using Newtonsoft.Json;
 using GoRogue;
 using CopperBend.Contract;
 using System.Collections.Generic;
@@ -19,24 +18,21 @@ namespace CopperBend.Model
         public uint ID { get; private set; }
         #endregion
 
-        public int Extent { get; set; }
+        public int Health { get; set; }
 
         #region IDestroyable
         public int MaxHealth { get; set; } = 80;
 
-        [JsonIgnore]
-        public int Health => Extent;
-
         public void Heal(int amount)
         {
             Guard.Against(amount < 0, $"Cannot heal negative amount {amount}.");
-            Extent = Math.Min(MaxHealth, Extent + amount);
+            Health = Math.Min(MaxHealth, Health + amount);
         }
 
         public void Hurt(int amount)
         {
             Guard.Against(amount < 0, $"Cannot hurt negative amount {amount}.");
-            Extent = Math.Max(0, Extent - amount);
+            Health = Math.Max(0, Health - amount);
         }
         #endregion
 

@@ -12,7 +12,7 @@ namespace CopperBend.Engine.tests
         [OneTimeSetUp]
         public void SetUp()
         {
-            Engine.InitializeMetaphysics("seed");
+            Engine.Cosmogenesis("seed");
         }
 
         [TestCase(1, "", "rock")]

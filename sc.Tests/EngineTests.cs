@@ -10,7 +10,7 @@ namespace CopperBend.Engine.Tests
         public void Can_init_ID_generator_service()
         {
             Item.IDGenerator = null;
-            Engine.InitializeMetaphysics("seed");
+            Engine.Cosmogenesis("seed");
             Assert.That(Item.IDGenerator, Is.Not.Null);
         }
 
@@ -18,7 +18,7 @@ namespace CopperBend.Engine.Tests
         public void Can_init_plant_repos()
         {
             Seed.Herbal = null;
-            Engine.InitializePlantRepos();
+            Engine.ConnectHerbal();
             Assert.That(Seed.Herbal, Is.Not.Null);
         }
     }

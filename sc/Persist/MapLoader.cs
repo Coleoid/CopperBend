@@ -16,6 +16,7 @@ namespace CopperBend.Persist
 {
     public class MapLoader
     {
+        //0.1: Extract Atlas into Compendium
         Dictionary<string, TerrainType> TerrainTypes;
 
         public MapLoader()
@@ -200,8 +201,7 @@ namespace CopperBend.Persist
                 BeingMap = new MultiSpatialMap<IBeing>(),
                 ItemMap = new ItemMap(),
                 LocatedTriggers = new List<LocatedTrigger>(),
-                //BlightMap = new BlightMap(1, 1),  //0.0: deserializing cheese
-                BlightMap = new BlightMap(1),
+                BlightMap = new BlightMap(1),  //0.1: deserializing cheese
             };
 
             for (int y = 0; y < height; y++)

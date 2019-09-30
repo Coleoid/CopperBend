@@ -36,8 +36,8 @@ namespace CopperBend.Engine.tests
 
             var log = LogManager.GetLogger("CB", "CB");
 
-            Engine.InitializeIDGenerator();
-            Engine.InitializePlantRepos();
+            Engine.ConnectIDGenerator();
+            Engine.ConnectHerbal();
         }
 
         [SetUp]

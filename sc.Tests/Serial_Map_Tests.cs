@@ -14,7 +14,7 @@ namespace sc_tests
         [SetUp]
         public void SetUp()
         {
-            Engine.InitializeMetaphysics("seed");
+            Engine.Cosmogenesis("seed");
         }
 
         [Test]

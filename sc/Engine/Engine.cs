@@ -82,26 +82,19 @@ namespace CopperBend.Engine
             PushEngineMode(EngineMode.StartUp, null);
 
             log.Info($"Top seed:  {topSeed}");
-            InitializeMetaphysics(topSeed);
+            Cosmogenesis(topSeed);
 
             var loader = new Persist.MapLoader();  //TODO: IoC
             FullMap = loader.FarmMap();
             log.Debug("Loaded the map");
 
+            //0.2.GFX: Set a non-square font in message areas
             //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
             //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
             //SadConsole.Global.FontDefault = font;
             Describer describer = new Describer();
 
-            //if (TestMode)
-            //{
-            //    var testRunner = new GameRunningTestRunner();
-            //    Schedule.AddAgent(testRunner, 1);
-            //}
-            //else
-            //{
-                Being.EntityFactory = new EntityFactory();
-            //}
+            Being.EntityFactory = new EntityFactory();
 
             Schedule = new Schedule();
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
@@ -120,8 +113,6 @@ namespace CopperBend.Engine
             MessageLog = builder.CreateMessageLog();
             Children.Add(MessageLog);
             MessageLog.Show();
-
-
 
             GameState = new GameState
             {
@@ -411,92 +402,5 @@ namespace CopperBend.Engine
         //    map.ItemAdded += (s, a) => MapConsole.Children.Add(a.Item);
         //    map.ItemRemoved += (s, a) => MapConsole.Children.Remove(a.Item);
         //}
-    }
-
-    public partial class Engine
-    {
-        private static Compendium _compendium;
-        public static Compendium Compendium
-        {
-            get
-            {
-                if (_compendium == null)
-                    _compendium = new Compendium();
-                return _compendium;
-            }
-            set { _compendium = value; }
-        }
-
-        public static void InitializeMetaphysics(string topSeed)
-        {
-            InitializeCompendium(topSeed);
-            InitializeIDGenerator();
-        }
-
-        public static void InitializeCompendium(string topSeed)
-        {
-            Compendium.TomeOfChaos = new TomeOfChaos(topSeed);
-            Compendium.IDGenerator = new IDGenerator();
-            Compendium.Herbal = InitializePlantRepos();
-
-            //move
-            Describer.Herbal = Compendium.Herbal;
-            Describer.TomeOfChaos = Compendium.TomeOfChaos;
-        }
-
-        // may become simply propagating Compendium
-        public static void InitializeIDGenerator()
-        {
-            // On this path, each new IDed type needs addition here,
-            // yet no IDs will ever clash.  I like this tradeoff.
-            CbEntity.IDGenerator = Compendium.IDGenerator;
-            Item.IDGenerator = Compendium.IDGenerator;
-            Space.IDGenerator = Compendium.IDGenerator;
-            AreaBlight.IDGenerator = Compendium.IDGenerator;
-        }
-
-        public static Herbal InitializePlantRepos()
-        {
-            Herbal herbal = new Herbal();
-
-            herbal.PlantByID = new Dictionary<uint, PlantDetails>();
-            herbal.PlantByName = new Dictionary<string, PlantDetails>();
-
-            PlantDetails plant = null;
-
-            //0.1.WORLD  Flesh the plant list out, and tuck it into YAML config.
-            plant = new PlantDetails
-            {
-                ID = 1,
-                MainName = "Boomer",
-                GrowthTime = 400
-            };
-            herbal.PlantByID[plant.ID] = plant;
-            herbal.PlantByName[plant.MainName] = plant;
-
-            plant = new PlantDetails
-            {
-                ID = 2,
-                MainName = "Healer",
-                GrowthTime = 400
-            };
-            herbal.PlantByID[plant.ID] = plant;
-            herbal.PlantByName[plant.MainName] = plant;
-
-            plant = new PlantDetails
-            {
-                ID = 3,
-                MainName = "Thornfriend",
-                GrowthTime = 400
-            };
-            herbal.PlantByID[plant.ID] = plant;
-            herbal.PlantByName[plant.MainName] = plant;
-
-            Seed.Herbal = herbal;
-            Fruit.Herbal = herbal;
-            Describer.Herbal = herbal;
-
-            return herbal;
-        }
     }
 }

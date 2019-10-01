@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 using GoRogue;
 using CopperBend.Contract;
 
@@ -106,16 +105,12 @@ namespace CopperBend.Fabric
         //public int Elevation;  //for later movement/attack mod
         public TerrainType Terrain { get; set; }
 
-        [JsonIgnore]
         //0.2.MAP  check for modifiers (smoke, dust, giant creature, ...)
         public bool CanSeeThrough => Terrain.CanSeeThrough;
-        [JsonIgnore]
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
-        [JsonIgnore]
         //0.2.MAP  check for modifiers (permission, hostile aura, blight, ...)
         public bool CanPlant => Terrain.CanPlant && IsTilled && !IsSown;
-        [JsonIgnore]
         public bool CanTill => Terrain.CanPlant && !IsTilled;
 
         public bool IsTilled { get; set; }

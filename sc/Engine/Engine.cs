@@ -98,10 +98,10 @@ namespace CopperBend.Engine
 
             Schedule = new Schedule();
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
-            //Player.Font = Font;
             Schedule.AddAgent(Player, 12);
 
             var builder = new UIBuilder(GameSize, null); //font
+            //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player.Console);
@@ -118,7 +118,6 @@ namespace CopperBend.Engine
             {
                 Player = Player,
                 Map = FullMap,
-                Tome = new TomeOfChaos(),
             };
 
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)

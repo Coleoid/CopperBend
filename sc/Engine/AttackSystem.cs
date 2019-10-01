@@ -146,21 +146,25 @@ Apply post-attack effects
 
         public void ReapDestroyed()
         {
-            // remove from whichever map
-            // remove from schedule
-            // drop items
-            // give experience
-            // show destruction/kill message
+            foreach(var mote in Destroyed)
+            {
+                Panel.RemoveFromAppropriateMap(mote);
 
-            //GameState.Map.BlightMap.RemoveItem(blight);
-            //0.0: give fight/kill experience
+                // remove from schedule
+                if (mote is IScheduleAgent agent)
+                    Panel.RemoveFromSchedule(agent);
 
-            //TODO: Destruction/kill messages
-            // Your hands destroy the blight
-            // The blight burns to a crisp
-            // The green sparks destroy the blight
+                //0.0: drop items
+                //0.0: give fight/kill experience
+            }
 
+            Destroyed.Clear();
         }
+
+        //TODO: Destruction/kill messages... somewhere
+        // Your hands destroy the blight
+        // The blight burns to a crisp
+        // The green sparks destroy the blight
 
         public void RegisterDamage(IDestroyable target, IEnumerable<AttackDamage> damages)
         {

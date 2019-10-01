@@ -11,6 +11,7 @@ namespace CopperBend.Contract
         ScheduleEntry GetNextAction();
         void AddAgent(IScheduleAgent agent);
         void AddAgent(IScheduleAgent agent, int offset);
+        void RemoveAgent(IScheduleAgent agent);
     }
 
     public class ScheduleEntry

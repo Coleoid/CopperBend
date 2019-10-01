@@ -29,6 +29,8 @@ namespace CopperBend.Contract
         Coord CoordInDirection(Coord start, CmdDirection direction);
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Coord position);
+        bool RemoveFromAppropriateMap(IDestroyable mote);
+        void RemoveFromSchedule(IScheduleAgent agent);
         void Till(ISpace space);
 
         void AddExperience(uint plantID, Exp experience);

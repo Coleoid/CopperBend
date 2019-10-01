@@ -85,6 +85,35 @@ namespace CopperBend.Engine
             //Map.GetTileAt(point).RemovePlant();
         }
 
+        public bool RemoveFromAppropriateMap(IDestroyable mote)
+        {
+            // remove from whichever map
+            if (mote is IAreaBlight blight)
+            {
+                BlightMap.RemoveItem(blight);
+                return true;
+            }
+
+            if (mote is IBeing being)
+            {
+                return BeingMap.Remove(being);
+            }
+
+            //1.+:  Make IItems IDestroyable
+            if (mote is IItem item)
+            {
+                return ItemMap.Remove(item);
+            }
+
+            throw new Exception($"Unsure how to destroy a {mote.GetType().Name}.");
+        }
+
+        public void RemoveFromSchedule(IScheduleAgent agent)
+        {
+            Schedule.RemoveAgent(agent);
+        }
+
+
         public void Till(ISpace space)
         {
             SpaceMap.Till(space);

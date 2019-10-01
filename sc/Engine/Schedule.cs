@@ -67,6 +67,15 @@ namespace CopperBend.Engine
             TickEntries[actionTick].Add(entry);
         }
 
+        public void RemoveAgent(IScheduleAgent agent)
+        {
+            foreach (var key in TickEntries.Keys)
+            {
+                var entries = TickEntries[key];
+                entries.RemoveAll(e => e.Agent == agent);
+            }
+        }
+
         public void Clear()
         {
             TickEntries.Clear();

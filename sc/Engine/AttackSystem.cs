@@ -85,12 +85,12 @@ Apply post-attack effects
         public AttackSystem(IControlPanel panel)
         {
             Panel = panel;
-            Destroyed = new List<IDestroyable>();
+            Destroyed = new Queue<IDestroyable>();
             AttackQueue = new Queue<Attack>();
         }
 
         public IControlPanel Panel { get; set; }
-        public List<IDestroyable> Destroyed { get; set; }
+        public Queue<IDestroyable> Destroyed { get; set; }
         public Queue<Attack> AttackQueue { get; set; }
 
         public void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
@@ -111,14 +111,11 @@ Apply post-attack effects
             {
                 ResolveAttack(AttackQueue.Dequeue());
             }
+
+            ReapDestroyed();
         }
 
         public void ResolveAttack(Attack attack)
-        {
-            Damage(attack.Attacker, attack.AttackMethod, attack.Defender, attack.DefenseMethod);
-        }
-
-        public void Damage(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
         {
             IEnumerable<AttackDamage> damages;
 
@@ -133,38 +130,14 @@ Apply post-attack effects
 
 
             // = 2.B. Roll Damage
-            damages = RollDamages(attack);
+            damages = RollDamages(attack.AttackMethod);
 
             // = 3.B.
-            ResistDamages(damages, defense);
+            ResistDamages(damages, attack.DefenseMethod);
 
             // = 5.A.
-            RegisterDamage(defender, damages);
-
-            ReapDestroyed();
+            RegisterDamage(attack.Defender, damages);
         }
-
-        public void ReapDestroyed()
-        {
-            foreach(var mote in Destroyed)
-            {
-                Panel.RemoveFromAppropriateMap(mote);
-
-                // remove from schedule
-                if (mote is IScheduleAgent agent)
-                    Panel.RemoveFromSchedule(agent);
-
-                //0.0: drop items
-                //0.0: give fight/kill experience
-            }
-
-            Destroyed.Clear();
-        }
-
-        //TODO: Destruction/kill messages... somewhere
-        // Your hands destroy the blight
-        // The blight burns to a crisp
-        // The green sparks destroy the blight
 
         public void RegisterDamage(IDestroyable target, IEnumerable<AttackDamage> damages)
         {
@@ -177,10 +150,32 @@ Apply post-attack effects
 
             if (target.Health < 1)
             {
-                //  Is this an angel?  (ツ)_/¯  🦋
-                //AddDestroyed(target, damages);
+                //              🦋
+                //  (ツ)_/¯
+                //  Is this an angel?
+                Destroyed.Enqueue(target);
             }
         }
+
+        public void ReapDestroyed()
+        {
+            while (Destroyed.TryDequeue(out var mote))
+            {
+                Panel.RemoveFromAppropriateMap(mote);
+
+                // remove from schedule
+                if (mote is IScheduleAgent agent)
+                    Panel.RemoveFromSchedule(agent);
+
+                //0.0: drop items
+                //0.0: give fight/kill experience
+            }
+        }
+
+        //TODO: Destruction/kill messages... somewhere
+        // Your hands destroy the blight
+        // The blight burns to a crisp
+        // The green sparks destroy the blight
 
         private void MessageDamage(IDestroyable target, IEnumerable<AttackDamage> damages)
         {

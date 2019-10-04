@@ -170,7 +170,7 @@ namespace CopperBend.Engine
 
             int amount = half + new Random().Next(half) + 1;  //0.1.DMG  need to use managed random
 
-            Damage(target, DamageType.Blight_toxin, amount);
+            Damage(target, "vital.blight", amount);
         }
 
         public void Damage(IDestroyable target, IBeing source)
@@ -179,9 +179,9 @@ namespace CopperBend.Engine
             Damage(target, amount);
         }
 
-        public void Damage(IDestroyable target, DamageType type, int amount)
+        public void Damage(IDestroyable target, string type, int amount)
         {
-            if (type == DamageType.Blight_toxin && target is Player)
+            if (type == "vital.blight" && target is Player)
             {
                 amount = Math.Clamp(amount / 10, 1, 3);
             }

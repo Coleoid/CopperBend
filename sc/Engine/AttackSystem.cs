@@ -201,7 +201,7 @@ Apply post-attack effects
                 var roll = RollDamage(effect);
                 var damage = new AttackDamage
                 {
-                    Type = effect.DamageType,
+                    DT = effect.Type,
                     Initial = roll,
                     Current = roll,
                 };
@@ -218,19 +218,37 @@ Apply post-attack effects
 
         public void ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
         {
-            Dictionary<DamageType, string> resistances = defense?.DamageResistances;
-            if (resistances == null)
-                resistances = new Dictionary<DamageType, string>();
+            Dictionary<string, string> drs = defense?.Resistances;
+            if (drs == null)
+                drs = new Dictionary<string, string>();
+
             foreach (var damage in damages)
             {
-                if (resistances.ContainsKey(damage.Type))
+                //  Hunt resistance, successively generalizing by trimming ending
+                //  E.g., physical.impact.blunt -> physical.impact -> physical -> default -> 0
+                var foundResistance = string.Empty;
+                for (
+                        string damagePath = damage.DT;
+                        damagePath.Length > 0;
+                        damagePath = damagePath.Substring(0, damagePath.LastIndexOf('.'))
+                    )
                 {
-                    var resistance = defense.DamageResistances[damage.Type];
-                    var resisted = new ClampedRatio(resistance).Apply(damage.Current);
-                    damage.Current -= Math.Clamp(resisted, 0, damage.Current);
-                }
+                    //  Found it directly?
+                    if (drs.TryGetValue(damagePath, out foundResistance)) break;
 
-                //TODO:  Add fallback to DamageType.Not_otherwise_specified
+                    //  If we can't break it down further, it's default or nothing
+                    if (damagePath.IndexOf('.') < 0)
+                    {
+                        drs.TryGetValue("default", out foundResistance);
+                        break;
+                    }
+                }
+                if (foundResistance == string.Empty) continue;
+
+                var resisted = new ClampedRatio(foundResistance).Apply(damage.Current);
+
+                //  Resistance can't make the damage worse, or cause healing
+                damage.Current -= Math.Clamp(resisted, 0, damage.Current);
             }
         }
 

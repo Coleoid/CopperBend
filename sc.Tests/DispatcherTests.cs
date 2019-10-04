@@ -89,28 +89,28 @@ namespace CopperBend.Engine.tests
         //    return areaMap;
         //}
 
-        [Explicit, Property("Context", "ConsoleRunning")]
-        [TestCase(CmdAction.Wait, CmdDirection.None, 6)]
-        [TestCase(CmdAction.Consume, CmdDirection.None, 2)]
-        [TestCase(CmdAction.Drop, CmdDirection.None, 1)]
-        [TestCase(CmdAction.Wield, CmdDirection.None, 6)]
-        public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
-        {
-            //TODO: Mock this factory
-            // needs IConsole plugged into the SadConsole project
-            //IEntityFactory mockEntityFactory = Substitute.For<IEntityFactory>();
-            //Being.EntityFactory = mockEntityFactory;
+        //[Explicit, Property("Context", "ConsoleRunning")]
+        //[TestCase(CmdAction.Wait, CmdDirection.None, 6)]
+        //[TestCase(CmdAction.Consume, CmdDirection.None, 2)]
+        //[TestCase(CmdAction.Drop, CmdDirection.None, 1)]
+        //[TestCase(CmdAction.Wield, CmdDirection.None, 6)]
+        //public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
+        //{
+        //    //TODO: Mock this factory
+        //    // needs IConsole plugged into the SadConsole project
+        //    //IEntityFactory mockEntityFactory = Substitute.For<IEntityFactory>();
+        //    //Being.EntityFactory = mockEntityFactory;
 
-            Being.EntityFactory = new EntityFactory();
+        //    Being.EntityFactory = new EntityFactory();
 
-            var actor = new Player(Color.AliceBlue, Color.Black);
-            var item = new Fruit((0, 0), 1, Fruit.Herbal.PlantByName["Healer"]);
-            actor.AddToInventory(item);
+        //    var actor = new Player(Color.AliceBlue, Color.Black);
+        //    var item = new Fruit((0, 0), 1, Fruit.Herbal.PlantByName["Healer"]);
+        //    actor.AddToInventory(item);
 
-            var cmd = new Command(action, direction, item);
-            _dispatcher.CommandBeing(actor, cmd);
-            __schedule.Received().AddAgent(actor, tickOff);
-        }
+        //    var cmd = new Command(action, direction, item);
+        //    _dispatcher.CommandBeing(actor, cmd);
+        //    __schedule.Received().AddAgent(actor, tickOff);
+        //}
 
 
         #region Consume

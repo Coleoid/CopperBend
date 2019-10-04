@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CopperBend.Contract;
 using CopperBend.Model;
 using CopperBend.Engine;
 using NUnit.Framework;
@@ -61,44 +60,53 @@ namespace sc.Tests
         [SetUp]
         public void SetUp()
         {
-            // Torch as club
+            // Torch as club, crunch and burn
             tac = new AttackMethod();
             tac_impact = new AttackEffect
             {
-                DamageType = DamageType.Physical_blunt_hit,
+                Type = "physical.impact.blunt",
                 DamageRange = "1d5"
             };
             tac_flame = new AttackEffect
             {
-                DamageType = DamageType.Fire,
+                Type = "energetic.fire",
                 DamageRange = "1d3 - 1"
             };
             tac.AttackEffects.Add(tac_impact);
             tac.AttackEffects.Add(tac_flame);
 
-            // Brekka-onu's Flame Hammer
+            // Brekka-onu's Flame Hammer, bigger crunch, bigger burn
             bfh = new AttackMethod();
             bfh_impact = new AttackEffect
             {
-                DamageType = DamageType.Physical_blunt_hit,
+                Type = "physical.impact.blunt",
                 DamageRange = "2d6 + 2"
             };
             bfh_flame = new AttackEffect
             {
-                DamageType = DamageType.Fire,
+                Type = "energetic.fire",
                 DamageRange = "1d4 + 2"
             };
             bfh.AttackEffects.Add(bfh_impact);
             bfh.AttackEffects.Add(bfh_flame);
 
             leather_armor = new DefenseMethod();
-            leather_armor.DamageResistances[DamageType.Physical_blunt_hit] = "1/4 ..4";
-            leather_armor.DamageResistances[DamageType.Fire] = "2/3 ..3";
+            leather_armor.Resistances["physical.impact.blunt"] = "1/4 ..4";
+            leather_armor.Resistances["physical"] = "1/2 ..4";
+            leather_armor.Resistances["energetic"] = "2/3 ..3";
+            leather_armor.Resistances["magical"] = "1/3 ..1";
+            leather_armor.Resistances["vital"] = "1/3 ..2";
+            //leather_armor.Resistances["default"] = "1/3 ..3";  //not needed with all branches covered
 
             ring_armor = new DefenseMethod();
-            ring_armor.DamageResistances[DamageType.Physical_blunt_hit] = "1/2 ..6";
-            ring_armor.DamageResistances[DamageType.Fire] = "2/3 ..5";
+            ring_armor.Resistances["physical.impact.blunt"] = "1/2 ..6";
+            ring_armor.Resistances["physical"] = "2/3 ..8";
+            ring_armor.Resistances["energetic.fire"] = "2/3 ..5";
+            ring_armor.Resistances["default"] = "1/2 ..5";
+
+            //0.2: Keep the tree of damage types in data, and type-check attacks/defenses at load time...
         }
+
 
         [Test]
         public void Damage_within_expected_ranges()
@@ -126,15 +134,36 @@ namespace sc.Tests
             var asys = new AttackSystem(null);
             List<AttackDamage> damages = new List<AttackDamage>
             {
-                new AttackDamage {Initial = 9, Current = 9, Type = DamageType.Physical_blunt_hit},
-                new AttackDamage {Initial = 5, Current = 5, Type = DamageType.Fire},
-                new AttackDamage {Initial = 1, Current = 1, Type = DamageType.Physical_edge_hit},
+                new AttackDamage {Initial = 9, Current = 9, DT = "physical.impact.blunt"},
+                new AttackDamage {Initial = 5, Current = 5, DT = "energetic.fire"},
+                new AttackDamage {Initial = 1, Current = 1, DT = "physical.impact.edge"},
             };
-            
+
             asys.ResistDamages(damages, leather_armor);
 
             Assert.That(damages[0].Initial, Is.EqualTo(9));
             Assert.That(damages[0].Current, Is.EqualTo(7));
+            Assert.That(damages[1].Initial, Is.EqualTo(5));
+            Assert.That(damages[1].Current, Is.EqualTo(2));
+            Assert.That(damages[2].Initial, Is.EqualTo(1));
+            Assert.That(damages[2].Current, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Damage_resistance_when_not_otherwise_specified()
+        {
+            var asys = new AttackSystem(null);
+            List<AttackDamage> damages = new List<AttackDamage>
+            {
+                new AttackDamage {Initial = 9, Current = 9, DT = "energetic.lightning"},
+                new AttackDamage {Initial = 5, Current = 5, DT = "energetic.light"},
+                new AttackDamage {Initial = 1, Current = 1, DT = "vital.toxin"},
+            };
+
+            asys.ResistDamages(damages, leather_armor);
+
+            Assert.That(damages[0].Initial, Is.EqualTo(9));
+            Assert.That(damages[0].Current, Is.EqualTo(6));
             Assert.That(damages[1].Initial, Is.EqualTo(5));
             Assert.That(damages[1].Current, Is.EqualTo(2));
             Assert.That(damages[2].Initial, Is.EqualTo(1));

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CopperBend.Model;
 
 namespace CopperBend.Contract
 {
@@ -31,12 +30,12 @@ namespace CopperBend.Contract
 
     public interface IDefenseMethod
     {
-        Dictionary<DamageType, string> DamageResistances { get; set; }
+        Dictionary<string, string> Resistances { get; set; }
     }
 
     public interface IAttackEffect
     {
-        DamageType DamageType { get; set; }
+        string Type { get; set; }
         string DamageRange { get; set; }
     }
 

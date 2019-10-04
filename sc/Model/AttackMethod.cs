@@ -8,7 +8,7 @@ namespace CopperBend.Model
         public List<IAttackEffect> AttackEffects { get; set; }
         public List<IModifier> AttackModifiers { get; set; }
 
-        public AttackMethod(DamageType type, string range)
+        public AttackMethod(string type, string range)
             : this()
         {
             AddEffect(type, range);
@@ -20,14 +20,15 @@ namespace CopperBend.Model
             AttackModifiers = new List<IModifier>();
         }
 
-        public void AddEffect(DamageType type, string range)
+        public void AddEffect(string type, string range)
         {
             AddEffect(new AttackEffect
             {
-                DamageType = type,
+                Type = type,
                 DamageRange = range
             });
         }
+
         public void AddEffect(IAttackEffect effect) => AttackEffects.Add(effect);
 
         public void AddModifier(IModifier modifier) => AttackModifiers.Add(modifier);
@@ -35,17 +36,17 @@ namespace CopperBend.Model
 
     public class DefenseMethod : IDefenseMethod
     {
-        public Dictionary<DamageType, string> DamageResistances { get; set; }
+        public Dictionary<string, string> Resistances { get; set; }
 
         public DefenseMethod()
         {
-            DamageResistances = new Dictionary<DamageType, string>();
+            Resistances = new Dictionary<string, string>();
         }
     }
 
     public class AttackEffect : IAttackEffect
     {
-        public DamageType DamageType { get; set; }
+        public string Type { get; set; }
         public string DamageRange { get; set; }
 
         public AttackEffect()
@@ -55,7 +56,7 @@ namespace CopperBend.Model
 
     public class AttackDamage
     {
-        public DamageType Type { get; set; }
+        public string DT { get; set; }
         public int Initial { get; set; }
         public int Current { get; set; }
     }

@@ -17,7 +17,7 @@ namespace CopperBend.Model
             Quantity = quantity;
             IsUsable = isUsable;
 
-            AttackMethod = new AttackMethod(DamageType.Physical_blunt_hit, "1d4");
+            AttackMethod = new AttackMethod("physical.impact.blunt", "1d4");
         }
 
         public IAttackMethod AttackMethod { get; set; }

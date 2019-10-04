@@ -57,7 +57,7 @@ namespace CopperBend.Model
         //0.1  Wrong place.  Collect a volume of standard effects?
         readonly AttackEffect lifeChampion = new AttackEffect
         {
-            DamageType = DamageType.Nature_itself,
+            Type = "vital.nature",
             DamageRange = "2d3+4" // 6-10
         };
 

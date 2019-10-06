@@ -7,10 +7,10 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NUnit.Framework;
 
-namespace sc_tests
+namespace External.Tests
 {
     [TestFixture]
-    public class prng_tests
+    public class PRNG_Tests
     {
         [OneTimeSetUp]
         public void OTSU()

@@ -4,7 +4,7 @@
 //namespace CopperBend.Engine.tests
 //{
 //    [TestFixture]
-//    public class InputCommandSourceTestsBase
+//    public class InputCommandSource_TestBase
 //    {
 //        protected Queue<RLKeyPress> _inQ;
 //        protected IGameWindow __gameWindow;

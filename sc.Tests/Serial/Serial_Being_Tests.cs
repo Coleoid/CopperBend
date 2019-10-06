@@ -8,7 +8,7 @@ using NSubstitute;
 using NUnit.Framework;
 using SadConsole.Entities;
 
-namespace sc_tests
+namespace CopperBend.Persist.Tests
 {
     [TestFixture]
     public class Serial_Being_Tests

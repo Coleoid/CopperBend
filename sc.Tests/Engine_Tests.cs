@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace CopperBend.Engine.Tests
 {
     [TestFixture]
-    public class EngineTests
+    public class Engine_Tests
     {
         [Test]
         public void Can_init_ID_generator_service()

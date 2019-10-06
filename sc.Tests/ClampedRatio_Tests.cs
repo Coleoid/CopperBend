@@ -1,9 +1,8 @@
 ﻿using System;
-using CopperBend.Fabric;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
-namespace sc.Tests
+namespace CopperBend.Fabric.Tests
 {
     [TestFixture]
     public class ClampedRatio_Tests

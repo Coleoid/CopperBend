@@ -6,7 +6,7 @@
 //using NUnit.Framework;
 //using CopperBend.Engine;
 
-//namespace sc_tests
+//namespace CopperBend.Persist.Tests
 //{
 //    [TestFixture]
 //    public class Serial_Map_Tests

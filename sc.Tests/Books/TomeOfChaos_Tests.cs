@@ -1,8 +1,7 @@
 ﻿using CopperBend.Contract;
-using CopperBend.Fabric;
 using NUnit.Framework;
 
-namespace sc.Tests.Books
+namespace CopperBend.Fabric.Tests
 {
     [TestFixture]
     public class TomeOfChaos_Tests

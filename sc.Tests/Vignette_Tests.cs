@@ -5,7 +5,7 @@
 //namespace CopperBend.Engine.tests
 //{
 //    [TestFixture]
-//    public class VignetteTests
+//    public class Vignette_Tests
 //    {
 //        private Schedule schedule;
 //        //private IControlPanel nullControlPanel;

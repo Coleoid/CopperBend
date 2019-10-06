@@ -1,13 +1,12 @@
 using GoRogue;
-using CopperBend.Fabric;
 using CopperBend.Model;
 using NUnit.Framework;
 using CopperBend.Contract;
 
-namespace CopperBend.Engine.tests
+namespace CopperBend.Engine.Tests
 {
     [TestFixture]
-    public class DescriberTests
+    public class Describer_Tests
     {
         [OneTimeSetUp]
         public void SetUp()

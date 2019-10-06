@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace Newtonsoft.Json.Tests.Issues
+namespace External.Tests
 {
     [TestFixture]
-    public class IssueNNNN
+    public class NewtonsoftJson_IssueNNNN
     {
         //  All failing classes have:
         //      a 0-param constructor

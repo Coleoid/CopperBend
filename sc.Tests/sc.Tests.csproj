@@ -4,6 +4,14 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <PackageId>CopperBendTests</PackageId>
+
+    <Authors>Jason Cole</Authors>
+
+    <Product>Copper Bend Tests</Product>
+
+    <RootNamespace>CopperBend..Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

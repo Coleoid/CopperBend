@@ -8,7 +8,7 @@
 //using CopperBend.Persist;
 //using NUnit.Framework;
 
-//namespace sc_tests
+//namespace CopperBend.Persist.Tests
 //{
 //    //  CRT_* tests that we "can round-trip" an object, serialize then deserialize
 //    [TestFixture]

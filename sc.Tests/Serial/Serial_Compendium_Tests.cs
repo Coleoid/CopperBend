@@ -6,7 +6,7 @@ using CopperBend.Persist;
 using CopperBend.Fabric;
 using NUnit.Framework;
 
-namespace sc_tests
+namespace CopperBend.Persist.Tests
 {
     [TestFixture]
     public class Serial_Compendium_Tests

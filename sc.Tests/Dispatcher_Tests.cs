@@ -12,11 +12,11 @@ using CopperBend.Model;
 using NUnit.Framework;
 using NSubstitute;
 
-namespace CopperBend.Engine.tests
+namespace CopperBend.Engine.Tests
 {
 
     [TestFixture]
-    public class DispatcherTests
+    public class Dispatcher_Tests
     {
         private CommandDispatcher _dispatcher = null;
         private ISchedule __schedule = null;

@@ -4,11 +4,11 @@ using log4net.Config;
 using log4net.Repository;
 using NUnit.Framework;
 
-namespace CopperBend.Engine.tests
+namespace CopperBend.Engine.Tests
 {
 
     [TestFixture]
-    public class ScheduleTests
+    public class Schedule_Tests
     {
         private Schedule schedule;
 

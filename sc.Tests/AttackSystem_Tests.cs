@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using CopperBend.Model;
-using CopperBend.Engine;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
-namespace sc.Tests
+namespace CopperBend.Engine.Tests
 {
     /* === Attack Phases
      *
@@ -80,7 +79,7 @@ namespace sc.Tests
             bfh_impact = new AttackEffect
             {
                 Type = "physical.impact.blunt",
-                DamageRange = "2d6 + 2"
+                DamageRange = "2d6 + 4"
             };
             bfh_flame = new AttackEffect
             {
@@ -93,7 +92,7 @@ namespace sc.Tests
             leather_armor = new DefenseMethod();
             leather_armor.Resistances["physical.impact.blunt"] = "1/4 ..4";
             leather_armor.Resistances["physical"] = "1/2 ..4";
-            leather_armor.Resistances["energetic"] = "2/3 ..3";
+            leather_armor.Resistances["energetic"] = "2/3 ..4";
             leather_armor.Resistances["magical"] = "1/3 ..1";
             leather_armor.Resistances["vital"] = "1/3 ..2";
             //leather_armor.Resistances["default"] = "1/3 ..3";  //not needed with all branches covered
@@ -109,7 +108,7 @@ namespace sc.Tests
 
 
         [Test]
-        public void Damage_within_expected_ranges()
+        public void Damage_rolls_within_expected_ranges()
         {
             var asys = new AttackSystem(null);
             bool rolled_min = false;
@@ -117,10 +116,10 @@ namespace sc.Tests
             for (int i = 0; i < 1000; i++)
             {
                 int damage = asys.RollDamage(bfh_impact);
-                if (damage == 4) rolled_min = true;
-                if (damage == 14) rolled_max = true;
-                Assert.That(damage, Is.GreaterThanOrEqualTo(4));
-                Assert.That(damage, Is.LessThanOrEqualTo(14));
+                if (damage == 6) rolled_min = true;
+                if (damage == 16) rolled_max = true;
+                Assert.That(damage, Is.GreaterThanOrEqualTo(6));
+                Assert.That(damage, Is.LessThanOrEqualTo(16));
             }
 
             // Technically a nondeterministic test, so, technically, evil.
@@ -134,40 +133,37 @@ namespace sc.Tests
             var asys = new AttackSystem(null);
             List<AttackDamage> damages = new List<AttackDamage>
             {
-                new AttackDamage {Initial = 9, Current = 9, DT = "physical.impact.blunt"},
-                new AttackDamage {Initial = 5, Current = 5, DT = "energetic.fire"},
-                new AttackDamage {Initial = 1, Current = 1, DT = "physical.impact.edge"},
+                new AttackDamage(8, "physical.impact.blunt"),
+                new AttackDamage(6, "physical.impact.edge"),
+                new AttackDamage(6, "energetic.fire"),
             };
+
+            Assert.That(damages[0].Initial, Is.EqualTo(8));
+            Assert.That(damages[0].Current, Is.EqualTo(8), "initial and current begin equal");
 
             asys.ResistDamages(damages, leather_armor);
 
-            Assert.That(damages[0].Initial, Is.EqualTo(9));
-            Assert.That(damages[0].Current, Is.EqualTo(7));
-            Assert.That(damages[1].Initial, Is.EqualTo(5));
-            Assert.That(damages[1].Current, Is.EqualTo(2));
-            Assert.That(damages[2].Initial, Is.EqualTo(1));
-            Assert.That(damages[2].Current, Is.EqualTo(0));
+            Assert.That(damages[0].Initial, Is.EqualTo(8), "resistance doesn't alter initial value");
+
+            Assert.That(damages[0].Current, Is.EqualTo(6), "leather resists blunt damage poorly");
+            Assert.That(damages[1].Current, Is.EqualTo(3), "leather resists other physical damage better");
+            Assert.That(damages[2].Current, Is.EqualTo(2), "leather resists energy damage well");
         }
 
-        [Test]
-        public void Damage_resistance_when_not_otherwise_specified()
+        [TestCase(9, "energetic.lightning", 4)]
+        [TestCase(9, "magical", 4)]
+        [TestCase(9, "energetic.lightning", 4)]
+        public void Damage_resistance_when_not_otherwise_specified(int initial, string type, int expected)
         {
             var asys = new AttackSystem(null);
             List<AttackDamage> damages = new List<AttackDamage>
             {
-                new AttackDamage {Initial = 9, Current = 9, DT = "energetic.lightning"},
-                new AttackDamage {Initial = 5, Current = 5, DT = "energetic.light"},
-                new AttackDamage {Initial = 1, Current = 1, DT = "vital.toxin"},
+                new AttackDamage(initial, type),
             };
 
-            asys.ResistDamages(damages, leather_armor);
+            asys.ResistDamages(damages, ring_armor);  //  default for ring is 1/2 ..5
 
-            Assert.That(damages[0].Initial, Is.EqualTo(9));
-            Assert.That(damages[0].Current, Is.EqualTo(6));
-            Assert.That(damages[1].Initial, Is.EqualTo(5));
-            Assert.That(damages[1].Current, Is.EqualTo(2));
-            Assert.That(damages[2].Initial, Is.EqualTo(1));
-            Assert.That(damages[2].Current, Is.EqualTo(1));
+            Assert.That(damages[0].Current, Is.EqualTo(expected));
         }
     }
 }

@@ -199,12 +199,7 @@ Apply post-attack effects
             foreach (var effect in attack.AttackEffects)
             {
                 var roll = RollDamage(effect);
-                var damage = new AttackDamage
-                {
-                    DT = effect.Type,
-                    Initial = roll,
-                    Current = roll,
-                };
+                var damage = new AttackDamage(roll, effect.Type);
                 damages.Add(damage);
             }
 
@@ -228,7 +223,7 @@ Apply post-attack effects
                 //  E.g., physical.impact.blunt -> physical.impact -> physical -> default -> 0
                 var foundResistance = string.Empty;
                 for (
-                        string damagePath = damage.DT;
+                        string damagePath = damage.Type;
                         damagePath.Length > 0;
                         damagePath = damagePath.Substring(0, damagePath.LastIndexOf('.'))
                     )

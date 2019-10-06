@@ -17,7 +17,7 @@ namespace CopperBend.Contract
 
         ICommandSource CommandSource { get; set; }
 
-        // This declaration left awkward intentionally, for SadConsole.Console...
+        // Left awkward intentionally, avoiding clash with SadConsole.Console
         Microsoft.Xna.Framework.Point Position { get; set; }
         void MoveTo(Coord position);
 
@@ -29,10 +29,9 @@ namespace CopperBend.Contract
 
         IItem WieldedTool { get; }
         IItem Gloves { get; }
+
         void Wield(IItem item);
-        bool HasClearedBlightBefore { get; set; }
-
+        bool HasClearedBlightBefore { get; set; }  //TODO: Subsume into messaging
         void GiveCommand();
-
-        IAttackMethod GetAttackMethod(IDefender defender);    }
+    }
 }

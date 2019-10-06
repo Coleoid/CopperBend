@@ -22,8 +22,7 @@ namespace CopperBend.Model
 
         public void AddEffect(string type, string range)
         {
-            AddEffect(new AttackEffect
-            {
+            AddEffect(new AttackEffect {
                 Type = type,
                 DamageRange = range
             });
@@ -48,15 +47,17 @@ namespace CopperBend.Model
     {
         public string Type { get; set; }
         public string DamageRange { get; set; }
-
-        public AttackEffect()
-        {
-        }
     }
 
     public class AttackDamage
     {
-        public string DT { get; set; }
+        public AttackDamage(int initial, string type)
+        {
+            Initial = Current = initial;
+            Type = type;
+        }
+
+        public string Type { get; set; }
         public int Initial { get; set; }
         public int Current { get; set; }
     }

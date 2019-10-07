@@ -120,7 +120,7 @@ namespace CopperBend.Engine
             }
         }
 
-        public string Describe(IItem item, DescMods mods = DescMods.None)
+        public virtual string Describe(IItem item, DescMods mods = DescMods.None)
         {
             return Describe(item.Name, mods, item.Quantity, item.Adjective);
         }

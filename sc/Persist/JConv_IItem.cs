@@ -56,7 +56,7 @@ namespace CopperBend.Persist
             case "Fruit":
                 var quantity = jOb["Quantity"].Value<int>();
                 var details = jOb["PlantDetails"].ToObject<PlantDetails>();
-                item = new Fruit(coord, quantity, details, id);
+                item = null; // new Fruit(coord, quantity, details, id);
                 break;
             case "Seed":
                 //quantity = jOb["Quantity"].Value<int>();

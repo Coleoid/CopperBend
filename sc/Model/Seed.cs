@@ -65,8 +65,13 @@ namespace CopperBend.Model
 
         protected virtual void SeedMatures(IControlPanel controls)
         {
-            //for now, insta-auto-harvest.  Two fruit drop to the ground, plant disappears.
-            IItem fruit = new Fruit(this.Location, 2, this.PlantDetails);
+            //0.1:  Move beyond insta-auto-harvest.
+            //Two fruit drop to the ground, plant disappears.
+            IItem fruit = new Item(this.Location, 2);
+            fruit.Components.AddComponent(new Consumable {
+                IsFruit = true,
+                PlantID = this.PlantDetails.ID, 
+            });
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this.Location);
         }

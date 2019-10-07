@@ -37,7 +37,7 @@ namespace CopperBend.Engine
             Describer = describer;
             MessageLog = messageLog;
             AttackSystem = new AttackSystem(this);
-
+            WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) MessageLog.WriteLine(message); };
             log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
 
@@ -130,8 +130,6 @@ namespace CopperBend.Engine
             //TODO: fold into Consumable Effects?
             FeedBeing(being, consumable.FoodValue);
 
-            log.Info($"Consumed {item.Name} to no effect.  Needmorecode.");
-
             return true;
         }
 
@@ -164,80 +162,6 @@ namespace CopperBend.Engine
         }
 
         //0.0.DMG:  Our hero is oddly resistant to the effects of the blight
-
-
-
-        //0.1.DMG  Rewrite these damage methods to work with the AttackSystem
-        public void Damage(IDestroyable target, IItem source)
-        {
-            int amount = DamageToTargetFromItem(target, source);
-            Damage(target, amount);
-        }
-
-        public void Damage(IDestroyable target, IAreaBlight source)
-        {
-            int half = source.Health * 5;
-
-            int amount = half + new Random().Next(half) + 1;  //0.1.DMG  need to use managed random
-
-            Damage(target, "vital.blight", amount);
-        }
-
-        public void Damage(IDestroyable target, IBeing source)
-        {
-            int amount = DamageToTargetFromBeing(target, source);
-            Damage(target, amount);
-        }
-
-        public void Damage(IDestroyable target, string type, int amount)
-        {
-            if (type == "vital.blight" && target is Player)
-            {
-                amount = Math.Clamp(amount / 10, 1, 3);
-            }
-            Damage(target, amount);
-        }
-
-        public void Damage(IDestroyable target, int amount)
-        {
-            target.Hurt(amount);
-
-            if (target is AreaBlight blight)
-            {
-                if (blight.Health < 1)
-                {
-                    GameState.Map.BlightMap.RemoveItem(blight);
-                }
-            }
-
-            if (target.Health < 1)
-            {
-                //  Is this an angel?  (ツ)_/¯  🦋
-                //0.1.DMG  Dead/destroyed:  Remove here and now?  Put on list to be reaped later?
-            }
-        }
-
-        private int DamageToTargetFromItem(IDestroyable target, IItem source)
-        {
-            throw new NotImplementedException();
-        }
-
-        //0.1.DMG  move beyond one special case and a couple of constants
-        private int DamageToTargetFromBeing(IDestroyable target, IBeing source)
-        {
-            if (source.IsPlayer)
-            {
-                if (target is AreaBlight)
-                {
-                    return 6;
-                }
-
-                return 2;
-            }
-
-            return 4;
-        }
-
 
         private bool Do_DirectionMove(IBeing being, Coord newPosition)
         {
@@ -329,6 +253,7 @@ namespace CopperBend.Engine
         private bool Do_PickUp(IBeing being, Command command)
         {
             var item = command.Item;
+            Guard.AgainstNullArgument(item, "No item chosen to pick up.");
             var pickedUp = ItemMap.Remove(item);
             if (pickedUp)
             {
@@ -338,7 +263,6 @@ namespace CopperBend.Engine
             }
             else
             {
-                ScheduleAgent(being, 1);
                 MessageLog.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
             }
             return pickedUp;

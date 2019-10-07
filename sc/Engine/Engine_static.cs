@@ -72,7 +72,7 @@ namespace CopperBend.Engine
             herbal.PlantByName[plant.MainName] = plant;
 
             Seed.Herbal = herbal;
-            Fruit.Herbal = herbal;
+            //Fruit.Herbal = herbal;
             Describer.Herbal = herbal;
 
             return herbal;

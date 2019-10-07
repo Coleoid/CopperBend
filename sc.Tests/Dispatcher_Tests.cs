@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
-using System.IO;
 using Microsoft.Xna.Framework;
 using log4net.Config;
 using log4net;
 using log4net.Repository;
+using NUnit.Framework;
+using NSubstitute;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using NUnit.Framework;
-using NSubstitute;
 
 namespace CopperBend.Engine.Tests
 {
@@ -49,45 +47,64 @@ namespace CopperBend.Engine.Tests
         [SetUp]
         public void SetUp()
         {
+            Engine.Cosmogenesis("bang");
+
             __schedule = Substitute.For<ISchedule>();
-            _gameState = new GameState();
+            _gameState = new GameState
+            {
+                Map = new CompoundMap {
+                    BeingMap = new GoRogue.MultiSpatialMap<IBeing>(),
+                    BlightMap = new BlightMap(42),
+                    SpaceMap = CreateSmallTestMap(),
+                    ItemMap = new ItemMap(),
+                },
+            };
             __describer = Substitute.For<IDescriber>();
             __messageOutput = Substitute.For<IMessageLogWindow>();
 
             //_gameState.Map = CreateSmallTestMap();
 
             _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput);
+            _dispatcher.ClearPendingInput = () => { };
+            var idGen = new GoRogue.IDGenerator();
+            CbEntity.IDGenerator = idGen;
+            Item.IDGenerator = idGen;
+
+            Being.EntityFactory = Substitute.For<IEntityFactory>();
         }
 
-        //public AreaMap CreateSmallTestMap()
-        //{
-        //    var ttWall = new TileType
-        //    {
-        //        IsTransparent = false,
-        //        IsWalkable = false,
-        //        Symbol = '#',
-        //        Name = "wall"
-        //    };
-        //    var ttFloor = new TileType
-        //    {
-        //        IsTransparent = true,
-        //        IsWalkable = true,
-        //        Symbol = '.',
-        //        Name = "floor"
-        //    };
-        //    AreaMap areaMap = new AreaMap(5, 5);
-        //    for (int x = 0; x < 5; x++)
-        //    {
-        //        for (int y = 0; y < 5; y++)
-        //        {
-        //            bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
-        //            var t = new Tile(x, y, isEdge ? ttWall : ttFloor);
-        //            areaMap.SetTile(t);
-        //        }
-        //    }
+        public SpaceMap CreateSmallTestMap()
+        {
+            var ttWall = new TerrainType
+            {
+                CanSeeThrough = false,
+                CanWalkThrough = false,
+                Looks = new SadConsole.Cell(Color.White, Color.Black, '#'),
+                Name = "wall"
+            };
+            var ttFloor = new TerrainType
+            {
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Looks = new SadConsole.Cell(Color.White, Color.Black, '.'),
+                Name = "floor"
+            };
+            SpaceMap spaceMap = new SpaceMap(5, 5);
+            for (int x = 0; x < 5; x++)
+            {
+                for (int y = 0; y < 5; y++)
+                {
+                    bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
+                    var s = new Space()
+                    {
+                        Terrain = isEdge ? ttWall : ttFloor
+                    };
+                    spaceMap.AddItem(s, (x, y));
+                }
+            }
 
-        //    return areaMap;
-        //}
+            return spaceMap;
+        }
 
         //[Explicit, Property("Context", "ConsoleRunning")]
         //[TestCase(CmdAction.Wait, CmdDirection.None, 6)]
@@ -117,51 +134,71 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Consume_throws_on_item_not_in_inventory()
         {
-            //var actor = new Actor();
-            //var item = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            //var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+            __describer.Describe((Item)null).ReturnsForAnyArgs("Thing");
 
-            //var ex = Assert.Throws<Exception>(() => _dispatcher.CommandActor(actor, cmd));
-            //Assert.That(ex.Message, Is.EqualTo("Item to consume not found in inventory"));
+            var being = new Being(Color.White, Color.Black, '@');
+            var item = new Item((0, 0), 1);
+            var consumable = new Consumable
+            {
+                FoodValue = 22,
+                PlantID = 2,
+                IsFruit = true,
+            };
+            item.Components.AddComponent(consumable);
+            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+
+            var ex = Assert.Throws<Exception>(() => _dispatcher.CommandBeing(being, cmd));
+            Assert.That(ex.Message, Is.EqualTo("Thing to consume not found in inventory"));
         }
 
         [Test]
         public void Consume_fruit_adds_seeds_and_removes_fruit_from_inventory()
         {
-            //_gameState.Map = new AreaMap(5, 5);
-            //var actor = new Actor();
-            //var item = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            //actor.AddToInventory(item);
+            __describer.Describe((Item)null).ReturnsForAnyArgs("Thing");
 
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(1));
+            var being = new Being(Color.White, Color.Black, '@');
+            var item = new Item((0, 0), 1);
+            var consumable = new Consumable
+            {
+                FoodValue = 22,
+                PlantID = 2,
+                IsFruit = true,
+                Effect = ("Heal", 4),
+            };
+            item.Components.AddComponent(consumable);
+            being.AddToInventory(item);
 
-            //var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
-            //_dispatcher.CommandActor(actor, cmd);
+            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, cmd);
 
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(1));
-            //if (actor.Inventory.ElementAt(0) is Seed seed)
-            //    Assert.That(seed.PlantType, Is.EqualTo(PlantType.Healer));
-            //else
-            //    Assert.Fail("Item wasn't seeds");
+            Assert.That(being.Inventory.Count(), Is.EqualTo(1));
+            if (being.Inventory.ElementAt(0) is Seed seed)
+                Assert.That(seed.PlantDetails.MainName, Is.EqualTo("Healer"));
+            else
+                Assert.Fail("Item wasn't seeds");
         }
 
         [Test]
-        public void Consume_wielded()  //  Wield food?  That's allowed.
+        public void Consume_wielded()
         {
-            //_gameState.Map = new AreaMap(5, 5);
-            //var actor = new Player(Color.AntiqueWhite, Color.Black, '?');
-            //var item = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-            //actor.Wield(item);
+            __describer.Describe((Item)null).ReturnsForAnyArgs("Thing");
 
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(1));
-            //Assert.That(actor.WieldedTool, Is.SameAs(item));
+            var being = new Being(Color.White, Color.Black, '@');
+            var item = new Item((0, 0), 1);
+            var consumable = new Consumable
+            {
+                FoodValue = 22,
+                PlantID = 2,
+                IsFruit = true,
+                Effect = ("Heal", 4),
+            };
+            item.Components.AddComponent(consumable);
+            being.Wield(item);
 
-            //var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
-            //_dispatcher.CommandBeing(actor, cmd);
+            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, cmd);
 
-            //Assert.That(actor.WieldedTool, Is.Null);
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(1));
-            //Assert.That(actor.Inventory.ElementAt(0), Is.Not.SameAs(item));
+            Assert.That(being.Inventory.ElementAt(0) is Seed);
         }
         #endregion
 
@@ -170,40 +207,40 @@ namespace CopperBend.Engine.Tests
         [TestCase(CmdDirection.Northeast, 17)]
         public void Direction_commands_take_time(CmdDirection direction, int tickOff)
         {
-            //var actor = new Actor(new Point(2, 2));
+            var being = new Being(Color.White, Color.Black, '@');
+            being.MoveTo((2, 2));
+            var cmd = new Command(CmdAction.Direction, direction, null);
+            _dispatcher.CommandBeing(being, cmd);
 
-            //var cmd = new Command(CmdAction.Direction, direction, null);
-            //_dispatcher.CommandActor(actor, cmd);
-            //__schedule.Received().AddActor(actor, tickOff);
+            __schedule.Received().AddAgent(being, tickOff);
         }
 
         [TestCase(CmdDirection.East, 3, 2)]
         [TestCase(CmdDirection.Northeast, 3, 1)]
         public void Direction_commands_change_location(CmdDirection direction, int newX, int newY)
         {
-            //var actor = new Actor(new Point(2, 2));
+            var being = new Being(Color.White, Color.Black, '@');
+            being.MoveTo((2, 2));
+            var cmd = new Command(CmdAction.Direction, direction, null);
+            _dispatcher.CommandBeing(being, cmd);
 
-            //var cmd = new Command(CmdAction.Direction, direction, null);
-            //_dispatcher.CommandActor(actor, cmd);
-            //Assert.That(actor.Point, Is.EqualTo(new Point(newX, newY)));
+            Assert.That(being.Position, Is.EqualTo(new Point(newX, newY)));
         }
 
-        [TestCase(CmdDirection.East, true)]
-        [TestCase(CmdDirection.Northeast, false)]
-        public void Moving_to_unwalkable_tile_does_nothing(CmdDirection direction, bool isPlayer)
+        [TestCase(CmdDirection.East)]
+        [TestCase(CmdDirection.Northeast)]
+        public void Moving_to_unwalkable_tile_does_nothing(CmdDirection direction)
         {
-            //var actor = new Actor(new Point(3, 2));
-            //actor.IsPlayer = isPlayer;
+            __describer.Describe("").ReturnsForAnyArgs("a wall");
+            var being = new Being(Color.White, Color.Black, '@');
+            being.MoveTo((3, 2));
+            being.IsPlayer = true;
+            var cmd = new Command(CmdAction.Direction, direction, null);
+            _dispatcher.CommandBeing(being, cmd);
 
-            //var cmd = new Command(CmdAction.Direction, direction, null);
-            //_dispatcher.CommandActor(actor, cmd);
-            //Assert.That(actor.Point, Is.EqualTo(new Point(3, 2)));
-            //__schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
+            Assert.That(being.Position, Is.EqualTo(new Point(3, 2)));
 
-            //var outputOrNot = isPlayer
-            //    ? (Func<IMessageOutput>)__messageOutput.Received
-            //    : __messageOutput.DidNotReceive;
-            //outputOrNot().WriteLine("I can't walk through a wall.");
+            __messageOutput.Received().WriteLine("I can't walk through a wall.");
         }
 
         [Test]
@@ -254,51 +291,54 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Drop_throws_on_item_not_in_inventory()
         {
-            //var actor = new Actor();
-            //var item = new HealerSeed(new Point(0, 0), 1);
-            //var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
+            var being = new Being(Color.White, Color.Black, '@');
+            var item = new Item((0, 0), 1);
+            var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
 
-            //var ex = Assert.Throws<Exception>(() => _dispatcher.CommandActor(actor, drop));
-            //Assert.That(ex.Message, Is.EqualTo("Item to drop not found in inventory"));
+            var ex = Assert.Throws<Exception>(() => _dispatcher.CommandBeing(being, drop));
+            Assert.That(ex.Message, Is.EqualTo("Item to drop not found in inventory"));
         }
 
         [Test]
         public void Drop_moves_item_from_inventory_to_map()
         {
-            //Point actorlocation = new Point(2, 3);
-            //var actor = new Actor(actorlocation);
-            //var item = new HealerSeed(new Point(0, 0), 1);
-            //actor.AddToInventory(item);
+            var being = new Being(Color.White, Color.Black, '@');
+            var item = new Item((0, 0), 1);
+            being.AddToInventory(item);
+            var mySpot = new GoRogue.Coord(2, 2);
+            being.MoveTo((2, 2));
+            var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
+            Assert.That(_gameState.Map.ItemMap.GetItems((2, 2)).Count(), Is.EqualTo(0));
 
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(1));
+            _dispatcher.CommandBeing(being, drop);
 
-            //var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
-            //_dispatcher.CommandActor(actor, drop);
+            Assert.That(being.Inventory.Count(), Is.EqualTo(0));
+            var items = _gameState.Map.ItemMap.GetItems((2, 2));
+            Assert.That(items.Count(), Is.EqualTo(1));
+            var mapItem = items.First();
 
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(0));
-            //Assert.That(_gameState.Map.Items.Count, Is.EqualTo(1));
-            //var droppedItem = _gameState.Map.Items[0];
-            //Assert.That(droppedItem.Point, Is.EqualTo(actorlocation));
+            Assert.That(mapItem.Location, Is.EqualTo(mySpot));
         }
 
         [Test]
         public void Drop_wielded()
         {
-            //var actor = new Actor();
-            //var item = new Hoe(new Point(0, 0));
-            //actor.Wield(item);
+            var being = new Being(Color.White, Color.Black, '@');
+            var item = new Item((0, 0), 1);
+            being.Wield(item);
+            Assert.That(being.WieldedTool, Is.SameAs(item));
+            Assert.That(being.Inventory.Count(), Is.EqualTo(1));
 
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(1));
-            //Assert.That(actor.WieldedTool, Is.SameAs(item));
+            var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, drop);
 
-            //var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
-            //_dispatcher.CommandActor(actor, drop);
+            Assert.That(being.Inventory.Count(), Is.EqualTo(0));
 
-            //Assert.That(actor.WieldedTool, Is.Null);
-            //Assert.That(actor.Inventory.Count(), Is.EqualTo(0));
+            Assert.That(being.WieldedTool, Is.Null);
+            Assert.That(being.Inventory.Count(), Is.EqualTo(0));
         }
 
-        //[Test] // defer until 0.3+
+        //[Test] //1.+
         //private void Drop_one_from_stack()
         //{
         //    var actor = new Actor(new Point(2, 2));
@@ -321,26 +361,32 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void PickUp_nothing_takes_no_time()
         {
-            //Point startingPoint = new Point(2, 2);
-            //var actor = new Actor(startingPoint);
+            var being = new Being(Color.White, Color.Black, '@');
+            being.MoveTo((2, 2));
+            var item = new Item((2,2), 1);
 
-            //var cmd = new Command(CmdAction.PickUp, CmdDirection.None, null);
-            //_dispatcher.CommandActor(actor, cmd);
+            var cmd = new Command(CmdAction.PickUp, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, cmd);
 
-            //__schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
+            __schedule.DidNotReceive().AddAgent(being, Arg.Any<int>());
         }
 
         [Test]
         public void PickUp_takes_time()
         {
-            //Point startingPoint = new Point(2, 2);
-            //var actor = new Actor(startingPoint);
-            //_gameState.Map.Items.Add(new Fruit(startingPoint, 1, PlantType.Healer));
-            //var cmd = new Command(CmdAction.PickUp, CmdDirection.None, null);
-            //_dispatcher.CommandActor(actor, cmd);
+            var coord = new GoRogue.Coord(2, 2);
+            var being = new Being(Color.White, Color.Black, '@');
+            being.MoveTo(coord);
+            var item = new Item(coord, 1);
+            _gameState.Map.ItemMap.Add(item, coord);
 
-            //__schedule.Received().AddActor(actor, 4);
+            var cmd = new Command(CmdAction.PickUp, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, cmd);
+
+            __schedule.Received().AddAgent(being, 4);
         }
+
+        // PickUp_fails_when_item_out_of_reach()  // or exception?  How'd this happen?
 
         [Test]
         public void PickUp_moves_item_from_map_to_actor()

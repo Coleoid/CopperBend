@@ -25,6 +25,7 @@ namespace CopperBend.Contract
         void AddToInventory(IItem item);
         IItem RemoveFromInventory(int inventorySlot);
         IItem RemoveFromInventory(IItem item);
+        bool HasInInventory(IItem item);
         IEnumerable<IItem> ReachableItems();
 
         IItem WieldedTool { get; }

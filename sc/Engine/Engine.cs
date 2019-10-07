@@ -56,6 +56,14 @@ namespace CopperBend.Engine
             ModeStack = new Stack<EngineMode>();
             CallbackStack = new Stack<Func<bool>>();
 
+            Init(topSeed);
+        }
+
+        private ICompoundMap FullMap;
+        public void Init(string topSeed)
+        {
+            PushEngineMode(EngineMode.StartUp, null);
+
             if (topSeed == null)
             {
                 string clearLetters = "bcdefghjkmnpqrstvwxyz";
@@ -72,14 +80,6 @@ namespace CopperBend.Engine
 
                 topSeed = b.ToString();
             }
-
-            Init(topSeed);
-        }
-
-        private ICompoundMap FullMap;
-        public void Init(string topSeed)
-        {
-            PushEngineMode(EngineMode.StartUp, null);
 
             log.Info($"Top seed:  {topSeed}");
             Cosmogenesis(topSeed);
@@ -147,7 +147,7 @@ namespace CopperBend.Engine
             };
             player.AddComponent(new EntityViewSyncComponent());
             player.AddToInventory(new Hoe((0,0)));
-            player.AddToInventory(new Seed((0,0), 2, Compendium.Herbal.PlantByName["Healer"].ID));
+            player.AddToInventory(new Seed(Compendium.Herbal.PlantByName["Healer"].ID, 2));
 
             log.Debug("Created player.");
             player.Console.Position = playerLocation;

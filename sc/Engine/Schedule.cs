@@ -45,12 +45,13 @@ namespace CopperBend.Engine
 
         public void AddAgent(IScheduleAgent agent)
         {
-            AddEntry(agent.GetNextEntry());
+            AddAgent(agent, 12); //0.1
         }
 
         public void AddAgent(IScheduleAgent agent, int offset)
         {
-            AddEntry(agent.GetNextEntry(offset));
+            var entry = agent.GetNextEntry(offset);
+            AddEntry(entry);
         }
 
         //  Action scheduled at CurrentTick plus offset

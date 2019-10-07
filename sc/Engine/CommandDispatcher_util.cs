@@ -46,12 +46,12 @@ namespace CopperBend.Engine
             return false;
         }
 
-        public void HealActor(IBeing being, int amount)
+        public void HealBeing(IBeing being, int amount)
         {
             being.Heal(amount);
         }
 
-        public void FeedActor(IBeing being, int amount)
+        public void FeedBeing(IBeing being, int amount)
         {
             //0.0
             //actor.Feed(amount);

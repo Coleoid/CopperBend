@@ -18,7 +18,6 @@ namespace CopperBend.Engine
             Compendium.Herbal = ConnectHerbal();
 
             //0.1: Think:  Give clients just the books they care about?
-            Describer.Herbal = Compendium.Herbal;
             Describer.TomeOfChaos = Compendium.TomeOfChaos;
         }
 

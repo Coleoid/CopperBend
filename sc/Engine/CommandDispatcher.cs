@@ -90,36 +90,46 @@ namespace CopperBend.Engine
         public bool Do_Consume(IBeing being, IItem item)
         {
             Guard.AgainstNullArgument(item, "No item in consume command");
-            var invItem = being.RemoveFromInventory(item);
-            Guard.AgainstNullArgument(invItem, "Item to consume not found in inventory");
-            Guard.Against(!item.IsConsumable, "Item is not consumeable");
+            string description = Describer.Describe(item);
+            Guard.Against(item.Quantity < 1, $"Only have {item.Quantity} {description}.");
+            Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory"); //0.2: animals eat off ground?
+            IConsumable consumable = item.Components.GetComponent<IConsumable>();
+            Guard.Against(consumable == null, $"{description} is not consumable");
 
-            if (item is Fruit fruit)
-            {
-                switch (fruit.PlantDetails.MainName)
-                {
-                case "Healer":
-                    HealActor(being, 4);
-                    FeedActor(being, 400);
-                    break;
-
-                default:
-                    throw new Exception($"Don't have eating written for fruit of {fruit.PlantDetails.MainName}.");
-                }
-
-                var seed = new Seed((0, 0), 2, fruit.PlantDetails.ID);
-                being.AddToInventory(seed);
-                fruit.PlantDetails.FruitKnown = true;
-                fruit.PlantDetails.SeedKnown = true;  //  Eating fruit also shows us what its seeds are.
-                AddExperience(fruit.PlantDetails.ID, Exp.EatFruit);
-                Schedule.AddAgent(being, 2);
-            }
-
-            //0.2  think about bail-out protocol on sanity check failure
-            Guard.Against(item.Quantity < 1, $"Not enough {item.Name} to {item.ConsumeVerb}, somehow.");
             item.Quantity--;
             if (item.Quantity < 1)
                 being.RemoveFromInventory(item);
+
+            switch (consumable.Effect.Name)
+            {
+            case "Heal":
+                HealBeing(being, consumable.Effect.Degree);
+                break;
+
+            default:
+                throw new Exception($"Don't have code written for Consumable Effect [{consumable.Effect.Name}].");
+            }
+
+            if (consumable.PlantID > 0)
+            {
+                var plant = Seed.Herbal.PlantByID[consumable.PlantID];
+                int seedCount = 2; //0.1
+                var seed = new Seed(plant.ID, seedCount);
+                being.AddToInventory(seed);
+                if (consumable.IsFruit)
+                {
+                    //0.K: Later, some plants remain mysterious?
+                    plant.FruitKnown = true;
+                    plant.SeedKnown = true;  //  Eating fruit also shows us what its seeds are.
+                    AddExperience(plant.ID, Exp.EatFruit);
+                }
+            }
+
+            Schedule.AddAgent(being, consumable.TicksToEat);
+
+            //TODO: fold into Consumable Effects?
+            FeedBeing(being, consumable.FoodValue);
+
             log.Info($"Consumed {item.Name} to no effect.  Needmorecode.");
 
             return true;
@@ -397,19 +407,17 @@ namespace CopperBend.Engine
 
             var seedStock = (Seed)command.Item;
             var seedToSow = seedStock.GetSeedFromStack();
-            SpaceMap.Sow(space, seedToSow);
-
-            ScheduleAgent(seedToSow, 100);
-
-            if (--seedStock.Quantity < 1)
+            if (seedStock.Quantity < 1)
             {
                 being.RemoveFromInventory(seedStock);
             }
 
+            SpaceMap.Sow(space, seedToSow);
             AddExperience(seedToSow.PlantDetails.ID, Exp.PlantSeed);
-
             GameState.Map.CoordsWithChanges.Add(targetCoord);
-            ScheduleAgent(being, 8);
+
+            ScheduleAgent(seedToSow, 100);
+            ScheduleAgent(being, 8);  //0.K:  Planting speed
             return true;
         }
 

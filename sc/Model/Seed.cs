@@ -26,14 +26,14 @@ namespace CopperBend.Model
             : base((0,0), 1, true)
         { }
 
-        public Seed(Coord position, int quantity, uint typeID, uint id = uint.MaxValue)
-            : base(position, quantity, true, id)
+        public Seed(uint typeID, int quantity = 1, uint id = uint.MaxValue)
+            : base((0,0), quantity, true, id)
         {
             PlantDetails = Herbal.PlantByID[typeID];
         }
 
-        public Seed(Coord position, PlantDetails details, int quantity = 1, uint id = uint.MaxValue)
-            : base(position, quantity, true, id)
+        public Seed(PlantDetails details, int quantity = 1, uint id = uint.MaxValue)
+            : base((0,0), quantity, true, id)
         {
             PlantDetails = details;
         }
@@ -41,7 +41,10 @@ namespace CopperBend.Model
         internal Seed GetSeedFromStack()
         {
             Guard.Against(Quantity < 1, "Somehow there's no seed here");
-            return new Seed(this.Location, 1, this.PlantDetails.ID);
+            Seed seed = new Seed(this.PlantDetails);
+            Quantity--;
+            seed.Location = Location;
+            return seed;
         }
 
         public override string Name
@@ -66,11 +69,6 @@ namespace CopperBend.Model
             IItem fruit = new Fruit(this.Location, 2, this.PlantDetails);
             controls.PutItemOnMap(fruit);
             controls.RemovePlantAt(this.Location);
-        }
-
-        public ScheduleEntry GetNextEntry()
-        {
-            return GetNextEntry(100);
         }
 
         public ScheduleEntry GetNextEntry(int offset)

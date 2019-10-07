@@ -5,11 +5,6 @@ namespace CopperBend.Model
 {
     public class Plant : IScheduleAgent
     {
-        public ScheduleEntry GetNextEntry()
-        {
-            throw new NotImplementedException();
-        }
-
         public ScheduleEntry GetNextEntry(int offset)
         {
             throw new NotImplementedException();
@@ -23,11 +18,6 @@ namespace CopperBend.Model
         {
             PlantDetails = seed.PlantDetails;
             schedule.AddAgent(this);
-        }
-
-        public ScheduleEntry GetNextEntry()
-        {
-            return GetNextEntry(88); // this looks less and less relevant
         }
 
         public ScheduleEntry GetNextEntry(int offset)

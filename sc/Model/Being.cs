@@ -122,6 +122,11 @@ namespace CopperBend.Model
                 // and 'delete' item?
         }
 
+        public bool HasInInventory(IItem item)
+        {
+            return InventoryList.Any(i => i == item);
+        }
+
         public IItem RemoveFromInventory(int inventorySlot)
         {
             if (inventorySlot >= InventoryList.Count()) return null;
@@ -155,11 +160,6 @@ namespace CopperBend.Model
         {
             throw new NotImplementedException();
             //return Map.Items.Where(i => i.Point.Equals(Point));
-        }
-
-        public virtual ScheduleEntry GetNextEntry()
-        {
-            return GetNextEntry(12);
         }
 
         public virtual ScheduleEntry GetNextEntry(int offset)

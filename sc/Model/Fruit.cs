@@ -20,6 +20,14 @@ namespace CopperBend.Model
             Glyph = '%';
             Foreground = Color.LightPink;
             Name = "fruit";
+
+            //0.1: Vary by plant, from data
+            Components.AddComponent(new Consumable {
+                IsFruit = true,
+                FoodValue = 400,
+                TicksToEat = 10,
+                Effect = ("Heal", 4)
+            });
         }
 
         public override string Name

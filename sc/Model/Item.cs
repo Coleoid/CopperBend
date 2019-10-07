@@ -18,6 +18,7 @@ namespace CopperBend.Model
             IsUsable = isUsable;
 
             AttackMethod = new AttackMethod("physical.impact.blunt", "1d4");
+            Components = new ComponentContainer();
         }
 
         public IAttackMethod AttackMethod { get; set; }
@@ -51,12 +52,12 @@ namespace CopperBend.Model
 
         public virtual bool IsConsumable => false;
 
-        public virtual string ConsumeVerb => "eat";
-
         public virtual bool StacksWith(IItem item)
         {
             return Name == item.Name
                 && ItemType == item.ItemType;
         }
+
+        public ComponentContainer Components { get; set; }
     }
 }

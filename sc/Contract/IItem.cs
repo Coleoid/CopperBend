@@ -21,9 +21,10 @@ namespace CopperBend.Contract
         void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction);
 
         bool IsConsumable { get; }
-        string ConsumeVerb { get; }
         string Adjective { get; set; }
         IAttackMethod AttackMethod { get; }
+
+        ComponentContainer Components { get; set; }
 
         bool StacksWith(IItem item);
     }

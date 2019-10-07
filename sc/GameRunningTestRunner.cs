@@ -60,11 +60,5 @@ namespace CopperBend.Application
         {
             EventReports.Add(report);
         }
-
-        public ScheduleEntry GetNextEntry()
-        {
-            // later we want to fill this out
-            throw new NotImplementedException();
-        }
     }
 }

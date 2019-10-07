@@ -7,7 +7,6 @@ using Troschuetz.Random.Generators;
 
 namespace CopperBend.Engine
 {
-
     public class Describer : IDescriber
     {
         public static Herbal Herbal { get; set; }
@@ -132,8 +131,6 @@ namespace CopperBend.Engine
 
             adj = mods.HasFlag(DescMods.NoAdjective) ? "" : adj;
             if (adj.Length > 0) adj += " ";
-
-
 
             if (mods.HasFlag(DescMods.Article))
             {

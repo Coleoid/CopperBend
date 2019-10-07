@@ -3,7 +3,6 @@ using System.IO;
 using log4net;
 using log4net.Config;
 using McMaster.Extensions.CommandLineUtils;
-using NUnit.Engine;
 using Game = SadConsole.Game;
 
 namespace CopperBend.Application

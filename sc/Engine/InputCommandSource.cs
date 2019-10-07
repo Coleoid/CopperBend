@@ -426,8 +426,15 @@ namespace CopperBend.Engine
             char index = 'a';
             foreach (var item in being.Inventory.Where(filter))
             {
-                WriteLine($"{index++}) {item.Name}");
+                if (filter(item))
+                    WriteLine($"{index}) {item.Name}");
+                index++;
             }
+        }
+
+        public void ShowInventory<T>(IBeing being)
+        {
+            ShowInventory(being, (i) => i.Components.HasComponent<T>());
         }
 
         private void WriteLine(string line)

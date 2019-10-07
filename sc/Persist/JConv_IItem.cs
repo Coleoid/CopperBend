@@ -61,7 +61,8 @@ namespace CopperBend.Persist
             case "Seed":
                 //quantity = jOb["Quantity"].Value<int>();
                 details = jOb["PlantDetails"].ToObject<PlantDetails>();
-                item = new Seed(coord, details, id: id);
+                item = new Seed(details, id: id);
+                item.Location = coord;
                 break;
             case "Hoe":
                 item = new Hoe(coord, id);

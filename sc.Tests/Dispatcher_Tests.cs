@@ -135,30 +135,6 @@ namespace CopperBend.Engine.Tests
                 __messageOutput.DidNotReceive().WriteLine(message);
         }
 
-        //[Explicit, Property("Context", "ConsoleRunning")]
-        //[TestCase(CmdAction.Wait, CmdDirection.None, 6)]
-        //[TestCase(CmdAction.Consume, CmdDirection.None, 2)]
-        //[TestCase(CmdAction.Drop, CmdDirection.None, 1)]
-        //[TestCase(CmdAction.Wield, CmdDirection.None, 6)]
-        //public void Commands_take_time(CmdAction action, CmdDirection direction, int tickOff)
-        //{
-        //    //TODO: Mock this factory
-        //    // needs IConsole plugged into the SadConsole project
-        //    //IEntityFactory mockEntityFactory = Substitute.For<IEntityFactory>();
-        //    //Being.EntityFactory = mockEntityFactory;
-
-        //    Being.EntityFactory = new EntityFactory();
-
-        //    var actor = new Player(Color.AliceBlue, Color.Black);
-        //    var item = new Fruit((0, 0), 1, Fruit.Herbal.PlantByName["Healer"]);
-        //    actor.AddToInventory(item);
-
-        //    var cmd = new Command(action, direction, item);
-        //    _dispatcher.CommandBeing(actor, cmd);
-        //    __schedule.Received().AddAgent(actor, tickOff);
-        //}
-
-
         #region Consume
         [Test]
         public void Consume_throws_on_item_not_in_inventory()
@@ -443,15 +419,17 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void PickUp_moves_item_from_map_to_actor()
         {
-            //Point startingPoint = new Point(2, 2);
-            //var actor = new Actor(startingPoint);
-            //Fruit thisFruit = new Fruit(startingPoint, 1, PlantType.Healer);
-            //_gameState.Map.Items.Add(thisFruit);
-            //var cmd = new Command(CmdAction.PickUp, CmdDirection.None, null);
-            //_dispatcher.CommandActor(actor, cmd);
+            var coord = new GoRogue.Coord(2, 2);
+            var being = new Being(Color.White, Color.Black, '@');
+            being.MoveTo(coord);
+            var item = new Item(coord, 1);
+            _gameState.Map.ItemMap.Add(item, coord);
 
-            //Assert.That(_gameState.Map.Items, Does.Not.Contain(thisFruit));
-            //Assert.That(actor.Inventory, Does.Contain(thisFruit));
+            var cmd = new Command(CmdAction.PickUp, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, cmd);
+
+            Assert.That(_gameState.Map.ItemMap.GetItems(coord), Does.Not.Contain(item));
+            Assert.That(being.Inventory.ElementAt(0), Is.SameAs(item));
         }
         #endregion
 
@@ -459,14 +437,17 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Wield_sets_actor_WieldedTool()
         {
-            //Point startingPoint = new Point(2, 2);
-            //var actor = new Actor(startingPoint);
-            //Knife knife = new Knife(startingPoint);
-            //actor.AddToInventory(knife);
-            //var cmd = new Command(CmdAction.Wield, CmdDirection.None, knife);
-            //_dispatcher.CommandActor(actor, cmd);
+            var coord = new GoRogue.Coord(2, 2);
+            var being = new Being(Color.White, Color.Black, '@');
+            being.MoveTo(coord);
+            var item = new Item(coord, 1);
+            being.AddToInventory(item);
+            Assert.That(being.WieldedTool, Is.Null);
 
-            //Assert.That(actor.WieldedTool, Is.SameAs(knife));
+            var cmd = new Command(CmdAction.Wield, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, cmd);
+
+            Assert.That(being.WieldedTool, Is.SameAs(item));
         }
         #endregion
     }

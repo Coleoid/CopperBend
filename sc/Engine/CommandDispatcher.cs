@@ -106,6 +106,10 @@ namespace CopperBend.Engine
                 HealBeing(being, consumable.Effect.Degree);
                 break;
 
+            case "":
+            case null:
+                break; //no effect
+
             default:
                 throw new Exception($"Don't have code written for Consumable Effect [{consumable.Effect.Name}].");
             }

@@ -6,7 +6,7 @@ namespace CopperBend.Fabric
 {
     public class SpaceMap : SerializableSpatialMap<ISpace>, ISpaceMap
     {
-        public static Dictionary<string, TerrainType> TerrainTypes { get; internal set; }
+        public static Dictionary<string, TerrainType> TerrainTypes { get; set; }
         public static TerrainType TilledSoil => TerrainTypes["tilled dirt"];
         public static TerrainType PlantedSoil => TerrainTypes["planted dirt"];
         public Coord PlayerStartPoint { get; set; }

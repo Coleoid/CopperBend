@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using log4net.Config;
@@ -13,7 +14,6 @@ using CopperBend.Model.Aspects;
 
 namespace CopperBend.Engine.Tests
 {
-
     [TestFixture]
     public class Dispatcher_Tests
     {
@@ -23,15 +23,16 @@ namespace CopperBend.Engine.Tests
         private IDescriber __describer = null;
         private IMessageLogWindow __messageOutput = null;
 
+        private TerrainType ttDoorOpen;
+        private TerrainType ttDoorClosed;
+        private TerrainType ttWall;
+        private TerrainType ttFloor;
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            bool foundRepo = false;
             var repos = LogManager.GetAllRepositories();
-            foreach (var r in repos)
-            {
-                if (r.Name == "CB") foundRepo = true;
-            }
+            bool foundRepo = repos.Any(r => r.Name == "CB");
 
             ILoggerRepository repo = null;
             if (foundRepo)
@@ -43,13 +44,49 @@ namespace CopperBend.Engine.Tests
                 repo = LogManager.CreateRepository("CB");
                 BasicConfigurator.Configure(repo);
             }
+
+            ttWall = new TerrainType
+            {
+                CanSeeThrough = false,
+                CanWalkThrough = false,
+                Looks = new SadConsole.Cell(Color.White, Color.Black, '#'),
+                Name = "wall"
+            };
+            ttFloor = new TerrainType
+            {
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Looks = new SadConsole.Cell(Color.White, Color.Black, '.'),
+                Name = "floor"
+            };
+
+            ttDoorOpen = new TerrainType
+            {
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Looks = new SadConsole.Cell(Color.White, Color.Black, '-'),
+                Name = "open door"
+            };
+            ttDoorClosed = new TerrainType
+            {
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Looks = new SadConsole.Cell(Color.White, Color.Black, '+'),
+                Name = "closed door"
+            };
+
+            SpaceMap.TerrainTypes = new Dictionary<string, TerrainType>();
+            SpaceMap.TerrainTypes[ttWall.Name] = ttWall;
+            SpaceMap.TerrainTypes[ttFloor.Name] = ttFloor;
+            SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;
+            SpaceMap.TerrainTypes[ttDoorClosed.Name] = ttDoorClosed;
+
+            Engine.Cosmogenesis("bang");
         }
 
         [SetUp]
         public void SetUp()
         {
-            Engine.Cosmogenesis("bang");
-
             __schedule = Substitute.For<ISchedule>();
             _gameState = new GameState
             {
@@ -63,33 +100,14 @@ namespace CopperBend.Engine.Tests
             __describer = Substitute.For<IDescriber>();
             __messageOutput = Substitute.For<IMessageLogWindow>();
 
-            //_gameState.Map = CreateSmallTestMap();
-
             _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput);
             _dispatcher.ClearPendingInput = () => { };
-            var idGen = new GoRogue.IDGenerator();
-            CbEntity.IDGenerator = idGen;
-            Item.IDGenerator = idGen;
 
             Being.EntityFactory = Substitute.For<IEntityFactory>();
         }
 
         public SpaceMap CreateSmallTestMap()
         {
-            var ttWall = new TerrainType
-            {
-                CanSeeThrough = false,
-                CanWalkThrough = false,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '#'),
-                Name = "wall"
-            };
-            var ttFloor = new TerrainType
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '.'),
-                Name = "floor"
-            };
             SpaceMap spaceMap = new SpaceMap(5, 5);
             for (int x = 0; x < 5; x++)
             {
@@ -103,8 +121,18 @@ namespace CopperBend.Engine.Tests
                     spaceMap.AddItem(s, (x, y));
                 }
             }
+            var sp = spaceMap.GetItem((3, 4));
+            sp.Terrain = ttDoorClosed;
 
             return spaceMap;
+        }
+
+        void Assert_MessageSent_Iff_Player(bool isPlayer, string message)
+        {
+            if (isPlayer)
+                __messageOutput.Received().WriteLine(message);
+            else
+                __messageOutput.DidNotReceive().WriteLine(message);
         }
 
         //[Explicit, Property("Context", "ConsoleRunning")]
@@ -180,10 +208,8 @@ namespace CopperBend.Engine.Tests
         }
 
         [Test]
-        public void Consume_wielded()
+        public void Consume_all_of_wielded_empties_hands()
         {
-            __describer.Describe((Item)null).ReturnsForAnyArgs("Thing");
-
             var being = new Being(Color.White, Color.Black, '@');
             var item = new Item((0, 0), 1);
             var consumable = new Consumable
@@ -191,7 +217,6 @@ namespace CopperBend.Engine.Tests
                 FoodValue = 22,
                 PlantID = 2,
                 IsFruit = true,
-                Effect = ("Heal", 4),
             };
             item.Components.AddComponent(consumable);
             being.Wield(item);
@@ -200,6 +225,28 @@ namespace CopperBend.Engine.Tests
             _dispatcher.CommandBeing(being, cmd);
 
             Assert.That(being.Inventory.ElementAt(0) is Seed);
+            Assert.That(being.WieldedTool, Is.Null);
+        }
+
+        [Test]
+        public void Consume_part_of_wielded_leaves_remainder_wielded()
+        {
+            var being = new Being(Color.White, Color.Black, '@');
+            var item = new Item((0, 0), 3);
+            var consumable = new Consumable
+            {
+                FoodValue = 22,
+                PlantID = 2,
+                IsFruit = false,
+            };
+            item.Components.AddComponent(consumable);
+            being.Wield(item);
+
+            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+            _dispatcher.CommandBeing(being, cmd);
+
+            Assert.That(being.Inventory.ElementAt(0), Is.SameAs(item));
+            Assert.That(being.WieldedTool, Is.SameAs(item));
         }
         #endregion
 
@@ -247,44 +294,48 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Moving_to_closed_door_opens_door_without_moving()
         {
-            //var tile = new Tile(2, 1, new TileType { Name = "closed door", Symbol = '+' });
-            //_gameState.Map.SetTile(tile);
-            //_gameState.Map.TileTypes["open door"] = new TileType  //WART: map should preload tile types req'd by code
-            //{
-            //    Name = "open door",
-            //    Symbol = '=',
-            //    IsTransparent = true,
-            //    IsWalkable = true
-            //};
-            //Point startingPoint = new Point(2, 2);
-            //var actor = new Actor(startingPoint);
-            //_gameState.Map.ViewpointActor = actor;  //WART: shouldn't need this, should just mark dirty
+            var startingPoint = new Point(3, 3);
+            var being = new Being(Color.White, Color.Black, '@')
+            {
+                IsPlayer = true,
+                Position = startingPoint,
+            };
+            var doorSpace = _gameState.Map.SpaceMap.GetItem((3, 4));
 
-            //var cmd = new Command(CmdAction.Direction, CmdDirection.North, null);
-            //_dispatcher.CommandActor(actor, cmd);
+            Assert.That(being.Position, Is.EqualTo(startingPoint));
+            Assert.That(doorSpace.Terrain.Name, Is.EqualTo("closed door"));
 
-            //Assert.That(actor.Point, Is.EqualTo(startingPoint));
-            //__schedule.Received().AddActor(actor, 4);
+            var cmd = new Command(CmdAction.Direction, CmdDirection.South, null);
+            _dispatcher.CommandBeing(being, cmd);
+
+            Assert.That(being.Position, Is.EqualTo(startingPoint));
+            Assert.That(doorSpace.Terrain.Name, Is.EqualTo("open door"));
+            __schedule.Received().AddAgent(being, 4);
         }
 
         [TestCase(true)]
         [TestCase(false)]
         public void Moving_onto_item_notifies_if_player(bool isPlayer)
         {
-            //Point startingPoint = new Point(2, 2);
-            //var actor = new Actor(startingPoint);
-            //actor.IsPlayer = isPlayer;
+            var startingPoint = new Point(2, 2);
+            var being = new Being(Color.White, Color.Black, '@')
+            {
+                IsPlayer = isPlayer,
+                Position = startingPoint,
+            };
 
-            //var item = new Knife(new Point(2, 1));
-            //_gameState.Map.Items.Add(item);
+            var itemPoint = new Point(2, 1);
+            var item = new Knife(itemPoint);
+            _gameState.Map.ItemMap.Add(item, itemPoint);
+            __describer.Describe(item, Arg.Any<DescMods>()).Returns("a knife");
 
-            //var cmd = new Command(CmdAction.Direction, CmdDirection.North, null);
-            //_dispatcher.CommandActor(actor, cmd);
+            var cmd = new Command(CmdAction.Direction, CmdDirection.North, null);
+            _dispatcher.CommandBeing(being, cmd);
 
-            //var outputOrNot = isPlayer
-            //    ? (Func<IMessageOutput>)__messageOutput.Received
-            //    : __messageOutput.DidNotReceive;
-            //outputOrNot().WriteLine("There is a knife here.");
+            Assert.That(being.Position, Is.EqualTo(itemPoint));
+            __schedule.Received().AddAgent(being, 12);
+
+            Assert_MessageSent_Iff_Player(isPlayer, "There is a knife here.");
         }
         #endregion
 

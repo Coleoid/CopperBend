@@ -33,9 +33,9 @@ namespace CopperBend.Persist
             //if (!Debugger.IsAttached) Debugger.Launch();
             ISpace space = null;
 
-            parser.Expect<MappingStart>();
+            parser.Consume<MappingStart>();
             space = ParseSpace(parser);
-            parser.Expect<MappingEnd>();
+            parser.Consume<MappingEnd>();
 
             return space;
         }

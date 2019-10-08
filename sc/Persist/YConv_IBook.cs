@@ -60,7 +60,7 @@ namespace CopperBend.Persist
             //if (!Debugger.IsAttached) Debugger.Launch();
             IBook book = null;
 
-            parser.Expect<MappingStart>();
+            parser.Consume<MappingStart>();
             var bookType = GetValueNext(parser, "BookType");
 
             switch (bookType)
@@ -91,7 +91,7 @@ namespace CopperBend.Persist
                 throw new NotImplementedException($"Not ready to Read book type [{bookType}].");
             }
 
-            parser.Expect<MappingEnd>();
+            parser.Consume<MappingEnd>();
             return book;
         }
         #endregion

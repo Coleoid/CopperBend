@@ -114,7 +114,7 @@ namespace External.Tests
 
             var reader = new StringReader(yaml_r1);
             var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(new PascalCaseNamingConvention())
+                .WithNamingConvention(PascalCaseNamingConvention.Instance)
                 .Build();
 
             var save_2 = deserializer.Deserialize<game_save>(yaml_r1);

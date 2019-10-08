@@ -24,10 +24,7 @@ namespace CopperBend.Persist
 
         protected string GetScalar(IParser parser)
         {
-            parser.Accept<Scalar>();
-            var scalar = parser.Current as Scalar;
-            parser.MoveNext();
-
+            parser.TryConsume<Scalar>(out Scalar scalar);
             return scalar.Value;
         }
 

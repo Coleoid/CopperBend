@@ -5,12 +5,12 @@ using Microsoft.Xna.Framework;
 using log4net.Config;
 using log4net;
 using log4net.Repository;
-using NUnit.Framework;
-using NSubstitute;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using CopperBend.Model.Aspects;
+using NUnit.Framework;
+using NSubstitute;
 
 namespace CopperBend.Engine.Tests
 {

@@ -4,7 +4,7 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    public interface IBeing : IDestroyable, IScheduleAgent, IHasID, IAttacker, IDefender
+    public interface IBeing : IDelible, IScheduleAgent, IHasID, IAttacker, IDefender
     {
         string Name { get; set; }
         int Awareness { get; set; }

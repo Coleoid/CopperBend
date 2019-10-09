@@ -2,6 +2,7 @@
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Model.Aspects;
 
 namespace CopperBend.Model
 {

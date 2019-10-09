@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CopperBend.Contract;
+using CopperBend.Model;
 using GoRogue;
 
 namespace CopperBend.Fabric

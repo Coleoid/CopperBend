@@ -1,6 +1,6 @@
 ﻿namespace CopperBend.Contract
 {
-    public interface IDestroyable
+    public interface IDelible
     {
         int MaxHealth { get; }
         int Health { get; }

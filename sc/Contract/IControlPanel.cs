@@ -29,7 +29,7 @@ namespace CopperBend.Contract
         Coord CoordInDirection(Coord start, CmdDirection direction);
         void PutItemOnMap(IItem item);
         void RemovePlantAt(Coord position);
-        bool RemoveFromAppropriateMap(IDestroyable mote);
+        bool RemoveFromAppropriateMap(IDelible mote);
         void RemoveFromSchedule(IScheduleAgent agent);
         void Till(ISpace space);
 

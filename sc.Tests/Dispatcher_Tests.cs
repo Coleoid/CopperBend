@@ -9,6 +9,7 @@ using NSubstitute;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using CopperBend.Model.Aspects;
 
 namespace CopperBend.Engine.Tests
 {

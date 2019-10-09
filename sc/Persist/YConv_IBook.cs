@@ -5,6 +5,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Model;
 
 namespace CopperBend.Persist
 {

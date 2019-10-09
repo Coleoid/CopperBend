@@ -85,7 +85,7 @@ namespace CopperBend.Engine
             //Map.GetTileAt(point).RemovePlant();
         }
 
-        public bool RemoveFromAppropriateMap(IDestroyable mote)
+        public bool RemoveFromAppropriateMap(IDelible mote)
         {
             // remove from whichever map
             if (mote is IAreaBlight blight)

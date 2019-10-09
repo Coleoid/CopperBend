@@ -1,6 +1,6 @@
 ﻿using CopperBend.Contract;
 
-namespace CopperBend.Model
+namespace CopperBend.Model.Aspects
 {
     public class Consumable : IConsumable
     {
@@ -11,5 +11,4 @@ namespace CopperBend.Model
         public uint PlantID { get; set; }
         public string ConsumeVerb { get; set; } = "eat";
     }
-
 }

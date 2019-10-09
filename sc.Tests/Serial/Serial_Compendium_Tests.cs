@@ -5,6 +5,7 @@ using CopperBend.Contract;
 using CopperBend.Persist;
 using CopperBend.Fabric;
 using NUnit.Framework;
+using CopperBend.Model;
 
 namespace CopperBend.Persist.Tests
 {

@@ -6,7 +6,7 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
-    public class AreaBlight : IHasID, IDestroyable, IAreaBlight
+    public class AreaBlight : IHasID, IDelible, IAreaBlight
     {
         public AreaBlight(uint id = uint.MaxValue)
         {

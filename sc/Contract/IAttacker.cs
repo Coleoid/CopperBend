@@ -15,7 +15,7 @@ namespace CopperBend.Contract
         List<IModifier> GetAttackModifiers(IDefender defender, IAttackMethod method);
     }
 
-    public interface IDefender : IDestroyable
+    public interface IDefender : IDelible
     {
         IDefenseMethod GetDefenseMethod(IAttackMethod method);
         List<IModifier> GetDefenseModifiers(IAttacker attacker, IAttackMethod method);

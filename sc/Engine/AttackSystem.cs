@@ -85,12 +85,12 @@ Apply post-attack effects
         public AttackSystem(IControlPanel panel)
         {
             Panel = panel;
-            Destroyed = new Queue<IDestroyable>();
+            Destroyed = new Queue<IDelible>();
             AttackQueue = new Queue<Attack>();
         }
 
         public IControlPanel Panel { get; set; }
-        public Queue<IDestroyable> Destroyed { get; set; }
+        public Queue<IDelible> Destroyed { get; set; }
         public Queue<Attack> AttackQueue { get; set; }
 
         public void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
@@ -139,7 +139,7 @@ Apply post-attack effects
             RegisterDamage(attack.Defender, damages);
         }
 
-        public void RegisterDamage(IDestroyable target, IEnumerable<AttackDamage> damages)
+        public void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages)
         {
             int amount = damages.Sum(d => d.Current);
             if (amount < 1) return;
@@ -177,7 +177,7 @@ Apply post-attack effects
         // The blight burns to a crisp
         // The green sparks destroy the blight
 
-        private void MessageDamage(IDestroyable target, IEnumerable<AttackDamage> damages)
+        private void MessageDamage(IDelible target, IEnumerable<AttackDamage> damages)
         {
             if (target.Health > 0)
             {

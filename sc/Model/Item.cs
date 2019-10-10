@@ -1,6 +1,9 @@
 ﻿using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
+using System.Linq;
+using System;
+using CopperBend.Model.Aspects;
 
 namespace CopperBend.Model
 {
@@ -18,7 +21,7 @@ namespace CopperBend.Model
             IsUsable = isUsable;
 
             AttackMethod = new AttackMethod("physical.impact.blunt", "1d4");
-            Components = new ComponentContainer();
+            Aspects = new ComponentContainer();
         }
 
         public IAttackMethod AttackMethod { get; set; }
@@ -50,7 +53,33 @@ namespace CopperBend.Model
             //output.Add($"Can't use a {Name} on {tile.TileType} to my {direction}.");
         }
 
-        public virtual bool IsConsumable => false;
+        public void AddAspect(object aspect)
+        {
+            Aspects.AddComponent(aspect);
+        }
+
+        public Use AddUse(string verbPhrase, UseTargetFlags targets)
+        {
+            IUsable usable = Aspects.GetComponent<IUsable>();
+            if (usable == null)
+            {
+                usable = new Usable();
+                Aspects.AddComponent(usable);
+            }
+            var use = new Use(verbPhrase, targets);
+            usable.Uses.Add(use);
+            return use;
+        }
+
+        public virtual bool IsIngestible 
+        {
+            get 
+            {
+                // this is squishy, may eventually be noticeably slow
+                return Aspects.GetComponents<IUsable>()
+                    .Any(ub => ub.Uses.Any(u => u.VerbPhrase == "eat" || u.VerbPhrase == "drink"));
+            }
+        }
 
         public virtual bool StacksWith(IItem item)
         {
@@ -58,6 +87,6 @@ namespace CopperBend.Model
                 && ItemType == item.ItemType;
         }
 
-        public ComponentContainer Components { get; set; }
+        public ComponentContainer Aspects { get; set; }
     }
 }

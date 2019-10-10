@@ -119,7 +119,7 @@ namespace CopperBend.Engine
 
         public Command Consume(IBeing being)
         {
-            var inv_consumables = being.Inventory.Where(i => i.IsConsumable).ToList();
+            var inv_consumables = being.Inventory.Where(i => i.IsIngestible).ToList();
             //var reach_consumables = actor.ReachableItems().Where(i => i.IsConsumable).ToList();
             if (inv_consumables.Count() == 0) /*+ reach_consumables.Count()*/
             {
@@ -146,7 +146,7 @@ namespace CopperBend.Engine
             var item = ItemInInventoryLocation(press, being);
             if (item != null)
             {
-                if (item.IsConsumable)
+                if (item.IsIngestible)
                 {
                     NextStep = null;
                     return new Command(CmdAction.Consume, CmdDirection.None, item);
@@ -434,7 +434,7 @@ namespace CopperBend.Engine
 
         public void ShowInventory<T>(IBeing being)
         {
-            ShowInventory(being, (i) => i.Components.HasComponent<T>());
+            ShowInventory(being, (i) => i.Aspects.HasComponent<T>());
         }
 
         private void WriteLine(string line)

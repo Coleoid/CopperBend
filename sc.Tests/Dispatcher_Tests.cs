@@ -149,7 +149,7 @@ namespace CopperBend.Engine.Tests
                 PlantID = 2,
                 IsFruit = true,
             };
-            item.Components.AddComponent(consumable);
+            item.Aspects.AddComponent(consumable);
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
 
             var ex = Assert.Throws<Exception>(() => _dispatcher.CommandBeing(being, cmd));
@@ -170,7 +170,7 @@ namespace CopperBend.Engine.Tests
                 IsFruit = true,
                 Effect = ("Heal", 4),
             };
-            item.Components.AddComponent(consumable);
+            item.Aspects.AddComponent(consumable);
             being.AddToInventory(item);
 
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
@@ -194,7 +194,7 @@ namespace CopperBend.Engine.Tests
                 PlantID = 2,
                 IsFruit = true,
             };
-            item.Components.AddComponent(consumable);
+            item.Aspects.AddComponent(consumable);
             being.Wield(item);
 
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
@@ -215,7 +215,7 @@ namespace CopperBend.Engine.Tests
                 PlantID = 2,
                 IsFruit = false,
             };
-            item.Components.AddComponent(consumable);
+            item.Aspects.AddComponent(consumable);
             being.Wield(item);
 
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);

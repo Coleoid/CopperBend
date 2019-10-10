@@ -93,7 +93,7 @@ namespace CopperBend.Engine
             string description = Describer.Describe(item);
             Guard.Against(item.Quantity < 1, $"Only have {item.Quantity} {description}.");
             Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory"); //0.2: animals eat off ground?
-            IConsumable consumable = item.Components.GetComponent<IConsumable>();
+            IConsumable consumable = item.Aspects.GetComponent<IConsumable>();
             Guard.Against(consumable == null, $"{description} is not consumable");
 
             item.Quantity--;

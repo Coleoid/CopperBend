@@ -18,11 +18,11 @@ namespace CopperBend.Contract
         bool IsUsable { get; }
         void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction);
 
-        bool IsConsumable { get; }
+        bool IsIngestible { get; }
         string Adjective { get; set; }
         IAttackMethod AttackMethod { get; }
 
-        ComponentContainer Components { get; set; }
+        ComponentContainer Aspects { get; set; }
 
         bool StacksWith(IItem item);
     }

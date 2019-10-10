@@ -30,7 +30,7 @@ namespace CopperBend.Model.Aspects
 
     public class Use : IUse
     {
-        public string Verb { get; set; }
+        public string VerbPhrase { get; set; }
 
         public List<UseCost> Costs { get; set; }
         public List<UseEffect> Effects { get; set; }
@@ -47,7 +47,7 @@ namespace CopperBend.Model.Aspects
 
         public Use(string verb, UseTargetFlags targets)
         {
-            Verb = verb;
+            VerbPhrase = verb;
             Targets = targets;
             Costs = new List<UseCost>();
             Effects = new List<UseEffect>();

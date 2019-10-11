@@ -1,89 +1,38 @@
-﻿using CopperBend.Contract;
-using CopperBend.Fabric;
+﻿using Microsoft.Xna.Framework;
+using GoRogue;
+using CopperBend.Contract;
+using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace CopperBend.Engine.tests
+namespace CopperBend.Engine.Tests
 {
     [TestFixture]
-    public class Dispatcher_Use_Tests
+    public class Dispatcher_Use_Tests : Dispatcher_Tests_Base
     {
-        private CommandDispatcher _dispatcher = null;
-        private ISchedule __schedule = null;
-        private GameState _gameState = null;
-        private Describer __describer = null;
-        private IMessageLogWindow __messageOutput;
-
-        [SetUp]
-        public void SetUp()
+        private Being SU_being_at_coord(Coord coord, int glyph)
         {
-            __schedule = Substitute.For<ISchedule>();
-            _gameState = new GameState();
-            __describer = Substitute.For<Describer>(88);
-            __messageOutput = Substitute.For<IMessageLogWindow>();
-
-            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput);
-            //_gameState.Map = CreateSmallTestMap();
-            //_gameState.Map.TileTypes["tilled dirt"] = new TileType
-            //{
-            //    Name = "tilled dirt",
-            //    Symbol = '~',
-            //    IsTransparent = true,
-            //    IsWalkable = true,
-            //};
+            var being = new Being(Color.White, Color.Black, glyph);
+            being.MoveTo(coord);
+            return being;
         }
-        //private AreaMap CreateSmallTestMap()
-        //{
-        //    var ttWall = new TileType
-        //    {
-        //        IsTransparent = false,
-        //        IsWalkable = false,
-        //        Symbol = '#',
-        //        Name = "wall"
-        //    };
-        //    var ttFloor = new TileType
-        //    {
-        //        IsTransparent = true,
-        //        IsWalkable = true,
-        //        Symbol = '.',
-        //        Name = "floor"
-        //    };
-        //    AreaMap areaMap = new AreaMap(5, 5);
-        //    for (int x = 0; x < 5; x++)
-        //    {
-        //        for (int y = 0; y < 5; y++)
-        //        {
-        //            bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
-        //            var t = new Tile(x, y, isEdge ? ttWall : ttFloor);
-        //            areaMap.SetTile(t);
-        //        }
-        //    }
-
-        //    return areaMap;
-        //}
-
-        //private (Actor, Point) SU_actor_at_point(int x, int y)
-        //{
-        //    Point startingPoint = new Point(x, y);
-        //    var actor = new Actor(startingPoint);
-        //    return (actor, startingPoint);
-        //}
 
         #region Hoe/Tilling
-        //[Test]
-        //public void Use_hoe_on_untillable_tile()
-        //{
-        //    (var actor, var startingPoint) = SU_actor_at_point(2, 2);
-        //    var hoe = new Hoe(startingPoint);
-        //    actor.AddToInventory(hoe);
-        //    actor.WieldedTool = hoe;
+        [Test]
+        public void Use_hoe_on_untillable_tile()
+        {
+            Coord coord = (2, 2);
+            var player = SU_being_at_coord(coord, '@');
+            var hoe = new Hoe(coord);
+            player.AddToInventory(hoe);
+            player.Wield(hoe);
 
-        //    var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
-        //    _dispatcher.CommandActor(actor, cmd);
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
+            _dispatcher.CommandBeing(player, cmd);
 
-        //    __schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
-        //    __messageOutput.Received().WriteLine("Cannot till the floor.");
-        //}
+            __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
+            __messageOutput.Received().WriteLine("Cannot till the floor.");
+        }
 
         //[Test]
         //public void Use_hoe_on_tilled_tile()

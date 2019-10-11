@@ -201,7 +201,7 @@ namespace CopperBend.Persist
                 BeingMap = new MultiSpatialMap<IBeing>(),
                 ItemMap = new ItemMap(),
                 LocatedTriggers = new List<LocatedTrigger>(),
-                BlightMap = new BlightMap(1),  //0.1: deserializing cheese
+                BlightMap = new BlightMap(),
             };
 
             for (int y = 0; y < height; y++)

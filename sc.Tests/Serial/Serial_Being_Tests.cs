@@ -1,12 +1,10 @@
-﻿using System.Diagnostics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using SadConsole.Entities;
 using YamlDotNet.Serialization;
 using CopperBend.Contract;
 using CopperBend.Model;
-using CopperBend.Persist;
 using NSubstitute;
 using NUnit.Framework;
-using SadConsole.Entities;
 
 namespace CopperBend.Persist.Tests
 {

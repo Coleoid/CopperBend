@@ -1,7 +1,7 @@
 ﻿using YamlDotNet.Serialization;
-using NUnit.Framework;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using NUnit.Framework;
 
 namespace CopperBend.Persist.Tests
 {

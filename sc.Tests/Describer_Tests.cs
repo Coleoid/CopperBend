@@ -1,7 +1,7 @@
 using GoRogue;
+using CopperBend.Contract;
 using CopperBend.Model;
 using NUnit.Framework;
-using CopperBend.Contract;
 
 namespace CopperBend.Engine.Tests
 {
@@ -22,7 +22,7 @@ namespace CopperBend.Engine.Tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Coord(0, 0), quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -39,7 +39,7 @@ namespace CopperBend.Engine.Tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity, false)
+            var item = new Item(new Coord(0, 0), quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -57,7 +57,7 @@ namespace CopperBend.Engine.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity, false)
+            var item = new Item((0, 0), quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -74,7 +74,7 @@ namespace CopperBend.Engine.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity, false)
+            var item = new Item((0, 0), quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -91,7 +91,7 @@ namespace CopperBend.Engine.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity, false)
+            var item = new Item((0, 0), quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -108,7 +108,7 @@ namespace CopperBend.Engine.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity, false)
+            var item = new Item((0, 0), quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -125,7 +125,7 @@ namespace CopperBend.Engine.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity, false)
+            var item = new Item((0, 0), quantity)
             {
                 Name = "rock",
                 Adjective = adjective,

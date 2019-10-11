@@ -9,8 +9,8 @@ namespace CopperBend.Model
         public override string Name { get => "knife"; }
         public override string ItemType { get => "Knife"; }
 
-        public Knife(Coord position, int quantity = 1, bool isUsable = true, uint id = uint.MaxValue)
-            : base(position, quantity, isUsable, id)
+        public Knife(Coord position, int quantity = 1, uint id = uint.MaxValue)
+            : base(position, quantity, id)
         {
         }
 

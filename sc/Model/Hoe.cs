@@ -8,7 +8,7 @@ namespace CopperBend.Model
         public override string ItemType { get => "Hoe"; }
 
         public Hoe(Coord position, uint id = uint.MaxValue)
-            : base(position, 1, true, id)
+            : base(position, 1, id)
         {
             Glyph = '\\';
         }

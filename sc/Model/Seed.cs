@@ -24,17 +24,17 @@ namespace CopperBend.Model
         }
 
         public Seed()
-            : base((0,0), 1, true)
+            : base((0,0), 1)
         { }
 
         public Seed(uint typeID, int quantity = 1, uint id = uint.MaxValue)
-            : base((0,0), quantity, true, id)
+            : base((0,0), quantity, id)
         {
             PlantDetails = Herbal.PlantByID[typeID];
         }
 
         public Seed(PlantDetails details, int quantity = 1, uint id = uint.MaxValue)
-            : base((0,0), quantity, true, id)
+            : base((0,0), quantity, id)
         {
             PlantDetails = details;
         }

@@ -6,11 +6,6 @@ namespace CopperBend.Contract
     /// <summary> Highly speculative </summary>
     public interface IUsable
     {
-        List<IUse> Uses { get; set; }
-    }
-
-    public interface IUse
-    {
         string VerbPhrase { get; set; }
         List<UseCost> Costs { get; set; }
         List<UseEffect> Effects { get; set; }

@@ -139,7 +139,7 @@ namespace CopperBend.Engine
 
             if (press.Character == '?')
             {
-                ShowInventory<IConsumable>(being);
+                ShowInventory<IIngestible>(being);
                 return CommandIncomplete;
             }
 

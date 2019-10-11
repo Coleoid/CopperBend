@@ -69,7 +69,7 @@ namespace CopperBend.Model
             //0.1:  Move beyond insta-auto-harvest.
             //Two fruit drop to the ground, plant disappears.
             IItem fruit = new Item(this.Location, 2);
-            fruit.Aspects.AddComponent(new Consumable {
+            fruit.Aspects.AddComponent(new Ingestible {
                 IsFruit = true,
                 PlantID = this.PlantDetails.ID, 
             });

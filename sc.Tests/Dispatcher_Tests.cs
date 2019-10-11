@@ -143,7 +143,7 @@ namespace CopperBend.Engine.Tests
 
             var being = new Being(Color.White, Color.Black, '@');
             var item = new Item((0, 0), 1);
-            var consumable = new Consumable
+            var consumable = new Ingestible
             {
                 FoodValue = 22,
                 PlantID = 2,
@@ -163,7 +163,7 @@ namespace CopperBend.Engine.Tests
 
             var being = new Being(Color.White, Color.Black, '@');
             var item = new Item((0, 0), 1);
-            var consumable = new Consumable
+            var consumable = new Ingestible
             {
                 FoodValue = 22,
                 PlantID = 2,
@@ -188,7 +188,7 @@ namespace CopperBend.Engine.Tests
         {
             var being = new Being(Color.White, Color.Black, '@');
             var item = new Item((0, 0), 1);
-            var consumable = new Consumable
+            var consumable = new Ingestible
             {
                 FoodValue = 22,
                 PlantID = 2,
@@ -209,7 +209,7 @@ namespace CopperBend.Engine.Tests
         {
             var being = new Being(Color.White, Color.Black, '@');
             var item = new Item((0, 0), 3);
-            var consumable = new Consumable
+            var consumable = new Ingestible
             {
                 FoodValue = 22,
                 PlantID = 2,

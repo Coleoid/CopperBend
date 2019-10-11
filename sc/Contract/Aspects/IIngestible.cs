@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CopperBend.Contract
 {
-    public interface IConsumable
+    public interface IIngestible
     {
         bool IsFruit { get; set; }
         int FoodValue { get; set; }

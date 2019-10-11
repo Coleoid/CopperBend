@@ -36,17 +36,27 @@ namespace CopperBend.Model.Aspects.Tests
             var hoe = new Item((0, 0));
             hoe.AddAspect(new Usable("till ground with", UseTargetFlags.Direction)
                 .AddEffect("till", 1)
-                .AddCosts(("time", 24), ("energy", 20))
-            );
-            hoe.AddAspect(new Usable("attack with", UseTargetFlags.Direction)
-                .AddEffect("attack", 1)
                 .AddCosts(("time", 24), ("energy", 20)));
+            hoe.AddAspect(new Usable("remove weeds with", UseTargetFlags.Direction)
+                .AddEffect("weed", 1)
+                .AddCosts(("time", 24), ("energy", 5)));
         }
 
         [Test]
         public void Weapon_is_Usable_plus_Attack_stuff()
         {
+            var knife = new Item((0, 0));
+            var cutTargets = UseTargetFlags.Item | UseTargetFlags.Direction;
+            knife.AddAspect(new Usable("cut target with", cutTargets)
+                .AddEffect("cut", 4)
+                .AddCosts(("time", 6), ("energy", 2)));
 
+            knife.AddAspect(new Weapon("attack target with", UseTargetFlags.Being | UseTargetFlags.Direction)
+                .AddAttackEffects(
+                    ("physical.impact.edge", "1d4+2"),
+                    ("physical.impact.blunt", "1d2"))
+                .AddEffect("cut", 4)
+                .AddCosts(("time", 6), ("energy", 2)));
         }
     }
 }

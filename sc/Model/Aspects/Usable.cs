@@ -54,4 +54,28 @@ namespace CopperBend.Model.Aspects
             get => Targets.HasFlag(UseTargetFlags.Direction);
         }
     }
+
+    public class Weapon : Usable
+    {
+        public AttackMethod AttackMethod { get; set; }
+
+        public Weapon(string verbPhrase, UseTargetFlags targets)
+            : base(verbPhrase, targets)
+        {
+            AttackMethod = new AttackMethod();
+        }
+
+        public Weapon AddAttackEffects(params (string type, string range)[] effects)
+        {
+            foreach ((string type, string range) in effects)
+                AttackMethod.AddEffect(type, range);
+            return this;
+        }
+
+        public Weapon AddAttackEffect(string type, string range)
+        {
+            AttackMethod.AddEffect(type, range);
+            return this;
+        }
+    }
 }

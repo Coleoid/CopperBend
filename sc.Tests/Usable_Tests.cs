@@ -51,12 +51,14 @@ namespace CopperBend.Model.Aspects.Tests
                 .AddEffect("cut", 4)
                 .AddCosts(("time", 6), ("energy", 2)));
 
-            knife.AddAspect(new Weapon("attack target with", UseTargetFlags.Being | UseTargetFlags.Direction)
+            knife.AddAspect(
+                new Weapon("attack target with", UseTargetFlags.Being | UseTargetFlags.Direction)
                 .AddAttackEffects(
                     ("physical.impact.edge", "1d4+2"),
-                    ("physical.impact.blunt", "1d2"))
-                .AddEffect("cut", 4)
-                .AddCosts(("time", 6), ("energy", 2)));
+                    ("physical.impact.blunt", "1d2")
+                )
+                .AddCosts(("time", 12), ("energy", 8))
+            );
         }
     }
 }

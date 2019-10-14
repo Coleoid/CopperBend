@@ -4,6 +4,7 @@ using CopperBend.Contract;
 using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
+using CopperBend.Model.Aspects;
 
 namespace CopperBend.Engine.Tests
 {
@@ -23,7 +24,14 @@ namespace CopperBend.Engine.Tests
         {
             Coord coord = (2, 2);
             var player = SU_being_at_coord(coord, '@');
-            var hoe = new Hoe(coord);
+            var hoe = new Item(coord);
+            hoe.AddAspect(new Usable("till ground with", UseTargetFlags.Direction)
+                .AddEffect("till", 1)
+                .AddCosts(("time", 24), ("energy", 20)));
+            hoe.AddAspect(new Usable("remove weeds with", UseTargetFlags.Direction)
+                .AddEffect("weed", 1)
+                .AddCosts(("time", 24), ("energy", 5)));
+
             player.AddToInventory(hoe);
             player.Wield(hoe);
 

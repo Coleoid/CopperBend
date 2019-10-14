@@ -48,7 +48,7 @@ namespace CopperBend.Engine
             }
         }
 
-        internal Command GetCommand(IBeing being)
+        public Command GetCommand(IBeing being)
         {
             if (!Controls.IsInputReady()) return CommandIncomplete;
             var press = Controls.GetNextInput();

@@ -1,26 +1,29 @@
-﻿using CopperBend.Contract;
-using CopperBend.Fabric;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+using SadConsole.Input;
 using log4net;
 using log4net.Config;
 using log4net.Repository;
-using Microsoft.Xna.Framework;
+using CopperBend.Contract;
+using CopperBend.Fabric;
 using NSubstitute;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace CopperBend.Engine.tests
+namespace CopperBend.Engine.Tests
 {
     [TestFixture]
     public class InputCommandSource_TestBase
     {
-        protected Queue<RLKeyPress> _inQ;
-        protected IGameWindow __gameWindow;
         protected InputCommandSource _source;
+        protected GameState _gameState = null;
+        protected Queue<AsciiKey> _inQ;
         protected IBeing __being;
         protected IControlPanel __controls;
-        protected GameState _gameState = null;
+        protected IMessageLogWindow __messageOutput = null;
 
+        #region OTSU
         protected TerrainType ttDoorOpen;
         protected TerrainType ttDoorClosed;
         protected TerrainType ttWall;
@@ -81,6 +84,7 @@ namespace CopperBend.Engine.tests
 
             Engine.Cosmogenesis("bang");
         }
+        #endregion
 
         [SetUp]
         public virtual void SetUp()
@@ -96,8 +100,13 @@ namespace CopperBend.Engine.tests
                 },
             };
             __controls = Substitute.For<IControlPanel>();
+            __controls.IsInputReady = () => _inQ.Count() > 0;
+            __controls.GetNextInput = () => _inQ.Dequeue();
+            __controls.ClearPendingInput = () => _inQ.Clear();
+            //__messageOutput = Substitute.For<IMessageLogWindow>();
             _source = new InputCommandSource(new Describer(), _gameState, __controls);
             __being = Substitute.For<IBeing>();
+            _inQ = new Queue<AsciiKey>();
         }
 
         public SpaceMap CreateSmallTestMap()
@@ -125,28 +134,22 @@ namespace CopperBend.Engine.tests
         public virtual void TearDown()
         {
             _inQ = null;
-            __gameWindow = null;
             _source = null;
             __being = null;
         }
 
         protected Command Cmd = new Command(CmdAction.Unset, CmdDirection.None);
         protected static readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
-        protected static readonly RLKeyPress KP_Question = KeyPressFrom(RLKey.Slash, shift: true);
 
-        protected static RLKeyPress KeyPressFrom(RLKey key, bool alt = false, bool shift = false, bool control = false, bool repeating = false, bool numLock = false, bool capsLock = false, bool scrollLock = false)
+        protected void Queue(Keys xnaKey)
         {
-            return new RLKeyPress(key, alt, shift, control, repeating, numLock, capsLock, scrollLock);
+            var key = new AsciiKey { Character = (char)xnaKey, Key = xnaKey };
+            _inQ.Enqueue(key);
         }
 
-        protected void Queue(RLKey key)
+        protected void Queue(AsciiKey key)
         {
-            RLKeyPress press = KeyPressFrom(key);
-            Queue(press);
-        }
-        protected void Queue(RLKeyPress press)
-        {
-            _inQ.Enqueue(press);
+            _inQ.Enqueue(key);
         }
     }
 }

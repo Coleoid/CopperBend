@@ -15,7 +15,7 @@ namespace CopperBend.Contract
     //  Some methods to communicate and control, in junk drawer mode.
     //  I'll keep accumulating until structure emerges.
     //  In other places I pass important domain bits as arguments.
-    public interface IControlPanel
+    public interface IControlPanel : IInputPanel, IWritePanel
     {
         /// <summary> The main purpose of the CommandDispatcher. </summary>
         bool CommandBeing(IBeing being, Command command);
@@ -40,18 +40,23 @@ namespace CopperBend.Contract
         //List<Coord> GetPathTo(Coord start, Coord target);
         //void Learn(Fruit fruit);
         //void SetMapDirty();
+    }
 
-        //  This approach works well.
-        //  Now nobody touches the engine, where these details originate.
-        //  Events/subscriptions also worked, but the defining advantage
-        // of events is providing multiple subscribers, which we didn't
-        // need, so the (significant) coding overhead was waste.
-        //0.2  group in interface, have ControlPanel delegate to another implementing obj?
-        Func<bool> IsInputReady { get; }
-        Func<AsciiKey> GetNextInput { get; }
-        Action ClearPendingInput { get; }
 
-        //0.2  group in interface, have ControlPanel delegate to another implementing obj?
+    //  I've built sub-APIs as small list of runtime-settable functions.
+    //  Now nobody touches the engine, where these details originate.
+    //  Events/subscriptions also worked, but the defining advantage
+    // of events is providing multiple subscribers, which we didn't
+    // need, so the (significant) coding overhead was waste.
+    public interface IInputPanel
+    {
+        Func<bool> IsInputReady { get; set; }
+        Func<AsciiKey> GetNextInput { get; set; }
+        Action ClearPendingInput { get; set; }
+    }
+
+    public interface IWritePanel
+    {
         Action<string> WriteLine { get; }
         Action<IBeing, string> WriteLineIfPlayer { get; }
         Action<string> Prompt { get; }

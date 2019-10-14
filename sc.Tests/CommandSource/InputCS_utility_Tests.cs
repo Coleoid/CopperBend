@@ -1,12 +1,12 @@
-﻿//using NUnit.Framework;
-//using System;
-//using System.Collections.Generic;
+﻿using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 
-//namespace CopperBend.Engine.tests
-//{
-//    [TestFixture]
-//    public class InputCS_utility_Tests : InputCommandSourceTestsBase
-//    {
+namespace CopperBend.Engine.Tests
+{
+    [TestFixture]
+    public class InputCS_utility_Tests : InputCommandSource_TestBase
+    {
 //        [TestCase(RLKey.A)]
 //        [TestCase(RLKey.X)]
 //        public void DirectionOf_nondirectional_is_None(RLKey key)
@@ -167,5 +167,5 @@
 //            __gameWindow.Received().ShowInventory(Arg.Any<IEnumerable<IItem>>(), Arg.Any<Func<IItem, bool>>());
 //            Assert.That(_source.InMultiStepCommand, "Displaying inventory does not abort command");
 //        }
-//    }
-//}
+    }
+}

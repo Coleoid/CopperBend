@@ -404,8 +404,12 @@ namespace CopperBend.Engine
         private static int AlphaIndexOfKeyPress(AsciiKey press)
         {
             int asciiNum = press.Character;
-            if (asciiNum < 'a' || 'z' < asciiNum) return -1;
-            return asciiNum - 'a';
+            if ('a' <= asciiNum && asciiNum <= 'z')
+                return asciiNum - 'a';
+            else if ('A' <= asciiNum && asciiNum <= 'Z')
+                return asciiNum - 'A';
+
+            return -1;
         }
 
         /// <summary> If more input is queued, the prompt will not be sent </summary>

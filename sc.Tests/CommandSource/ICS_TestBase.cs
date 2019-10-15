@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace CopperBend.Engine.Tests
 {
     [TestFixture]
-    public class InputCommandSource_TestBase
+    public class ICS_TestBase
     {
         protected InputCommandSource _source;
         protected GameState _gameState = null;

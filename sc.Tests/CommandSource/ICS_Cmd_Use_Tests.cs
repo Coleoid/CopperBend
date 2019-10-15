@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace CopperBend.Engine.Tests
 {
     [TestFixture]
-    public class InputCS_command_use_Tests : InputCommandSource_TestBase
+    public class ICS_Cmd_Use_Tests : ICS_TestBase
     {
         [Test]
         public void Use_cancel()

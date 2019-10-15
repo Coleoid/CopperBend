@@ -60,43 +60,27 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Consume_cancel()
         {
-            var fruit = new Item((0, 0), 1);
-            fruit.AddAspect(new Ingestible
-            {
-                IsFruit = true,
-                FoodValue = 210,
-                PlantID = Engine.Compendium.Herbal.PlantByName["Healer"].ID
-            });
-            __being.Inventory.Returns(new List<IItem> { fruit });
+            Fill_pack();
+
             Queue(Keys.C);
             Queue(Keys.Escape);
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __controls.Received().WriteLine("Do_Consume cancelled.");
+            __controls.Received().WriteLine("Consume cancelled.");
             Assert.IsFalse(_source.InMultiStepCommand);
         }
 
         [Test]
         public void Consume_inventory()
         {
-            var knife = new Item((0, 0));
-            var fruit = new Item((0, 0), 1);
-            fruit.AddAspect(new Ingestible
-            {
-                IsFruit = true,
-                FoodValue = 210,
-                PlantID = Engine.Compendium.Herbal.PlantByName["Healer"].ID
-            });
- 
-            __being.ReachableItems().Returns(new List<IItem> { });
-            __being.Inventory.Returns(new List<IItem> { knife, fruit });
+            (_, var fruit, _) = Fill_pack();
 
             Queue(Keys.C);
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __controls.Received().Prompt("Do_Consume (inventory letter or ? to show inventory): ");
+            __controls.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
             Assert.That(_source.InMultiStepCommand);
 
             Queue(Keys.B);
@@ -106,44 +90,39 @@ namespace CopperBend.Engine.Tests
             Assert.IsFalse(_source.InMultiStepCommand);
         }
 
-        //[Test]
-        //public void Consume_unqualified_inventory()
-        //{
-        //    var knife = new Knife(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.ReachableItems().Returns(new List<IItem> { });
-        //    __being.Inventory.Returns(new List<IItem> { knife, fruit });
+        [Test]
+        public void Consume_unqualified_inventory()
+        {
+            Fill_pack();
 
-        //    Queue(Keys.C);
-        //    Cmd = _source.GetCommand(__being);
+            Queue(Keys.C);
+            Cmd = _source.GetCommand(__being);
 
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    __gameWindow.Received().Prompt("Do_Consume (inventory letter or ? to show inventory): ");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __prompt.Received().Invoke("Consume (inventory letter or ? to show inventory): ");
+            Assert.That(_source.InMultiStepCommand);
 
-        //    Queue(Keys.A);
-        //    Cmd = _source.GetCommand(__being);
+            Queue(Keys.A);
+            Cmd = _source.GetCommand(__being);
 
-        //    __gameWindow.Received().WriteLine("I can't eat or drink a knife.");
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //}
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
+            __writeLine.Received().Invoke("I can't eat or drink a knife.");
+            Assert.That(_source.InMultiStepCommand);
+        }
 
-        //[Test]
-        //public void Consume_unfilled_inventory_letter()
-        //{
-        //    var knife = new Knife(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.ReachableItems().Returns(new List<IItem> { });
-        //    __being.Inventory.Returns(new List<IItem> { knife, fruit });
+        [Test]
+        public void Consume_unfilled_inventory_letter()
+        {
+            Fill_pack();
 
-        //    Queue(Keys.C);
-        //    Queue(Keys.C);
-        //    Cmd = _source.GetCommand(__being);
+            Queue(Keys.C);
+            Queue(Keys.D);
+            Cmd = _source.GetCommand(__being);
 
-        //    __gameWindow.Received().WriteLine("Nothing in inventory slot c.");
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //}
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
+            __writeLine.Received().Invoke("Nothing in inventory slot D.");
+            Assert.That(_source.InMultiStepCommand);
+        }
 
         ////[Test]  // not until I care more AND work out the UI flow
         //private void Consume_reachable()

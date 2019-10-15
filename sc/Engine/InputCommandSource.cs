@@ -126,13 +126,13 @@ namespace CopperBend.Engine
                 WriteLine("Nothing to eat or drink.");
                 return CommandIncomplete;
             }
-            return FFwdOrPrompt(Consume_main, "Do_Consume (inventory letter or ? to show inventory): ", being);
+            return FFwdOrPrompt(Consume_main, "Consume (inventory letter or ? to show inventory): ", being);
         }
         public Command Consume_main(AsciiKey press, IBeing being)
         {
             if (press.Key == Keys.Escape)
             {
-                WriteLine("Do_Consume cancelled.");
+                WriteLine("Consume cancelled.");
                 NextStep = null;
                 return CommandIncomplete;
             }
@@ -348,7 +348,7 @@ namespace CopperBend.Engine
             return CommandIncomplete;
         }
 
-        /// <summary> 0.1:  simply grab the topmost.  Later, choose. </summary>
+        /// <summary> 0.2:  Currently, grab the topmost.  Later, choose. </summary>
         public Command PickUp(IBeing being)
         {
             var items = GameState.Map.ItemMap.GetItems(being.Position);
@@ -412,7 +412,7 @@ namespace CopperBend.Engine
             return -1;
         }
 
-        /// <summary> If more input is queued, the prompt will not be sent </summary>
+        /// <summary> If more input is ready, skip prompt and go to the next step </summary>
         private Command FFwdOrPrompt(Func<AsciiKey, IBeing, Command> nextStep, string prompt, IBeing being)
         {
             NextStep = nextStep;
@@ -432,6 +432,8 @@ namespace CopperBend.Engine
             {
                 if (filter(item))
                     WriteLine($"{index}) {item.Name}");
+
+                // if the item is skipped by the filter, the letter still advances.
                 index++;
             }
         }

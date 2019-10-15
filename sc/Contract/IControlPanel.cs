@@ -57,9 +57,10 @@ namespace CopperBend.Contract
 
     public interface IWritePanel
     {
-        Action<string> WriteLine { get; }
-        Action<IBeing, string> WriteLineIfPlayer { get; }
-        Action<string> Prompt { get; }
+        //void Write
+        Action<string> WriteLine { get; set; }
+        Action<IBeing, string> WriteLineIfPlayer { get; set; }
+        Action<string> Prompt { get; set; }
     }
 
     //0.1.XP  extend categories

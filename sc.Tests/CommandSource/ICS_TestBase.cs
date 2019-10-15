@@ -8,8 +8,11 @@ using log4net.Config;
 using log4net.Repository;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Model;
+using CopperBend.Model.Aspects;
 using NSubstitute;
 using NUnit.Framework;
+using System;
 
 namespace CopperBend.Engine.Tests
 {
@@ -21,6 +24,8 @@ namespace CopperBend.Engine.Tests
         protected Queue<AsciiKey> _inQ;
         protected IBeing __being;
         protected IControlPanel __controls;
+        protected Action<string> __prompt;
+        protected Action<string> __writeLine;
         protected IMessageLogWindow __messageOutput = null;
 
         #region OTSU
@@ -100,6 +105,14 @@ namespace CopperBend.Engine.Tests
                 },
             };
             __controls = Substitute.For<IControlPanel>();
+            __prompt = Substitute.For<Action<string>>();
+            __writeLine = Substitute.For<Action<string>>();
+            __controls.Prompt = __prompt;
+            __controls.WriteLine = __writeLine;
+            __controls.WriteLineIfPlayer = (being, msg) =>
+            {
+                if (being.IsPlayer) __writeLine(msg);
+            };
             __controls.IsInputReady = () => _inQ.Count() > 0;
             __controls.GetNextInput = () => _inQ.Dequeue();
             __controls.ClearPendingInput = () => _inQ.Clear();
@@ -128,6 +141,26 @@ namespace CopperBend.Engine.Tests
             sp.Terrain = ttDoorClosed;
 
             return spaceMap;
+        }
+
+        public (Item knife, Item fruit, Item hoe) Fill_pack()
+        {
+            var knife = new Item((0, 0)) { Name = "knife" };
+            var fruit = new Item((0, 0), 1);
+            fruit.AddAspect(new Ingestible
+            {
+                IsFruit = true,
+                FoodValue = 210,
+                PlantID = Engine.Compendium.Herbal.PlantByName["Healer"].ID
+            });
+
+            var hoe = new Item((0, 0));
+            hoe.AddAspect(new Usable("till ground with", UseTargetFlags.Direction)
+                .AddEffect("till", 1)
+                .AddCosts(("time", 24), ("energy", 20)));
+
+            __being.Inventory.Returns(new List<IItem> { knife, fruit, hoe });
+            return (knife, fruit, hoe);
         }
 
         [TearDown]

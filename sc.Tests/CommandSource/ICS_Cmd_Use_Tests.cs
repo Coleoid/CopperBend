@@ -1,5 +1,6 @@
 ﻿using CopperBend.Contract;
 using CopperBend.Model;
+using CopperBend.Model.Aspects;
 using Microsoft.Xna.Framework.Input;
 using NSubstitute;
 using NUnit.Framework;
@@ -43,13 +44,17 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(_source.InMultiStepCommand, Is.False);
         }
+        // Use_with_nonUsable_wielded_must_choose_item()
+
+        // Use_with_self_targeting_item_wielded_asks()
+        // 'e': [eat apple], '?': pick item and use, '
+        // Use_with_other_targeting_item_wielded_goes_()
+
 
         [Test]
         public void Use_with_nothing_wielded_must_choose_item()
         {
-            var hoe = new Item((0, 0));
-            var fruit = new Item((0, 0), 1);
-            __being.Inventory.Returns(new List<IItem> { fruit, hoe });
+            (_, _, var hoe) = Fill_pack();
             __being.WieldedTool.Returns((IItem)null);
 
             Queue(Keys.U);

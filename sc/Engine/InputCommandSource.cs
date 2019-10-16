@@ -123,7 +123,7 @@ namespace CopperBend.Engine
             //var reach_consumables = actor.ReachableItems().Where(i => i.IsConsumable).ToList();
             if (inv_consumables.Count() == 0) /*+ reach_consumables.Count()*/
             {
-                WriteLine("Nothing to eat or drink.");
+                WriteLine("Nothing to eat or drink on me.");
                 return CommandIncomplete;
             }
             return FFwdOrPrompt(Consume_main, "Consume (inventory letter or ? to show inventory): ", being);
@@ -232,6 +232,15 @@ namespace CopperBend.Engine
         private IItem ThisUsedItem = null;
         public Command Use(IBeing being)
         {
+            //0.2: Next, usability in context?  Or good enough?
+            var inv_usables = being.Inventory.Where(i => i.IsUsable).ToList();
+            //var reach_usables = actor.ReachableItems().Where(i => i.IsUsable).ToList();
+            if (inv_usables.Count() == 0) /*+ reach_usables.Count()*/
+            {
+                WriteLine("Nothing usable on me.");
+                return CommandIncomplete;
+            }
+
             ThisUsedItem = ThisUsedItem ?? PriorUsedItem ?? being.WieldedTool;
             if (ThisUsedItem == null)
             {
@@ -424,7 +433,7 @@ namespace CopperBend.Engine
             return NextStep(Controls.GetNextInput(), being);
         }
 
-        public void ShowInventory(IBeing being, Func<IItem, bool> filter = null)
+        public bool ShowInventory(IBeing being, Func<IItem, bool> filter = null)
         {
             if (filter == null) filter = (i) => true;
             char index = 'a';
@@ -436,6 +445,10 @@ namespace CopperBend.Engine
                 // if the item is skipped by the filter, the letter still advances.
                 index++;
             }
+            if (index == 'a')
+                WriteLine("Got nothing on me.");
+
+            return index != 'a';
         }
 
         public void ShowInventory<T>(IBeing being)

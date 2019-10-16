@@ -12,30 +12,39 @@ namespace CopperBend.Engine.Tests
     public class ICS_Cmd_Use_Tests : ICS_TestBase
     {
         [Test]
-        public void Use_cancel()
+        public void Use_then_cancel()
         {
-            Queue(Keys.U);
-            Queue(Keys.Escape);
+            Fill_pack();
+            __being.WieldedTool.Returns((IItem)null);
+            Queue(Keys.U, Keys.Escape);
 
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __controls.Received().WriteLine("cancelled.");
+            __writeLine.Received().Invoke("cancelled.");
             Assert.That(_source.InMultiStepCommand, Is.False);
         }
 
-        //[Test]
-        //public void Use_when_nothing_in_inventory()
-        //{
-        //}
+        [Test]
+        public void Use_when_nothing_in_inventory()
+        {
+            __being.Inventory.Returns(new List<IItem>());
+            __being.WieldedTool.Returns((IItem)null);
+            Queue(Keys.U);
+
+            Cmd = _source.GetCommand(__being);
+
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __writeLine.Received().Invoke("Nothing usable on me.");
+            Assert.That(_source.InMultiStepCommand, Is.False);
+        }
 
         [Test]
         public void Use_wielded_item_West()
         {
-            var hoe = new Item((0, 0));
+            var (_, _, hoe) = Fill_pack();
             __being.WieldedTool.Returns(hoe);
-            Queue(Keys.U);
-            Queue(Keys.Left);
+            Queue(Keys.U, Keys.Left);
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
@@ -62,13 +71,14 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
-            __controls.Received().Prompt("Use item: ");
+            __prompt.Received().Invoke("Use item: ");
 
-            Queue(Keys.B);
+            Queue(Keys.C);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
-            __controls.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
+            __prompt.Received().Invoke("Direction to use the hoe, or [a-z?] to choose item: ");
+            //__prompt.DidNotReceive().Invoke(Arg.Any<string>());
 
             Queue(Keys.NumPad9);
             Cmd = _source.GetCommand(__being);
@@ -78,28 +88,23 @@ namespace CopperBend.Engine.Tests
             Assert.That(_source.InMultiStepCommand, Is.False);
         }
 
-        //[Test]
-        //public void Use_with_nothing_wielded_remembers_last_used()
-        //{
-        //    var hoe = new Hoe(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.Inventory.Returns(new List<IItem> { fruit, hoe });
-        //    __being.WieldedTool.Returns((IItem)null);
+        [Test]
+        public void Use_with_nothing_wielded_remembers_last_used()
+        {
+            (_, _, var hoe) = Fill_pack();
+            __being.WieldedTool.Returns((IItem)null);
 
-        //    Queue(RLKey.U);
-        //    Queue(RLKey.B);
-        //    Queue(RLKey.Keypad9);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
-        //    Assert.That(_source.InMultiStepCommand, Is.False);
+            Queue(Keys.U, Keys.C, Keys.NumPad9);
+            Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
+            Assert.That(_source.InMultiStepCommand, Is.False);
 
-        //    Queue(RLKey.U);
-        //    Queue(RLKey.Down);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
-        //    Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.South));
-        //    Assert.That(Cmd.Item, Is.SameAs(hoe));
-        //}
+            Queue(Keys.U, Keys.Down);
+            Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
+            Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.South));
+            Assert.That(Cmd.Item, Is.SameAs(hoe));
+        }
 
         //[Test]
         //public void Use_with_nothing_wielded_prequeued_skips_prompts()
@@ -109,9 +114,9 @@ namespace CopperBend.Engine.Tests
         //    __being.Inventory.Returns(new List<IItem> { fruit, hoe });
         //    __being.WieldedTool.Returns((IItem)null);
 
-        //    Queue(RLKey.U);
-        //    Queue(RLKey.B);
-        //    Queue(RLKey.Keypad9);
+        //    Queue(Keys.U);
+        //    Queue(Keys.B);
+        //    Queue(Keys.NumPad9);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
         //    Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
@@ -129,20 +134,20 @@ namespace CopperBend.Engine.Tests
         //    __being.Inventory.Returns(new List<IItem> { fruit, hoe });
         //    __being.WieldedTool.Returns(knife);
 
-        //    Queue(RLKey.U);
+        //    Queue(Keys.U);
         //    Cmd = _source.GetCommand(__being);
 
         //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
         //    Assert.That(_source.InMultiStepCommand);
         //    __gameWindow.Received().Prompt("Direction to use the knife, or [a-z?] to choose item: ");
 
-        //    Queue(RLKey.B);
+        //    Queue(Keys.B);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
         //    Assert.That(_source.InMultiStepCommand);
         //    __gameWindow.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
 
-        //    Queue(RLKey.Keypad9);
+        //    Queue(Keys.NumPad9);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
         //    Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
@@ -159,33 +164,33 @@ namespace CopperBend.Engine.Tests
         //    __being.Inventory.Returns(new List<IItem> { fruit, hoe });
         //    __being.WieldedTool.Returns((IItem)null);
 
-        //    Queue(RLKey.U);
-        //    Queue(RLKey.C);
+        //    Queue(Keys.U);
+        //    Queue(Keys.C);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
         //    Assert.That(_source.InMultiStepCommand);
         //    __gameWindow.Received().WriteLine("The key [c] does not match an inventory item.  Pick another.");
 
-        //    Queue(RLKey.A);
+        //    Queue(Keys.A);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
         //    Assert.That(_source.InMultiStepCommand);
         //    __gameWindow.Received().WriteLine("The smooth fruit is not a usable item.  Pick another.");
 
-        //    Queue(RLKey.Period);
+        //    Queue(Keys.Period);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
         //    Assert.That(_source.InMultiStepCommand);
         //    __gameWindow.Received().WriteLine("The key [.] does not match an inventory item.  Pick another.");
 
-        //    Queue(RLKey.Right);
+        //    Queue(Keys.Right);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
         //    Assert.That(_source.InMultiStepCommand);
         //    __gameWindow.Received().WriteLine("The key [Right] does not match an inventory item.  Pick another.");
 
-        //    Queue(RLKey.B);
-        //    Queue(RLKey.Period);
+        //    Queue(Keys.B);
+        //    Queue(Keys.Period);
         //    Cmd = _source.GetCommand(__being);
         //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
         //    Assert.That(_source.InMultiStepCommand);

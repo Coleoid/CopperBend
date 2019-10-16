@@ -53,7 +53,7 @@ namespace CopperBend.Engine.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __controls.Received().WriteLine("Nothing to eat or drink.");
+            __writeLine.Received().Invoke("Nothing to eat or drink on me.");
             Assert.IsFalse(_source.InMultiStepCommand);
         }
 
@@ -67,7 +67,7 @@ namespace CopperBend.Engine.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __controls.Received().WriteLine("Consume cancelled.");
+            __writeLine.Received().Invoke("Consume cancelled.");
             Assert.IsFalse(_source.InMultiStepCommand);
         }
 
@@ -80,7 +80,7 @@ namespace CopperBend.Engine.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __controls.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
+            __prompt.Received().Invoke("Consume (inventory letter or ? to show inventory): ");
             Assert.That(_source.InMultiStepCommand);
 
             Queue(Keys.B);

@@ -154,7 +154,7 @@ namespace CopperBend.Engine.Tests
                 PlantID = Engine.Compendium.Herbal.PlantByName["Healer"].ID
             });
 
-            var hoe = new Item((0, 0));
+            var hoe = new Item((0, 0)) { Name = "hoe" };
             hoe.AddAspect(new Usable("till ground with", UseTargetFlags.Direction)
                 .AddEffect("till", 1)
                 .AddCosts(("time", 24), ("energy", 20)));
@@ -174,10 +174,13 @@ namespace CopperBend.Engine.Tests
         protected Command Cmd = new Command(CmdAction.Unset, CmdDirection.None);
         protected static readonly Command CommandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
 
-        protected void Queue(Keys xnaKey)
+        protected void Queue(params Keys[] xnaKeys)
         {
-            var key = new AsciiKey { Character = (char)xnaKey, Key = xnaKey };
-            _inQ.Enqueue(key);
+            foreach (var xnaKey in xnaKeys)
+            {
+                var key = new AsciiKey { Character = (char)xnaKey, Key = xnaKey };
+                _inQ.Enqueue(key);
+            }
         }
 
         protected void Queue(AsciiKey key)

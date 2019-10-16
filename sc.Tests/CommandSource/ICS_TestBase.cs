@@ -146,7 +146,7 @@ namespace CopperBend.Engine.Tests
         public (Item knife, Item fruit, Item hoe) Fill_pack()
         {
             var knife = new Item((0, 0)) { Name = "knife" };
-            var fruit = new Item((0, 0), 1);
+            var fruit = new Item((0, 0)) { Name = "fruit" };
             fruit.AddAspect(new Ingestible
             {
                 IsFruit = true,
@@ -176,16 +176,13 @@ namespace CopperBend.Engine.Tests
 
         protected void Queue(params Keys[] xnaKeys)
         {
+            var state = new KeyboardState(xnaKeys, false, true);
             foreach (var xnaKey in xnaKeys)
             {
-                var key = new AsciiKey { Character = (char)xnaKey, Key = xnaKey };
+                var key = AsciiKey.Get(xnaKey, state);
+                //var key = new AsciiKey { Character = (char)xnaKey, Key = xnaKey };
                 _inQ.Enqueue(key);
             }
-        }
-
-        protected void Queue(AsciiKey key)
-        {
-            _inQ.Enqueue(key);
         }
     }
 }

@@ -244,7 +244,8 @@ namespace CopperBend.Engine
             ThisUsedItem = ThisUsedItem ?? PriorUsedItem ?? being.WieldedTool;
             if (ThisUsedItem == null)
             {
-                ShowInventory(being, i => i.IsUsable);
+                if (!Controls.IsInputReady())
+                    ShowInventory(being, i => i.IsUsable);
                 return FFwdOrPrompt(Use_Pick_Item, "Use item: ", being);
             }
 
@@ -375,8 +376,19 @@ namespace CopperBend.Engine
         #region Utility
         private static string PressRep(AsciiKey press)
         {
-            string rep = press.Character.ToString();
-            if (string.IsNullOrEmpty(rep)) rep = press.Key.ToString();
+            string rep;
+            if (press.Character == 0)
+            {
+                rep = press.Key.ToString();
+            }
+            else if (20 <= press.Character && press.Character <= 127)
+            {
+                rep = press.Character.ToString();
+            }
+            else
+            {
+                rep = "???";
+            }
             return rep;
         }
 
@@ -437,7 +449,7 @@ namespace CopperBend.Engine
         {
             if (filter == null) filter = (i) => true;
             char index = 'a';
-            foreach (var item in being.Inventory.Where(filter))
+            foreach (var item in being.Inventory)
             {
                 if (filter(item))
                     WriteLine($"{index}) {item.Name}");

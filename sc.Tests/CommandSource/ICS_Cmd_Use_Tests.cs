@@ -26,7 +26,7 @@ namespace CopperBend.Engine.Tests
         }
 
         [Test]
-        public void Use_when_nothing_in_inventory()
+        public void Use_when_inventory_empty()
         {
             __being.Inventory.Returns(new List<IItem>());
             __being.WieldedTool.Returns((IItem)null);
@@ -78,7 +78,6 @@ namespace CopperBend.Engine.Tests
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.InMultiStepCommand);
             __prompt.Received().Invoke("Direction to use the hoe, or [a-z?] to choose item: ");
-            //__prompt.DidNotReceive().Invoke(Arg.Any<string>());
 
             Queue(Keys.NumPad9);
             Cmd = _source.GetCommand(__being);
@@ -106,96 +105,84 @@ namespace CopperBend.Engine.Tests
             Assert.That(Cmd.Item, Is.SameAs(hoe));
         }
 
-        //[Test]
-        //public void Use_with_nothing_wielded_prequeued_skips_prompts()
-        //{
-        //    var hoe = new Hoe(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.Inventory.Returns(new List<IItem> { fruit, hoe });
-        //    __being.WieldedTool.Returns((IItem)null);
+        [Test]
+        public void Use_with_prequeued_input_skips_output()
+        {
+            (_, _, var hoe) = Fill_pack();
+            __being.WieldedTool.Returns((IItem)null);
 
-        //    Queue(Keys.U);
-        //    Queue(Keys.B);
-        //    Queue(Keys.NumPad9);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
-        //    Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
-        //    Assert.That(Cmd.Item, Is.SameAs(hoe));
-        //    Assert.That(_source.InMultiStepCommand, Is.False);
-        //    __gameWindow.DidNotReceive().Prompt(Arg.Any<string>());
-        //}
+            Queue(Keys.U, Keys.C, Keys.NumPad9);
+            Cmd = _source.GetCommand(__being);
 
-        //[Test]
-        //public void Use_change_item_although_wielding()
-        //{
-        //    var knife = new Knife(new Point(0, 0));
-        //    var hoe = new Hoe(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.Inventory.Returns(new List<IItem> { fruit, hoe });
-        //    __being.WieldedTool.Returns(knife);
+            __prompt.DidNotReceive().Invoke(Arg.Any<string>());
+            __writeLine.DidNotReceive().Invoke(Arg.Any<string>());
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
+            Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
+            Assert.That(Cmd.Item, Is.SameAs(hoe));
+            Assert.That(_source.InMultiStepCommand, Is.False);
+        }
 
-        //    Queue(Keys.U);
-        //    Cmd = _source.GetCommand(__being);
+        [Test]
+        public void Use_change_item_although_wielding()
+        {
+            var (knife, _, hoe) = Fill_pack();
+            __being.WieldedTool.Returns(knife);
 
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //    __gameWindow.Received().Prompt("Direction to use the knife, or [a-z?] to choose item: ");
+            Queue(Keys.U);
+            Cmd = _source.GetCommand(__being);
 
-        //    Queue(Keys.B);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //    __gameWindow.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+            __prompt.Received().Invoke("Direction to use the knife, or [a-z?] to choose item: ");
 
-        //    Queue(Keys.NumPad9);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
-        //    Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
-        //    Assert.That(Cmd.Item, Is.SameAs(hoe));
-        //    Assert.That(_source.InMultiStepCommand, Is.False);
-        //}
+            Queue(Keys.C);
+            Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+            __prompt.Received().Invoke("Direction to use the hoe, or [a-z?] to choose item: ");
 
-        //[Test]
-        //public void Use_unhappy_paths()
-        //{
-        //    var knife = new Knife(new Point(0, 0));
-        //    var hoe = new Hoe(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.Inventory.Returns(new List<IItem> { fruit, hoe });
-        //    __being.WieldedTool.Returns((IItem)null);
+            Queue(Keys.NumPad9);
+            Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
+            Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
+            Assert.That(Cmd.Item, Is.SameAs(hoe));
+            Assert.That(_source.InMultiStepCommand, Is.False);
+        }
 
-        //    Queue(Keys.U);
-        //    Queue(Keys.C);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //    __gameWindow.Received().WriteLine("The key [c] does not match an inventory item.  Pick another.");
+        [Test]
+        public void Use_unhappy_paths()
+        {
+            var (_, fruit, hoe) = Fill_pack();
+            //__being.Inventory.Returns(new List<IItem> { fruit, hoe });
+            __being.WieldedTool.Returns((IItem)null);
 
-        //    Queue(Keys.A);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //    __gameWindow.Received().WriteLine("The smooth fruit is not a usable item.  Pick another.");
+            Queue(Keys.U, Keys.D);
+            Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+            __writeLine.Received().Invoke("The key [d] does not match an inventory item.  Pick another.");
+            __writeLine.ClearReceivedCalls();
 
-        //    Queue(Keys.Period);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //    __gameWindow.Received().WriteLine("The key [.] does not match an inventory item.  Pick another.");
+            //Queue(Keys.B);
+            //Cmd = _source.GetCommand(__being);
+            //Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            //Assert.That(_source.InMultiStepCommand);
+            //__writeLine.Received().Invoke("The smooth fruit is not a usable item.  Pick another.");
+            //__writeLine.ClearReceivedCalls();
 
-        //    Queue(Keys.Right);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //    __gameWindow.Received().WriteLine("The key [Right] does not match an inventory item.  Pick another.");
+            Queue(Keys.OemPeriod);
+            Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+            __writeLine.Received().Invoke("The key [.] does not match an inventory item.  Pick another.");
+            __writeLine.ClearReceivedCalls();
 
-        //    Queue(Keys.B);
-        //    Queue(Keys.Period);
-        //    Cmd = _source.GetCommand(__being);
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //    __gameWindow.Received().WriteLine("The key [.] does not match an inventory item or a direction.  Pick another.");
-        //    __gameWindow.ClearReceivedCalls();
-        //}
+            Queue(Keys.Right);
+            Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+            __writeLine.Received().Invoke("The key [Right] does not match an inventory item.  Pick another.");
+            __writeLine.ClearReceivedCalls();
+        }
     }
 }

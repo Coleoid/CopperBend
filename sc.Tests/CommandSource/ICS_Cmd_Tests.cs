@@ -2,6 +2,8 @@
 using CopperBend.Fabric;
 using CopperBend.Model;
 using CopperBend.Model.Aspects;
+using GoRogue;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using NSubstitute;
 using NUnit.Framework;
@@ -62,8 +64,7 @@ namespace CopperBend.Engine.Tests
         {
             Fill_pack();
 
-            Queue(Keys.C);
-            Queue(Keys.Escape);
+            Queue(Keys.C, Keys.Escape);
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
@@ -95,14 +96,7 @@ namespace CopperBend.Engine.Tests
         {
             Fill_pack();
 
-            Queue(Keys.C);
-            Cmd = _source.GetCommand(__being);
-
-            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __prompt.Received().Invoke("Consume (inventory letter or ? to show inventory): ");
-            Assert.That(_source.InMultiStepCommand);
-
-            Queue(Keys.A);
+            Queue(Keys.C, Keys.A);
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
@@ -115,12 +109,11 @@ namespace CopperBend.Engine.Tests
         {
             Fill_pack();
 
-            Queue(Keys.C);
-            Queue(Keys.D);
+            Queue(Keys.C, Keys.D);
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
-            __writeLine.Received().Invoke("Nothing in inventory slot D.");
+            __writeLine.Received().Invoke("Nothing in inventory slot d.");
             Assert.That(_source.InMultiStepCommand);
         }
 
@@ -145,82 +138,78 @@ namespace CopperBend.Engine.Tests
 
         ////Drop();
 
-        //[Test]
-        //public void Drop_nothing_available()
-        //{
-        //    __being.Inventory.Returns(new List<IItem> { });
-        //    Queue(Keys.D);
-        //    Cmd = _source.GetCommand(__being);
+        [Test]
+        public void Drop_with_empty_inventory()
+        {
+            __being.Inventory.Returns(new List<IItem> { });
 
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    __gameWindow.Received().WriteLine("Nothing to drop.");
-        //    Assert.IsFalse(_source.InMultiStepCommand);
-        //}
+            Queue(Keys.D);
+            Cmd = _source.GetCommand(__being);
 
-        //[Test]
-        //public void Drop_cancel()
-        //{
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.Inventory.Returns(new List<IItem> { fruit });
-        //    Queue(Keys.D);
-        //    Queue(Keys.Escape);
-        //    Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __writeLine.Received().Invoke("Nothing to drop.");
+            Assert.IsFalse(_source.InMultiStepCommand);
+        }
 
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    __gameWindow.Received().WriteLine("Drop cancelled.");
-        //    Assert.IsFalse(_source.InMultiStepCommand);
-        //}
+        [Test]
+        public void Drop_then_cancel()
+        {
+            Fill_pack();
 
-        //[Test]
-        //public void Drop_inventory()
-        //{
-        //    var knife = new Knife(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.Inventory.Returns(new List<IItem> { knife, fruit });
+            Queue(Keys.D, Keys.Escape);
+            Cmd = _source.GetCommand(__being);
 
-        //    Queue(Keys.D);
-        //    Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __writeLine.Received().Invoke("Drop cancelled.");
+            Assert.IsFalse(_source.InMultiStepCommand);
+        }
 
-        //    __gameWindow.Received().Prompt("Drop (inventory letter or ? to show inventory): ");
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
+        [Test]
+        public void Drop_happypath()
+        {
+            var (_, fruit, _) = Fill_pack();
 
-        //    Queue(Keys.B);
-        //    Cmd = _source.GetCommand(__being);
+            Queue(Keys.D);
+            Cmd = _source.GetCommand(__being);
 
-        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Drop));
-        //    Assert.That(Cmd.Item, Is.SameAs(fruit));
-        //    Assert.IsFalse(_source.InMultiStepCommand);
-        //}
+            __prompt.Received().Invoke("Drop (inventory letter or ? to show inventory): ");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
 
-        //[Test]
-        //public void Drop_unfilled_inventory_letter()
-        //{
-        //    var knife = new Knife(new Point(0, 0));
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.Inventory.Returns(new List<IItem> { knife, fruit });
+            Queue(Keys.B);
+            Cmd = _source.GetCommand(__being);
 
-        //    Queue(Keys.D);
-        //    Queue(Keys.C);
-        //    Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Drop));
+            Assert.That(Cmd.Item, Is.SameAs(fruit));
+            Assert.IsFalse(_source.InMultiStepCommand);
+        }
 
-        //    __gameWindow.Received().WriteLine("Nothing in inventory slot c.");
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    Assert.That(_source.InMultiStepCommand);
-        //}
+        [Test]
+        public void Drop_unfilled_inventory_letter()
+        {
+            var (_, fruit, _) = Fill_pack();
+
+            Queue(Keys.D, Keys.D);
+            Cmd = _source.GetCommand(__being);
+
+            __prompt.DidNotReceive().Invoke("Drop (inventory letter or ? to show inventory): ");
+            __writeLine.Received().Invoke("Nothing in inventory slot d.");
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            Assert.That(_source.InMultiStepCommand);
+        }
 
 
         ////Help();
 
-        //[Test]
-        //public void Help()
-        //{
-        //    Queue(Keys.H);
-        //    Cmd = _source.GetCommand(__being);
+        [Test]
+        public void Help()
+        {
+            Queue(Keys.H);
+            Cmd = _source.GetCommand(__being);
 
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    __gameWindow.Received().WriteLine("Help:");
-        //}
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __writeLine.Received().Invoke("Help:");
+        }
 
 
         ////Inventory();
@@ -244,46 +233,53 @@ namespace CopperBend.Engine.Tests
 
         ////PickUp();
 
-        //[Test]
-        //public void PickUp_nothing()
-        //{
-        //    __being.ReachableItems().Returns(new List<IItem> { });
-        //    Queue(Keys.Comma);
-        //    Cmd = _source.GetCommand(__being);
+        [Test]
+        public void PickUp_nothing()
+        {
+            __being.ReachableItems().Returns(new List<IItem> { });
+            Queue(Keys.OemComma);
+            Cmd = _source.GetCommand(__being);
 
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    __gameWindow.Received().WriteLine("Nothing to pick up here.");
-        //}
+            Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            __writeLine.Received().Invoke("Nothing to pick up here.");
+        }
 
-        //[Test]
-        //public void PickUp_single()
-        //{
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    __being.ReachableItems().Returns(new List<IItem> { fruit });
-        //    Queue(Keys.Comma);
-        //    Cmd = _source.GetCommand(__being);
+        [Test]
+        public void PickUp_single()
+        {
+            var widget = new Item((0, 0), 1);
+            _gameState.Map.ItemMap.Add(widget, (2, 2));
+            __being.Position.Returns(new Point(2, 2));  //0.2 .Posn vs BeingMap
+            //_gameState.Map.BeingMap.Add(__being, (2, 2));
 
-        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
-        //    Assert.That(Cmd.Item, Is.SameAs(fruit));
-        //}
+            Queue(Keys.OemComma);
+            Cmd = _source.GetCommand(__being);
 
-        //[Test]
-        //public void PickUp_multiple()
-        //{
-        //    var fruit = new Fruit(new Point(0, 0), 1, PlantType.Healer);
-        //    var knife = new Knife(new Point(0,0));
-        //    __being.ReachableItems().Returns(new List<IItem> { fruit, knife });
-        //    Queue(Keys.Comma);
-        //    Cmd = _source.GetCommand(__being);
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
+            Assert.That(Cmd.Item, Is.SameAs(widget));
+        }
 
-        //    Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-        //    __gameWindow.Received().Prompt("Pick up a-b or ? to see items in range: ");
-        //    Queue(Keys.A);
-        //    Cmd = _source.GetCommand(__being);
+        [Test]
+        public void PickUp_multiple()
+        {
+            var widget = new Item((0, 0)) { Name = "widget" };
+            var gadget = new Item((0, 0)) { Name = "gadget" };
+            _gameState.Map.ItemMap.Add(widget, (2, 2));
+            _gameState.Map.ItemMap.Add(gadget, (2, 2));
+            __being.Position.Returns(new Point(2, 2));  //0.2 .Posn vs BeingMap
 
-        //    Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
-        //    Assert.That(Cmd.Item, Is.SameAs(fruit));
-        //    //TODO:  put multiple items on player tile, expect prompt and choice
-        //}
+            Queue(Keys.OemComma);
+            Cmd = _source.GetCommand(__being);
+
+            //0.2: pickup is simplified at the moment
+            //Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
+            //__prompt.Received().Invoke("Pick up a-b or ? to see items in range: ");
+            //Queue(Keys.A);
+            //Cmd = _source.GetCommand(__being);
+
+            Assert.That(Cmd.Action, Is.EqualTo(CmdAction.PickUp));
+            Assert.That(Cmd.Item, Is.SameAs(widget));
+            //TODO:  put multiple items on player tile, expect prompt and choice
+        }
     }
 }

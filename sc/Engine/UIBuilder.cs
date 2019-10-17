@@ -29,14 +29,15 @@ namespace CopperBend.Engine
                 Position = new Coord(0, GameSize.Height - 8)
             };
 
-            ////  Rudimentary fill the window
+            ////  Garbage to visually test the window
             //MessageLog.Add("Testing");
             //MessageLog.Add("Testing B");
             //MessageLog.Add("Testing three");
             //MessageLog.Add("Testing 4");
             //MessageLog.Add("Testing V");
-            //MessageLog.Add("Testing x6");
+            //MessageLog.Add("Testing #6");
             //MessageLog.Add("Testing Seventh");
+            //MessageLog.Add("Testing[7]");
 
             return messageLog;
         }
@@ -53,13 +54,13 @@ namespace CopperBend.Engine
             };
             log.DebugFormat("Created map window, [{0}].", mapWindow.AbsoluteArea);
 
-            //TODO: make click do something
-            Button closeButton = new Button(3, 1)
-            {
-                Position = new Coord(windowSize.Width - 3, 0),
-                Text = "X"
-            };
-            mapWindow.Add(closeButton);
+            //// what would close button do, bring up save/quit?
+            //Button closeButton = new Button(3, 1)
+            //{
+            //    Position = new Coord(windowSize.Width - 3, 0),
+            //    Text = "X"
+            //};
+            //mapWindow.Add(closeButton);
 
             var mapConsole = new ScrollingConsole(
                 fullMap.Width, fullMap.Height, SadConsole.Global.FontDefault,

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using CopperBend.Contract;
 using Troschuetz.Random.Generators;
+using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {
@@ -22,12 +22,8 @@ namespace CopperBend.Fabric
         
         public AbstractGenerator LearnableGenerator { get; set; }
         public AbstractGenerator MapTopGenerator { get; set; }
-        private Dictionary<Maps, AbstractGenerator> MapGenerators { get; set; }
+        public Dictionary<Maps, AbstractGenerator> MapGenerators { get; set; }
 
-
-        public TomeOfChaos()
-            : this("must become better soon")
-        { }
 
         public TomeOfChaos(string topSeed)
         {
@@ -43,16 +39,11 @@ namespace CopperBend.Fabric
             // repeatability, which affects saved games and debug dumps.
             LearnableGenerator = new XorShift128Generator(TopGenerator.Next());
             MapTopGenerator = new XorShift128Generator(TopGenerator.Next());
-            MapGenerators = new Dictionary<Maps, AbstractGenerator>
-            {
-                [Maps.TackerFarm] = new XorShift128Generator(MapTopGenerator.Next()),
-                [Maps.TownBastion] = new XorShift128Generator(MapTopGenerator.Next())
-            };
         }
 
-        protected internal virtual AbstractGenerator MapRndGen(Maps map)
+        public int LearnableRndNext()
         {
-            return MapGenerators[map];
+            return LearnableGenerator.Next();
         }
 
         public int MapRndNext(Maps map)
@@ -60,9 +51,9 @@ namespace CopperBend.Fabric
             return MapRndGen(map).Next();
         }
 
-        public int LearnableRndNext()
+        protected internal virtual AbstractGenerator MapRndGen(Maps map)
         {
-            return LearnableGenerator.Next();
+            return MapGenerators[map];
         }
     }
 }

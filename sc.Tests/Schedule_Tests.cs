@@ -36,8 +36,7 @@ namespace CopperBend.Engine.Tests
 
             var log = LogManager.GetLogger("CB", "CB");
 
-            Engine.ConnectIDGenerator();
-            Engine.ConnectHerbal();
+            Engine.Cosmogenesis("monobloc");
         }
 
         [SetUp]

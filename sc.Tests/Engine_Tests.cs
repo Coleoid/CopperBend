@@ -18,8 +18,9 @@ namespace CopperBend.Engine.Tests
         public void Can_init_plant_repos()
         {
             Seed.Herbal = null;
-            Engine.ConnectHerbal();
-            Assert.That(Seed.Herbal, Is.Not.Null);
+            var herbal = Engine.InitHerbal();
+            Engine.ConnectHerbal(herbal);
+            Assert.That(Seed.Herbal, Is.SameAs(herbal));
         }
     }
 }

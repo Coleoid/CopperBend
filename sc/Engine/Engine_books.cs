@@ -1,8 +1,9 @@
-﻿using CopperBend.Contract;
+﻿using System.Collections.Generic;
+using GoRogue;
+using Troschuetz.Random.Generators;
+using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using GoRogue;
-using System.Collections.Generic;
 
 namespace CopperBend.Engine
 {
@@ -13,35 +14,60 @@ namespace CopperBend.Engine
         public static void Cosmogenesis(string topSeed)
         {
             Compendium = new Compendium();
-            Compendium.IDGenerator = ConnectIDGenerator();
-            Compendium.TomeOfChaos = new TomeOfChaos(topSeed);
-            Compendium.Herbal = ConnectHerbal();
 
-            //0.1: Think:  Give clients just the books they care about?
+            var generator = InitIDGenerator();
+            ConnectIDGenerator(generator);
+
+            var tome = InitTome(topSeed);
+            ConnectTome(tome);
+
+            var herbal = InitHerbal();
+            ConnectHerbal(herbal);
+        }
+
+        public static TomeOfChaos InitTome(string topSeed)
+        {
+            var tome = new TomeOfChaos(topSeed);
+
+            //0.2:  Move from indexing on the Maps enum to loading from YAML
+            tome.MapGenerators = new Dictionary<Maps, AbstractGenerator>
+            {
+                [Maps.TackerFarm] = new XorShift128Generator(tome.MapTopGenerator.Next()),
+                [Maps.TownBastion] = new XorShift128Generator(tome.MapTopGenerator.Next())
+            };
+
+            return tome;
+        }
+
+        public static void ConnectTome(TomeOfChaos tome)
+        {
+            Compendium.TomeOfChaos = tome;
             Describer.TomeOfChaos = Compendium.TomeOfChaos;
         }
 
-        public static IDGenerator ConnectIDGenerator()
+        public static IDGenerator InitIDGenerator()
         {
             // The IDGenerator is below the Model
-            var gen = new IDGenerator();
+            return new IDGenerator();
+        }
 
+        public static void ConnectIDGenerator(IDGenerator gen)
+        {
+            Compendium.IDGenerator = gen;
             CbEntity.IDGenerator = gen;
             Item.IDGenerator = gen;
             Space.IDGenerator = gen;
             AreaBlight.IDGenerator = gen;
-
-            return gen;
         }
 
-        public static Herbal ConnectHerbal()
+        public static Herbal InitHerbal()
         {
             Herbal herbal = new Herbal();
 
             herbal.PlantByID = new Dictionary<uint, PlantDetails>();
             herbal.PlantByName = new Dictionary<string, PlantDetails>();
 
-            PlantDetails plant = null;
+            PlantDetails plant;
 
             //0.1.WORLD  Flesh out the plant list, and tuck it into YAML config.
             plant = new PlantDetails
@@ -70,12 +96,15 @@ namespace CopperBend.Engine
             };
             herbal.PlantByID[plant.ID] = plant;
             herbal.PlantByName[plant.MainName] = plant;
-
-            Seed.Herbal = herbal;
-            //Fruit.Herbal = herbal;
-            Describer.Herbal = herbal;
-
+            
             return herbal;
+        }
+
+        public static void ConnectHerbal(Herbal herbal)
+        {
+            Compendium.Herbal = herbal;
+            Seed.Herbal = herbal;
+            Describer.Herbal = herbal;
         }
     }
 }

@@ -53,9 +53,10 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(_source.InMultiStepCommand, Is.False);
         }
-        // Use_with_nonUsable_wielded_must_choose_item()
 
-        // Use_with_self_targeting_item_wielded_asks()
+        // Use_with_nonUsable_wielded_must_choose_item()
+        // Use_when_wielding_self_targeting_item_verifies()
+        // Use_when_wielding_non_targeting_item_verifies()
         // 'e': [eat apple], '?': pick item and use, '
         // Use_with_other_targeting_item_wielded_goes_()
 
@@ -153,7 +154,6 @@ namespace CopperBend.Engine.Tests
         public void Use_unhappy_paths()
         {
             var (_, fruit, hoe) = Fill_pack();
-            //__being.Inventory.Returns(new List<IItem> { fruit, hoe });
             __being.WieldedTool.Returns((IItem)null);
 
             Queue(Keys.U, Keys.D);

@@ -59,7 +59,7 @@ namespace CopperBend.Model.Aspects
     {
         public AttackMethod AttackMethod { get; set; }
 
-        public Weapon(string verbPhrase, UseTargetFlags targets)
+        public Weapon(string verbPhrase = "attack with", UseTargetFlags targets = UseTargetFlags.Direction)
             : base(verbPhrase, targets)
         {
             AttackMethod = new AttackMethod();

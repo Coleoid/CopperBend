@@ -286,6 +286,20 @@ namespace CopperBend.Engine
             }
         }
 
+        private bool Do_Use_(IBeing being, Command command)
+        {
+            switch (command.Item)
+            {
+            case Hoe h:
+                return Use_Hoe(being, command);
+            case Seed s:
+                return Use_Seed(being, command);
+
+            default:
+                throw new Exception($"Don't know how to use a {command.Item.GetType().Name} yet.");
+            }
+        }
+
         private bool Use_Hoe(IBeing being, Command command)
         {
             var targetCoord = CoordInDirection(being.Position, command.Direction);

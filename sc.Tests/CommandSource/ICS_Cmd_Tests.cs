@@ -1,14 +1,11 @@
-﻿using CopperBend.Contract;
-using CopperBend.Fabric;
-using CopperBend.Model;
-using CopperBend.Model.Aspects;
-using GoRogue;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using CopperBend.Contract;
+using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CopperBend.Engine.Tests
 {

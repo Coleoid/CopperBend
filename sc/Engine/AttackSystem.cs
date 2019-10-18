@@ -54,9 +54,10 @@ For each queued attack  //  ResolveAttackQueue()
     Resolve effects (damage of different types, ...)
 
         Directly adjust values
-            Damage body, conciousness, nerve, ...
-                May add target to Destroyed list
+            Accumulate time costs
             Experience for attacker and defender
+            Conciousness, nerve, fatigue, ...
+            Health (may add target to Destroyed list)
 
         Apply extended effects
             Status effects (stun, fear, haste, ...)
@@ -69,6 +70,12 @@ Apply post-attack effects
         Remove from being, blight, or item map
         Drop items (roll for loot?)
         Check story line / quest triggers
+
+    */
+
+    /*
+    Another view:
+
 
     */
 

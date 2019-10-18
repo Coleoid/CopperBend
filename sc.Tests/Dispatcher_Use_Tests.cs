@@ -2,9 +2,9 @@
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
+using CopperBend.Fabric;
 using NSubstitute;
 using NUnit.Framework;
-using CopperBend.Model.Aspects;
 
 namespace CopperBend.Engine.Tests
 {
@@ -24,18 +24,35 @@ namespace CopperBend.Engine.Tests
         {
             Coord coord = (2, 2);
             var player = SU_being_at_coord(coord, '@');
-            var hoe = new Item(coord);
-            hoe.AddAspect(new Usable("till ground with", UseTargetFlags.Direction)
-                .AddEffect("till", 1)
-                .AddCosts(("time", 24), ("energy", 20)));
-            hoe.AddAspect(new Usable("remove weeds with", UseTargetFlags.Direction)
-                .AddEffect("weed", 1)
-                .AddCosts(("time", 24), ("energy", 5)));
-
+            player.IsPlayer = true;
+            var hoe = Equipper.BuildItem("hoe");
             player.AddToInventory(hoe);
             player.Wield(hoe);
 
-            var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
+            var usable = hoe.Aspects.GetComponent<IUsable>();
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe, usable);
+            _dispatcher.CommandBeing(player, cmd);
+
+            __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
+            __messageOutput.Received().WriteLine("Cannot till the floor.");
+        }
+
+        [Test]
+        public void Use_hoe_on_tilled_tile()
+        {
+            Coord coord = (2, 2);
+            var player = SU_being_at_coord(coord, '@');
+            player.IsPlayer = true;
+            var hoe = Equipper.BuildItem("hoe");
+            player.AddToInventory(hoe);
+            player.Wield(hoe);
+
+            Tile soil = new Tile(2, 1, new TileType { IsTillable = true, IsTransparent = true, IsWalkable = true, Name = "soil", Symbol = '.' });
+            _dispatcher.Till(soil);
+            _gameState.Map.SetTile(soil);
+
+            var usable = hoe.Aspects.GetComponent<IUsable>();
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe, usable);
             _dispatcher.CommandBeing(player, cmd);
 
             __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());

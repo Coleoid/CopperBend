@@ -272,6 +272,7 @@ namespace CopperBend.Engine
             return pickedUp;
         }
 
+        int Time_spent_on_usable = 0;
         private bool Do_Usable(IBeing being, Command command)
         {
             if (command.Usable == null)
@@ -279,6 +280,7 @@ namespace CopperBend.Engine
                 return Do_Use_old_style(being, command);
             }
 
+            Time_spent_on_usable = 0;
             bool action_taken = false;
 
             foreach (var effect in command.Usable.Effects)
@@ -294,33 +296,40 @@ namespace CopperBend.Engine
                 }
             }
 
-            //  only exact the costs if something worked
-            if (!action_taken) return false;
-
-            int time_taken = 0;
-            foreach (var cost in command.Usable.Costs)
+            //  Usable.Costs are contingent on success of .Effects
+            if (action_taken)
             {
-                switch (cost.Substance)
+                foreach (var cost in command.Usable.Costs)
                 {
-                case "health":
-                    being.Hurt(cost.Amount);
-                    break;
-
-                case "energy":
-                    being.Fatigue(cost.Amount);
-                    break;
-
-                case "time":
-                    time_taken += cost.Amount;
-                    break;
-
-                default:
-                    throw new Exception($"Don't know how to pay Usable cost [{cost.Substance}] yet.");
+                    PayCost(being, cost);
                 }
+            
+                if (Time_spent_on_usable > 0)
+                    ScheduleAgent(being, Time_spent_on_usable);
             }
 
-            ScheduleAgent(being, time_taken);
             return action_taken;
+        }
+
+        public void PayCost(IBeing being, UseCost cost)
+        {
+            switch (cost.Substance)
+            {
+            case "health":
+                being.Hurt(cost.Amount);
+                break;
+
+            case "energy":
+                being.Fatigue(cost.Amount);
+                break;
+
+            case "time":
+                Time_spent_on_usable += cost.Amount;
+                break;
+
+            default:
+                throw new Exception($"Don't know how to pay Usable cost [{cost.Substance}] yet.");
+            }
         }
 
         private bool Do_Use_old_style(IBeing being, Command command)
@@ -341,20 +350,20 @@ namespace CopperBend.Engine
             var space = SpaceMap.GetItem(targetCoord);
             if (space.IsTilled)
             {
-                MessageLog.WriteLine("Ground here's already tilled.");
+                WriteLineIfPlayer(being, "Ground here's already tilled.");
                 return false;
             }
 
             if (!space.CanTill)
             {
-                MessageLog.WriteLine($"Cannot till the {space.Terrain.Name}.");
+                WriteLineIfPlayer(being, $"Cannot till the {space.Terrain.Name}.");
                 return false;
             }
 
             if (being.WieldedTool != command.Item)
             {
                 being.Wield(command.Item);
-                command.Usable.AddCost("time", 6);  // no... this is a permanent mod to the use.
+                PayCost(being, new UseCost("time", 6));
             }
 
             Till(space);

@@ -1,10 +1,8 @@
-﻿using CopperBend.Contract;
-using CopperBend.Model;
-using CopperBend.Model.Aspects;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
+using CopperBend.Contract;
 using NSubstitute;
 using NUnit.Framework;
-using System.Collections.Generic;
 
 namespace CopperBend.Engine.Tests
 {

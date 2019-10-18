@@ -31,6 +31,9 @@ namespace CopperBend.Fabric
                     new Usable("till ground with", UseTargetFlags.Direction)
                         .AddEffect("till", 1)
                         .AddCosts(("time", 24), ("energy", 20))
+                //.AddAspect(new Usable("remove weeds with", UseTargetFlags.Direction)
+                //    .AddEffect("weed", 1)
+                //    .AddCosts(("time", 24), ("energy", 5))
                 );
                 break;
 

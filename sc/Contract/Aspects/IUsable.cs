@@ -11,6 +11,12 @@ namespace CopperBend.Contract
         List<UseEffect> Effects { get; set; }
         UseTargetFlags Targets { get; set; }
 
+        IUsable AddCosts(params (string substance, int amount)[] costs);
+        IUsable AddCost(string substance, int amount);
+        IUsable AddEffects(params (string effect, int amount)[] effects);
+        IUsable AddEffect(string effect, int amount);
+
+
         bool IsExpended { get; }
         bool TakesDirection { get; }
     }

@@ -74,7 +74,7 @@ namespace CopperBend.Engine
             case CmdAction.Direction: return Do_Direction(being, command.Direction);
             case CmdAction.Drop:      return Do_Drop(being, command);
             case CmdAction.PickUp:    return Do_PickUp(being, command);
-            case CmdAction.Use:       return Do_Use(being, command);
+            case CmdAction.Use:       return Do_Usable(being, command);
             case CmdAction.Wait:      return Do_Wait(being, command);
             case CmdAction.Wield:     return Do_Wield(being, command.Item);
 
@@ -272,12 +272,61 @@ namespace CopperBend.Engine
             return pickedUp;
         }
 
-        private bool Do_Use(IBeing being, Command command)
+        private bool Do_Usable(IBeing being, Command command)
+        {
+            if (command.Usable == null)
+            {
+                return Do_Use_old_style(being, command);
+            }
+
+            bool action_taken = false;
+
+            foreach (var effect in command.Usable.Effects)
+            {
+                switch (effect.Effect)
+                {
+                case "till":
+                    action_taken |= Till(being, command);
+                    break;
+
+                default:
+                    throw new Exception($"Don't know how to cause Usable effect [{effect.Effect}] yet.");
+                }
+            }
+
+            //  only exact the costs if something worked
+            if (!action_taken) return false;
+
+            int time_taken = 0;
+            foreach (var cost in command.Usable.Costs)
+            {
+                switch (cost.Substance)
+                {
+                case "health":
+                    being.Hurt(cost.Amount);
+                    break;
+
+                case "energy":
+                    being.Fatigue(cost.Amount);
+                    break;
+
+                case "time":
+                    time_taken += cost.Amount;
+                    break;
+
+                default:
+                    throw new Exception($"Don't know how to pay Usable cost [{cost.Substance}] yet.");
+                }
+            }
+
+            ScheduleAgent(being, time_taken);
+            return action_taken;
+        }
+
+        private bool Do_Use_old_style(IBeing being, Command command)
         {
             switch (command.Item)
             {
-            case Hoe h:
-                return Use_Hoe(being, command);
             case Seed s:
                 return Use_Seed(being, command);
 
@@ -286,21 +335,7 @@ namespace CopperBend.Engine
             }
         }
 
-        private bool Do_Use_(IBeing being, Command command)
-        {
-            switch (command.Item)
-            {
-            case Hoe h:
-                return Use_Hoe(being, command);
-            case Seed s:
-                return Use_Seed(being, command);
-
-            default:
-                throw new Exception($"Don't know how to use a {command.Item.GetType().Name} yet.");
-            }
-        }
-
-        private bool Use_Hoe(IBeing being, Command command)
+        private bool Till(IBeing being, Command command)
         {
             var targetCoord = CoordInDirection(being.Position, command.Direction);
             var space = SpaceMap.GetItem(targetCoord);
@@ -316,16 +351,14 @@ namespace CopperBend.Engine
                 return false;
             }
 
-            int tillTime = 15;
             if (being.WieldedTool != command.Item)
             {
                 being.Wield(command.Item);
-                tillTime += 6;
+                command.Usable.AddCost("time", 6);  // no... this is a permanent mod to the use.
             }
 
             Till(space);
             GameState.Map.CoordsWithChanges.Add(targetCoord);
-            ScheduleAgent(being, tillTime);
             return true;
         }
 

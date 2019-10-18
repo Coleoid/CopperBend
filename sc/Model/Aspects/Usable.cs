@@ -19,27 +19,27 @@ namespace CopperBend.Model.Aspects
             Effects = new List<UseEffect>();
         }
 
-        public Usable AddCosts(params (string substance, int amount)[] costs)
+        public IUsable AddCosts(params (string substance, int amount)[] costs)
         {
             foreach ((string substance, int amount) in costs)
                 Costs.Add(new UseCost(substance, amount));
             return this;
         }
 
-        public Usable AddCost(string substance, int amount)
+        public IUsable AddCost(string substance, int amount)
         {
             Costs.Add(new UseCost(substance, amount));
             return this;
         }
 
-        public Usable AddEffects(params (string effect, int amount)[] effects)
+        public IUsable AddEffects(params (string effect, int amount)[] effects)
         {
             foreach ((string effect, int amount) in effects)
                 Effects.Add(new UseEffect(effect, amount));
             return this;
         }
 
-        public Usable AddEffect(string effect, int amount)
+        public IUsable AddEffect(string effect, int amount)
         {
             Effects.Add(new UseEffect(effect, amount));
             return this;

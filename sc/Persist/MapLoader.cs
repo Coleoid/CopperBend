@@ -261,7 +261,8 @@ namespace CopperBend.Persist
                 _farmMap = MapFromYAML(FarmMapYaml);
                 _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1.MAP  get start location from map
                 Coord ShedCoord = (28, 4);
-                _farmMap.ItemMap.Add(new Hoe(ShedCoord), ShedCoord);
+                var hoe = Equipper.BuildItem("hoe");
+                _farmMap.ItemMap.Add(hoe, ShedCoord);
                 //  Obscure point on the edge to test map transitions
                 //_farmMap.AddEventAtLocation(new Point(41, 1), new CommandEntry(GameCommand.GoToFarmhouse, null));
 

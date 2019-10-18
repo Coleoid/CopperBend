@@ -176,5 +176,10 @@ namespace CopperBend.Model
         {
             CommandSource.GiveCommand(this);
         }
+
+        public void Fatigue(int amount)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

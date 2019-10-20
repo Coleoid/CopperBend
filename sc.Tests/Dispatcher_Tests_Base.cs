@@ -20,10 +20,13 @@ namespace CopperBend.Engine.Tests
         protected IDescriber __describer = null;
         protected IMessageLogWindow __messageOutput = null;
 
+        protected TerrainType ttFloor;
+        protected TerrainType ttWall;
         protected TerrainType ttDoorOpen;
         protected TerrainType ttDoorClosed;
-        protected TerrainType ttWall;
-        protected TerrainType ttFloor;
+        protected TerrainType ttSoil;
+        protected TerrainType ttSoilTilled;
+        protected TerrainType ttSoilPlanted;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -42,19 +45,19 @@ namespace CopperBend.Engine.Tests
                 BasicConfigurator.Configure(repo);
             }
 
-            ttWall = new TerrainType
-            {
-                CanSeeThrough = false,
-                CanWalkThrough = false,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '#'),
-                Name = "wall"
-            };
             ttFloor = new TerrainType
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
                 Looks = new SadConsole.Cell(Color.White, Color.Black, '.'),
                 Name = "floor"
+            };
+            ttWall = new TerrainType
+            {
+                CanSeeThrough = false,
+                CanWalkThrough = false,
+                Looks = new SadConsole.Cell(Color.White, Color.Black, '#'),
+                Name = "wall"
             };
 
             ttDoorOpen = new TerrainType
@@ -72,11 +75,39 @@ namespace CopperBend.Engine.Tests
                 Name = "closed door"
             };
 
+            ttSoil = new TerrainType
+            {
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Looks = new SadConsole.Cell(Color.Brown, Color.Black, '.'),
+                Name = Terrains.Soil,
+                CanPlant = true,
+            };
+            ttSoilTilled = new TerrainType
+            {
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Looks = new SadConsole.Cell(Color.Brown, Color.Black, '~'),
+                Name = Terrains.SoilTilled,
+                CanPlant = true,
+            };
+            ttSoilPlanted = new TerrainType
+            {
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Looks = new SadConsole.Cell(Color.Green, Color.Black, '~'),
+                Name = Terrains.SoilPlanted,
+                CanPlant = false,
+            };
+
             SpaceMap.TerrainTypes = new Dictionary<string, TerrainType>();
-            SpaceMap.TerrainTypes[ttWall.Name] = ttWall;
             SpaceMap.TerrainTypes[ttFloor.Name] = ttFloor;
+            SpaceMap.TerrainTypes[ttWall.Name] = ttWall;
             SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;
             SpaceMap.TerrainTypes[ttDoorClosed.Name] = ttDoorClosed;
+            SpaceMap.TerrainTypes[ttSoil.Name] = ttSoil;
+            SpaceMap.TerrainTypes[ttSoilTilled.Name] = ttSoilTilled;
+            SpaceMap.TerrainTypes[ttSoilPlanted.Name] = ttSoilPlanted;
 
             Engine.Cosmogenesis("bang");
         }

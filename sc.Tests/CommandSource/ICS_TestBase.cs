@@ -146,7 +146,7 @@ namespace CopperBend.Engine.Tests
         public (Item knife, Item fruit, Item hoe) Fill_pack()
         {
             var knife = Equipper.BuildItem("knife");
-            var fruit = Equipper.BuildItem("fruit");
+            var fruit = Equipper.BuildItem("fruit:Healer");
             var hoe = Equipper.BuildItem("hoe");
             __being.Inventory.Returns(new List<IItem> { knife, fruit, hoe });
 

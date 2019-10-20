@@ -15,6 +15,8 @@ namespace CopperBend.Model
 
         public int Health { get; set; }
         public int MaxHealth { get; set; }
+        public int Energy { get; set; }
+        public int MaxEnergy { get; set; }
         public char Symbol { get; set; }
 
         public Color Foreground { get; set; }
@@ -24,7 +26,8 @@ namespace CopperBend.Model
         public Being(Color foreground, Color background, int glyph, uint id = uint.MaxValue)
             : base(id)
         {
-            Health = MaxHealth = 6;
+            Health = MaxHealth = 20;
+            Energy = MaxEnergy = 140;
             Awareness = 6;
 
             InventoryList = new List<IItem>();
@@ -127,26 +130,28 @@ namespace CopperBend.Model
             return InventoryList.Any(i => i == item);
         }
 
-        public IItem RemoveFromInventory(int inventorySlot)
+        public IItem RemoveFromInventory(int inventorySlot, int quantity = 0)
         {
             if (inventorySlot >= InventoryList.Count()) return null;
 
             IItem item = InventoryList.ElementAt(inventorySlot);
-            InventoryList.RemoveAt(inventorySlot);
-            if (WieldedTool == item) WieldedTool = null;
-
-            return item;
+            return RemoveFromInventory(item, quantity);
         }
 
-        public IItem RemoveFromInventory(IItem item)
+        public IItem RemoveFromInventory(IItem item, int quantity = 0)
         {
             if (!InventoryList.Contains(item)) return null;
 
-            InventoryList.Remove(item);
-            if (WieldedTool == item)
-                WieldedTool = null;
+            if (quantity == 0 || quantity >= item.Quantity)
+            {
+                InventoryList.Remove(item);
+                if (WieldedTool == item)
+                    WieldedTool = null;
+                return item;
+            }
 
-            return item;
+            var returnedPortion = item.SplitFromStack(quantity);
+            return returnedPortion;
         }
 
         public void Wield(IItem item)
@@ -179,7 +184,9 @@ namespace CopperBend.Model
 
         public void Fatigue(int amount)
         {
-            throw new NotImplementedException();
+            Energy -= amount;
+            //0.1: as energy hits 0, actions prevented.
+            //0.2: as energy nears 0, chance of ill effects.
         }
     }
 }

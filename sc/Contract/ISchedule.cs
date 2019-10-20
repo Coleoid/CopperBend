@@ -29,5 +29,6 @@ namespace CopperBend.Contract
         GetCommand,
         SeedGrows,
         PlantGrows,
+        NoFurtherActions,
     }
 }

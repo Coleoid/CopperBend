@@ -6,7 +6,7 @@ namespace CopperBend.Contract
     public interface IItem : IHasID
     {
         string Name { get; }
-        string ItemType { get; }
+        string ItemType { get; set; }
         int Quantity { get; set; }
 
         Color Foreground { get; }
@@ -25,5 +25,6 @@ namespace CopperBend.Contract
         ComponentContainer Aspects { get; set; }
 
         bool StacksWith(IItem item);
+        IItem SplitFromStack(int quantity = 1);
     }
 }

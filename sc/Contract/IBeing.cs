@@ -23,8 +23,8 @@ namespace CopperBend.Contract
 
         IReadOnlyCollection<IItem> Inventory { get; }
         void AddToInventory(IItem item);
-        IItem RemoveFromInventory(int inventorySlot);
-        IItem RemoveFromInventory(IItem item);
+        IItem RemoveFromInventory(int inventorySlot, int quantity = 0);
+        IItem RemoveFromInventory(IItem item, int quantity = 0);
         bool HasInInventory(IItem item);
         IEnumerable<IItem> ReachableItems();
 

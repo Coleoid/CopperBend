@@ -6,6 +6,7 @@ using CopperBend.Model;
 using CopperBend.Model.Aspects;
 using NSubstitute;
 using NUnit.Framework;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine.Tests
 {
@@ -187,7 +188,7 @@ namespace CopperBend.Engine.Tests
             };
 
             var itemPoint = new Point(2, 1);
-            var item = new Knife(itemPoint);
+            var item = Equipper.BuildItem("knife");
             _gameState.Map.ItemMap.Add(item, itemPoint);
             __describer.Describe(item, Arg.Any<DescMods>()).Returns("a knife");
 

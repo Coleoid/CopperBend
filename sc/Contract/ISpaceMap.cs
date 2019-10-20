@@ -14,7 +14,8 @@ namespace CopperBend.Contract
         bool CanWalkThrough(Coord position);
 
         ISpace GetItem(Coord coord);
-        void Sow(ISpace space, ISeed seedToSow);
+        //void Sow(ISpace space, ISeed seedToSow);
+        void MarkSpaceSown(ISpace space);
         void Till(ISpace space);
         bool OpenDoor(ISpace space);
         void SeeCoords(IEnumerable<Coord> newlySeen);

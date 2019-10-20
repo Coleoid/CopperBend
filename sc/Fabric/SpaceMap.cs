@@ -7,8 +7,8 @@ namespace CopperBend.Fabric
     public class SpaceMap : SerializableSpatialMap<ISpace>, ISpaceMap
     {
         public static Dictionary<string, TerrainType> TerrainTypes { get; set; }
-        public static TerrainType TilledSoil => TerrainTypes["tilled dirt"];
-        public static TerrainType PlantedSoil => TerrainTypes["planted dirt"];
+        public static TerrainType TilledSoil => TerrainTypes[Terrains.SoilTilled];
+        public static TerrainType PlantedSoil => TerrainTypes[Terrains.SoilPlanted];
         public Coord PlayerStartPoint { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
@@ -51,8 +51,8 @@ namespace CopperBend.Fabric
             return GetItem(position).CanPlant;
         }
 
-
-        public void Sow(ISpace space, ISeed seedToSow)
+        //1.+: Change these to Guards?
+        public void MarkSpaceSown(ISpace space)
         {
             if (space.CanPlant)
             {

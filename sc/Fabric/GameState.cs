@@ -9,7 +9,7 @@ namespace CopperBend.Fabric
         public IBeing Player { get; set; }
         public TomeOfChaos Tome { get; internal set; }
 
-        public void DirtyCoord(Coord newPosition)
+        public void MarkDirtyCoord(Coord newPosition)
         {
             Map.CoordsWithChanges.Add(newPosition);
         }

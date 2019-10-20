@@ -7,7 +7,7 @@ namespace CopperBend.Contract
         ICompoundMap Map { get; }
         IBeing Player { get; }
 
-        void DirtyCoord(Coord newPosition);
+        void MarkDirtyCoord(Coord newPosition);
         //0.2.SAVE  include beings and items on levels
         //0.2.SAVE  Player basics:  health & energy, items, experience
         //0.2.SAVE  include player knowledge repos

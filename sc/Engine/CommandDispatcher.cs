@@ -160,7 +160,7 @@ namespace CopperBend.Engine
             AttackSystem.AddAttack(being, attackMethod, target, null); //0.1: need defense
             AttackSystem.ResolveAttackQueue();
 
-            GameState.DirtyCoord(position);
+            GameState.MarkDirtyCoord(position);
             ScheduleAgent(being, 12);  //0.2 attack time spent should vary
             return true;
         }
@@ -184,7 +184,7 @@ namespace CopperBend.Engine
                 if (success)
                 {
                     ScheduleAgent(being, 4);
-                    GameState.Map.CoordsWithChanges.Add(newPosition);
+                    GameState.MarkDirtyCoord(newPosition);
                 }
                 else
                 {
@@ -277,7 +277,7 @@ namespace CopperBend.Engine
         {
             if (command.Usable == null)
             {
-                return Do_Use_old_style(being, command);
+                throw new Exception("Phlargieu!");
             }
 
             Time_spent_on_usable = 0;
@@ -289,6 +289,10 @@ namespace CopperBend.Engine
                 {
                 case "till":
                     action_taken |= Till(being, command);
+                    break;
+
+                case "plant":
+                    action_taken |= Plant(being, command);
                     break;
 
                 default:
@@ -332,18 +336,6 @@ namespace CopperBend.Engine
             }
         }
 
-        private bool Do_Use_old_style(IBeing being, Command command)
-        {
-            switch (command.Item)
-            {
-            case Seed s:
-                return Use_Seed(being, command);
-
-            default:
-                throw new Exception($"Don't know how to use a {command.Item.GetType().Name} yet.");
-            }
-        }
-
         private bool Till(IBeing being, Command command)
         {
             var targetCoord = CoordInDirection(being.Position, command.Direction);
@@ -367,14 +359,14 @@ namespace CopperBend.Engine
             }
 
             Till(space);
-            GameState.Map.CoordsWithChanges.Add(targetCoord);
+            GameState.MarkDirtyCoord(targetCoord);
             return true;
         }
 
-        private bool Use_Seed(IBeing being, Command command)
+        private bool Plant(IBeing being, Command command)
         {
-            var targetCoord = CoordInDirection(being.Position, command.Direction);
-            var space = SpaceMap.GetItem(targetCoord);
+            var coord = CoordInDirection(being.Position, command.Direction);
+            var space = SpaceMap.GetItem(coord);
 
             if (!space.IsTilled)
             {
@@ -389,19 +381,15 @@ namespace CopperBend.Engine
                 return false;
             }
 
-            var seedStock = (Seed)command.Item;
-            var seedToSow = seedStock.GetSeedFromStack();
-            if (seedStock.Quantity < 1)
-            {
-                being.RemoveFromInventory(seedStock);
-            }
+            IItem toSow = being.RemoveFromInventory(command.Item, 1);
 
-            SpaceMap.Sow(space, seedToSow);
-            AddExperience(seedToSow.PlantDetails.ID, Exp.PlantSeed);
-            GameState.Map.CoordsWithChanges.Add(targetCoord);
+            SpaceMap.MarkSpaceSown(space);
+            GameState.MarkDirtyCoord(coord);
 
-            ScheduleAgent(seedToSow, 100);
-            ScheduleAgent(being, 8);  //0.K:  Planting speed
+            var growingPlant = toSow.Aspects.GetComponent<Plant>();
+            AddExperience(growingPlant.PlantDetails.ID, Exp.PlantSeed);
+            ScheduleAgent(growingPlant, 100);
+
             return true;
         }
 

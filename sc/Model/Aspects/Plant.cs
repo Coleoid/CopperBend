@@ -20,15 +20,26 @@ namespace CopperBend.Model
 
     public class Plant : IScheduleAgent
     {
+        public PlantDetails PlantDetails { get; set; }
+
+        public Plant(PlantDetails details, ISchedule schedule = null)
+        {
+            PlantDetails = details;
+            schedule?.AddAgent(this);
+            // for IScheduleAgent aspects, do I need to link back to my entity?
+        }
+
         public ScheduleEntry GetNextEntry(int offset)
         {
-            throw new NotImplementedException();
+            //0.0: plant needs to grow, then when grown, act depending on its type
+            //currently, remove itself from the schedule
+            return new ScheduleEntry { Action = ScheduleAction.NoFurtherActions, Agent = this, Offset = offset };
         }
     }
 
     public class GrowingPlant : IScheduleAgent
     {
-        public PlantDetails PlantDetails { get; protected set; }
+        public PlantDetails PlantDetails { get; set; }
         public GrowingPlant(Seed seed, ISchedule schedule)
         {
             PlantDetails = seed.PlantDetails;

@@ -9,6 +9,7 @@
             Item = item;
             Usable = usable;
         }
+
         public CmdAction Action { get; }
         public CmdDirection Direction { get; }
         public IItem Item { get; set; }
@@ -19,6 +20,7 @@
             var itemStr = Item == null ? string.Empty : " " + Item.Name;
             var dirStr = Direction == CmdDirection.None ? string.Empty : " in " + Direction.ToString();
             return $"{Action}{itemStr}{dirStr}";
+            //1.+: Command.ToString for Usable and targeting and ...
         }
     }
 }

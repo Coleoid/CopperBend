@@ -1,16 +1,14 @@
 ﻿using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
 using CopperBend.Contract;
-using System.Linq;
-using System;
-using CopperBend.Model.Aspects;
+using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
     public class Item : IItem
     {
         public static IDGenerator IDGenerator;
-        public virtual string ItemType { get; } = "Item";
+        public string ItemType { get; set; } = "Item";
         public uint ID { get; private set; }
         public ComponentContainer Aspects { get; set; }
 
@@ -66,5 +64,15 @@ namespace CopperBend.Model
                 && ItemType == item.ItemType;
         }
 
+        public IItem SplitFromStack(int quantity = 1)
+        {
+            Guard.Against(Quantity < 1, $"Somehow there's no {Name} here.");
+            Guard.Against(Quantity < quantity, $"Want {quantity} of {Name} but there are only {Quantity}.");
+
+            Item newStack = Equipper.BuildItem(ItemType, quantity);
+            Quantity -= quantity;
+
+            return newStack;
+        }
     }
 }

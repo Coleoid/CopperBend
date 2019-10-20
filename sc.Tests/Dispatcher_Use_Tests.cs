@@ -11,22 +11,21 @@ namespace CopperBend.Engine.Tests
     [TestFixture]
     public class Dispatcher_Use_Tests : Dispatcher_Tests_Base
     {
-        private Being SU_being_at_coord(Coord coord, int glyph)
+        private Being SetUp_being_at_coord(Coord coord, int glyph, bool isPlayer = false)
         {
             var being = new Being(Color.White, Color.Black, glyph);
             being.MoveTo(coord);
+            being.IsPlayer = isPlayer;
+
             return being;
         }
 
         #region Hoe/Tilling
         [Test]
-        public void Use_hoe_on_untillable_tile()
+        public void Cannot_till_untillable_terrain()
         {
-            Coord coord = (2, 2);
-            var player = SU_being_at_coord(coord, '@');
-            player.IsPlayer = true;
+            var player = SetUp_being_at_coord((2, 2), '@', true);
             var hoe = Equipper.BuildItem("hoe");
-            player.AddToInventory(hoe);
             player.Wield(hoe);
 
             var usable = hoe.Aspects.GetComponent<IUsable>();
@@ -38,86 +37,87 @@ namespace CopperBend.Engine.Tests
         }
 
         [Test]
-        public void Use_hoe_on_tilled_tile()
+        public void Cannot_till_already_tilled_space()
         {
-            Coord coord = (2, 2);
-            var player = SU_being_at_coord(coord, '@');
-            player.IsPlayer = true;
+            var player = SetUp_being_at_coord((2, 2), '@', true);
             var hoe = Equipper.BuildItem("hoe");
-            player.AddToInventory(hoe);
             player.Wield(hoe);
 
-            Tile soil = new Tile(2, 1, new TileType { IsTillable = true, IsTransparent = true, IsWalkable = true, Name = "soil", Symbol = '.' });
-            _dispatcher.Till(soil);
-            _gameState.Map.SetTile(soil);
+            var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
+            sp.Terrain = ttSoil;
+            _gameState.Map.SpaceMap.Till(sp);
 
             var usable = hoe.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe, usable);
             _dispatcher.CommandBeing(player, cmd);
 
             __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
-            __messageOutput.Received().WriteLine("Cannot till the floor.");
+            __messageOutput.Received().WriteLine("Ground here's already tilled.");
         }
 
-        //[Test]
-        //public void Use_hoe_on_tilled_tile()
-        //{
-        //    (var actor, var startingPoint) = SU_actor_at_point(2, 2);
-        //    var hoe = new Hoe(startingPoint);
-        //    actor.AddToInventory(hoe);
-        //    actor.WieldedTool = hoe;
+        [Test]
+        public void Can_till_tillable_space()
+        {
+            Coord coord = (2, 2);
+            var player = SetUp_being_at_coord(coord, '@');
+            player.IsPlayer = true;
+            var tool = Equipper.BuildItem("hoe");
+            player.Wield(tool);
 
-        //    Tile soil = new Tile(2, 1, new TileType { IsTillable = true, IsTransparent = true, IsWalkable = true, Name = "soil", Symbol = '.' });
-        //    _dispatcher.Till(soil);
-        //    _gameState.Map.SetTile(soil);
+            var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
+            sp.Terrain = ttSoil;
 
-        //    var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
-        //    _dispatcher.CommandActor(actor, cmd);
+            var usable = tool.Aspects.GetComponent<IUsable>();
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, tool, usable);
+            _dispatcher.CommandBeing(player, cmd);
 
-        //    __schedule.DidNotReceive().AddActor(actor, Arg.Any<int>());
-        //    __messageOutput.Received().WriteLine("Already tilled.");
-        //}
+            __schedule.Received().AddAgent(player, 24);
+        }
 
-        //[Test]
-        //public void Use_hoe_tills_ground_in_direction()
-        //{
-        //    (var actor, var startingPoint) = SU_actor_at_point(2, 2);
-        //    var hoe = new Hoe(startingPoint);
-        //    actor.AddToInventory(hoe);
-        //    actor.WieldedTool = hoe;
+        [TestCase(true, 24)]
+        [TestCase(false, 30)]
+        public void Use_unwielded_tool_takes_longer_and_wields_it(bool startsWielded, int tickOff)
+        {
+            var player = SetUp_being_at_coord((2, 2), '@', true);
+            var tool = Equipper.BuildItem("hoe");
+            if (startsWielded)
+                player.Wield(tool);
+            else
+                player.AddToInventory(tool);
 
-        //    Tile soil = new Tile(2, 1, new TileType { IsTillable = true, IsTransparent = true, IsWalkable = true, Name = "soil", Symbol = '.' });
-        //    _gameState.Map.SetTile(soil);
+            var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
+            sp.Terrain = ttSoil;
 
-        //    var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
-        //    _dispatcher.CommandActor(actor, cmd);
+            var usable = tool.Aspects.GetComponent<IUsable>();
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, tool, usable);
+            _dispatcher.CommandBeing(player, cmd);
 
-        //    Assert.That(soil.IsTilled);
-        //}
+            __schedule.Received().AddAgent(player, tickOff);
+            Assert.That(player.WieldedTool, Is.SameAs(tool));
+        }
 
-        //[TestCase(true, 15)]
-        //[TestCase(false, 21)]
-        //public void Use_unwielded_hoe_takes_longer_and_wields_it(bool startsWielded, int tickOff)
-        //{
-        //    (var actor, var startingPoint) = SU_actor_at_point(2, 2);
-        //    var hoe = new Hoe(startingPoint);
-        //    actor.AddToInventory(hoe);
-        //    if (startsWielded)
-        //        actor.WieldedTool = hoe;
-
-        //    Tile soil = new Tile(2, 1, new TileType { IsTillable = true, IsTransparent = true, IsWalkable = true, Name = "soil", Symbol = '.' });
-        //    _gameState.Map.SetTile(soil);
-
-        //    var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe);
-        //    _dispatcher.CommandActor(actor, cmd);
-
-        //    Assert.That(soil.IsTilled);
-        //    Assert.That(actor.WieldedTool, Is.SameAs(hoe));
-        //    __schedule.Received().AddActor(actor, tickOff);
-        //}
         //#endregion
 
         //#region Seed/Planting
+
+        [Test]
+        public void Can_plant_in_tilled_space()
+        {
+            var player = SetUp_being_at_coord((2, 2), '@', true);
+            var seed = Equipper.BuildItem("seed:Healer");
+            player.AddToInventory(seed);
+
+            var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
+            sp.Terrain = ttSoil;
+            _gameState.Map.SpaceMap.Till(sp);
+
+            var usable = seed.Aspects.GetComponent<IUsable>();
+            var cmd = new Command(CmdAction.Use, CmdDirection.North, seed, usable);
+            _dispatcher.CommandBeing(player, cmd);
+
+            __schedule.Received().AddAgent(player, 6);
+        }
+
         //[Test]
         //public void Use_seed_on_untilled_tile()
         //{

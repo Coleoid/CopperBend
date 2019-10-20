@@ -8,7 +8,6 @@ namespace CopperBend.Model
 {
     public class Seed : Item, ISeed, IScheduleAgent
     {
-        public override string ItemType { get => "Seed"; }
         public static Herbal Herbal { get; set; }
 
         public PlantDetails PlantDetails;

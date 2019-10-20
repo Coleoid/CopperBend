@@ -1,18 +1,23 @@
 ﻿using CopperBend.Contract;
 using System;
+using System.Collections.Generic;
 
 namespace CopperBend.Model.Aspects
 {
-    public class Ingestible : IIngestible
+    public class Ingestible : Usable, IIngestible
     {
+        public uint PlantID { get; set; }
         public bool IsFruit { get; set; }
         public int FoodValue { get; set; }
         public int TicksToEat { get; set; }
-        public (string Name, int Degree) Effect { get; set; }
-        public uint PlantID { get; set; }
-        public string ConsumeVerb { get; set; } = "eat";
+
+        public Ingestible(string verbPhrase = "eat", UseTargetFlags targets = UseTargetFlags.Self)
+            : base(verbPhrase, targets)
+        { }
     }
 
+    //0.+:  At some point we'll want creatures with specific appetites,
+    // and players able to engage in challenge Conducts.
     [Flags]
     public enum FoodCategoryFlags
     {

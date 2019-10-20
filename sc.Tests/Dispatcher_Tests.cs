@@ -55,8 +55,8 @@ namespace CopperBend.Engine.Tests
                 FoodValue = 22,
                 PlantID = 2,
                 IsFruit = true,
-                Effect = ("Heal", 4),
             };
+            consumable.AddEffect("heal", 4);
             item.Aspects.AddComponent(consumable);
             being.AddToInventory(item);
 

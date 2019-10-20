@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace CopperBend.Contract
 {
-    /// <summary> Highly speculative </summary>
     public interface IUsable
     {
         string VerbPhrase { get; set; }

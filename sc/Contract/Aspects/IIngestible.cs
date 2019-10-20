@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace CopperBend.Contract
+﻿namespace CopperBend.Contract
 {
-    public interface IIngestible
+    public interface IIngestible : IUsable
     {
+        uint PlantID { get; set; }
+        string VerbPhrase { get; set; }
         bool IsFruit { get; set; }
         int FoodValue { get; set; }
         int TicksToEat { get; set; }
-        (string Name, int Degree) Effect { get; set; }  // IUsable encloses...
-        uint PlantID { get; set; }
-        string ConsumeVerb { get; set; }
     }
 }

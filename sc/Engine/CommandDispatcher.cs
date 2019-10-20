@@ -92,49 +92,54 @@ namespace CopperBend.Engine
             Guard.AgainstNullArgument(item, "No item in consume command");
             string description = Describer.Describe(item);
             Guard.Against(item.Quantity < 1, $"Only have {item.Quantity} {description}.");
-            Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory"); //0.2: animals eat off ground?
-            IIngestible consumable = item.Aspects.GetComponent<IIngestible>();
-            Guard.Against(consumable == null, $"{description} is not consumable");
+            Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory");
+            //0.2: eat from ground, or directly from plant, or someone feeds someone
+            IIngestible ingestible = item.Aspects.GetComponent<IIngestible>();
+            Guard.Against(ingestible == null, $"{description} is not ingestible");
 
+            foreach (var effect in ingestible.Effects)
+            {
+                switch (effect.Effect)
+                {
+                case "heal":
+                    HealBeing(being, effect.Amount);
+                    break;
+
+                default:
+                    var verb = string.IsNullOrEmpty(ingestible.VerbPhrase) ? "ingest" : ingestible.VerbPhrase;
+                    throw new Exception($"Don't have code for Effect [{effect.Effect}] of {verb}ing {item.Name}.");
+                }
+            }
+
+            //0.2: Unify this with a standard self-expend cost?
             item.Quantity--;
             if (item.Quantity < 1)
                 being.RemoveFromInventory(item);
 
-            switch (consumable.Effect.Name)
+            if (ingestible.IsFruit)
             {
-            case "Heal":
-                HealBeing(being, consumable.Effect.Degree);
-                break;
-
-            case "":
-            case null:
-                break; //no effect
-
-            default:
-                throw new Exception($"Don't have code written for Consumable Effect [{consumable.Effect.Name}].");
-            }
-
-            if (consumable.IsFruit)
-            {
-                var plant = Engine.Compendium.Herbal.PlantByID[consumable.PlantID];
+                var plantType = Engine.Compendium.Herbal.PlantByID[ingestible.PlantID];
                 
                 // pocket some seeds
                 int seedCount = 2; //0.1
-                var seed = Equipper.BuildPlant("seed", plant);
-                seed.Quantity = seedCount;
-                being.AddToInventory(seed);
+                if (seedCount > 0)
+                {
+                    var seeds = Equipper.BuildPlant("seed", plantType);
+                    seeds.Quantity = seedCount;
+                    being.AddToInventory(seeds);
+                }
 
                 // identify
-                plant.FruitKnown = true;
-                plant.SeedKnown = seedCount > 0;
-                AddExperience(plant.ID, Exp.EatFruit);
+                plantType.FruitKnown = true;
+                plantType.SeedKnown |= seedCount > 0;
+                AddExperience(plantType.ID, Exp.EatFruit);
                 //0.K: Later, some plants remain mysterious?
             }
 
-            Schedule.AddAgent(being, consumable.TicksToEat);
+            Schedule.AddAgent(being, ingestible.TicksToEat);
 
             //TODO: fold into Consumable Effects?
-            FeedBeing(being, consumable.FoodValue);
+            FeedBeing(being, ingestible.FoodValue);
 
             return true;
         }

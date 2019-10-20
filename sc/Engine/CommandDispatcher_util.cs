@@ -53,8 +53,7 @@ namespace CopperBend.Engine
 
         public void FeedBeing(IBeing being, int amount)
         {
-            //0.0
-            //being.Feed(amount);
+            //being.Feed(amount); //0.0
         }
 
         public List<Coord> GetPathTo(Coord start, Coord target)

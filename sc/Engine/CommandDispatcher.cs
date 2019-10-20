@@ -70,7 +70,7 @@ namespace CopperBend.Engine
         {
             switch (command.Action)
             {
-            case CmdAction.Consume:   return Do_Consume(being, command.Item);
+            case CmdAction.Consume:   return Do_Consume(being, command);
             case CmdAction.Direction: return Do_Direction(being, command.Direction);
             case CmdAction.Drop:      return Do_Drop(being, command);
             case CmdAction.PickUp:    return Do_PickUp(being, command);
@@ -87,34 +87,23 @@ namespace CopperBend.Engine
         }
 
 
-        public bool Do_Consume(IBeing being, IItem item)
+        public bool Do_Consume(IBeing being, Command command)
         {
+            IIngestible ingestible = command.Usable as IIngestible;
+            if (ingestible == null)
+                ingestible = command.Item.Aspects.GetComponent<IIngestible>();
+            Guard.AgainstNullArgument(ingestible, "Nothing ingestible in consume command");
+
+            IItem item = command.Item;
             Guard.AgainstNullArgument(item, "No item in consume command");
             string description = Describer.Describe(item);
             Guard.Against(item.Quantity < 1, $"Only have {item.Quantity} {description}.");
-            Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory");
             //0.2: eat from ground, or directly from plant, or someone feeds someone
-            IIngestible ingestible = item.Aspects.GetComponent<IIngestible>();
+            Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory");
+
             Guard.Against(ingestible == null, $"{description} is not ingestible");
 
-            foreach (var effect in ingestible.Effects)
-            {
-                switch (effect.Effect)
-                {
-                case "heal":
-                    HealBeing(being, effect.Amount);
-                    break;
-
-                default:
-                    var verb = string.IsNullOrEmpty(ingestible.VerbPhrase) ? "ingest" : ingestible.VerbPhrase;
-                    throw new Exception($"Don't have code for Effect [{effect.Effect}] of {verb}ing {item.Name}.");
-                }
-            }
-
-            //0.2: Unify this with a standard self-expend cost?
-            item.Quantity--;
-            if (item.Quantity < 1)
-                being.RemoveFromInventory(item);
+            Do_Usable(being, command);
 
             if (ingestible.IsFruit)
             {
@@ -135,11 +124,6 @@ namespace CopperBend.Engine
                 AddExperience(plantType.ID, Exp.EatFruit);
                 //0.K: Later, some plants remain mysterious?
             }
-
-            Schedule.AddAgent(being, ingestible.TicksToEat);
-
-            //TODO: fold into Consumable Effects?
-            FeedBeing(being, ingestible.FoodValue);
 
             return true;
         }
@@ -302,8 +286,20 @@ namespace CopperBend.Engine
                     action_taken |= Plant(being, command);
                     break;
 
+                case "food":
+                    FeedBeing(being, effect.Amount);
+                    action_taken = true;
+                    break;
+
+                case "heal":
+                    HealBeing(being, effect.Amount);
+                    action_taken = true;
+                    break;
+
                 default:
-                    throw new Exception($"Don't know how to cause Usable effect [{effect.Effect}] yet.");
+                    var vp = command.Usable.VerbPhrase;
+                    var np = Describer.Describe(command.Item, DescMods.Article);
+                    throw new Exception($"Don't have code to cause [{effect.Effect}] Effect when I {vp} {np}.");
                 }
             }
 
@@ -312,7 +308,7 @@ namespace CopperBend.Engine
             {
                 foreach (var cost in command.Usable.Costs)
                 {
-                    PayCost(being, cost);
+                    PayCost(being, command.Item, cost);
                 }
             
                 if (Time_spent_on_usable > 0)
@@ -322,7 +318,7 @@ namespace CopperBend.Engine
             return action_taken;
         }
 
-        public void PayCost(IBeing being, UseCost cost)
+        public void PayCost(IBeing being, IItem item, UseCost cost)
         {
             switch (cost.Substance)
             {
@@ -336,6 +332,12 @@ namespace CopperBend.Engine
 
             case "time":
                 Time_spent_on_usable += cost.Amount;
+                break;
+
+            case "this":
+                item.Quantity -= cost.Amount;
+                if (item.Quantity < 1)
+                    being.RemoveFromInventory(item);
                 break;
 
             default:
@@ -362,7 +364,7 @@ namespace CopperBend.Engine
             if (being.WieldedTool != command.Item)
             {
                 being.Wield(command.Item);
-                PayCost(being, new UseCost("time", 6));
+                PayCost(being, command.Item, new UseCost("time", 6));
             }
 
             Till(space);

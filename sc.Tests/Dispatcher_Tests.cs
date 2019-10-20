@@ -60,7 +60,7 @@ namespace CopperBend.Engine.Tests
             item.Aspects.AddComponent(consumable);
             being.AddToInventory(item);
 
-            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item, consumable);
             _dispatcher.CommandBeing(being, cmd);
 
             Assert.That(being.Inventory.Count(), Is.EqualTo(1));
@@ -85,7 +85,7 @@ namespace CopperBend.Engine.Tests
             item.Aspects.AddComponent(consumable);
             being.Wield(item);
 
-            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item, consumable);
             _dispatcher.CommandBeing(being, cmd);
 
             Assert.That(being.Inventory.ElementAt(0).Name, Is.EqualTo("seed"));
@@ -106,7 +106,7 @@ namespace CopperBend.Engine.Tests
             item.Aspects.AddComponent(consumable);
             being.Wield(item);
 
-            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
+            var cmd = new Command(CmdAction.Consume, CmdDirection.None, item, consumable);
             _dispatcher.CommandBeing(being, cmd);
 
             Assert.That(being.Inventory.ElementAt(0), Is.SameAs(item));

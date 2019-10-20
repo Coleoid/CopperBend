@@ -11,9 +11,12 @@ namespace CopperBend.Model.Aspects
         public int FoodValue { get; set; }
         public int TicksToEat { get; set; }
 
-        public Ingestible(string verbPhrase = "eat", UseTargetFlags targets = UseTargetFlags.Self)
-            : base(verbPhrase, targets)
-        { }
+        public Ingestible(string verbPhrase = "eat", int timeToIngest = 8, int foodValue = 1200)
+            : base(verbPhrase, UseTargetFlags.Self)
+        {
+            AddCosts(("time", timeToIngest), ("this", 1));
+            AddEffect("food", foodValue);
+        }
     }
 
     //0.+:  At some point we'll want creatures with specific appetites,

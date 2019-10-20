@@ -103,7 +103,6 @@ namespace CopperBend.Engine
         public static void ConnectHerbal(Herbal herbal)
         {
             Compendium.Herbal = herbal;
-            Seed.Herbal = herbal;
             Describer.Herbal = herbal;
         }
     }

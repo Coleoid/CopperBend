@@ -114,19 +114,21 @@ namespace CopperBend.Engine
                 throw new Exception($"Don't have code written for Consumable Effect [{consumable.Effect.Name}].");
             }
 
-            if (consumable.PlantID > 0)
+            if (consumable.IsFruit)
             {
-                var plant = Seed.Herbal.PlantByID[consumable.PlantID];
+                var plant = Engine.Compendium.Herbal.PlantByID[consumable.PlantID];
+                
+                // pocket some seeds
                 int seedCount = 2; //0.1
-                var seed = new Seed(plant.ID, seedCount);
+                var seed = Equipper.BuildPlant("seed", plant);
+                seed.Quantity = seedCount;
                 being.AddToInventory(seed);
-                if (consumable.IsFruit)
-                {
-                    //0.K: Later, some plants remain mysterious?
-                    plant.FruitKnown = true;
-                    plant.SeedKnown = true;  //  Eating fruit also shows us what its seeds are.
-                    AddExperience(plant.ID, Exp.EatFruit);
-                }
+
+                // identify
+                plant.FruitKnown = true;
+                plant.SeedKnown = seedCount > 0;
+                AddExperience(plant.ID, Exp.EatFruit);
+                //0.K: Later, some plants remain mysterious?
             }
 
             Schedule.AddAgent(being, consumable.TicksToEat);

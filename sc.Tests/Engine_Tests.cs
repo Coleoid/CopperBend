@@ -14,13 +14,13 @@ namespace CopperBend.Engine.Tests
             Assert.That(Item.IDGenerator, Is.Not.Null);
         }
 
-        [Test]
-        public void Can_init_plant_repos()
-        {
-            Seed.Herbal = null;
-            var herbal = Engine.InitHerbal();
-            Engine.ConnectHerbal(herbal);
-            Assert.That(Seed.Herbal, Is.SameAs(herbal));
-        }
+        //[Test]
+        //public void Can_init_plant_repos()
+        //{
+        //    Seed.Herbal = null;
+        //    var herbal = Engine.InitHerbal();
+        //    Engine.ConnectHerbal(herbal);
+        //    Assert.That(Seed.Herbal, Is.SameAs(herbal));
+        //}
     }
 }

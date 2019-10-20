@@ -146,8 +146,7 @@ namespace CopperBend.Engine
             };
             player.AddComponent(new EntityViewSyncComponent());
             player.AddToInventory(Equipper.BuildItem("hoe"));
-            //player.AddToInventory(new Hoe((0,0)));
-            player.AddToInventory(new Seed(Compendium.Herbal.PlantByName["Healer"].ID, 2));
+            player.AddToInventory(Equipper.BuildItem("seed:Healer", 2));
 
             log.Debug("Created player.");
             player.Console.Position = playerLocation;

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using CopperBend.Contract;
 
@@ -40,9 +39,9 @@ namespace CopperBend.Model
     public class GrowingPlant : IScheduleAgent
     {
         public PlantDetails PlantDetails { get; set; }
-        public GrowingPlant(Seed seed, ISchedule schedule)
+        public GrowingPlant(PlantDetails details, ISchedule schedule)
         {
-            PlantDetails = seed.PlantDetails;
+            PlantDetails = details;
             schedule.AddAgent(this);
         }
 

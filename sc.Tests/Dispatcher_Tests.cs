@@ -64,10 +64,11 @@ namespace CopperBend.Engine.Tests
             _dispatcher.CommandBeing(being, cmd);
 
             Assert.That(being.Inventory.Count(), Is.EqualTo(1));
-            if (being.Inventory.ElementAt(0) is Seed seed)
-                Assert.That(seed.PlantDetails.MainName, Is.EqualTo("Healer"));
-            else
-                Assert.Fail("Item wasn't seeds");
+            var seed = being.Inventory.ElementAt(0);
+            Assert.That(seed.Name, Is.EqualTo("seed"));
+
+            var plant = seed.Aspects.GetComponent<Plant>();
+            Assert.That(plant.PlantDetails.MainName, Is.EqualTo("Healer"));
         }
 
         [Test]
@@ -87,7 +88,7 @@ namespace CopperBend.Engine.Tests
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
             _dispatcher.CommandBeing(being, cmd);
 
-            Assert.That(being.Inventory.ElementAt(0) is Seed);
+            Assert.That(being.Inventory.ElementAt(0).Name, Is.EqualTo("seed"));
             Assert.That(being.WieldedTool, Is.Null);
         }
 

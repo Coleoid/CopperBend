@@ -65,16 +65,22 @@ namespace CopperBend.Fabric
             if (!byName.ContainsKey(plantName))
                 throw new Exception($"Don't know the plant [{plantName}].");
 
-            var item = new Item((0, 0)) { Name = plantName };
-            var plantDetails = byName[plantName];
+            return BuildPlant(plantPart, byName[plantName]);
+        }
+
+        public static Item BuildPlant(string plantPart, PlantDetails details)
+        {
+            var item = new Item((0, 0)) { Name = plantPart };
+
             switch (plantPart)
             {
             case "fruit":
                 item.AddAspect(
-                    new Ingestible {
+                    new Ingestible
+                    {
                         IsFruit = true,
                         FoodValue = 210,  //0.2: draw from data
-                        PlantID = plantDetails.ID,
+                        PlantID = details.ID,
                     });
                 break;
 
@@ -90,7 +96,7 @@ namespace CopperBend.Fabric
                 throw new Exception($"Can't handle plant part [{plantPart}].");
             }
 
-            item.AddAspect(new Plant(plantDetails));
+            item.AddAspect(new Plant(details));
             return item;
         }
 

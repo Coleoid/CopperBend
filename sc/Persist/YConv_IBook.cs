@@ -214,14 +214,14 @@ namespace CopperBend.Persist
         {
             Herbal herbal = new Herbal();
 
-            while (parser.Peek<Scalar>()?.Value == "Plant")
+            while (parser.Accept<Scalar>(out var evt) && evt.Value == "Plant")
             {
-                parser.Expect<Scalar>();
-                parser.Expect<MappingStart>();
+                parser.Consume<Scalar>();
+                parser.Consume<MappingStart>();
 
                 herbal.AddPlant(ParsePlantDetails(parser));
 
-                parser.Expect<MappingEnd>();
+                parser.Consume<MappingEnd>();
             }
 
             return herbal;

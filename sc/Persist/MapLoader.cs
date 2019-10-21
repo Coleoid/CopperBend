@@ -298,7 +298,7 @@ namespace CopperBend.Persist
         {
             var reader = new StringReader(mapYaml);
             var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
             return deserializer.Deserialize<MapData>(reader);

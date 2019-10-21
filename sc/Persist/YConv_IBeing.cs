@@ -52,7 +52,7 @@ namespace CopperBend.Persist
             //if (!Debugger.IsAttached) Debugger.Launch();
             IBeing being = null;
 
-            parser.Expect<MappingStart>();
+            parser.Consume<MappingStart>();
             var beingType = GetValueNext(parser, "BeingType");
 
             switch (beingType)
@@ -65,7 +65,7 @@ namespace CopperBend.Persist
                 throw new NotImplementedException($"Not ready to Read being type [{beingType}].");
             }
 
-            parser.Expect<MappingEnd>();
+            parser.Consume<MappingEnd>();
             return being;
         }
         #endregion

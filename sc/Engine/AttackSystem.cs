@@ -212,6 +212,7 @@ Apply post-attack effects
         {
             return Dice.Roll(effect.DamageRange);
         }
+        //0.0.DMG:  Our hero is oddly resistant to the effects of the blight
 
         public void ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
         {

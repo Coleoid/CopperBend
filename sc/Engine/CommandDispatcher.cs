@@ -139,7 +139,7 @@ namespace CopperBend.Engine
                 target = BlightMap.GetItem(newPosition);
 
             if (target == null)
-                return Do_DirectionMove(being, newPosition);
+                return Do_Move(being, newPosition);
 
             return Do_Attack(being, target, newPosition);
         }
@@ -156,9 +156,7 @@ namespace CopperBend.Engine
             return true;
         }
 
-        //0.0.DMG:  Our hero is oddly resistant to the effects of the blight
-
-        private bool Do_DirectionMove(IBeing being, Coord newPosition)
+        private bool Do_Move(IBeing being, Coord newPosition)
         {
             if (newPosition.X < 0 || newPosition.Y < 0
                 || SpaceMap.Width <= newPosition.X || SpaceMap.Height <= newPosition.Y)

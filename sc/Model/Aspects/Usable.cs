@@ -44,15 +44,6 @@ namespace CopperBend.Model.Aspects
             Effects.Add(new UseEffect(effect, amount));
             return this;
         }
-
-        public bool IsExpended
-        {
-            get => Costs.Any(c => c.Substance == "this");
-        }
-        public bool TakesDirection
-        {
-            get => Targets.HasFlag(UseTargetFlags.Direction);
-        }
     }
 
     public class Weapon : Usable

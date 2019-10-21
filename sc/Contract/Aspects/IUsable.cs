@@ -14,10 +14,6 @@ namespace CopperBend.Contract
         IUsable AddCost(string substance, int amount);
         IUsable AddEffects(params (string effect, int amount)[] effects);
         IUsable AddEffect(string effect, int amount);
-
-
-        bool IsExpended { get; }
-        bool TakesDirection { get; }
     }
 
     public struct UseCost

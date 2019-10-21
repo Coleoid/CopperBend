@@ -8,14 +8,13 @@ namespace CopperBend.Model.Aspects
     {
         public uint PlantID { get; set; }
         public bool IsFruit { get; set; }
-        public int FoodValue { get; set; }
-        public int TicksToEat { get; set; }
 
-        public Ingestible(string verbPhrase = "eat", int timeToIngest = 8, int foodValue = 1200)
+        public Ingestible(string verbPhrase = "eat", int timeToIngest = 8, int foodValue = 0)
             : base(verbPhrase, UseTargetFlags.Self)
         {
             AddCosts(("time", timeToIngest), ("this", 1));
-            AddEffect("food", foodValue);
+            if (foodValue > 0)
+                AddEffect("food", foodValue);
         }
     }
 

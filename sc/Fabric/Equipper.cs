@@ -76,10 +76,9 @@ namespace CopperBend.Fabric
             {
             case "fruit":
                 item.AddAspect(
-                    new Ingestible
+                    new Ingestible(foodValue:210)  //0.2: draw from data
                     {
                         IsFruit = true,
-                        FoodValue = 210,  //0.2: draw from data
                         PlantID = details.ID,
                     });
                 break;

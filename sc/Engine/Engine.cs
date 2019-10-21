@@ -123,12 +123,13 @@ namespace CopperBend.Engine
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)
             {
                 PushEngineMode = PushEngineMode,
+                PopEngineMode = PopEngineMode,
                 IsInputReady = () => InputQueue.Count > 0,
                 GetNextInput = InputQueue.Dequeue,
                 ClearPendingInput = InputQueue.Clear,
                 WriteLine = MessageLog.WriteLine,
                 Prompt = MessageLog.Prompt,
-                More = MessageLog.More,
+                More = this.More,
             };
 
             Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher);
@@ -306,10 +307,15 @@ namespace CopperBend.Engine
                 }
                 else
                 {
-                    AddMessage("-- more --");
-                    PushEngineMode(EngineMode.MessagesPending, null);
+                    More();
                 }
             }
+        }
+
+        public void More()
+        {
+            AddMessage("-- more --");
+            PushEngineMode(EngineMode.MessagesPending, null);
         }
 
         public void HandlePendingMessages()

@@ -118,13 +118,25 @@ namespace CopperBend.Engine
             SpaceMap.Till(space);
         }
 
-
         /// <summary> I hope you had fun! </summary>
         public void GameOver(IBeing player)
         {
+            if (player.Health < 1)
+            {
+                WriteLine("After you're dead, Kulkecharra Valley and Copper Bend are");
+                WriteLine("overrun by the blight.  Every creature flees, is absorbed");
+                WriteLine("for energy, or suffers a brief quasi-life as the blight");
+                WriteLine("strives to learn how we move.  What will stand in its way?");
+                More();
+            }
 
+            WriteStats();
+            ClearStats();
+            PopEngineMode();
         }
 
+        public void WriteStats() { } //0.0
+        public void ClearStats() { } //0.0
 
         public Dictionary<Exp, int> XP { get; set; } = new Dictionary<Exp, int>();
         public void AddExperience(uint plantID, Exp experience)
@@ -163,6 +175,7 @@ namespace CopperBend.Engine
 
         public bool PlayerMoved { get; set; }
         public Action<EngineMode, Func<bool>> PushEngineMode { get; set; }
+        public Action PopEngineMode { get; set; }
 
         public Func<bool> IsInputReady { get; set; }
         public Func<AsciiKey> GetNextInput { get; set; }

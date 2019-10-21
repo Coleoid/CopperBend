@@ -25,6 +25,7 @@ namespace CopperBend.Contract
 
         /// <summary> When an action interrupts the entire game, in some way. </summary>
         Action<EngineMode, Func<bool>> PushEngineMode { get; }
+        Action PopEngineMode { get; }
 
         Coord CoordInDirection(Coord start, CmdDirection direction);
         void PutItemOnMap(IItem item, Coord coord);
@@ -57,7 +58,6 @@ namespace CopperBend.Contract
 
     public interface IWritePanel
     {
-        //void Write
         Action<string> WriteLine { get; set; }
         Action<IBeing, string> WriteLineIfPlayer { get; set; }
         Action<string> Prompt { get; set; }

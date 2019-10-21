@@ -152,7 +152,7 @@ namespace CopperBend.Engine
             AttackSystem.ResolveAttackQueue();
 
             GameState.MarkDirtyCoord(position);
-            ScheduleAgent(being, 12);  //0.2 attack time spent should vary
+            ScheduleAgent(being, 12);  //0.1 time spent should vary, sched should go elsewhere
             return true;
         }
 
@@ -264,10 +264,7 @@ namespace CopperBend.Engine
         int Time_spent_on_usable = 0;
         private bool Do_Usable(IBeing being, Command command)
         {
-            if (command.Usable == null)
-            {
-                throw new Exception("Phlargieu!");
-            }
+            Guard.AgainstNullArgument(command.Usable, "Need Usable component of command");
 
             Time_spent_on_usable = 0;
             bool action_taken = false;

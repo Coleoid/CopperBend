@@ -128,6 +128,7 @@ namespace CopperBend.Engine
                 ClearPendingInput = InputQueue.Clear,
                 WriteLine = MessageLog.WriteLine,
                 Prompt = MessageLog.Prompt,
+                More = MessageLog.More,
             };
 
             Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher);

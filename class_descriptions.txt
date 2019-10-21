@@ -1,0 +1,165 @@
+== Outer level ==
+
+=== Program
+### Traditional console app entry point
+    Handle command line arguments
+        -t|--test, currently NOP
+        -s|--seed, text seed for the RNG
+    Establish logging
+    Create and run the SadConsole.Game object
+        Takes game height and width in cells
+        OnInitialize generates a new Engine object
+
+
+== Engine level ==
+
+=== Engine
+### Coordinate input, output, and game logic
+    Build and cross-connect engine subsystems
+    Receive and queue keyboard input
+    Maintain game state stack
+
+    # Runs once at startup
+    Init
+        Generate top seed if not passed in CLI
+        Populate well-known resources >> Cosmogenesis
+        Load current map via MapLoader (0.1)
+        Init Describer, Being, Schedule
+        Create player (0.1)
+        Put player on schedule
+        Create map and message windows via UIBuilder
+        Init Dispatcher
+        Give player an InputCommandSource
+        Put the game into Schedule mode
+    
+    # Called rapidly, repeatedly by SadConsole.Game framework
+    Update
+        Queue input
+        Act on mode >>
+        Sync map changes
+            If any map visibility changed, rebuild FOV
+            if player moved
+                Update FOV
+                Center map on player
+        Animate background
+
+    # Dispatch correct behavior depending on overall game state
+    Act On Mode
+        Paused:
+            Consume input, wait for Esc (0.0)
+        Menu open:
+            Give input to particular menu dispatcher (0.0)
+        Large message window:
+            Same (0.0)
+        Messages pending ("more..."):
+            Consume input, wait for space, show more messages (0.2)
+        Input bound:
+            Send input to InputCommandSource for player (0.K)
+        Schedule:
+            Do next scheduled action (0.K)
+
+    # Populate the Compendium and its books (IoC)
+    Cosmogenesis
+        Compendium
+        Create IDGenerator
+            Connect to CbEntity, Item, Space, and AreaBlight
+        Create Tome of Chaos with top seed
+            Connect to Describer
+        Create Herbal
+            Connect to Seed, Fruit, and Describer
+
+=== Describer
+### Manage descriptions for the identification sub-game
+    Scramble categories of learnables with adjectives
+        Currently Fruit and Seeds
+    Remember when the player learns one (0.0) (--or Herbal?  But potions, etc.)
+    Describe (item)
+        Use proper name or scrambled adjective depending on player knowledge
+    Describe (noun)
+        Noun phrase with a/an/the/some/quantity as wanted
+
+=== Schedule
+### Track what will happen when
+    Get Next Action
+        Go through each moment (tick) until an Entry is found
+        Update the current tick if the next action was in the future
+    Add Agent
+        Put an Agent on the Schedule by asking it for its next Entry
+    Add Entry
+        Add a ScheduleEntry at the current tick plus offset
+    Remove Agent
+        Remove all Schedule Entries for this agent
+
+=== Command Dispatcher
+### Make things happen
+
+    # Schedule entries start the appropriate process
+    Dispatch (schedule entry)
+        GetCommand:
+            Tell Being it's time to act, Being gets a command from its CommandSource
+        Seed or Plant grows: (currently nothing to dispatch?)
+
+    # The CommandSource sends its Command here, once it decides
+    CommandBeing (being, command)
+        Dispatch command to Do_(action) method
+
+    Do_Usable
+        * (soon) check that costs can be paid before trying effects
+        * (soon) Some costs spent regardless of success?  I think modeling content will tell me.
+        Handle list of Effect, Amount pairs
+            till, plant, food, heal
+        if any Effects took place, pay costs
+            health, energy, time, this
+
+    Do_Consume
+        Delegate to Do_Usable for Effects and Costs
+        If Fruit
+            Maybe gain some seeds
+            Learn fruit and maybe seeds
+            Add Experience
+
+    Do_Direction
+        If there's a being or blight in the chosen direction, Do_Attack
+        Otherwise, Do_Move
+
+    Do_Attack
+        Add being's attack method to the queue
+        Start resolving the queue
+        Mark the attacked location visually dirty ...?
+        Schedule being in 12 (0.1)
+
+    Do_Move
+        * ?: Unify off-map and can't-move-to cases?
+        If coord is off-map
+            Message
+            Don't move
+            Done with no action
+        If coord is closed door
+            open door
+            Mark space dirty
+            Schedule in 4
+            Don't move
+            Done with action
+        If coord cannot be moved to
+            Message
+            Don't move
+            Clear queued input
+            Done with no action
+
+        Determine direction of move and move cost
+        Move
+        if being is player
+            Message about items in location moved to
+
+
+    Do_Drop
+        Take the thing out of inventory
+        Put it at the being's location
+        Schedule being 1
+
+    Do_PickUp,
+
+    Do_Wait,
+
+
+    Do_Wield, 

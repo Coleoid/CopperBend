@@ -168,21 +168,42 @@ Apply post-attack effects
         {
             while (Destroyed.TryDequeue(out var mote))
             {
+                if (mote is IBeing being)
+                {
+                    if (being.IsPlayer)
+                    {
+                        //1.+: Game modes (agent of power, hardcore, savescummer)
+                        Panel.WriteLine("Guess I'll die.");
+                        Panel.More();
+                        Panel.GameOver(being);
+                        return;
+                    }
+
+                    //0.1: drop fewer items
+                    foreach (var it in being.Inventory)
+                    {
+                        being.RemoveFromInventory(it);
+                        Panel.PutItemOnMap(it, being.Position);
+                    }
+                }
+
                 Panel.RemoveFromAppropriateMap(mote);
 
                 // remove from schedule
                 if (mote is IScheduleAgent agent)
                     Panel.RemoveFromSchedule(agent);
 
-                //0.0: drop items
                 //0.0: give fight/kill experience
+                //Panel.AddExperience()  //0.1: only works for plants atm
             }
         }
 
+
         //TODO: Destruction/kill messages... somewhere
-        // Your hands destroy the blight
         // The blight burns to a crisp
-        // The green sparks destroy the blight
+        // ( My hands | The green sparks ) destroy the blight
+        // ( The flames destroy | The arrow destroys ) the blight
+        // ( My hands tear | The arrow tears ) the blight apart
 
         private void MessageDamage(IDelible target, IEnumerable<AttackDamage> damages)
         {

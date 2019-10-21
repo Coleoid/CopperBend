@@ -138,6 +138,11 @@ namespace CopperBend.Engine
             isNewLine = false;
         }
 
+        public void More()
+        {
+
+        }
+
         private void add_message_to_list(string message)
         {
             if (isNewLine)

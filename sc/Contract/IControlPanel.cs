@@ -27,7 +27,7 @@ namespace CopperBend.Contract
         Action<EngineMode, Func<bool>> PushEngineMode { get; }
 
         Coord CoordInDirection(Coord start, CmdDirection direction);
-        void PutItemOnMap(IItem item);
+        void PutItemOnMap(IItem item, Coord coord);
         void RemovePlantAt(Coord position);
         bool RemoveFromAppropriateMap(IDelible mote);
         void RemoveFromSchedule(IScheduleAgent agent);
@@ -38,8 +38,8 @@ namespace CopperBend.Contract
 
         //bool CanActorSeeTarget(IBeing being, Coord target);
         //List<Coord> GetPathTo(Coord start, Coord target);
-        //void Learn(Fruit fruit);
-        //void SetMapDirty();
+
+        void GameOver(IBeing player);
     }
 
 
@@ -61,6 +61,7 @@ namespace CopperBend.Contract
         Action<string> WriteLine { get; set; }
         Action<IBeing, string> WriteLineIfPlayer { get; set; }
         Action<string> Prompt { get; set; }
+        Action More { get; set; }
     }
 
     //0.1.XP  extend categories

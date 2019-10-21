@@ -74,9 +74,9 @@ namespace CopperBend.Engine
             throw new NotImplementedException();
         }
 
-        public void PutItemOnMap(IItem item)
+        public void PutItemOnMap(IItem item, Coord coord)
         {
-            ItemMap.Add(item, item.Location);
+            ItemMap.Add(item, coord);
         }
 
         public void RemovePlantAt(Coord position)
@@ -117,6 +117,14 @@ namespace CopperBend.Engine
         {
             SpaceMap.Till(space);
         }
+
+
+        /// <summary> I hope you had fun! </summary>
+        public void GameOver(IBeing player)
+        {
+
+        }
+
 
         public Dictionary<Exp, int> XP { get; set; } = new Dictionary<Exp, int>();
         public void AddExperience(uint plantID, Exp experience)
@@ -162,5 +170,6 @@ namespace CopperBend.Engine
         public Action<string> WriteLine { get; set; }
         public Action<IBeing, string> WriteLineIfPlayer { get; set; }
         public Action<string> Prompt { get; set; }
+        public Action More { get; set; }
     }
 }

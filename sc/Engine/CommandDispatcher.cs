@@ -5,6 +5,7 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using System.Diagnostics;
 
 namespace CopperBend.Engine
 {

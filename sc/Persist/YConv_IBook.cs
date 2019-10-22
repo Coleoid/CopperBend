@@ -129,10 +129,10 @@ namespace CopperBend.Persist
         private IBook ParseCompendium(IParser parser)
         {
             Compendium compendium = new Compendium();
-            while (parser.Peek<Scalar>() != null)
+            //while (parser.Peek<Scalar>() != null)
+            while (parser.Accept<Scalar>(out var next))
             {
-                string next = GetScalar(parser);
-                switch (next)
+                switch (next.Value)
                 {
                 case "TomeOfChaos":
                     compendium.TomeOfChaos = (TomeOfChaos)ReadYaml(parser, typeof(TomeOfChaos));

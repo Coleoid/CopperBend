@@ -24,6 +24,7 @@ namespace CopperBend.Persist
             InitTerrain();
         }
 
+        //0.2: Bring this into Cosmogenesis
         private void InitTerrain()
         {
             TerrainTypes = new Dictionary<string, TerrainType>();
@@ -42,7 +43,7 @@ namespace CopperBend.Persist
 
             type = new TerrainType
             {
-                Name = "dirt",
+                Name = Terrains.Soil,
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 CanPlant = true,
@@ -53,7 +54,7 @@ namespace CopperBend.Persist
 
             type = new TerrainType
             {
-                Name = "tilled dirt",
+                Name = Terrains.SoilTilled,
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 CanPlant = true,
@@ -63,7 +64,7 @@ namespace CopperBend.Persist
 
             type = new TerrainType
             {
-                Name = "planted dirt",
+                Name = Terrains.SoilPlanted,
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 CanPlant = false,
@@ -83,7 +84,7 @@ namespace CopperBend.Persist
 
             type = new TerrainType
             {
-                Name = "closed door",
+                Name = Terrains.DoorClosed,
                 CanWalkThrough = false,
                 CanSeeThrough = false,
                 Looks = new Cell(Color.DarkGray, stoneBG, '+'),
@@ -92,7 +93,7 @@ namespace CopperBend.Persist
 
             type = new TerrainType
             {
-                Name = "open door",
+                Name = Terrains.DoorOpen,
                 CanWalkThrough = true,
                 CanSeeThrough = true,
                 Looks = new Cell(Color.DarkGray, stoneBG, '-'),
@@ -352,10 +353,10 @@ terrain:
 name:  Farm
 
 legend:
- '.': dirt
+ '.': soil
  '#': wooden fence
  '+': closed door
- 'x': tilled dirt
+ 'x': tilled soil
  '=': wall
  '|': gate
  '-': gate

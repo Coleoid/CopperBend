@@ -85,13 +85,26 @@ namespace CopperBend.Model
         }
 
         //  IDefender
-        public IDefenseMethod GetDefenseMethod(IAttackMethod method)
+        public IDefenseMethod GetDefenseMethod(IAttackMethod attackMethod)
         {
-            throw new NotImplementedException();
+            var defenseMethod = new DefenseMethod();
+
+            if (IsPlayer) //0.1  Nice. and. Crispy.
+            {
+                defenseMethod.Resistances.Add("vital.blight", "4/5");
+                defenseMethod.Resistances.Add("default", "1/5");
+            }
+            else
+            {
+                defenseMethod.Resistances.Add("default", "1/5");
+            }
+
+            return defenseMethod;
         }
+
         public List<IModifier> GetDefenseModifiers(IAttacker attacker, IAttackMethod method)
         {
-            throw new NotImplementedException();
+            return new List<IModifier>();
         }
 
 

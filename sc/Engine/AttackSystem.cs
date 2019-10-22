@@ -140,7 +140,7 @@ Apply post-attack effects
             damages = RollDamages(attack.AttackMethod);
 
             // = 3.B.
-            ResistDamages(damages, attack.DefenseMethod);
+            ResistDamages(damages, attack.Defender, attack.DefenseMethod);
 
             // = 5.A.
             RegisterDamage(attack.Defender, damages);
@@ -235,7 +235,7 @@ Apply post-attack effects
         }
         //0.0.DMG:  Our hero is oddly resistant to the effects of the blight
 
-        public void ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
+        public void ResistDamages(IEnumerable<AttackDamage> damages, IDefender defender, IDefenseMethod defense)
         {
             Dictionary<string, string> drs = defense?.Resistances;
             if (drs == null)

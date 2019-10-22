@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using log4net;
 using log4net.Config;
@@ -9,6 +10,9 @@ namespace CopperBend.Application
 {
     public class Program
     {
+        [Option("-d|--Debug")]
+        public bool LaunchDebugger { get; }
+
         [Option("-t|--Test")]
         public bool TestMode { get; }
 
@@ -22,6 +26,8 @@ namespace CopperBend.Application
 
         public void OnExecute()
         {
+            if (LaunchDebugger && !Debugger.IsAttached) Debugger.Launch();
+
             ILog log;
             var repo = LogManager.CreateRepository("CB");
             XmlConfigurator.Configure(repo, new FileInfo("sc.log.config"));

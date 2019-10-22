@@ -244,9 +244,8 @@ namespace CopperBend.Persist
 
                         bool isD = symbol.CompareTo("0") > -1 && symbol.CompareTo("9") < 1;
                         int extent = isD ? int.Parse(symbol) : 0;
-
-
-                        map.BlightMap.AddItem(new AreaBlight {Health = extent}, (x + x_off, y + y_off));
+                        if (extent > 0)
+                            map.BlightMap.AddItem(new AreaBlight {Health = extent}, (x + x_off, y + y_off));
                     }
                 }
             }

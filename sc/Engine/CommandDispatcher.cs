@@ -149,7 +149,8 @@ namespace CopperBend.Engine
         private bool Do_Attack(IBeing being, IDefender target, Coord position)
         {
             var attackMethod = being.GetAttackMethod(target);
-            AttackSystem.AddAttack(being, attackMethod, target, null); //0.1: need defense
+            var defenseMethod = target.GetDefenseMethod(attackMethod);
+            AttackSystem.AddAttack(being, attackMethod, target, defenseMethod);
             AttackSystem.ResolveAttackQueue();
 
             GameState.MarkDirtyCoord(position);

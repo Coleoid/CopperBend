@@ -50,8 +50,13 @@ namespace CopperBend.Model
         //  IDefender
         public IDefenseMethod GetDefenseMethod(IAttackMethod method)
         {
-            throw new NotImplementedException();
+            var dm = new DefenseMethod();
+            dm.Resistances.Add("physical", "1/3 +2 ..6");
+            dm.Resistances.Add("default", "1/4 +1 ..6");
+
+            return dm;
         }
+
         public List<IModifier> GetDefenseModifiers(IAttacker attacker, IAttackMethod method)
         {
             throw new NotImplementedException();

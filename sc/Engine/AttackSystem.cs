@@ -114,7 +114,7 @@ Apply post-attack effects
         
         public void ResolveAttackQueue()
         {
-            while (AttackQueue.Peek() != null)
+            while (AttackQueue.Count() > 0)
             {
                 ResolveAttack(AttackQueue.Dequeue());
             }
@@ -140,7 +140,7 @@ Apply post-attack effects
             damages = RollDamages(attack.AttackMethod);
 
             // = 3.B.
-            ResistDamages(damages, attack.Defender, attack.DefenseMethod);
+            ResistDamages(damages, attack.DefenseMethod);
 
             // = 5.A.
             RegisterDamage(attack.Defender, damages);
@@ -233,9 +233,10 @@ Apply post-attack effects
         {
             return Dice.Roll(effect.DamageRange);
         }
+
         //0.0.DMG:  Our hero is oddly resistant to the effects of the blight
 
-        public void ResistDamages(IEnumerable<AttackDamage> damages, IDefender defender, IDefenseMethod defense)
+        public void ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
         {
             Dictionary<string, string> drs = defense?.Resistances;
             if (drs == null)

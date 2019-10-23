@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CopperBend.Model;
+using Microsoft.Xna.Framework;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
@@ -123,8 +124,8 @@ namespace CopperBend.Engine.Tests
             }
 
             // Technically a nondeterministic test, so, technically, evil.
-            Assert.That(rolled_min, "the odds of not rolling min in 1000 are 5.8e-13, or 1.7 trillion to one.");
-            Assert.That(rolled_max, "the odds of not rolling max in 1000 are 5.8e-13, or 1.7 trillion to one.");
+            Assert.That(rolled_min, "the probability of not rolling min in 1000 is 5.8e-13, or odds of 1.7 trillion to one.");
+            Assert.That(rolled_max, "the probability of not rolling max in 1000 is 5.8e-13, or odds of 1.7 trillion to one.");
         }
 
         [Test]
@@ -152,8 +153,9 @@ namespace CopperBend.Engine.Tests
 
         [TestCase(9, "energetic.lightning", 4)]
         [TestCase(9, "magical", 4)]
-        [TestCase(9, "energetic.lightning", 4)]
-        public void Damage_resistance_when_not_otherwise_specified(int initial, string type, int expected)
+        [TestCase(9, "vital", 4)]
+        [TestCase(9, "sausage", 4)]  //0.2: would be nice if this broke, to rule out typos.
+        public void Default_resistance_when_type_has_no_match(int initial, string type, int expected)
         {
             var asys = new AttackSystem(null);
             List<AttackDamage> damages = new List<AttackDamage>
@@ -164,6 +166,46 @@ namespace CopperBend.Engine.Tests
             asys.ResistDamages(damages, ring_armor);  //  default for ring is 1/2 ..5
 
             Assert.That(damages[0].Current, Is.EqualTo(expected));
+        }
+
+        // Note, our hero is strong against all vital.blight damage.
+        [TestCase("physical.impact.point", true)]
+        [TestCase("physical.impact.blunt", true)]
+        [TestCase("energetic.fire", false)]
+        public void Blight_splashback(string damageType, bool willSplashBack)
+        {
+            // Anyone directly physically assaulting AreaBlight is 
+            // hit with immediate vital.blight.toxin damage.
+            
+            var asys = new AttackSystem(null);
+
+            var flameRat = new Being(Color.Red, Color.Black, 'r');
+            var am = new AttackMethod(damageType, "1d3 +2");
+            var blight = new AreaBlight();
+            Attack attack = new Attack
+            {
+                Attacker = flameRat,
+                AttackMethod = am,
+                Defender = blight,
+                DefenseMethod = blight.GetDefenseMethod(am)
+            };
+
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
+
+            // There are only a few odd damage cases, for now, so
+            // stuffing them in a little zoo should keep them (and us) safe.
+            asys.CheckForSpecials(attack);
+
+            int newAttackCount = willSplashBack ? 1 : 0;
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(newAttackCount));
+            if (!willSplashBack) return;
+
+            var newAttack = asys.AttackQueue.Dequeue();
+            var newAM = newAttack.AttackMethod;
+            var newAE = newAM.AttackEffects[0];
+            Assert.That(newAE.GetType, Is.EqualTo("vital.blight.toxin"));
+            Assert.That(newAttack.Defender, Is.EqualTo(flameRat));
+            Assert.That(newAttack.Attacker, Is.EqualTo(blight));
         }
     }
 }

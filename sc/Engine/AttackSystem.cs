@@ -135,6 +135,7 @@ Apply post-attack effects
             //  fatigue multiplier applied in step 5
             //  ...these go way beyond modifying the AttackMethod.  Time to think again.
 
+            CheckForSpecials(attack);
 
             // = 2.B. Roll Damage
             damages = RollDamages(attack.AttackMethod);
@@ -144,6 +145,11 @@ Apply post-attack effects
 
             // = 5.A.
             RegisterDamage(attack.Defender, damages);
+        }
+
+        public void CheckForSpecials(Attack attack)
+        {
+
         }
 
         public void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages)
@@ -173,7 +179,7 @@ Apply post-attack effects
                     if (being.IsPlayer)
                     {
                         //1.+: Game modes (agent of power, hardcore, savescummer)
-                        Panel.WriteLine("Guess I'll die.");
+                        Panel.WriteLine("I die.");
                         Panel.More();
                         Panel.GameOver(being);
                         return;
@@ -233,8 +239,6 @@ Apply post-attack effects
         {
             return Dice.Roll(effect.DamageRange);
         }
-
-        //0.0.DMG:  Our hero is oddly resistant to the effects of the blight
 
         public void ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
         {

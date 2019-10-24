@@ -55,7 +55,7 @@ namespace CopperBend.Persist
         public AbstractGenerator RngFromBase64(string rng_b64)
         {
             byte[] rng_bytes = Convert.FromBase64String(rng_b64);
-            var rng = (XorShift128Generator)ByteArrayToObject(rng_bytes);
+            var rng = (NR3Generator)ByteArrayToObject(rng_bytes);
             return rng;
         }
 

@@ -49,8 +49,8 @@ namespace CopperBend.Persist.Tests
 
             //TODO: slightly more muscular checks once these books go beyond placeholders
             Assert.That(newCompendium.Herbal, Is.Not.Null);
-            Assert.That(newCompendium.SocialRegister, Is.Not.Null);
-            Assert.That(newCompendium.Dramaticon, Is.Not.Null);
+            //Assert.That(newCompendium.SocialRegister, Is.Not.Null);
+            //Assert.That(newCompendium.Dramaticon, Is.Not.Null);
         }
 
         [Test]
@@ -65,9 +65,9 @@ namespace CopperBend.Persist.Tests
             Assert.That(newBook, Is.TypeOf<TomeOfChaos>());
             var newTome = (TomeOfChaos)newBook;
             Assert.That(newTome.TopSeed, Is.EqualTo("floop"));
-            Assert.That(newTome.TopGenerator, Is.TypeOf<XorShift128Generator>());
-            Assert.That(newTome.LearnableGenerator, Is.TypeOf<XorShift128Generator>());
-            Assert.That(newTome.MapTopGenerator, Is.TypeOf<XorShift128Generator>());
+            Assert.That(newTome.TopGenerator, Is.TypeOf<NR3Generator>());
+            Assert.That(newTome.LearnableGenerator, Is.TypeOf<NR3Generator>());
+            Assert.That(newTome.MapTopGenerator, Is.TypeOf<NR3Generator>());
 
             for (int i = 0; i < 10; i++)
             {

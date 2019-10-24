@@ -33,12 +33,12 @@ namespace CopperBend.Fabric
                 var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(TopSeed));
                 TopSeedInt = BitConverter.ToInt32(hashed, 0);
             }
-            TopGenerator = new XorShift128Generator(TopSeedInt);
+            TopGenerator = new NR3Generator(TopSeedInt);
 
             // The order of calls to a generator matters for
             // repeatability, which affects saved games and debug dumps.
-            LearnableGenerator = new XorShift128Generator(TopGenerator.Next());
-            MapTopGenerator = new XorShift128Generator(TopGenerator.Next());
+            LearnableGenerator = new NR3Generator(TopGenerator.Next());
+            MapTopGenerator = new NR3Generator(TopGenerator.Next());
         }
 
         public int LearnableRndNext()

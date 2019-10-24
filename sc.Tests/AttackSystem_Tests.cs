@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 using CopperBend.Model;
 using Microsoft.Xna.Framework;
 using NSubstitute;
@@ -198,8 +199,6 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
-            // There are only a few odd damage cases, for now, so
-            // stuffing them in a little zoo should keep them (and us) safe.
             asys.CheckForSpecials(attack);
 
             int newAttackCount = willSplashBack ? 1 : 0;
@@ -212,6 +211,84 @@ namespace CopperBend.Engine.Tests
             Assert.That(newAE.Type, Is.EqualTo("vital.blight.toxin"));
             Assert.That(newAttack.Defender, Is.EqualTo(flameRat));
             Assert.That(newAttack.Attacker, Is.EqualTo(blight));
+        }
+
+        [Test]
+        public void Nature_strikes_the_blight_through_our_hero()
+        {
+            var asys = new AttackSystem(null);
+
+            var player = new Being(Color.LawnGreen, Color.Black, '@');
+            player.IsPlayer = true;
+            var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
+            var blight = new AreaBlight();
+            Attack attack = new Attack
+            {
+                Attacker = player,
+                AttackMethod = am,
+                Defender = blight,
+                DefenseMethod = blight.GetDefenseMethod(am)
+            };
+
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
+
+            asys.BlightMap = new BlightMap();
+            asys.CheckForSpecials(attack);
+
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(2));
+
+            var splashBack = asys.AttackQueue.Dequeue();
+            var newAttack = asys.AttackQueue.Dequeue();
+            var newAM = newAttack.AttackMethod;
+            var newAE = newAM.AttackEffects[0];
+            Assert.That(newAE.Type, Is.EqualTo("vital.nature.itself"));
+            Assert.That(newAttack.Defender, Is.EqualTo(blight));
+            Assert.That(newAttack.Attacker, Is.EqualTo(player));
+        }
+
+        [Test]
+        public void Nature_strikes_neighboring_blight_through_our_hero()
+        {
+
+            var player = new Being(Color.LawnGreen, Color.Black, '@');
+            player.IsPlayer = true;
+            var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
+            var blight = new AreaBlight();
+            Attack attack = new Attack
+            {
+                Attacker = player,
+                AttackMethod = am,
+                Defender = blight,
+                DefenseMethod = blight.GetDefenseMethod(am)
+            };
+
+            var blightMap = new BlightMap();
+            //...add two neighbor ABs, and one further away
+            var nbor_1 = new AreaBlight();
+            var nbor_2 = new AreaBlight();
+            var stranger = new AreaBlight();
+            blightMap.AddItem(blight, (2, 2));
+            blightMap.AddItem(nbor_1, (2, 3));
+            blightMap.AddItem(nbor_2, (3, 1));
+            blightMap.AddItem(stranger, (8, 2));
+
+            var asys = new AttackSystem(null);
+            asys.BlightMap = blightMap;
+
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
+
+            asys.CheckForSpecials(attack);
+
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(4));
+
+            var splashBack = asys.AttackQueue.Dequeue();
+            var newAttack = asys.AttackQueue.Dequeue();
+            Assert.That(newAttack.Defender, Is.EqualTo(blight));
+
+            newAttack = asys.AttackQueue.Dequeue();
+            Assert.That(newAttack.Defender, Is.EqualTo(nbor_1));
+            newAttack = asys.AttackQueue.Dequeue();
+            Assert.That(newAttack.Defender, Is.EqualTo(nbor_2));
         }
     }
 }

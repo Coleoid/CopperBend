@@ -138,6 +138,10 @@ Apply post-attack effects
             RegisterDamage(attack.Defender, damages);
         }
 
+        /// <summary>
+        /// There are only a few odd damage cases, for now, so
+        /// stuffing them in a little zoo should keep them (and us) safe.
+        /// </summary>
         public void CheckForSpecials(Attack attack)
         {
             //  Blight splashback
@@ -158,6 +162,36 @@ Apply post-attack effects
                 });
             }
 
+            //  Nature strikes the blight through our hero
+            if (attack.Defender is AreaBlight areaBlight &&
+                attack.Attacker is Being being &&
+                being.IsPlayer &&
+                attack.AttackMethod.AttackEffects.Any(ae =>
+                ae.Type.StartsWith("physical"))
+            )
+            {
+                var newAM = new AttackMethod("vital.nature.itself", "3d3");
+                AttackQueue.Enqueue(new Attack
+                {
+                    Attacker = being,
+                    Defender = areaBlight,
+                    AttackMethod = newAM,
+                    DefenseMethod = areaBlight.GetDefenseMethod(newAM)
+                });
+
+                foreach(AreaBlight neighborBlight in NeighborBlightsOf(areaBlight))
+                {
+                    AttackQueue.Enqueue(new Attack
+                    {
+                        Attacker = being,
+                        Defender = neighborBlight,
+                        AttackMethod = newAM,
+                        DefenseMethod = neighborBlight.GetDefenseMethod(newAM)
+                    });
+                }
+            }
+
+
             //TODO:  Check if the attacker has any modifiers to the AttackMethod
             //  e.g., Aura of Smite Sauce:  +2 to Impact_blunt, +2 against Unholy
             //  benefits apply after rolling damage?
@@ -166,9 +200,34 @@ Apply post-attack effects
             //  defense debuff applied during resist_damages
             //  fatigue multiplier applied in step 5
             //  ...these go way beyond modifying the AttackMethod.  Time to think again.
+        }
 
+        public IEnumerable<IAreaBlight> NeighborBlightsOf(AreaBlight areaBlight)
+        {
+            var nbors = new List<IAreaBlight>();
+            var coord = BlightMap.SpatialMap.GetPosition(areaBlight);
 
+            IAreaBlight nbor = null;
 
+            //  Hang on, I'm about to get reeeal stupid.
+            nbor = BlightMap.SpatialMap.GetItem(coord.X - 1, coord.Y - 1);
+            if (nbor != null) nbors.Add(nbor);
+            nbor = BlightMap.SpatialMap.GetItem(coord.X - 1, coord.Y);
+            if (nbor != null) nbors.Add(nbor);
+            nbor = BlightMap.SpatialMap.GetItem(coord.X - 1, coord.Y + 1);
+            if (nbor != null) nbors.Add(nbor);
+            nbor = BlightMap.SpatialMap.GetItem(coord.X, coord.Y - 1);
+            if (nbor != null) nbors.Add(nbor);
+            nbor = BlightMap.SpatialMap.GetItem(coord.X, coord.Y + 1);
+            if (nbor != null) nbors.Add(nbor);
+            nbor = BlightMap.SpatialMap.GetItem(coord.X + 1, coord.Y - 1);
+            if (nbor != null) nbors.Add(nbor);
+            nbor = BlightMap.SpatialMap.GetItem(coord.X + 1, coord.Y);
+            if (nbor != null) nbors.Add(nbor);
+            nbor = BlightMap.SpatialMap.GetItem(coord.X + 1, coord.Y + 1);
+            if (nbor != null) nbors.Add(nbor);
+
+            return nbors;
         }
 
         public void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages)
@@ -298,6 +357,8 @@ Apply post-attack effects
         #region Messages
 
         Dictionary<Messages, bool> SeenMessages { get; set; } = new Dictionary<Messages, bool>();
+        public BlightMap BlightMap { get; set; }
+
         /// <summary> First time running across this message in this game run? </summary>
         public bool FirstTimeFor(Messages key)
         {

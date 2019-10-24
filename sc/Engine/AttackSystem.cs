@@ -140,7 +140,23 @@ Apply post-attack effects
 
         public void CheckForSpecials(Attack attack)
         {
-
+            //  Blight splashback
+            if (attack.Defender is AreaBlight &&
+                attack.AttackMethod.AttackEffects.Any(ae => 
+                ae.Type.StartsWith("physical"))
+            )
+            {
+                var newAttacker = (IAttacker)attack.Defender;
+                var newDefender = (IDefender)attack.Attacker;
+                var newAM = new AttackMethod("vital.blight.toxin", "3d3");
+                AttackQueue.Enqueue(new Attack
+                {
+                    Attacker = newAttacker,
+                    Defender = newDefender,
+                    AttackMethod = newAM,
+                    DefenseMethod = newDefender.GetDefenseMethod(newAM)
+                });
+            }
 
             //TODO:  Check if the attacker has any modifiers to the AttackMethod
             //  e.g., Aura of Smite Sauce:  +2 to Impact_blunt, +2 against Unholy
@@ -150,6 +166,8 @@ Apply post-attack effects
             //  defense debuff applied during resist_damages
             //  fatigue multiplier applied in step 5
             //  ...these go way beyond modifying the AttackMethod.  Time to think again.
+
+
 
         }
 

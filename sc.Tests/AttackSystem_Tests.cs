@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using CopperBend.Contract;
 using CopperBend.Model;
 using Microsoft.Xna.Framework;
+using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
@@ -60,6 +62,10 @@ namespace CopperBend.Engine.Tests
         [SetUp]
         public void SetUp()
         {
+            Being.IDGenerator = new GoRogue.IDGenerator();
+            Being.EntityFactory = Substitute.For<IEntityFactory>();
+            AreaBlight.IDGenerator = Being.IDGenerator;
+
             // Torch as club, crunch and burn
             tac = new AttackMethod();
             tac_impact = new AttackEffect
@@ -176,7 +182,7 @@ namespace CopperBend.Engine.Tests
         {
             // Anyone directly physically assaulting AreaBlight is 
             // hit with immediate vital.blight.toxin damage.
-            
+            //0.2: ranged physical damage should avoid splashback.
             var asys = new AttackSystem(null);
 
             var flameRat = new Being(Color.Red, Color.Black, 'r');
@@ -203,7 +209,7 @@ namespace CopperBend.Engine.Tests
             var newAttack = asys.AttackQueue.Dequeue();
             var newAM = newAttack.AttackMethod;
             var newAE = newAM.AttackEffects[0];
-            Assert.That(newAE.GetType, Is.EqualTo("vital.blight.toxin"));
+            Assert.That(newAE.Type, Is.EqualTo("vital.blight.toxin"));
             Assert.That(newAttack.Defender, Is.EqualTo(flameRat));
             Assert.That(newAttack.Attacker, Is.EqualTo(blight));
         }

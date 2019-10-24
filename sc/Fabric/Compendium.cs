@@ -7,7 +7,6 @@ namespace CopperBend.Fabric
 {
     public class Compendium : IBook
     {
-        public string BookType { get; set; } = "Compendium";
         public TomeOfChaos TomeOfChaos { get; set; }
         public Herbal Herbal { get; set; }
         public SocialRegister SocialRegister { get; set; }
@@ -19,7 +18,6 @@ namespace CopperBend.Fabric
     // in this run.  Also tracks changes as plants become malleable.
     public class Herbal : IBook
     {
-        public string BookType { get; set; } = "Herbal";
         public Dictionary<uint, PlantDetails> PlantByID { get; internal set; }
         public Dictionary<string, PlantDetails> PlantByName { get; internal set; }
 
@@ -39,14 +37,12 @@ namespace CopperBend.Fabric
     // All significant beings, their current state and relationships
     public class SocialRegister : IBook
     {
-        public string BookType { get; set; } = "SocialRegister";
     }
 
     // Stories, scenes, quests, visions, dreams
     // No plan for this to change per run, so likely not in save file.
     public class Dramaticon : IBook
     {
-        public string BookType { get; set; } = "Dramaticon";
     }
 
     #region ===  Second wave below, current plans don't immediately need these
@@ -54,13 +50,11 @@ namespace CopperBend.Fabric
     // Creatures
     public class Bestiary : IBook
     {
-        public string BookType { get; set; } = "Bestiary";
     }
 
     // Recipes and processes to create and transform
     public class Cookbook : IBook
     {
-        public string BookType { get; set; } = "Cookbook";
     }
 
     // Items, things, and stuff
@@ -68,7 +62,6 @@ namespace CopperBend.Fabric
     // and components instead of classes.
     public class ItemDictionary : IBook  // the lamest of names
     {
-        public string BookType { get; set; } = "NamestOfLames";
     }
     #endregion
 }

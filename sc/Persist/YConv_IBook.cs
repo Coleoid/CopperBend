@@ -20,32 +20,30 @@ namespace CopperBend.Persist
         {
             emitter.Emit(new MappingStart());
 
-            IBook book = (IBook)value;
-
-            switch (book.BookType)  //0.2: obviate BookType
+            switch ((IBook)value)
             {
-            case "Compendium":
-                EmitCompendium(emitter, book);
+            case Compendium compendium:
+                EmitCompendium(emitter, compendium);
                 break;
 
-            case "TomeOfChaos":
-                EmitTome(emitter, book);
+            case TomeOfChaos tome:
+                EmitTome(emitter, tome);
                 break;
 
-            case "Herbal":
-                EmitHerbal(emitter, book);
+            case Herbal herbal:
+                EmitHerbal(emitter, herbal);
                 break;
 
-            case "SocialRegister":
-                EmitSocialRegister(emitter, book);
+            case SocialRegister socialRegister:
+                EmitSocialRegister(emitter, socialRegister);
                 break;
 
-            case "Dramaticon":
-                EmitDramaticon(emitter, book);
+            case Dramaticon dramaticon:
+                EmitDramaticon(emitter, dramaticon);
                 break;
 
             default:
-                throw new NotImplementedException($"Not ready to Write book type [{book.BookType}].");
+                throw new NotImplementedException($"Not ready to Write book type [{value.GetType().Name}].");
             }
 
             emitter.Emit(new MappingEnd());

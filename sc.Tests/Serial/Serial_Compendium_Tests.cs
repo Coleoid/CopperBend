@@ -44,7 +44,6 @@ namespace CopperBend.Persist.Tests
 
             Assert.That(newBook, Is.TypeOf<Compendium>());
             var newCompendium = (Compendium)newBook;
-            Assert.That(newCompendium.BookType, Is.EqualTo("Compendium"));
             Assert.That(newCompendium.TomeOfChaos.TopSeed, Is.EqualTo("gloop"));
 
             //TODO: slightly more muscular checks once these books go beyond placeholders

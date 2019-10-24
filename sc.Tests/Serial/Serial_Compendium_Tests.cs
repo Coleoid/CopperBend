@@ -36,7 +36,6 @@ namespace CopperBend.Persist.Tests
                 Dramaticon = new Dramaticon(),
             };
 
-            //if (!Debugger.IsAttached) Debugger.Launch();
             var yaml = _serializer.Serialize(compendium);
 
             Assert.That(yaml, Is.Not.Null);
@@ -57,8 +56,6 @@ namespace CopperBend.Persist.Tests
         [Test]
         public void CRT_TomeOfChaos()
         {
-            //if (!Debugger.IsAttached) Debugger.Launch();
-
             var tome = new TomeOfChaos("floop");
             var yaml = _serializer.Serialize(tome);
 

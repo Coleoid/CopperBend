@@ -126,15 +126,6 @@ Apply post-attack effects
         {
             IEnumerable<AttackDamage> damages;
 
-            //TODO:  Check if the attacker has any modifiers to the AttackMethod
-            //  e.g., Aura of Smite Sauce:  +2 to Impact_blunt, +2 against Unholy
-            //  benefits apply after rolling damage?
-            //  needs to query defender for 'against' matches
-            //  e.g., Rage:  x 1.5 damage, x .75 defense, x 2.5 fatigue
-            //  defense debuff applied during resist_damages
-            //  fatigue multiplier applied in step 5
-            //  ...these go way beyond modifying the AttackMethod.  Time to think again.
-
             CheckForSpecials(attack);
 
             // = 2.B. Roll Damage
@@ -149,6 +140,16 @@ Apply post-attack effects
 
         public void CheckForSpecials(Attack attack)
         {
+
+
+            //TODO:  Check if the attacker has any modifiers to the AttackMethod
+            //  e.g., Aura of Smite Sauce:  +2 to Impact_blunt, +2 against Unholy
+            //  benefits apply after rolling damage?
+            //  needs to query defender for 'against' matches
+            //  e.g., Rage:  x 1.5 damage, x .75 defense, x 2.5 fatigue
+            //  defense debuff applied during resist_damages
+            //  fatigue multiplier applied in step 5
+            //  ...these go way beyond modifying the AttackMethod.  Time to think again.
 
         }
 

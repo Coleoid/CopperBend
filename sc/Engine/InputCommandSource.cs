@@ -88,10 +88,10 @@ namespace CopperBend.Engine
             var newPosition = Controls.CoordInDirection(being.Position, dir);
             
             var targetBlight = GameState.Map.BlightMap.GetItem(newPosition);
-            if (targetBlight?.Health > 0)
+            if (targetBlight != null)
             {
                 //0.1.STORY  improve impact of this landmark event
-                if (!being.HasClearedBlightBefore)
+                if (!GameState.Story.HasClearedBlight)
                 {
                     blightDirection = dir;
                     Controls.WriteLine("Lookin' at the scum covering the ground sets my teeth on edge.  I'm growling.");
@@ -112,6 +112,7 @@ namespace CopperBend.Engine
                 return CommandIncomplete;
             }
 
+            GameState.Story.HasClearedBlight = true;
             WriteLine("Yes.  Now.");
             return new Command(CmdAction.Direction, blightDirection);
         }

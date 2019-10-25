@@ -23,6 +23,9 @@ namespace CopperBend.Engine
 
             var herbal = InitHerbal();
             ConnectHerbal(herbal);
+
+            var story = InitStory();
+            ConnectStory(story);
         }
 
         public static TomeOfChaos InitTome(string topSeed)
@@ -104,6 +107,16 @@ namespace CopperBend.Engine
         {
             Compendium.Herbal = herbal;
             Describer.Herbal = herbal;
+        }
+
+        public static Dramaticon InitStory()
+        {
+            return new Dramaticon();
+        }
+
+        public static void ConnectStory(Dramaticon story)
+        {
+            Compendium.Dramaticon = story;
         }
     }
 }

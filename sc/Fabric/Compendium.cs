@@ -43,6 +43,7 @@ namespace CopperBend.Fabric
     // No plan for this to change per run, so likely not in save file.
     public class Dramaticon : IBook
     {
+        public bool HasClearedBlight { get; internal set; }
     }
 
     #region ===  Second wave below, current plans don't immediately need these

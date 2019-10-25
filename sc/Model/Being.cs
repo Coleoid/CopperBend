@@ -115,8 +115,6 @@ namespace CopperBend.Model
 
         public bool IsPlayer { get; set; }
         
-        public bool HasClearedBlightBefore { get; set; }
-        
         //  Inventory has extra game effects, so I want to be sure I
         //  don't casually add/remove directly from the list, from outside.
         private List<IItem> InventoryList;

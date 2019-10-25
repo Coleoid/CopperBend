@@ -32,7 +32,6 @@ namespace CopperBend.Contract
         IItem Gloves { get; }
 
         void Wield(IItem item);
-        bool HasClearedBlightBefore { get; set; }  //TODO: Subsume into messaging
         void GiveCommand();
         void Fatigue(int amount);
     }

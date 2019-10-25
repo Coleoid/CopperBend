@@ -118,6 +118,7 @@ namespace CopperBend.Engine
             {
                 Player = Player,
                 Map = FullMap,
+                Story = Engine.Compendium.Dramaticon,
             };
 
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog, log)

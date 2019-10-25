@@ -4,7 +4,7 @@ using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {
-    public class SpaceMap : SerializableSpatialMap<ISpace>, ISpaceMap
+    public class SpaceMap : SpatialMap<ISpace>, ISpaceMap
     {
         public static Dictionary<string, TerrainType> TerrainTypes { get; set; }
         public static TerrainType TilledSoil => TerrainTypes[Terrains.SoilTilled];

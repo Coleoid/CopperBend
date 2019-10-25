@@ -1,14 +1,9 @@
 ﻿using CopperBend.Contract;
+using GoRogue;
 
 namespace CopperBend.Fabric
 {
-    public class BlightMap : SerializableSpatialMap<IAreaBlight>, IBlightMap
+    public class BlightMap : SpatialMap<IAreaBlight>, IBlightMap
     {
-        public string Name { get; set; }
-
-        public BlightMap()
-            : base()
-        {
-        }
     }
 }

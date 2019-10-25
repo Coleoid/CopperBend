@@ -2,6 +2,7 @@
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using log4net;
 using Microsoft.Xna.Framework;
 using NSubstitute;
 using NUnit.Framework;
@@ -59,10 +60,12 @@ namespace CopperBend.Engine.Tests
         DefenseMethod leather_armor;
         DefenseMethod ring_armor;
 
+        ILog __log; 
 
         [SetUp]
         public void SetUp()
         {
+            __log = Substitute.For<ILog>();
             Being.IDGenerator = new GoRogue.IDGenerator();
             Being.EntityFactory = Substitute.For<IEntityFactory>();
             AreaBlight.IDGenerator = Being.IDGenerator;
@@ -114,11 +117,17 @@ namespace CopperBend.Engine.Tests
             //0.2: Keep the tree of damage types in data, and type-check attacks/defenses at load time...
         }
 
+        [Test]
+        public void AAA_Gather_Startup_Costs()
+        {
+            // Because AttackSystem_Tests is alphabetically first...
+            __log.Info("This also seems to gather a bit more init cost.");
+        }
 
         [Test]
         public void Damage_rolls_within_expected_ranges()
         {
-            var asys = new AttackSystem(null);
+            var asys = new AttackSystem(null, __log);
             bool rolled_min = false;
             bool rolled_max = false;
             for (int i = 0; i < 1000; i++)
@@ -138,7 +147,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Can_resist_a_set_of_AttackDamages()
         {
-            var asys = new AttackSystem(null);
+            var asys = new AttackSystem(null, __log);
             List<AttackDamage> damages = new List<AttackDamage>
             {
                 new AttackDamage(8, "physical.impact.blunt"),
@@ -164,7 +173,7 @@ namespace CopperBend.Engine.Tests
         [TestCase(9, "sausage", 4)]  //0.2: would be nice if this broke, to rule out typos.
         public void Default_resistance_when_type_has_no_match(int initial, string type, int expected)
         {
-            var asys = new AttackSystem(null);
+            var asys = new AttackSystem(null, __log);
             List<AttackDamage> damages = new List<AttackDamage>
             {
                 new AttackDamage(initial, type),
@@ -184,7 +193,7 @@ namespace CopperBend.Engine.Tests
             // Anyone directly physically assaulting AreaBlight is 
             // hit with immediate vital.blight.toxin damage.
             //0.2: ranged physical damage should avoid splashback.
-            var asys = new AttackSystem(null);
+            var asys = new AttackSystem(null, __log);
 
             var flameRat = new Being(Color.Red, Color.Black, 'r');
             var am = new AttackMethod(damageType, "1d3 +2");
@@ -216,7 +225,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Nature_strikes_the_blight_through_our_hero()
         {
-            var asys = new AttackSystem(null);
+            var asys = new AttackSystem(null, __log);
 
             var player = new Being(Color.LawnGreen, Color.Black, '@');
             player.IsPlayer = true;
@@ -262,17 +271,17 @@ namespace CopperBend.Engine.Tests
                 DefenseMethod = blight.GetDefenseMethod(am)
             };
 
-            var blightMap = new BlightMap();
+            BlightMap blightMap = new BlightMap();
             //...add two neighbor ABs, and one further away
             var nbor_1 = new AreaBlight();
             var nbor_2 = new AreaBlight();
             var stranger = new AreaBlight();
-            blightMap.AddItem(blight, (2, 2));
-            blightMap.AddItem(nbor_1, (2, 3));
-            blightMap.AddItem(nbor_2, (3, 1));
-            blightMap.AddItem(stranger, (8, 2));
+            blightMap.Add(blight, (2, 2));
+            blightMap.Add(nbor_1, (2, 3));
+            blightMap.Add(nbor_2, (3, 1));
+            blightMap.Add(stranger, (8, 2));
 
-            var asys = new AttackSystem(null);
+            var asys = new AttackSystem(null, __log);
             asys.BlightMap = blightMap;
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));

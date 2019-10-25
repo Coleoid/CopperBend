@@ -1,7 +1,6 @@
 ﻿using System;
 using log4net;
-using log4net.Config;
-using log4net.Repository;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace CopperBend.Engine.Tests
@@ -11,38 +10,18 @@ namespace CopperBend.Engine.Tests
     public class Schedule_Tests
     {
         private Schedule schedule;
-
+        private ILog __log;
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            bool foundRepo = false;
-            var repos = LogManager.GetAllRepositories();
-            foreach (var r in repos)
-            {
-                if (r.Name == "CB") foundRepo = true;
-            }
-
-            ILoggerRepository repo = null;
-            if (foundRepo)
-            {
-                repo = LogManager.GetRepository("CB");
-            }
-            else
-            {
-                repo = LogManager.CreateRepository("CB");
-                BasicConfigurator.Configure(repo);
-            }
-            // nfw this should be this difficult.
-
-            var log = LogManager.GetLogger("CB", "CB");
-
-            Engine.Cosmogenesis("monobloc");
+            __log = Substitute.For<ILog>();
+            Engine.Cosmogenesis("monobloc delenda est!");
         }
 
         [SetUp]
         public void SetUp()
         {
-            schedule = new Schedule();
+            schedule = new Schedule(__log);
         }
 
         [Test]

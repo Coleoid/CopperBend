@@ -19,7 +19,7 @@ namespace CopperBend.Engine
 {
     public partial class Engine : ContainerConsole
     {
-        private ILog log;
+        private readonly ILog log;
 
         public Size GameSize;
         public Size MapSize;
@@ -38,10 +38,10 @@ namespace CopperBend.Engine
         private CommandDispatcher Dispatcher;
 
         #region Init
-        public Engine(int gameWidth, int gameHeight, string topSeed = null)
+        public Engine(int gameWidth, int gameHeight, ILog logger, string topSeed = null)
             : base()
         {
-            log = LogManager.GetLogger("CB", "CB.Engine");
+            log = logger;
 
             IsVisible = true;
             IsFocused = true;
@@ -96,11 +96,11 @@ namespace CopperBend.Engine
 
             Being.EntityFactory = new EntityFactory();
 
-            Schedule = new Schedule();
+            Schedule = new Schedule(log);
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             Schedule.AddAgent(Player, 12);
 
-            var builder = new UIBuilder(GameSize, null); //font
+            var builder = new UIBuilder(GameSize, null, log); //font
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
             Children.Add(MapWindow);
@@ -120,7 +120,7 @@ namespace CopperBend.Engine
                 Map = FullMap,
             };
 
-            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog)
+            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog, log)
             {
                 PushEngineMode = PushEngineMode,
                 PopEngineMode = PopEngineMode,
@@ -132,7 +132,7 @@ namespace CopperBend.Engine
                 More = this.More,
             };
 
-            Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher);
+            Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher, log);
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 

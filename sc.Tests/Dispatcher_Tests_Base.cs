@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using log4net;
-using log4net.Config;
-using log4net.Repository;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
 
+
 namespace CopperBend.Engine.Tests
 {
     public class Dispatcher_Tests_Base
     {
+        protected ILog __log = null;
         protected CommandDispatcher _dispatcher = null;
         protected ISchedule __schedule = null;
         protected GameState _gameState = null;
@@ -31,19 +30,7 @@ namespace CopperBend.Engine.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            var repos = LogManager.GetAllRepositories();
-            bool foundRepo = repos.Any(r => r.Name == "CB");
-
-            ILoggerRepository repo = null;
-            if (foundRepo)
-            {
-                repo = LogManager.GetRepository("CB");
-            }
-            else
-            {
-                repo = LogManager.CreateRepository("CB");
-                BasicConfigurator.Configure(repo);
-            }
+            __log = Substitute.For<ILog>();
 
             ttFloor = new TerrainType
             {
@@ -129,7 +116,7 @@ namespace CopperBend.Engine.Tests
             __describer = Substitute.For<IDescriber>();
             __messageOutput = Substitute.For<IMessageLogWindow>();
 
-            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput);
+            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput, __log);
             _dispatcher.ClearPendingInput = () => { };
 
             Being.EntityFactory = Substitute.For<IEntityFactory>();
@@ -147,7 +134,7 @@ namespace CopperBend.Engine.Tests
                     {
                         Terrain = isEdge ? ttWall : ttFloor
                     };
-                    spaceMap.AddItem(s, (x, y));
+                    spaceMap.Add(s, (x, y));
                 }
             }
             var sp = spaceMap.GetItem((3, 4));

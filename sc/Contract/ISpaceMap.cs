@@ -3,7 +3,7 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    public interface ISpaceMap
+    public interface ISpaceMap : ISpatialMap<ISpace>
     {
         int Height { get; set; }
         Coord PlayerStartPoint { get; set; }
@@ -19,6 +19,5 @@ namespace CopperBend.Contract
         void Till(ISpace space);
         bool OpenDoor(ISpace space);
         void SeeCoords(IEnumerable<Coord> newlySeen);
-        void AddItem(ISpace space, Coord coord);
     }
 }

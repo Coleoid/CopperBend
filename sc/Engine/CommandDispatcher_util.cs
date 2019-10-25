@@ -89,7 +89,7 @@ namespace CopperBend.Engine
             // remove from whichever map
             if (mote is IAreaBlight blight)
             {
-                BlightMap.RemoveItem(blight);
+                BlightMap.Remove(blight);
                 return true;
             }
 

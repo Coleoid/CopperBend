@@ -17,12 +17,12 @@ namespace CopperBend.Engine
         private readonly GameState GameState;
         private readonly IControlPanel Controls;
 
-        public InputCommandSource(Describer describer, GameState state, IControlPanel controls)
+        public InputCommandSource(Describer describer, GameState state, IControlPanel controls, ILog logger)
         {
             Describer = describer;
             GameState = state;
             Controls = controls;
-            log = LogManager.GetLogger("CB", "CB.InputCommandSource");
+            log = logger;
         }
 
         public bool InMultiStepCommand => NextStep != null;

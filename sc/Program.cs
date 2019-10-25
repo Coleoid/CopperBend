@@ -32,6 +32,7 @@ namespace CopperBend.Application
             var repo = LogManager.CreateRepository("CB");
             XmlConfigurator.Configure(repo, new FileInfo("sc.log.config"));
             log = LogManager.GetLogger("CB", "CB");
+            //log = repo.GetLogger("CB");
             log.Info("\n======================================");
             log.Info("Run started");
 
@@ -45,7 +46,7 @@ namespace CopperBend.Application
 
                 //  Engine is now a console, which cannot be created before .Run() below.
                 //  .OnInitialize must be set before .Run is called.
-                Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight, InitialSeed);
+                Game.OnInitialize = () => new Engine.Engine(gameWidth, gameHeight, log, InitialSeed);
                 Game.Instance.Window.Title = "Copper Bend";
                 Game.Instance.Run();
             }

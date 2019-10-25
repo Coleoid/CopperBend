@@ -5,6 +5,7 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using System.Linq;
+using log4net;
 
 namespace CopperBend.Engine
 {
@@ -89,11 +90,13 @@ Apply post-attack effects
 
     public class AttackSystem
     {
-        public AttackSystem(IControlPanel panel)
+        private readonly ILog log;
+        public AttackSystem(IControlPanel panel, ILog logger)
         {
             Panel = panel;
             Destroyed = new Queue<IDelible>();
             AttackQueue = new Queue<Attack>();
+            log = logger;
         }
 
         public IControlPanel Panel { get; set; }
@@ -145,17 +148,17 @@ Apply post-attack effects
         public void CheckForSpecials(Attack attack)
         {
             //  Blight splashback
-            if (attack.Defender is AreaBlight &&
+            if (attack.Defender is AreaBlight blight &&
                 attack.AttackMethod.AttackEffects.Any(ae => 
                 ae.Type.StartsWith("physical"))
             )
             {
-                var newAttacker = (IAttacker)attack.Defender;
+                log.Info("Blight strikeback");
                 var newDefender = (IDefender)attack.Attacker;
                 var newAM = new AttackMethod("vital.blight.toxin", "3d3");
                 AttackQueue.Enqueue(new Attack
                 {
-                    Attacker = newAttacker,
+                    Attacker = blight,
                     Defender = newDefender,
                     AttackMethod = newAM,
                     DefenseMethod = newDefender.GetDefenseMethod(newAM)
@@ -170,6 +173,7 @@ Apply post-attack effects
                 ae.Type.StartsWith("physical"))
             )
             {
+                log.Info("Nature through our hero");
                 var newAM = new AttackMethod("vital.nature.itself", "3d3");
                 AttackQueue.Enqueue(new Attack
                 {
@@ -205,28 +209,29 @@ Apply post-attack effects
         public IEnumerable<IAreaBlight> NeighborBlightsOf(AreaBlight areaBlight)
         {
             var nbors = new List<IAreaBlight>();
-            var coord = BlightMap.SpatialMap.GetPosition(areaBlight);
+            var coord = BlightMap.GetPosition(areaBlight);
 
             IAreaBlight nbor = null;
 
             //  Hang on, I'm about to get reeeal stupid.
-            nbor = BlightMap.SpatialMap.GetItem(coord.X - 1, coord.Y - 1);
+            nbor = BlightMap.GetItem(coord.X - 1, coord.Y - 1);
             if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.SpatialMap.GetItem(coord.X - 1, coord.Y);
+            nbor = BlightMap.GetItem(coord.X - 1, coord.Y);
             if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.SpatialMap.GetItem(coord.X - 1, coord.Y + 1);
+            nbor = BlightMap.GetItem(coord.X - 1, coord.Y + 1);
             if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.SpatialMap.GetItem(coord.X, coord.Y - 1);
+            nbor = BlightMap.GetItem(coord.X, coord.Y - 1);
             if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.SpatialMap.GetItem(coord.X, coord.Y + 1);
+            nbor = BlightMap.GetItem(coord.X, coord.Y + 1);
             if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.SpatialMap.GetItem(coord.X + 1, coord.Y - 1);
+            nbor = BlightMap.GetItem(coord.X + 1, coord.Y - 1);
             if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.SpatialMap.GetItem(coord.X + 1, coord.Y);
+            nbor = BlightMap.GetItem(coord.X + 1, coord.Y);
             if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.SpatialMap.GetItem(coord.X + 1, coord.Y + 1);
+            nbor = BlightMap.GetItem(coord.X + 1, coord.Y + 1);
             if (nbor != null) nbors.Add(nbor);
 
+            log.Info($"Found {nbors.Count} neighbors of the target blight.");
             return nbors;
         }
 
@@ -357,7 +362,7 @@ Apply post-attack effects
         #region Messages
 
         Dictionary<Messages, bool> SeenMessages { get; set; } = new Dictionary<Messages, bool>();
-        public BlightMap BlightMap { get; set; }
+        public IBlightMap BlightMap { get; set; }
 
         /// <summary> First time running across this message in this game run? </summary>
         public bool FirstTimeFor(Messages key)

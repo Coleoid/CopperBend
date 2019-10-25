@@ -2,11 +2,10 @@
 
 namespace CopperBend.Contract
 {
-    public interface IBlightMap
+    public interface IBlightMap : ISpatialMap<IAreaBlight>, IReadOnlySpatialMap<IAreaBlight>
     {
-        string Name { get; set; }
-        void AddItem(IAreaBlight blight, Coord coord);
-        IAreaBlight GetItem(Coord coord);
-        void RemoveItem(IAreaBlight blight);
+        // Some parts of AdvancedSpatialMap aren't in ISaptialMap, so I patch them in
+        IAreaBlight GetItem(Coord position);
+        IAreaBlight GetItem(int X, int Y);
     }
 }

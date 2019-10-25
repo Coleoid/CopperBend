@@ -19,6 +19,7 @@ namespace CopperBend.Engine.Tests
     [TestFixture]
     public class ICS_TestBase
     {
+        protected ILog __log;
         protected InputCommandSource _source;
         protected GameState _gameState = null;
         protected Queue<AsciiKey> _inQ;
@@ -37,19 +38,7 @@ namespace CopperBend.Engine.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            var repos = LogManager.GetAllRepositories();
-            bool foundRepo = repos.Any(r => r.Name == "CB");
-
-            ILoggerRepository repo = null;
-            if (foundRepo)
-            {
-                repo = LogManager.GetRepository("CB");
-            }
-            else
-            {
-                repo = LogManager.CreateRepository("CB");
-                BasicConfigurator.Configure(repo);
-            }
+            __log = Substitute.For<ILog>();
 
             ttWall = new TerrainType
             {
@@ -117,7 +106,7 @@ namespace CopperBend.Engine.Tests
             __controls.GetNextInput = () => _inQ.Dequeue();
             __controls.ClearPendingInput = () => _inQ.Clear();
             //__messageOutput = Substitute.For<IMessageLogWindow>();
-            _source = new InputCommandSource(new Describer(), _gameState, __controls);
+            _source = new InputCommandSource(new Describer(), _gameState, __controls, __log);
             __being = Substitute.For<IBeing>();
             _inQ = new Queue<AsciiKey>();
         }
@@ -134,7 +123,7 @@ namespace CopperBend.Engine.Tests
                     {
                         Terrain = isEdge ? ttWall : ttFloor
                     };
-                    spaceMap.AddItem(s, (x, y));
+                    spaceMap.Add(s, (x, y));
                 }
             }
             var sp = spaceMap.GetItem((3, 4));

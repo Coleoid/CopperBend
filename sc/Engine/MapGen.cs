@@ -22,9 +22,9 @@ namespace CopperBend.Engine
         private Cell _floorCell;
         private readonly TerrainType _floor;
 
-        public MapGen()
+        public MapGen(ILog logger)
         {
-            log = LogManager.GetLogger("CB", "CB.MapGen");
+            log = logger;
             _wallCell = new Cell(Color.LightGray, Color.DarkGray, '#');
             _floorCell = new Cell(Color.DarkGray, Color.Black, '.');
 
@@ -97,7 +97,7 @@ namespace CopperBend.Engine
             {
                 for (int x = 0; x < map.Width; x++)
                 {
-                    map.AddItem(new Space {Terrain = _wall}, (x, y));
+                    map.Add(new Space {Terrain = _wall}, (x, y));
                 }
             }
         }

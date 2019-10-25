@@ -67,7 +67,8 @@ namespace CopperBend.Model
         //  IAttacker
         public IAttackMethod GetAttackMethod(IDefender defender)
         {
-            var attack = WieldedTool?.AttackMethod ?? new AttackMethod();
+            //0.2:  Different beings get different natural weaponry.  No more wolves with fists.
+            var attack = WieldedTool?.AttackMethod ?? new AttackMethod("physical.impact.blunt", "1d3+2");
             if (defender is AreaBlight)
             {
                 if (IsPlayer && WieldedTool == null && Gloves == null)
@@ -79,6 +80,7 @@ namespace CopperBend.Model
 
             return attack;
         }
+
         public List<IModifier> GetAttackModifiers(IDefender defender, IAttackMethod method)
         {
             throw new NotImplementedException();

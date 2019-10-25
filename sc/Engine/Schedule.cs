@@ -13,9 +13,9 @@ namespace CopperBend.Engine
         private readonly SortedDictionary<int, List<ScheduleEntry>> TickEntries;
         public int CurrentTick { get; private set; }
 
-        public Schedule()
+        public Schedule(ILog logger)
         {
-            log = LogManager.GetLogger("CB", "CB.Schedule");
+            log = logger;
             TickEntries = new SortedDictionary<int, List<ScheduleEntry>>();
             CurrentTick = 0;
         }

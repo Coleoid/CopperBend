@@ -14,9 +14,9 @@ namespace CopperBend.Engine
         public readonly Size GameSize;
         //public Font Font;
 
-        public UIBuilder(Size gameSize, Font font)
+        public UIBuilder(Size gameSize, Font font, ILog logger)
         {
-            log = LogManager.GetLogger("CB", "CB.UIBuilder");
+            log = logger;
 
             GameSize = gameSize;
             //Font = font;

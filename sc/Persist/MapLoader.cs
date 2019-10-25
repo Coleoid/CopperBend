@@ -220,7 +220,7 @@ namespace CopperBend.Persist
                     {
                         Terrain = type,
                     };
-                    map.SpaceMap.AddItem(space, (x, y));
+                    map.SpaceMap.Add(space, (x, y));
 
                     if (type == SpaceMap.TilledSoil) map.SpaceMap.Till(space);
                 }
@@ -245,7 +245,7 @@ namespace CopperBend.Persist
                         bool isD = symbol.CompareTo("0") > -1 && symbol.CompareTo("9") < 1;
                         int extent = isD ? int.Parse(symbol) : 0;
                         if (extent > 0)
-                            map.BlightMap.AddItem(new AreaBlight {Health = extent}, (x + x_off, y + y_off));
+                            map.BlightMap.Add(new AreaBlight {Health = extent}, (x + x_off, y + y_off));
                     }
                 }
             }

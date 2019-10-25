@@ -30,16 +30,19 @@ namespace CopperBend.Engine
             ISchedule schedule,
             IGameState gameState,
             IDescriber describer,
-            IMessageLogWindow messageLog
+            IMessageLogWindow messageLog,
+            ILog logger
         )
         {
+            log = logger;
             Schedule = schedule;
             GameState = gameState;
             Describer = describer;
             MessageLog = messageLog;
-            AttackSystem = new AttackSystem(this);
+            AttackSystem = new AttackSystem(this, logger);
+            AttackSystem.BlightMap = gameState.Map.BlightMap;
+
             WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) MessageLog.WriteLine(message); };
-            log = LogManager.GetLogger("CB", "CB.Dispatcher");
         }
 
 

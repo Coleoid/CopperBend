@@ -3,19 +3,19 @@
 --- The GoRogue IDGenerator
 What will a unit test tell me about how it works?
 
-It tells me that the returned ids simply start at 0 and increment by 1.  So long as this doesn't change, when serializing, we can get and store:
+It tells me that the returned ids simply start at 0 and increment by 1.
+  So long as this doesn't change, when serializing, we can get and store:
 
-    int TotalIDsGenerated = gen.UseID();
+    int nextID = gen.UseID();
 
-...and after serialize/deserialize, fast-forward the generator with...
+...and after serialize/deserialize, it has a constructor:
 
-    for (var i = 0; i < TotalIDsGenerated; i++) gen.UseID();
-(or)
-    while (gen.UseID() < TotalIDsGenerated - 1) {}  //bug if 0 ids generated before persisting.
+    var gen = new IDGenerator(nextID);
 
-...so that the next requested ID will be equal to TotalIDsGenerated, and will continue from there.
+...so we're golden, we just store nextID.
 
-Entails:  We need to allow the deserializer to set the IDs, rather than gen them.
+---
+We need to allow the deserializer to set the IDs on all our deser'd objects, rather than gen them.
 
 Quickly trying a couple of approaches, I liked adding an id arg on the constructors, with a default of uint.MaxValue, and going to the generator for the value if we get the default.
     Usage in the normal app doesn't change
@@ -27,24 +27,25 @@ This will give us reliable sync of entity IDs across save/load, which is one ele
 
 --- RNGs
 
-Time for more unit tests.
-A hypothesis that seeding a Random generator B with the last output of generator A would synchronize the two from there on, does not survive a unit test.
-Research provides even grimmer answers.
-Hoever, GoRogue uses the Troschuetz RNG library, whose generators are all marked [Serializable], and the implementations are open.  That seems to be the correct play, here.
+We want to preserve the sequence of numbers generated whether the game was saved and reloaded or not.  Debugging from save files.
 
-The next step, some tests prove that serializing, then deserializing to a new object restores the sequence.  Discarding options:
+Distillation of reading and unit tests is:
 
-  The (convenient) .Net Random class is incompatible between .Net framework versions, and doesn't guarantee the same series from the same seed.  Too much uncertainty for part of the infrastructure which will be key when debugging from a save file.
+GoRogue uses the Troschuetz RNG library, whose generators are all marked [Serializable], and the implementations are open.  That seems to be the correct play, here.
+
+The next step, some tests prove that serializing, then deserializing to a new object keeps the sequence.  Discarding options:
+
+  The (convenient) .Net Random class is incompatible between .Net framework versions, and (crucially) doesn't guarantee the same series from the same seed.  Doesn't suit our needs.
 
   The (strong, very long-period) MersenneTwister serializes (Base64) to 3.7k characters.  I expect that I'll have several (many?) specific-purpose RNGs in the full game, which could really bulk up the save file.
 
   The (extra fast) XorShift128 generator has bad internal seeding (in this version of the Troschuetz library), so at least its first values are badly unrandom.  If it's fixed later, it may well not deserialize its sequence across versions.
 
-I'm choosing, for now, the NR3 generator.  It seems plenty fast for me, and is the recommended choice in "a famous numerical analysis book".  The Troschuetz library includes two faster variants (and other fast algorithms) in case I ever find it's slow enough to notice.  It serializes (Base64) to under 500 characters.  This may eventually bother me, in which case I can seek gains by writing a custom serialization that only saves/restores the state.  
+I'm choosing, for now, the NR3 generator.  It seems plenty fast for me, and is the recommended choice in "a famous numerical analysis book".  The Troschuetz library includes two faster variants (and other fast algorithms) in case I ever find it's slow enough to notice.  It serializes (Base64) to under 500 characters.  This may eventually bother me, in which case I can seek gains by writing a custom serialization that only saves/restores the members of the generators which hold state.  Tiny, but I'd need to dive into the guts.
 
 Last hurdle:
   I'm doing saves in YAML format.  The YamlDotNet serialization won't serialize the RNG object directly.  So, I serialize the NR3 generator with .NET serialization, convert the resulting bytes to a Base64 string, and stick that in a string property of my save object.  Reverse the steps to load, test passes.
-  I tried just serializing the byte array, which worked, yet was one line per byte in the resulting YAML.  Terrible, and still opaque.  The extra step of byte[] => Base64 is worth it.  I aim for the save files to remain readable, hackable, and a debugging tool.
+  I YAML'd the byte array, which worked, yet was FUGLY--one line per byte in the resulting file, plus indentation, punctuation, and byte represented as int.  Terrible, and still opaque.  Base64 is my buddy.  I aim for the save files to remain readable, hackable, and a debugging tool.
 
 
 --- The schedule
@@ -71,4 +72,5 @@ This details object also holds the randomized descriptions and player knowledge.
 Oh, it also provides a basis for hybrid/created plant types...
 
 ===
+ECS / Aspects
 

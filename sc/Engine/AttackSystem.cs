@@ -131,13 +131,10 @@ Apply post-attack effects
 
             CheckForSpecials(attack);
 
-            // = 2.B. Roll Damage
             damages = RollDamages(attack.AttackMethod);
 
-            // = 3.B.
             ResistDamages(damages, attack.DefenseMethod);
 
-            // = 5.A.
             RegisterDamage(attack.Defender, damages);
         }
 
@@ -183,7 +180,7 @@ Apply post-attack effects
                     DefenseMethod = areaBlight.GetDefenseMethod(newAM)
                 });
 
-                foreach(AreaBlight neighborBlight in NeighborBlightsOf(areaBlight))
+                foreach (IAreaBlight neighborBlight in NeighborBlightsOf(areaBlight))
                 {
                     AttackQueue.Enqueue(new Attack
                     {
@@ -206,33 +203,10 @@ Apply post-attack effects
             //  ...these go way beyond modifying the AttackMethod.  Time to think again.
         }
 
-        public IEnumerable<IAreaBlight> NeighborBlightsOf(AreaBlight areaBlight)
+        public IEnumerable<IAreaBlight> NeighborBlightsOf(IAreaBlight areaBlight)
         {
-            var nbors = new List<IAreaBlight>();
             var coord = BlightMap.GetPosition(areaBlight);
-
-            IAreaBlight nbor = null;
-
-            //  Hang on, I'm about to get reeeal stupid.
-            nbor = BlightMap.GetItem(coord.X - 1, coord.Y - 1);
-            if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.GetItem(coord.X - 1, coord.Y);
-            if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.GetItem(coord.X - 1, coord.Y + 1);
-            if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.GetItem(coord.X, coord.Y - 1);
-            if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.GetItem(coord.X, coord.Y + 1);
-            if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.GetItem(coord.X + 1, coord.Y - 1);
-            if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.GetItem(coord.X + 1, coord.Y);
-            if (nbor != null) nbors.Add(nbor);
-            nbor = BlightMap.GetItem(coord.X + 1, coord.Y + 1);
-            if (nbor != null) nbors.Add(nbor);
-
-            log.Info($"Found {nbors.Count} neighbors of the target blight.");
-            return nbors;
+            return BlightMap.GetItems(coord.Neighbors());
         }
 
         public void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages)
@@ -250,6 +224,7 @@ Apply post-attack effects
                 //  (ツ)_/¯
                 //  Is this an angel?
                 Destroyed.Enqueue(target);
+                log.Info($"Target destroyed.");
             }
         }
 
@@ -261,6 +236,7 @@ Apply post-attack effects
                 {
                     if (being.IsPlayer)
                     {
+                        log.Info("Game over, man.");
                         //1.+: Game modes (agent of power, hardcore, savescummer)
                         Panel.WriteLine("I die.");
                         Panel.More();

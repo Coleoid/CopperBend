@@ -24,6 +24,7 @@ namespace CopperBend.Engine
         public Size GameSize;
         public Size MapSize;
         public Size MapWindowSize;
+        public Size MenuWindowSize;
 
         private ScrollingConsole MapConsole { get; set; }
         public Window MapWindow;
@@ -48,6 +49,7 @@ namespace CopperBend.Engine
 
             GameSize = new Size(gameWidth, gameHeight);
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
+            MenuWindowSize = new Size(GameSize.Width / 2, GameSize.Height - 12);
 
             Parent = SadConState.CurrentScreen;
             Kbd = SadConState.KeyboardState;
@@ -109,6 +111,12 @@ namespace CopperBend.Engine
             FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
             FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
+
+            var (menuConsole, menuWindow) = builder.CreateMenuWindow(MenuWindowSize, "Menu", FullMap);
+            Children.Add(menuWindow);
+            menuWindow.Show();
+            menuWindow.Add(new ControlsConsole(23, 23, null));
+            menuWindow.Add(new ControlsConsole(23, 23, "FONNNT!"));
 
             MessageLog = builder.CreateMessageLog();
             Children.Add(MessageLog);

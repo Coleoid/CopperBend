@@ -295,9 +295,9 @@ namespace CopperBend.Engine.Tests
             Assert.That(newAttack.Defender, Is.EqualTo(blight));
 
             newAttack = asys.AttackQueue.Dequeue();
-            Assert.That(newAttack.Defender, Is.EqualTo(nbor_1));
-            newAttack = asys.AttackQueue.Dequeue();
             Assert.That(newAttack.Defender, Is.EqualTo(nbor_2));
+            newAttack = asys.AttackQueue.Dequeue();
+            Assert.That(newAttack.Defender, Is.EqualTo(nbor_1));
         }
     }
 }

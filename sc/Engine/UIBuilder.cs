@@ -42,6 +42,29 @@ namespace CopperBend.Engine
             return messageLog;
         }
 
+        public (LayeredConsole, Window) CreateMenuWindow(Size windowSize, string title, ICompoundMap fullMap)
+        {
+            int viewWidth = windowSize.Width - 2;
+            int viewHeight = windowSize.Height - 2;
+
+            Window menuWindow = new Window(windowSize.Width, windowSize.Height)
+            {
+                CanDrag = true,
+                Title = title.Align(HorizontalAlignment.Center, viewWidth)
+            };
+            log.DebugFormat("Created menu window, [{0}].", menuWindow.AbsoluteArea);
+
+            var menuConsole = new LayeredConsole(fullMap.Width, fullMap.Height, 2);
+
+            // Fit the Console inside the Window border
+            menuConsole.Position = new Coord(1, 1);
+            log.Debug("Created layered console.");
+
+            menuWindow.Children.Add(menuConsole);
+
+            return (menuConsole, menuWindow);
+        }
+
         public (ScrollingConsole, Window) CreateMapWindow(Size windowSize, string title, ICompoundMap fullMap)
         {
             int viewWidth = windowSize.Width - 2;

@@ -5,6 +5,7 @@
     Handle command line arguments
         -t|--test, currently NOP
         -s|--seed, text seed for the RNG
+        -d|--debug, attach a debugger
     Establish logging
     Create and run the SadConsole.Game object
         Takes game height and width in cells
@@ -21,8 +22,8 @@
 
     # Runs once at startup
     Init
-        Generate top seed if not passed in CLI
-        Populate well-known resources >> Cosmogenesis
+        Generate top seed if not passed on command line
+        >> Cosmogenesis (Populate shared info)
         Load current map via MapLoader (0.1)
         Init Describer, Being, Schedule
         Create player (0.1)
@@ -32,10 +33,11 @@
         Give player an InputCommandSource
         Put the game into Schedule mode
     
+    ### This is the outer game loop
     # Called rapidly, repeatedly by SadConsole.Game framework
     Update
-        Queue input
-        Act on mode >>
+        Queue any new input for later mode-specific handling
+        >> Act on mode
         Sync map changes
             If any map visibility changed, rebuild FOV
             if player moved
@@ -45,6 +47,11 @@
 
     # Dispatch correct behavior depending on overall game state
     Act On Mode
+        Input bound: (the main "player's turn" mode)
+            Ask InputCommandSource if it has a command from the player (0.K)
+        Schedule: (the main "everything else's turn" mode)
+            Do next scheduled action (0.K)
+
         Paused:
             Consume input, wait for Esc (0.0)
         Menu open:
@@ -53,20 +60,16 @@
             Same (0.0)
         Messages pending ("more..."):
             Consume input, wait for space, show more messages (0.2)
-        Input bound:
-            Send input to InputCommandSource for player (0.K)
-        Schedule:
-            Do next scheduled action (0.K)
 
-    # Populate the Compendium and its books (IoC)
+    # Populate shared information resources (the Compendium and its books)
     Cosmogenesis
-        Compendium
+        Initialize Compendium
+        Initialize the main books
+            Tome of Chaos gets the top seed
+        Store all books in the Compendium
+        Store particular books in the game objects most needing them
         Create IDGenerator
             Connect to CbEntity, Item, Space, and AreaBlight
-        Create Tome of Chaos with top seed
-            Connect to Describer
-        Create Herbal
-            Connect to Seed, Fruit, and Describer
 
 === Describer
 ### Manage descriptions for the identification sub-game

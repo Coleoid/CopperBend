@@ -29,7 +29,7 @@ namespace CopperBend.Engine
         public Window MapWindow;
         public MessageLogWindow MessageLog;
         
-        private Keyboard Kbd;
+        private readonly Keyboard Kbd;
         public Queue<AsciiKey> InputQueue;
         private Being Player;
 
@@ -127,9 +127,9 @@ namespace CopperBend.Engine
                 IsInputReady = () => InputQueue.Count > 0,
                 GetNextInput = InputQueue.Dequeue,
                 ClearPendingInput = InputQueue.Clear,
-                WriteLine = MessageLog.WriteLine,
+                WriteLine = AddMessage,
                 Prompt = MessageLog.Prompt,
-                More = this.More,
+                More = this.PromptUserForMoreAndPend,
             };
 
             Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher, log);
@@ -249,8 +249,8 @@ namespace CopperBend.Engine
                 break;
 
             //  Messages waiting at "- more -" for the user will block input and scheduled events
-            case EngineMode.MessagesPending:
-                HandlePendingMessages();
+            case EngineMode.MessagesPendingUserInput:
+                HandlePendingState();
                 break;
 
             //  Pause and InputBound have developed the same API.
@@ -286,47 +286,51 @@ namespace CopperBend.Engine
         }
 
         #region Short Message log
-        public Queue<string> MessageQueue;
+        private Queue<string> MessageQueue = new Queue<string>();
+        private int MessagesSentSincePause = 0;
+        private int MessageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
+
         public void AddMessage(string newMessage)
         {
             MessageQueue.Enqueue(newMessage);
             ShowMessages();
         }
 
-        private int ShownMessages = 0;
-        public int ShownLineLimitBeforePause = 3;
-        public void ShowMessages()
+        //0.1: ResetMessagesSentSincePause() needs to be called all through the ICS.
+        public void ResetMessagesSentSincePause() => MessagesSentSincePause = 0;
+
+        private void ShowMessages()
         {
-            while (CurrentMode != EngineMode.MessagesPending && MessageQueue.Any())
+            //0.2: There are probably other modes where we want to suspend messages.
+            while (CurrentMode != EngineMode.MessagesPendingUserInput && MessageQueue.Any())
             {
-                if (ShownMessages < ShownLineLimitBeforePause)
+                if (MessagesSentSincePause >= MessageLimitBeforePause)
                 {
-                    var nextMessage = MessageQueue.Dequeue();
-                    AddMessage(nextMessage);
-                    ShownMessages++;
+                    PromptUserForMoreAndPend();
+                    return;
                 }
-                else
-                {
-                    More();
-                }
+
+                var nextMessage = MessageQueue.Dequeue();
+                MessageLog.WriteLine(nextMessage);
+                MessagesSentSincePause++;
             }
         }
 
-        public void More()
+        private void PromptUserForMoreAndPend()
         {
             AddMessage("-- more --");
-            PushEngineMode(EngineMode.MessagesPending, null);
+            PushEngineMode(EngineMode.MessagesPendingUserInput, null);
         }
 
-        public void HandlePendingMessages()
+        private void HandlePendingState()
         {
             for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
             {
                 if (k.Key == Keys.Space)
                 {
-                    ShownMessages = 0;
+                    ResetMessagesSentSincePause();
                     PopEngineMode();
-                    ShowMessages();  // ...which may pause us again.  If so, we'll be right back.
+                    ShowMessages();  // ...which may have enough messages to pend us again.
                     return;
                 }
             }

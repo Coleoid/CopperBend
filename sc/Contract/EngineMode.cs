@@ -6,7 +6,7 @@
         StartUp,
         MenuOpen,
         LargeMessagePending,
-        MessagesPending,
+        MessagesPendingUserInput,
         InputBound,
         Schedule,
         Pause,

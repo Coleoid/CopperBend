@@ -3,7 +3,7 @@
     public enum EngineMode
     {
         Unknown = 0,
-        StartUp,
+        NoGameRunning,
         MenuOpen,
         LargeMessagePending,
         MessagesPendingUserInput,

@@ -63,31 +63,22 @@ namespace CopperBend.Engine
             Init(topSeed);
         }
 
+        //0.1: Tease apart distinct start-up goals:
+        //  App initialization,
+        //  Beginning a new game,
+        //  Loading a saved game,
+        //  Debug stuff?
         private ICompoundMap FullMap;
         public void Init(string topSeed)
         {
-            PushEngineMode(EngineMode.StartUp, null);
+            PushEngineMode(EngineMode.NoGameRunning, null);
 
-            if (topSeed == null)
-            {
-                string clearLetters = "bcdefghjkmnpqrstvwxyz";
-                var r = new Random();
-                var b = new StringBuilder();
-                b.Append(clearLetters[r.Next(0, 20)]);
-                b.Append(clearLetters[r.Next(0, 20)]);
-                b.Append('-');
-                b.Append(clearLetters[r.Next(0, 20)]);
-                b.Append(clearLetters[r.Next(0, 20)]);
-                b.Append('-');
-                b.Append(clearLetters[r.Next(0, 20)]);
-                b.Append(clearLetters[r.Next(0, 20)]);
-
-                topSeed = b.ToString();
-            }
-
+            // per-new-game
+            if (topSeed == null) topSeed = GenerateSimpleTopSeed();
             log.Info($"Top seed:  {topSeed}");
             Cosmogenesis(topSeed);
 
+            // per-new-game
             var loader = new Persist.MapLoader();  //TODO: IoC
             FullMap = loader.FarmMap();
             log.Debug("Loaded the map");
@@ -96,16 +87,21 @@ namespace CopperBend.Engine
             //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
             //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
             //SadConsole.Global.FontDefault = font;
+
+            // per-run (but must be attached to Herbal &c per-game)
             Describer describer = new Describer();
-
             Being.EntityFactory = new EntityFactory();
-
             Schedule = new Schedule(log);
+
+            // per-game
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             Schedule.AddAgent(Player, 12);
 
+            // per-run
             var builder = new UIBuilder(GameSize, null, log); //font
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
+
+            // per-run (except for map window name)
             (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player.Console);
@@ -114,15 +110,18 @@ namespace CopperBend.Engine
             FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
 
+            // per-run
             ControlsConsole menuConsole;
             (menuConsole, MenuWindow) = builder.CreateM2Window(MenuWindowSize, "Game Menu");
             Children.Add(MenuWindow);
             //MenuWindow.Show();
 
+            // per-run
             MessageLog = builder.CreateMessageLog();
             Children.Add(MessageLog);
             MessageLog.Show();
 
+            // per-game
             GameState = new GameState
             {
                 Player = Player,
@@ -130,6 +129,7 @@ namespace CopperBend.Engine
                 Story = Engine.Compendium.Dramaticon,
             };
 
+            // per-run
             Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog, log)
             {
                 PushEngineMode = PushEngineMode,
@@ -147,6 +147,23 @@ namespace CopperBend.Engine
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
             PushEngineMode(EngineMode.Schedule, null);
+        }
+
+        private static string GenerateSimpleTopSeed()
+        {
+            string clearLetters = "bcdefghjkmnpqrstvwxyz";
+            var r = new Random();
+            var b = new StringBuilder();
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append('-');
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append('-');
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append(clearLetters[r.Next(0, 20)]);
+
+            return b.ToString();
         }
 
         private Being CreatePlayer(Coord playerLocation)
@@ -187,15 +204,20 @@ namespace CopperBend.Engine
             //0.K
             foreach (var key in Kbd.KeysPressed)
             {
-                if (CurrentMode != EngineMode.MenuOpen && key == Keys.Escape)
+                // Escape key processing skips the normal input queue,
+                // to make 'Quit Game' as reliably available as possible.
+                if (key == Keys.Escape && CurrentMode != EngineMode.MenuOpen)
                 {
-                    //!!!
+                    InputQueue.Clear();
+                    MenuWindow.Show();
+                    PushEngineMode(EngineMode.MenuOpen, () => true);
+                    return;
                 }
 
                 InputQueue.Enqueue(key);
             }
 
-            // considering... if I'm not in menu, and I see Esc, empty queue and push menu mode...
+            //1.+: Capturing mouse events can wait until post 1.0.
         }
 
         private AsciiKey GetNextKeyPress()
@@ -384,18 +406,28 @@ namespace CopperBend.Engine
         #region LargeMessages and Menus, currently empty
         private void HandleMenus()
         {
-            //0.1.SAVE  create menu actions related to save/load
-            //  Start new game
-            //  Load game
-            //  Save and Quit
+            //0.1: mark game over on player death
+            bool game_running = true;
 
+            if (game_running)
+            {
+                //return to game
+                //save and quit
+            }
+            else
+            {
+                //start new game
+                //quit
+            }
+
+            //0.1: Currently hardcoded R)eturn to Game and Q)uit
             for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
             {
                 //0.2: 'return to game' isn't available after loss
                 if (k.Key == Keys.R || k.Key == Keys.Escape)
                 {
-
                     PopEngineMode();
+                    MenuWindow.Hide();
                     return;
                 }
 

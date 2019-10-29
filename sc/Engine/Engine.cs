@@ -38,6 +38,8 @@ namespace CopperBend.Engine
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
 
+        private Window MenuWindow;
+
         #region Init
         public Engine(int gameWidth, int gameHeight, ILog logger, string topSeed = null)
             : base()
@@ -49,7 +51,7 @@ namespace CopperBend.Engine
 
             GameSize = new Size(gameWidth, gameHeight);
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
-            MenuWindowSize = new Size(GameSize.Width / 2, GameSize.Height - 12);
+            MenuWindowSize = new Size(GameSize.Width - 12, GameSize.Height / 2);
 
             Parent = SadConState.CurrentScreen;
             Kbd = SadConState.KeyboardState;
@@ -112,11 +114,10 @@ namespace CopperBend.Engine
             FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
 
-            var (menuConsole, menuWindow) = builder.CreateMenuWindow(MenuWindowSize, "Menu", FullMap);
-            Children.Add(menuWindow);
-            menuWindow.Show();
-            menuWindow.Add(new ControlsConsole(23, 23, null));
-            menuWindow.Add(new ControlsConsole(23, 23, "FONNNT!"));
+            ControlsConsole menuConsole;
+            (menuConsole, MenuWindow) = builder.CreateM2Window(MenuWindowSize, "Game Menu");
+            Children.Add(MenuWindow);
+            //MenuWindow.Show();
 
             MessageLog = builder.CreateMessageLog();
             Children.Add(MessageLog);
@@ -183,11 +184,18 @@ namespace CopperBend.Engine
 
         public void QueueInput()
         {
-            //  0.5, later other sources of input
+            //0.K
             foreach (var key in Kbd.KeysPressed)
             {
+                if (CurrentMode != EngineMode.MenuOpen && key == Keys.Escape)
+                {
+                    //!!!
+                }
+
                 InputQueue.Enqueue(key);
             }
+
+            // considering... if I'm not in menu, and I see Esc, empty queue and push menu mode...
         }
 
         private AsciiKey GetNextKeyPress()
@@ -380,6 +388,23 @@ namespace CopperBend.Engine
             //  Start new game
             //  Load game
             //  Save and Quit
+
+            for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
+            {
+                //0.2: 'return to game' isn't available after loss
+                if (k.Key == Keys.R || k.Key == Keys.Escape)
+                {
+
+                    PopEngineMode();
+                    return;
+                }
+
+                if (k.Key == Keys.Q)
+                {
+                    Game.Instance.Exit();
+                }
+            }
+
         }
 
         //  The engine calls here when we're in EngineMode.LargeMessagePending

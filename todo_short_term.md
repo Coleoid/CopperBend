@@ -1,6 +1,14 @@
 ===  CB short-term todo
 
-Make the 'tackle blight bare-handed' decision once only
+More messaging of "ouch" and "the blight crumbles".
+
+Mark blight tiles dirty on damage?
+
+Log Damage/Defense calculations
+
+Turn down our guy's completely correct toughness
+
+Invalidate FOV when door opened or closed
 
 
 ---  Notes on process

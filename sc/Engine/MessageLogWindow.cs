@@ -19,18 +19,18 @@ namespace CopperBend.Engine
         /// <summary> add an unfinished line to the messages </summary>
         void Prompt(string message);
 
-        void Show();
-        void Hide();
-        void Center();
-        void Print(int x, int y, string text);
-        void Print(int x, int y, string text, Color foreground);
-        void Print(int x, int y, string text, Color foreground, Color background);
-        void Print(int x, int y, string text, Color foreground, Color background, SpriteEffects mirror);
-        void Print(int x, int y, string text, SpriteEffects mirror);
-        void Print(int x, int y, string text, Cell appearance, ICellEffect effect);
-        int Width { get; }
-        int Height { get; }
-        Cell[] Cells { get; }
+        //void Show();
+        //void Hide();
+        //void Center();
+        //void Print(int x, int y, string text);
+        //void Print(int x, int y, string text, Color foreground);
+        //void Print(int x, int y, string text, Color foreground, Color background);
+        //void Print(int x, int y, string text, Color foreground, Color background, SpriteEffects mirror);
+        //void Print(int x, int y, string text, SpriteEffects mirror);
+        //void Print(int x, int y, string text, Cell appearance, ICellEffect effect);
+        //int Width { get; }
+        //int Height { get; }
+        //Cell[] Cells { get; }
     }
 
     public class MessageLogWindow : Window, IMessageLogWindow
@@ -49,23 +49,25 @@ namespace CopperBend.Engine
 
         public MessageLogWindow(int width, int height, string title) : base(width, height)
         {
-            DefaultBackground = Color.DarkGreen;
+            DefaultBackground = Color.DarkOliveGreen;
             // Ensure that the window background is the correct colour
             Theme.WindowTheme.FillStyle.Background = DefaultBackground;
+            //Theme.WindowTheme.BorderStyle.Background = Color.DarkOliveGreen;//the goggles
             _lines = new List<string>();
             CanDrag = true;
             Title = title.Align(HorizontalAlignment.Center, Width);
 
             // add the message console, reposition, enable the viewport, and add it to the window
-            _messageConsole = new ScrollingConsole(width - _windowBorderThickness, _maxLines);
+            _messageConsole = new ScrollingConsole(width - _windowBorderThickness, _maxLines); //0.1: change msgs to rect. font
             _messageConsole.Position = new Coord(1, 1);
             _messageConsole.ViewPort = new Rectangle(0, 0, width - 1, height - _windowBorderThickness);
+            _messageConsole.DefaultBackground = Color.Black;
 
             // create a scrollbar and attach it to an event handler, then add it to the Window
             _messageScrollBar = new SadConsole.Controls.ScrollBar(Orientation.Vertical, height - _windowBorderThickness)
             {
                 Position = new Coord(_messageConsole.Width + 1, _messageConsole.Position.X),
-                IsEnabled = false
+                IsEnabled = false,
             };
             _messageScrollBar.ValueChanged += MessageScrollBar_ValueChanged;
             Add(_messageScrollBar);

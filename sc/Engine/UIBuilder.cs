@@ -1,9 +1,11 @@
 ﻿using System;
 using Size = System.Drawing.Size;
-using log4net;
+using MG = Microsoft.Xna.Framework;
 using SadConsole;
+using SadGlobe = SadConsole.Global;
 using SadConsole.Controls;
 using GoRogue;
+using log4net;
 using CopperBend.Contract;
 
 namespace CopperBend.Engine
@@ -26,7 +28,9 @@ namespace CopperBend.Engine
         {
             var messageLog = new MessageLogWindow(GameSize.Width, 8, "Message Log")
             {
-                Position = new Coord(0, GameSize.Height - 8)
+                Position = new Coord(0, GameSize.Height - 8),
+                DefaultBackground = MG.Color.Black,
+                
             };
 
             ////  Garbage to visually test the window
@@ -42,7 +46,7 @@ namespace CopperBend.Engine
             return messageLog;
         }
 
-        public (LayeredConsole, Window) CreateMenuWindow(Size windowSize, string title, ICompoundMap fullMap)
+        public (LayeredConsole, Window) CreateMenuWindow(Size windowSize, string title)
         {
             int viewWidth = windowSize.Width - 2;
             int viewHeight = windowSize.Height - 2;
@@ -54,7 +58,10 @@ namespace CopperBend.Engine
             };
             log.DebugFormat("Created menu window, [{0}].", menuWindow.AbsoluteArea);
 
-            var menuConsole = new LayeredConsole(fullMap.Width, fullMap.Height, 2);
+            var menuConsole = new LayeredConsole(viewWidth, viewHeight, 2)
+            {
+                DefaultBackground = MG.Color.Black,
+            };
 
             // Fit the Console inside the Window border
             menuConsole.Position = new Coord(1, 1);
@@ -62,6 +69,37 @@ namespace CopperBend.Engine
 
             menuWindow.Children.Add(menuConsole);
 
+            return (menuConsole, menuWindow);
+        }
+
+        public (ControlsConsole, Window) CreateM2Window(Size windowSize, string title)
+        {
+            int viewWidth = windowSize.Width - 2;
+            int viewHeight = windowSize.Height - 2;
+
+            Window menuWindow = new Window(windowSize.Width, windowSize.Height)  //0.2 textier font
+            {
+                CanDrag = true,
+                Title = title.Align(HorizontalAlignment.Center, viewWidth),
+                DefaultBackground = MG.Color.Black,
+            };
+            log.DebugFormat("Created menu window, [{0}].", menuWindow.AbsoluteArea);
+
+            var menuConsole = new ControlsConsole(viewWidth, viewHeight)  //0.2 textier font
+            {
+                DefaultBackground = MG.Color.Black,
+                Theme = new SadConsole.Themes.Library()  //  ?!?
+            };
+
+            // Fit the Console inside the Window border
+            menuConsole.Position = new Coord(1, 1);
+            log.Debug("Created ctrls console.");
+
+            menuConsole.Print(2, 4, "R) Return to game");
+            menuConsole.Print(2, 6, "Q) Quit");
+
+            menuWindow.Children.Add(menuConsole);
+            //menuWindow.Hide();  // by default?
             return (menuConsole, menuWindow);
         }
 
@@ -86,8 +124,8 @@ namespace CopperBend.Engine
             //mapWindow.Add(closeButton);
 
             var mapConsole = new ScrollingConsole(
-                fullMap.Width, fullMap.Height, SadConsole.Global.FontDefault,
-                new Rectangle(0, 0, viewWidth, viewHeight));
+                fullMap.Width, fullMap.Height, SadGlobe.FontDefault,
+                new MG.Rectangle(0, 0, viewWidth, viewHeight));
 
             // Fit the MapConsole inside the MapWindow border
             mapConsole.Position = new Coord(1, 1);

@@ -51,7 +51,7 @@ namespace CopperBend.Engine
 
             GameSize = new Size(gameWidth, gameHeight);
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
-            MenuWindowSize = new Size(GameSize.Width - 12, GameSize.Height / 2);
+            MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
 
             Parent = SadConState.CurrentScreen;
             Kbd = SadConState.KeyboardState;

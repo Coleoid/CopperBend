@@ -88,13 +88,22 @@ namespace CopperBend.Engine
             var menuConsole = new ControlsConsole(viewWidth, viewHeight)  //0.2 textier font
             {
                 DefaultBackground = MG.Color.Black,
-                Theme = new SadConsole.Themes.Library()  //  ?!?
+                //Theme = new SadConsole.Themes.Library {
+                //    ControlsConsoleTheme = new SadConsole.Themes.ControlsConsoleTheme(
+                //    new SadConsole.Themes.Colors()
+                //    {
+                //        // pick from a large selection here eventually...
+                //        // but this is not the rabbit to chase right now I think.
+                //    })
+                //}
             };
 
             // Fit the Console inside the Window border
             menuConsole.Position = new Coord(1, 1);
             log.Debug("Created ctrls console.");
 
+            //menuConsole.Fill(MG.Color.White, MG.Color.Black, ' ');
+            menuConsole.Clear();
             menuConsole.Print(2, 4, "R) Return to game");
             menuConsole.Print(2, 6, "Q) Quit");
 

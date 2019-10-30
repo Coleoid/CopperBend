@@ -37,14 +37,25 @@ namespace CopperBend.Engine
         private GameState GameState;
         private Schedule Schedule;
         private CommandDispatcher Dispatcher;
+        private Describer Describer;
+        private UIBuilder UIBuilder;
 
         private Window MenuWindow;
+        ControlsConsole MenuConsole;
+
+        private bool GameIsStarted;
+        private int TickOfGameSave;
+        private string TopSeed;
 
         #region Init
         public Engine(int gameWidth, int gameHeight, ILog logger, string topSeed = null)
             : base()
         {
             log = logger;
+
+            if (topSeed == null) topSeed = GenerateSimpleTopSeed();
+            log.Info($"Initial top seed:  {topSeed}");
+            TopSeed = topSeed;
 
             IsVisible = true;
             IsFocused = true;
@@ -60,77 +71,37 @@ namespace CopperBend.Engine
             ModeStack = new Stack<EngineMode>();
             CallbackStack = new Stack<Func<bool>>();
 
-            Init(topSeed);
+            Init();
         }
 
         //0.1: Tease apart distinct start-up goals:
-        //  App initialization,
-        //  Beginning a new game,
         //  Loading a saved game,
         //  Debug stuff?
         private ICompoundMap FullMap;
-        public void Init(string topSeed)
+        public void Init()
         {
             PushEngineMode(EngineMode.NoGameRunning, null);
 
-            // per-new-game
-            if (topSeed == null) topSeed = GenerateSimpleTopSeed();
-            log.Info($"Top seed:  {topSeed}");
-            Cosmogenesis(topSeed);
-
-            // per-new-game
-            var loader = new Persist.MapLoader();  //TODO: IoC
-            FullMap = loader.FarmMap();
-            log.Debug("Loaded the map");
-
-            //0.2.GFX: Set a non-square font in message areas
-            //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
-            //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
-            //SadConsole.Global.FontDefault = font;
-
-            // per-run (but must be attached to Herbal &c per-game)
-            Describer describer = new Describer();
             Being.EntityFactory = new EntityFactory();
             Schedule = new Schedule(log);
 
-            // per-game
-            Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
-            Schedule.AddAgent(Player, 12);
-
-            // per-run
-            var builder = new UIBuilder(GameSize, null, log); //font
+            // per-app-run
+            UIBuilder = new UIBuilder(GameSize, null, log); //font
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
 
-            // per-run (except for map window name)
-            (MapConsole, MapWindow) = builder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
-            Children.Add(MapWindow);
-            MapConsole.Children.Add(Player.Console);
-            FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
-            FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
-            FullMap.UpdateFOV(MapConsole, Player.Position);
-            MapWindow.Show();
-
-            // per-run
-            ControlsConsole menuConsole;
-            (menuConsole, MenuWindow) = builder.CreateM2Window(MenuWindowSize, "Game Menu");
+            // per-app-run
+            (MenuConsole, MenuWindow) = UIBuilder.CreateM2Window(MenuWindowSize, "Game Menu");
             Children.Add(MenuWindow);
             //MenuWindow.Show();
 
-            // per-run
-            MessageLog = builder.CreateMessageLog();
+            // per-app-run
+            MessageLog = UIBuilder.CreateMessageLog();
             Children.Add(MessageLog);
             MessageLog.Show();
 
-            // per-game
-            GameState = new GameState
-            {
-                Player = Player,
-                Map = FullMap,
-                Story = Engine.Compendium.Dramaticon,
-            };
-
-            // per-run
-            Dispatcher = new CommandDispatcher(Schedule, GameState, describer, MessageLog, log)
+            // per-app-run
+            Describer = new Describer();  // (must be attached to Herbal &c per-game)
+            Dispatcher = new CommandDispatcher(Schedule, GameState, Describer, MessageLog, log)
             {
                 PushEngineMode = PushEngineMode,
                 PopEngineMode = PopEngineMode,
@@ -142,11 +113,60 @@ namespace CopperBend.Engine
                 More = this.PromptUserForMoreAndPend,
             };
 
-            Player.CommandSource = new InputCommandSource(describer, GameState, Dispatcher, log);
+            GameIsStarted = false;
+            OpenGameMenu();
+        }
+
+        public void OpenGameMenu()
+        {
+            Guard.Against(CurrentMode == EngineMode.MenuOpen);
+
+            MenuConsole.Clear();
+            MenuConsole.Print(2, 4, GameIsStarted ? "R) Return to game" : "B) Begin new game");
+            MenuConsole.Print(2, 6, "Q) Quit");
+
+            MenuWindow.Show();
+            PushEngineMode(EngineMode.MenuOpen, null);
+        }
+
+        public void BeginNewGame()
+        {
+            Cosmogenesis(TopSeed);
+            Describer.Scramble();
+
+            var loader = new Persist.MapLoader();  //TODO: IoC
+            FullMap = loader.FarmMap();
+            log.Debug("Loaded the map");
+
+            Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
+            Schedule.AddAgent(Player, 12);
+
+            (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
+            Children.Add(MapWindow);
+            MapConsole.Children.Add(Player.Console);
+            FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
+            FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
+            FullMap.UpdateFOV(MapConsole, Player.Position);
+            MapWindow.Show();
+
+            //0.2.GFX: Set a non-square font in message areas
+            //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
+            //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
+            //SadConsole.Global.FontDefault = font;
+
+            GameState = new GameState
+            {
+                Player = Player,
+                Map = FullMap,
+                Story = Engine.Compendium.Dramaticon,
+            };
+
+            Player.CommandSource = new InputCommandSource(Describer, GameState, Dispatcher, log);
 
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
             PushEngineMode(EngineMode.Schedule, null);
+            GameIsStarted = true;
         }
 
         private static string GenerateSimpleTopSeed()

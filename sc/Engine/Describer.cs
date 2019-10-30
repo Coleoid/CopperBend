@@ -14,7 +14,7 @@ namespace CopperBend.Engine
 
         private AbstractGenerator rnd;
 
-        public Describer()
+        public void Scramble()
         {
             rnd = TomeOfChaos.LearnableGenerator;
 

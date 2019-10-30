@@ -40,7 +40,7 @@ namespace CopperBend.Engine
             Describer = describer;
             MessageLog = messageLog;
             AttackSystem = new AttackSystem(this, logger);
-            AttackSystem.BlightMap = gameState.Map.BlightMap;
+            //AttackSystem.BlightMap = gameState.Map.BlightMap;
 
             WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) MessageLog.WriteLine(message); };
         }

@@ -26,6 +26,7 @@ namespace CopperBend.Contract
         /// <summary> When an action interrupts the entire game, in some way. </summary>
         Action<EngineMode, Func<bool>> PushEngineMode { get; }
         Action PopEngineMode { get; }
+        Action<IBeing> GameOver { get; }
 
         Coord CoordInDirection(Coord start, CmdDirection direction);
         void PutItemOnMap(IItem item, Coord coord);
@@ -39,8 +40,6 @@ namespace CopperBend.Contract
 
         //bool CanActorSeeTarget(IBeing being, Coord target);
         //List<Coord> GetPathTo(Coord start, Coord target);
-
-        void GameOver(IBeing player);
     }
 
 

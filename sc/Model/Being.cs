@@ -93,7 +93,8 @@ namespace CopperBend.Model
 
             if (IsPlayer) //0.1  Nice. and. Crispy.
             {
-                defenseMethod.Resistances.Add("vital.blight", "4/5");
+                //0.1: I want roughly this, but for the short term, I'm testing dying, so...
+                //defenseMethod.Resistances.Add("vital.blight", "4/5");
                 defenseMethod.Resistances.Add("default", "1/5");
             }
             else

@@ -28,7 +28,9 @@ namespace CopperBend.Engine
 
         private ScrollingConsole MapConsole { get; set; }
         public Window MapWindow;
-        public MessageLogWindow MessageLog;
+        public MessageLogWindow MessageWindow;
+        private Window MenuWindow;
+        private ControlsConsole MenuConsole;
         
         private readonly Keyboard Kbd;
         public Queue<AsciiKey> InputQueue;
@@ -39,9 +41,6 @@ namespace CopperBend.Engine
         private CommandDispatcher Dispatcher;
         private Describer Describer;
         private UIBuilder UIBuilder;
-
-        private Window MenuWindow;
-        ControlsConsole MenuConsole;
 
         private bool GameInProgress;
         private int TickWhenGameLastSaved;
@@ -93,12 +92,12 @@ namespace CopperBend.Engine
             (MenuConsole, MenuWindow) = UIBuilder.CreateM2Window(MenuWindowSize, "Game Menu");
             Children.Add(MenuWindow);
 
-            MessageLog = UIBuilder.CreateMessageLog();
-            Children.Add(MessageLog);
-            MessageLog.Show();
+            MessageWindow = UIBuilder.CreateMessageLog();
+            Children.Add(MessageWindow);
+            MessageWindow.Show();
 
             Describer = new Describer();  // (must be attached to Herbal &c per-game)
-            Dispatcher = new CommandDispatcher(Schedule, GameState, Describer, MessageLog, log)
+            Dispatcher = new CommandDispatcher(Schedule, GameState, Describer, MessageWindow, log)
             {
                 PushEngineMode = PushEngineMode,
                 PopEngineMode = PopEngineMode,
@@ -106,8 +105,9 @@ namespace CopperBend.Engine
                 GetNextInput = InputQueue.Dequeue,
                 ClearPendingInput = InputQueue.Clear,
                 WriteLine = AddMessage,
-                Prompt = MessageLog.Prompt,
+                Prompt = MessageWindow.Prompt,
                 More = this.PromptUserForMoreAndPend,
+                GameOver = GameOver,
             };
 
             OpenGameMenu();
@@ -127,12 +127,14 @@ namespace CopperBend.Engine
 
         public void BeginNewGame()
         {
+            log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
             Cosmogenesis(TopSeed);
             Describer.Scramble();
 
-            var loader = new Persist.MapLoader();  //TODO: IoC
+            //0.1: Map loading is so hard-codey
+            var loader = new Persist.MapLoader();
             FullMap = loader.FarmMap();
-            log.Debug("Loaded the map");
+            log.Debug("Loaded the farmyard map");
 
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             Schedule.AddAgent(Player, 12);
@@ -156,14 +158,39 @@ namespace CopperBend.Engine
                 Map = FullMap,
                 Story = Engine.Compendium.Dramaticon,
             };
+            Dispatcher.GameState = GameState;
+            Dispatcher.AttackSystem.BlightMap = GameState.Map.BlightMap;
 
             Player.CommandSource = new InputCommandSource(Describer, GameState, Dispatcher, log);
-
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
             PushEngineMode(EngineMode.Schedule, null);
             GameInProgress = true;
+            log.Info("Began new game");
         }
+
+        /// <summary> I hope you had fun! </summary>
+        public void GameOver(IBeing player)
+        {
+            //Dispatcher.WriteLine("After you're dead, the town of Copper Bend in Kulkecharra Valley is");
+            //Dispatcher.WriteLine("overrun by the blight.  Every creature flees, is absorbed");
+            //Dispatcher.WriteLine("for energy, or suffers a brief quasi-life as the blight");
+            //Dispatcher.WriteLine("strives to learn how we move.  What will stand in its way?");
+
+            //WriteStats();
+            //ClearStats();
+            //PromptUserForMoreAndPend();
+
+            GameInProgress = false;
+            PopEngineMode();
+            //PushEngineMode(EngineMode.MenuOpen, null);
+            OpenGameMenu();
+        }
+
+        public void WriteStats() { } //0.0: WriteStats
+        public void ClearStats() { } //0.0: ClearStats
+
+
 
         private static string GenerateSimpleTopSeed()
         {
@@ -203,9 +230,12 @@ namespace CopperBend.Engine
         {
             QueueInput();
             ActOnMode();
-            SyncMapChanges();
 
-            AnimateBackground(timeElapsed);
+            if (GameInProgress)
+            {
+                SyncMapChanges();
+                AnimateBackground(timeElapsed);
+            }
 
             base.Update(timeElapsed);
         }
@@ -295,7 +325,7 @@ namespace CopperBend.Engine
             {
             //  A menu will block even pending messages 
             case EngineMode.MenuOpen:
-                HandleMenus();
+                HandleGameMenu();
                 break;
 
             //  The large message pane (inventory, log, ...) overlays most of the game
@@ -366,7 +396,7 @@ namespace CopperBend.Engine
                 }
 
                 var nextMessage = MessageQueue.Dequeue();
-                MessageLog.WriteLine(nextMessage);
+                MessageWindow.WriteLine(nextMessage);
                 MessagesSentSincePause++;
             }
         }
@@ -419,47 +449,60 @@ namespace CopperBend.Engine
             FullMap.CoordsWithChanges.Clear();
         }
 
-        private void HandleMenus()
+        private void HandleGameMenu()
         {
-            //0.1: mark game over on player death
-            //bool game_running = true;
-
-            for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
+            for (AsciiKey press = GetNextKeyPress(); press.Key != Keys.None; press = GetNextKeyPress())
             {
                 if (GameInProgress)
                 {
                     //0.K: return to game
-                    if (k.Key == Keys.R || k.Key == Keys.Escape)
+                    if (press.Key == Keys.R || press.Key == Keys.Escape)
                     {
                         PopEngineMode();
                         MenuWindow.Hide();
                         return;
                     }
 
-                    //0.0: save
-                    
-                    // quit
-                    if (k.Key == Keys.Q)
+                    //0.0: save and unload
+                    if (press.Key == Keys.S)
                     {
-                        //0.2: verify with player if CurrentTick > Tick of last save
-                        Game.Instance.Exit();
+                        TickWhenGameLastSaved = Schedule.CurrentTick;
+                        // ActuallySaveTheGame();
+                        GameInProgress = false;
+                        // UnloadManyFriends();
+                        // redraw menu options
                     }
                 }
                 else
                 {
                     // begin new game
-                    if (k.Key == Keys.B)
+                    if (press.Key == Keys.B)
                     {
+                        PopEngineMode();
+                        MenuWindow.Hide();
                         BeginNewGame();
                         return;
                     }
 
-                    // quit
-                    if (k.Key == Keys.Q)
+                    //0.0: load saved game and resume play
+                    if (press.Key == Keys.L)
                     {
-                        //0.2: verify with player if CurrentTick > Tick of last save
-                        Game.Instance.Exit();
+                        PopEngineMode();
+                        MenuWindow.Hide();
+                        //PickAndResumeSavedGame();
+                        TickWhenGameLastSaved = Schedule.CurrentTick;
+                        return;
                     }
+                }
+
+                // quit
+                if (press.Key == Keys.Q)
+                {
+                    if (GameInProgress && Schedule.CurrentTick > TickWhenGameLastSaved)
+                    {
+                        //0.0: verify with player "Quit with unsaved changes?"
+                    }
+                    Game.Instance.Exit();
                 }
             }
 

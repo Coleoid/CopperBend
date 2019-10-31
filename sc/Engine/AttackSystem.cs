@@ -238,8 +238,6 @@ Apply post-attack effects
                     {
                         log.Info("Game over, man.");
                         //1.+: Game modes (agent of power, hardcore, savescummer)
-                        Panel.WriteLine("I die.");
-                        Panel.More();
                         Panel.GameOver(being);
                         return;
                     }

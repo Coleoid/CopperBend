@@ -292,7 +292,7 @@ namespace CopperBend.Engine
                 return new Command(CmdAction.Use, dir, PriorUsedItem);
             }
 
-            //0.0
+            //1.+: 'Use' inventory suggesting uses?
             if (press.Key == Keys.OemQuestion)
             {
                 ShowInventory(being, i => i.IsUsable);
@@ -339,7 +339,7 @@ namespace CopperBend.Engine
                 return CommandIncomplete;
             }
 
-            //0.0
+            //0.2: Perhaps only 'likely' wields by default?
             if (press.Key == Keys.OemQuestion)
             {
                 ShowInventory(being, i => true);

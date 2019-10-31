@@ -12,7 +12,7 @@ namespace CopperBend.Engine
     public partial class CommandDispatcher
     {
         private ISchedule Schedule { get; set; }
-        private IGameState GameState { get; set; }
+        public IGameState GameState { get; set; }
 
         protected ISpaceMap SpaceMap => GameState.Map.SpaceMap;
         private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;

@@ -43,8 +43,8 @@ namespace CopperBend.Engine
         private Window MenuWindow;
         ControlsConsole MenuConsole;
 
-        private bool GameIsStarted;
-        private int TickOfGameSave;
+        private bool GameInProgress;
+        private int TickWhenGameLastSaved;
         private string TopSeed;
 
         #region Init
@@ -71,6 +71,7 @@ namespace CopperBend.Engine
             ModeStack = new Stack<EngineMode>();
             CallbackStack = new Stack<Func<bool>>();
 
+            //  Is there any current concrete reason I'm splitting this here?
             Init();
         }
 
@@ -80,26 +81,22 @@ namespace CopperBend.Engine
         private ICompoundMap FullMap;
         public void Init()
         {
+            GameInProgress = false;
             PushEngineMode(EngineMode.NoGameRunning, null);
 
             Being.EntityFactory = new EntityFactory();
             Schedule = new Schedule(log);
 
-            // per-app-run
             UIBuilder = new UIBuilder(GameSize, null, log); //font
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
 
-            // per-app-run
             (MenuConsole, MenuWindow) = UIBuilder.CreateM2Window(MenuWindowSize, "Game Menu");
             Children.Add(MenuWindow);
-            //MenuWindow.Show();
 
-            // per-app-run
             MessageLog = UIBuilder.CreateMessageLog();
             Children.Add(MessageLog);
             MessageLog.Show();
 
-            // per-app-run
             Describer = new Describer();  // (must be attached to Herbal &c per-game)
             Dispatcher = new CommandDispatcher(Schedule, GameState, Describer, MessageLog, log)
             {
@@ -113,7 +110,6 @@ namespace CopperBend.Engine
                 More = this.PromptUserForMoreAndPend,
             };
 
-            GameIsStarted = false;
             OpenGameMenu();
         }
 
@@ -122,7 +118,7 @@ namespace CopperBend.Engine
             Guard.Against(CurrentMode == EngineMode.MenuOpen);
 
             MenuConsole.Clear();
-            MenuConsole.Print(2, 4, GameIsStarted ? "R) Return to game" : "B) Begin new game");
+            MenuConsole.Print(2, 4, GameInProgress ? "R) Return to game" : "B) Begin new game");
             MenuConsole.Print(2, 6, "Q) Quit");
 
             MenuWindow.Show();
@@ -166,7 +162,7 @@ namespace CopperBend.Engine
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
             PushEngineMode(EngineMode.Schedule, null);
-            GameIsStarted = true;
+            GameInProgress = true;
         }
 
         private static string GenerateSimpleTopSeed()
@@ -423,42 +419,53 @@ namespace CopperBend.Engine
             FullMap.CoordsWithChanges.Clear();
         }
 
-        #region LargeMessages and Menus, currently empty
         private void HandleMenus()
         {
             //0.1: mark game over on player death
-            bool game_running = true;
+            //bool game_running = true;
 
-            if (game_running)
-            {
-                //return to game
-                //save and quit
-            }
-            else
-            {
-                //start new game
-                //quit
-            }
-
-            //0.1: Currently hardcoded R)eturn to Game and Q)uit
             for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
             {
-                //0.2: 'return to game' isn't available after loss
-                if (k.Key == Keys.R || k.Key == Keys.Escape)
+                if (GameInProgress)
                 {
-                    PopEngineMode();
-                    MenuWindow.Hide();
-                    return;
-                }
+                    //0.K: return to game
+                    if (k.Key == Keys.R || k.Key == Keys.Escape)
+                    {
+                        PopEngineMode();
+                        MenuWindow.Hide();
+                        return;
+                    }
 
-                if (k.Key == Keys.Q)
+                    //0.0: save
+                    
+                    // quit
+                    if (k.Key == Keys.Q)
+                    {
+                        //0.2: verify with player if CurrentTick > Tick of last save
+                        Game.Instance.Exit();
+                    }
+                }
+                else
                 {
-                    Game.Instance.Exit();
+                    // begin new game
+                    if (k.Key == Keys.B)
+                    {
+                        BeginNewGame();
+                        return;
+                    }
+
+                    // quit
+                    if (k.Key == Keys.Q)
+                    {
+                        //0.2: verify with player if CurrentTick > Tick of last save
+                        Game.Instance.Exit();
+                    }
                 }
             }
 
         }
 
+        #region LargeMessages, currently empty
         //  The engine calls here when we're in EngineMode.LargeMessagePending
         public void HandleLargeMessage()
         {

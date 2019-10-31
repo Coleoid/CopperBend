@@ -100,12 +100,12 @@ namespace CopperBend.Engine
 
             // Fit the Console inside the Window border
             menuConsole.Position = new Coord(1, 1);
-            log.Debug("Created ctrls console.");
+            log.DebugFormat("Created menu console, [{0}].", menuConsole.AbsoluteArea);
 
             //menuConsole.Fill(MG.Color.White, MG.Color.Black, ' ');
             menuConsole.Clear();
-            menuConsole.Print(2, 4, "R) Return to game");
-            menuConsole.Print(2, 6, "Q) Quit");
+            //menuConsole.Print(2, 4, "R) Return to game");
+            //menuConsole.Print(2, 6, "Q) Quit");
 
             menuWindow.Children.Add(menuConsole);
             //menuWindow.Hide();  // by default?

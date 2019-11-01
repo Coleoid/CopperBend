@@ -62,8 +62,7 @@ namespace CopperBend.Engine
             IsFocused = true;
 
             GameSize = new Size(gameWidth, gameHeight);
-            MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
-            MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
+            UIBuilder = new UIBuilder(GameSize, null, log); //font
 
             Parent = SadConState.CurrentScreen;
             Kbd = SadConState.KeyboardState;
@@ -88,7 +87,9 @@ namespace CopperBend.Engine
             Being.EntityFactory = new EntityFactory();
             Schedule = new Schedule(log);
 
-            UIBuilder = new UIBuilder(GameSize, null, log); //font
+            MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
+            MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
+
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
 
             (MenuConsole, MenuWindow) = UIBuilder.CreateM2Window(MenuWindowSize, "Game Menu");
@@ -184,32 +185,50 @@ namespace CopperBend.Engine
             //ClearStats();
             //PromptUserForMoreAndPend();
 
-            GameInProgress = false;
             PopEngineMode();
-            //PushEngineMode(EngineMode.MenuOpen, null);
+            GameInProgress = false;
+
+            ShutDownGame();
             OpenGameMenu();
         }
 
         public void WriteStats() { } //0.0: WriteStats
         public void ClearStats() { } //0.0: ClearStats
 
-
-
-        private static string GenerateSimpleTopSeed()
+        private void ShutDownGame()
         {
-            string clearLetters = "bcdefghjkmnpqrstvwxyz";
-            var r = new Random();
-            var b = new StringBuilder();
-            b.Append(clearLetters[r.Next(0, 20)]);
-            b.Append(clearLetters[r.Next(0, 20)]);
-            b.Append('-');
-            b.Append(clearLetters[r.Next(0, 20)]);
-            b.Append(clearLetters[r.Next(0, 20)]);
-            b.Append('-');
-            b.Append(clearLetters[r.Next(0, 20)]);
-            b.Append(clearLetters[r.Next(0, 20)]);
+            // Start by simply undoing many NewGame steps in reverse order
+            log.Info("Shutting down game");
 
-            return b.ToString();
+            Player.CommandSource = null;
+
+            Dispatcher.AttackSystem.BlightMap = null;
+            Dispatcher.GameState = null;
+
+            GameState = null;
+
+            FullMap.FOV = null;
+
+            MapConsole.Children.Remove(Player.Console);
+            Children.Remove(MapWindow);
+            MapConsole = null;
+            MapWindow = null;
+
+            //Schedule.AddAgent(Player, 12);
+            Schedule.Clear();
+
+            //Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
+            Player = null;
+
+            //FullMap = loader.FarmMap();
+            FullMap = null;
+
+            //var loader = new Persist.MapLoader();
+            //Describer.Scramble();
+            //Cosmogenesis(TopSeed);
+
+            //----
+            log.Info("Shut down game");
         }
 
         private Being CreatePlayer(Coord playerLocation)

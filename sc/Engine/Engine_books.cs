@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using GoRogue;
 using Troschuetz.Random.Generators;
 using CopperBend.Contract;
@@ -117,6 +119,23 @@ namespace CopperBend.Engine
         public static void ConnectStory(Dramaticon story)
         {
             Compendium.Dramaticon = story;
+        }
+
+        private static string GenerateSimpleTopSeed()
+        {
+            string clearLetters = "bcdefghjkmnpqrstvwxyz";
+            var r = new Random();
+            var b = new StringBuilder();
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append('-');
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append('-');
+            b.Append(clearLetters[r.Next(0, 20)]);
+            b.Append(clearLetters[r.Next(0, 20)]);
+
+            return b.ToString();
         }
     }
 }

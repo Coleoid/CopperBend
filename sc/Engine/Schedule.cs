@@ -80,6 +80,7 @@ namespace CopperBend.Engine
         public void Clear()
         {
             TickEntries.Clear();
+            CurrentTick = 0;
         }
     }
 }

@@ -14,6 +14,7 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using System.Text;
+using System.Diagnostics;
 
 namespace CopperBend.Engine
 {
@@ -45,6 +46,7 @@ namespace CopperBend.Engine
         private bool GameInProgress;
         private int TickWhenGameLastSaved;
         private string TopSeed;
+        private bool JumpToDebugger = true;
 
         #region Init
         public Engine(int gameWidth, int gameHeight, ILog logger, string topSeed = null)
@@ -146,6 +148,7 @@ namespace CopperBend.Engine
             FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
             FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
+            MessageQueue = new Queue<string>();
 
             //0.2.GFX: Set a non-square font in message areas
             //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
@@ -164,7 +167,7 @@ namespace CopperBend.Engine
             Player.CommandSource = new InputCommandSource(Describer, GameState, Dispatcher, log);
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
-            PushEngineMode(EngineMode.Schedule, null);
+            PushEngineMode(EngineMode.GameWorldActing, null);
             GameInProgress = true;
             log.Info("Began new game");
         }
@@ -229,7 +232,7 @@ namespace CopperBend.Engine
         public override void Update(TimeSpan timeElapsed)
         {
             QueueInput();
-            ActOnMode();
+            ActOnMode();  // <<== 
 
             if (GameInProgress)
             {
@@ -240,11 +243,7 @@ namespace CopperBend.Engine
             base.Update(timeElapsed);
         }
 
-        private void AnimateBackground(TimeSpan timeElapsed)
-        {
-            FullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
-        }
-
+        #region Handle input
         public void QueueInput()
         {
             //0.K
@@ -271,8 +270,10 @@ namespace CopperBend.Engine
             if (InputQueue.Count == 0) return new AsciiKey { Key = Keys.None };
             return InputQueue.Dequeue();
         }
+        #endregion
 
-        #region Mode mechanics
+        #region Handle Game Modes
+        #region Mode Mechanisms
         //  We can stack modes of the game to any level.
         //  Say the schedule reaches the player, who enters a command
         //  to inspect their quest/job list, the stack is:
@@ -283,8 +284,8 @@ namespace CopperBend.Engine
         //  ...and we can later leave the quest details without confusion
         //  about what we're doing.
 
-        private Stack<EngineMode> ModeStack;
-        private Stack<Func<bool>> CallbackStack;
+        private readonly Stack<EngineMode> ModeStack;
+        private readonly Stack<Func<bool>> CallbackStack;
 
         internal EngineMode CurrentMode
         {
@@ -292,6 +293,7 @@ namespace CopperBend.Engine
                 ? EngineMode.Unknown
                 : ModeStack.Peek();
         }
+
         internal Func<bool> CurrentCallback { get => CallbackStack.Peek(); }
 
         internal void PushEngineMode(EngineMode newMode, Func<bool> callback)
@@ -303,29 +305,43 @@ namespace CopperBend.Engine
             ModeStack.Push(newMode);
             CallbackStack.Push(callback);
 
-            if (oldMode != EngineMode.Schedule || CurrentMode != EngineMode.InputBound)
+            // Don't log the mode shift between player's turn and world's turn.
+            if (oldMode != EngineMode.GameWorldActing || CurrentMode != EngineMode.PlayerActing)
                 log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
         }
+
         internal void PopEngineMode()
         {
             var oldMode = ModeStack.Pop();
             CallbackStack.Pop();
 
-            // We're always shifting between input and schedule during play,
-            // so let's only log more interesting mode changes.
-            if (oldMode != EngineMode.InputBound || CurrentMode != EngineMode.Schedule)
+            // Don't log the mode shift between player's turn and world's turn.
+            if (oldMode != EngineMode.PlayerActing || CurrentMode != EngineMode.GameWorldActing)
                 log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
         }
-        #endregion
+        #endregion 
 
         internal void ActOnMode()
         {
-            bool leaveMode = false;
             switch (CurrentMode)
             {
-            //  A menu will block even pending messages 
+            //  The game menu being open has priority
             case EngineMode.MenuOpen:
                 HandleGameMenu();
+                break;
+
+            //  When the player is busy or incapacitated,
+            //  time passes and other actors act.
+            case EngineMode.GameWorldActing:
+                HandleScheduledEvents();
+                break;
+
+            //  When the player is choosing their action
+            //  or enough small messages have been printed that the
+            //  UI is waiting with a '- more -' style prompt
+            case EngineMode.PlayerActing:
+            case EngineMode.MessagesPendingUserInput:
+                HandleGatheringInput();
                 break;
 
             //  The large message pane (inventory, log, ...) overlays most of the game
@@ -333,37 +349,90 @@ namespace CopperBend.Engine
                 HandleLargeMessage();
                 break;
 
-            //  Messages waiting at "- more -" for the user will block input and scheduled events
-            case EngineMode.MessagesPendingUserInput:
-                HandlePendingState();
-                break;
-
-            //  Pause and InputBound have developed the same API.
-            //  Update does nothing when paused
-            //  Waiting for player input blocks Schedule
-            case EngineMode.Pause:
-            case EngineMode.InputBound:
-                leaveMode = CurrentCallback();
-                if (leaveMode) PopEngineMode();
-                break;
-
-            //  When the player has chosen an action that keeps them busy for a while,
-            //  time passes and other actors act.
-            case EngineMode.Schedule:
-                DoNextScheduled();
-                break;
-
+            //  Reaching this branch is always developer error
             case EngineMode.Unknown:
-                throw new Exception("Engine mode unknown, probably popped one too many.");
-
+            case EngineMode.NoGameRunning:
             default:
-                throw new Exception($"Engine mode [{CurrentMode}] not written yet.");
+                if (JumpToDebugger) // compile to false for production builds
+                {
+                    if (!Debugger.IsAttached) Debugger.Launch();
+                    else Debugger.Break();
+                }
+                else throw new Exception($"Hit the game loop in {CurrentMode} mode.");
+                break;
             }
         }
 
-        public void DoNextScheduled()
+        private void HandleGameMenu()
         {
-            while (CurrentMode == EngineMode.Schedule)
+            for (AsciiKey press = GetNextKeyPress(); press.Key != Keys.None; press = GetNextKeyPress())
+            {
+                // Quit
+                if (press.Key == Keys.Q)
+                {
+                    if (GameInProgress && Schedule.CurrentTick > TickWhenGameLastSaved)
+                    {
+                        //0.0: verify with player "Quit with unsaved changes?"
+                    }
+                    Game.Instance.Exit();
+                }
+
+                if (GameInProgress)
+                {
+                    // Return to game
+                    if (press.Key == Keys.R || press.Key == Keys.Escape)
+                    {
+                        PopEngineMode();
+                        MenuWindow.Hide();
+                        return;
+                    }
+
+                    //0.0: Save and unload current game
+                    if (press.Key == Keys.S)
+                    {
+                        TickWhenGameLastSaved = Schedule.CurrentTick;
+                        // ActuallySaveTheGame();
+                        GameInProgress = false;
+                        // UnloadManyFriends();
+                        // redraw menu options
+                    }
+                }
+                else
+                {
+                    // Begin new game
+                    if (press.Key == Keys.B)
+                    {
+                        PopEngineMode();
+                        MenuWindow.Hide();
+                        BeginNewGame();
+                        return;
+                    }
+
+                    //0.0: Load saved game and resume play
+                    if (press.Key == Keys.L)
+                    {
+                        PopEngineMode();
+                        MenuWindow.Hide();
+                        //PickAndResumeSavedGame();
+                        TickWhenGameLastSaved = Schedule.CurrentTick;
+                        return;
+                    }
+
+                    //0.0: Generate new seed, or enter new seed
+                }
+            }
+        }
+
+        private void HandleGatheringInput()
+        {
+            bool leaveMode = CurrentCallback();
+            if (leaveMode) PopEngineMode();
+        }
+        #endregion
+
+        public void HandleScheduledEvents()
+        {
+            while (CurrentMode == EngineMode.GameWorldActing)
             {
                 var nextAction = Schedule.GetNextAction();
                 Dispatcher.Dispatch(nextAction);
@@ -371,7 +440,7 @@ namespace CopperBend.Engine
         }
 
         #region Short Message log
-        private Queue<string> MessageQueue = new Queue<string>();
+        private Queue<string> MessageQueue;
         private int MessagesSentSincePause = 0;
         private int MessageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
 
@@ -404,10 +473,10 @@ namespace CopperBend.Engine
         private void PromptUserForMoreAndPend()
         {
             AddMessage("-- more --");
-            PushEngineMode(EngineMode.MessagesPendingUserInput, null);
+            PushEngineMode(EngineMode.MessagesPendingUserInput, HandleMessagesPending);
         }
 
-        private void HandlePendingState()
+        private bool HandleMessagesPending()
         {
             for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
             {
@@ -416,12 +485,13 @@ namespace CopperBend.Engine
                     ResetMessagesSentSincePause();
                     PopEngineMode();
                     ShowMessages();  // ...which may have enough messages to pend us again.
-                    return;
+                    return true;
                 }
             }
+
+            return false;
         }
         #endregion
-
 
         public void SyncMapChanges()
         {
@@ -449,63 +519,9 @@ namespace CopperBend.Engine
             FullMap.CoordsWithChanges.Clear();
         }
 
-        private void HandleGameMenu()
+        private void AnimateBackground(TimeSpan timeElapsed)
         {
-            for (AsciiKey press = GetNextKeyPress(); press.Key != Keys.None; press = GetNextKeyPress())
-            {
-                if (GameInProgress)
-                {
-                    //0.K: return to game
-                    if (press.Key == Keys.R || press.Key == Keys.Escape)
-                    {
-                        PopEngineMode();
-                        MenuWindow.Hide();
-                        return;
-                    }
-
-                    //0.0: save and unload
-                    if (press.Key == Keys.S)
-                    {
-                        TickWhenGameLastSaved = Schedule.CurrentTick;
-                        // ActuallySaveTheGame();
-                        GameInProgress = false;
-                        // UnloadManyFriends();
-                        // redraw menu options
-                    }
-                }
-                else
-                {
-                    // begin new game
-                    if (press.Key == Keys.B)
-                    {
-                        PopEngineMode();
-                        MenuWindow.Hide();
-                        BeginNewGame();
-                        return;
-                    }
-
-                    //0.0: load saved game and resume play
-                    if (press.Key == Keys.L)
-                    {
-                        PopEngineMode();
-                        MenuWindow.Hide();
-                        //PickAndResumeSavedGame();
-                        TickWhenGameLastSaved = Schedule.CurrentTick;
-                        return;
-                    }
-                }
-
-                // quit
-                if (press.Key == Keys.Q)
-                {
-                    if (GameInProgress && Schedule.CurrentTick > TickWhenGameLastSaved)
-                    {
-                        //0.0: verify with player "Quit with unsaved changes?"
-                    }
-                    Game.Instance.Exit();
-                }
-            }
-
+            FullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
         }
 
         #region LargeMessages, currently empty

@@ -5,10 +5,9 @@
         Unknown = 0,
         NoGameRunning,
         MenuOpen,
-        LargeMessagePending,
+        GameWorldActing,
+        PlayerActing,
         MessagesPendingUserInput,
-        InputBound,
-        Schedule,
-        Pause,
+        LargeMessagePending,
     }
 }

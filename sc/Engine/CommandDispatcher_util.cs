@@ -164,6 +164,5 @@ namespace CopperBend.Engine
         public Action<IBeing, string> WriteLineIfPlayer { get; set; }
         public Action<string> Prompt { get; set; }
         public Action More { get; set; }
-        public Action<IBeing> GameOver { get; set; }
     }
 }

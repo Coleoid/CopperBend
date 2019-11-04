@@ -25,7 +25,7 @@ namespace CopperBend.Engine
             log = logger;
         }
 
-        public bool InMultiStepCommand => NextStep != null;
+        public bool IsAssemblingCommand => NextStep != null;
         private Func<AsciiKey, IBeing, Command> NextStep = null;
 
         public void GiveCommand(IBeing being)
@@ -44,27 +44,31 @@ namespace CopperBend.Engine
             var commandGiven = deliverCommandFromInput();
             if (!commandGiven)
             {
-                Controls.PushEngineMode(EngineMode.PlayerActing, deliverCommandFromInput);
+                Controls.PushEngineMode(EngineMode.PlayerTurn, deliverCommandFromInput);
             }
         }
 
         public Command GetCommand(IBeing being)
         {
+            // Most of the time, when waiting on a human, we're going
+            // to hit this line and return with no input and no command.
             if (!Controls.IsInputReady()) return CommandIncomplete;
+
             var press = Controls.GetNextInput();
 
-            if (InMultiStepCommand)  //  Most of them
-            {
-                return NextStep(press, being);
-            }
+            // Most commands take multiple keystrokes to resolve.
+            // When that's true, we've stored the next step to take for when
+            // we have the next keystroke(s) to get us closer to a Command.
+            if (IsAssemblingCommand) return NextStep(press, being);
 
-            //  Going somewhere?
+            // Otherwise, if we've got a direction key, do that
             var dir = DirectionOf(press);
             if (dir != CmdDirection.None)
             {
                 return Direction(being, dir);
             }
 
+            // Or dispatch the beginning of another Command
             switch (press.Key)
             {
             case Keys.C: return Consume(being);
@@ -83,6 +87,36 @@ namespace CopperBend.Engine
             }
         }
 
+        public Command SameStep(string text)
+        {
+            WriteLine(text);
+            return CommandIncomplete;
+        }
+
+        private Command CancelMultiStep(string text)
+        {
+            WriteLine(text);
+            NextStep = null;
+            return CommandIncomplete;
+        }
+
+        /// <summary> If more input is ready, skip prompt and go to the next step </summary>
+        private Command NextStepIs(Func<AsciiKey, IBeing, Command> nextStep, string prompt, IBeing being)
+        {
+            NextStep = nextStep;
+            if (Controls.IsInputReady()) return NextStep(Controls.GetNextInput(), being);
+
+            Controls.Prompt(prompt);
+            return CommandIncomplete;
+        }
+
+        private Command FinishedCommand(CmdAction action, CmdDirection direction, IItem item = null, IUsable usable = null)
+        {
+            NextStep = null;
+            return new Command(action, direction, item, usable);
+        }
+
+
         private Command Direction(IBeing being, CmdDirection dir)
         {
             var newPosition = Controls.CoordInDirection(being.Position, dir);
@@ -95,113 +129,66 @@ namespace CopperBend.Engine
                 {
                     blightDirection = dir;
                     Controls.WriteLine("Lookin' at the scum covering the ground sets my teeth on edge.  I'm growling.");
-                    return FFwdOrPrompt(Direction_decide_to_Clear_Blight, "Am I goin' after this stuff bare-handed? (y/n): ", being);
+                    return NextStepIs(Direction_decide_to_Clear_Blight, "Am I goin' after this stuff bare-handed? ", being);
                 }
             }
 
-            return new Command(CmdAction.Direction, dir);
+            return FinishedCommand(CmdAction.Direction, dir);
         }
 
         //0.1.STORY  first time clearing blight
         CmdDirection blightDirection;
         public Command Direction_decide_to_Clear_Blight(AsciiKey press, IBeing being)
         {
+            //0.1: change decision mechanic to key == dir towards area blight
             if (press.Key == Keys.Escape || press.Character == 'n')
             {
-                WriteLine("Not yet.");
-                return CommandIncomplete;
+                return SameStep("Not yet.");
             }
 
             GameState.Story.HasClearedBlight = true;
             WriteLine("Yes.  Now.");
-            return new Command(CmdAction.Direction, blightDirection);
+            return FinishedCommand(CmdAction.Direction, blightDirection);
         }
 
 
         public Command Consume(IBeing being)
         {
+            //1.+: food on ground, on adjacent plant, drink from pool...
             var inv_consumables = being.Inventory.Where(i => i.IsIngestible).ToList();
-            //var reach_consumables = actor.ReachableItems().Where(i => i.IsConsumable).ToList();
-            if (inv_consumables.Count() == 0) /*+ reach_consumables.Count()*/
-            {
-                WriteLine("Nothing to eat or drink on me.");
-                return CommandIncomplete;
-            }
-            return FFwdOrPrompt(Consume_main, "Consume (inventory letter or ? to show inventory): ", being);
+
+            return (inv_consumables.Count() == 0)
+                ? CancelMultiStep("Nothing to eat or drink on me.")
+                : NextStepIs(Consume_main, "Consume (inventory letter or ? to show inventory): ", being);
         }
         public Command Consume_main(AsciiKey press, IBeing being)
         {
-            if (press.Key == Keys.Escape)
-            {
-                WriteLine("Consume cancelled.");
-                NextStep = null;
-                return CommandIncomplete;
-            }
-
-            if (press.Character == '?')
-            {
-                ShowInventory<IIngestible>(being);
-                return CommandIncomplete;
-            }
+            if (press.Key == Keys.Escape) return CancelMultiStep("cancelled.");
+            if (press.Character == '?') return ShowInventory<IIngestible>(being);
 
             var item = ItemInInventoryLocation(press, being);
-            if (item != null)
-            {
-                if (item.IsIngestible)
-                {
-                    NextStep = null;
-                    return new Command(CmdAction.Consume, CmdDirection.None, item);
-                }
-                else
-                {
-                    WriteLine($"I can't eat or drink {Describer.Describe(item, DescMods.Article)}.");
-                }
-            }
-            else
-            {
-                WriteLine($"Nothing in inventory slot {press.Character}.");
-            }
-            return CommandIncomplete;
+            if (item == null) return SameStep($"Nothing in inventory slot {press.Character}.");
+            if (!item.IsIngestible) return SameStep($"I can't eat or drink {Describer.Describe(item, DescMods.Article)}.");
+
+            return FinishedCommand(CmdAction.Consume, CmdDirection.None, item);
         }
 
         public Command Drop(IBeing being)
         {
-            if (being.Inventory.Count() == 0)
-            {
-                WriteLine("Nothing to drop.");
-                return CommandIncomplete;
-            }
-            return FFwdOrPrompt(Drop_main, "Drop (inventory letter or ? to show inventory): ", being);
+            return (being.Inventory.Count() == 0)
+                ? CancelMultiStep("Nothing to drop.")
+                : NextStepIs(Drop_main, "Drop (inventory letter or ? to show inventory): ", being);
         }
         public Command Drop_main(AsciiKey press, IBeing being)
         {
-            if (press.Key == Keys.Escape)
-            {
-                WriteLine("Drop cancelled.");
-                NextStep = null;
-                return CommandIncomplete;
-            }
-
-            if (press.Character == '?')
-            {
-                ShowInventory(being, i => true);
-                return CommandIncomplete;
-            }
+            if (press.Key == Keys.Escape) return CancelMultiStep("Drop cancelled.");
+            if (press.Character == '?') return ShowInventory(being, i => true);
 
             var item = ItemInInventoryLocation(press, being);
-            if (item != null)
-            {
-                NextStep = null;
-                return new Command(CmdAction.Drop, CmdDirection.None, item);
-            }
-            else
-            {
-                WriteLine($"Nothing in inventory slot {press.Character}.");
-            }
+            if (item == null) return SameStep($"Nothing in inventory slot {press.Character}.");
 
-            return CommandIncomplete;
+            return FinishedCommand(CmdAction.Drop, CmdDirection.None, item);
         }
-        //HMMM:  Consume_main and Drop_main differ only in CmdAction, inventory filter, text
 
         public Command Help()
         {
@@ -218,8 +205,7 @@ namespace CopperBend.Engine
 
         public Command Inventory(IBeing being)
         {
-            ShowInventory(being);
-            return CommandIncomplete;
+            return ShowInventory(being);
         }
 
         public Command SaveGame()
@@ -238,8 +224,7 @@ namespace CopperBend.Engine
             //var reach_usables = actor.ReachableItems().Where(i => i.IsUsable).ToList();
             if (inv_usables.Count() == 0) /*+ reach_usables.Count()*/
             {
-                WriteLine("Nothing usable on me.");
-                return CommandIncomplete;
+                return CancelMultiStep("Nothing usable on me.");
             }
 
             ThisUsedItem = ThisUsedItem ?? PriorUsedItem ?? being.WieldedTool;
@@ -247,66 +232,51 @@ namespace CopperBend.Engine
             {
                 if (!Controls.IsInputReady())
                     ShowInventory(being, i => i.IsUsable);
-                return FFwdOrPrompt(Use_Pick_Item, "Use item: ", being);
+                return NextStepIs(Use_Pick_Item, "Use item: ", being);
             }
 
-            return FFwdOrPrompt(Use_Has_Item, 
+            return NextStepIs(Use_Has_Item, 
                 $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", being);
         }
         public Command Use_Pick_Item(AsciiKey press, IBeing being)
         {
-            if (press.Key == Keys.Escape)
-            {
-                WriteLine("cancelled.");
-                NextStep = null;
-                return CommandIncomplete;
-            }
+            if (press.Key == Keys.Escape) return CancelMultiStep("cancelled.");
 
             var selectedIndex = AlphaIndexOfKeyPress(press);
             if (selectedIndex < 0 || being.Inventory.Count() <= selectedIndex)
             {
-                WriteLine($"The key [{PressRep(press)}] does not match an inventory item.  Pick another.");
-                return CommandIncomplete;
+                return SameStep($"The key [{PressRep(press)}] does not match an inventory item.  Pick another.");
             }
 
             var item = being.Inventory.ElementAt(selectedIndex);
             if (!item.IsUsable)
             {
-                WriteLine($"The {Describer.Describe(item)} is not a usable item.  Pick another.");
-                return CommandIncomplete;
+                return SameStep($"The {Describer.Describe(item)} is not a usable item.  Pick another.");
             }
 
             ThisUsedItem = item;
 
-            return FFwdOrPrompt( Use_Has_Item, 
+            return NextStepIs( Use_Has_Item, 
                 $"Direction to use the {Describer.Describe(ThisUsedItem)}, or [a-z?] to choose item: ", being);
         }
+
         private Command Use_Has_Item(AsciiKey press, IBeing being)
         {
             var dir = DirectionOf(press);
             if (dir != CmdDirection.None)
             {
-                NextStep = null;
                 PriorUsedItem = ThisUsedItem;
                 ThisUsedItem = null;
-                return new Command(CmdAction.Use, dir, PriorUsedItem);
+                return FinishedCommand(CmdAction.Use, dir, PriorUsedItem);
             }
 
             //1.+: 'Use' inventory suggesting uses?
-            if (press.Key == Keys.OemQuestion)
-            {
-                ShowInventory(being, i => i.IsUsable);
-            }
+            if (press.Key == Keys.OemQuestion) return ShowInventory(being, i => i.IsUsable);
+            if (press.Key == Keys.Escape) return CancelMultiStep("cancelled.");
 
             if ('a' <= press.Character && press.Character <= 'z')
             {
                 return Use_Pick_Item(press, being);
-            }
-
-            if (press.Key == Keys.Escape)
-            {
-                WriteLine("cancelled.");
-                NextStep = null;
             }
 
             WriteLine($"The key [{PressRep(press)}] does not match an inventory item or a direction.  Pick another.");
@@ -322,56 +292,32 @@ namespace CopperBend.Engine
         public Command Wield(IBeing being)
         {
             var wieldables = being.Inventory.ToList();
-            if (wieldables.Count() == 0)
-            {
-                WriteLine("Nothing to wield.");
-                return CommandIncomplete;
-            }
-            return FFwdOrPrompt(Wield_main, "Wield (inventory letter or ? to show inventory): ", being);
+            if (wieldables.Count() == 0) return CancelMultiStep("Nothing to wield.");
+
+            return NextStepIs(Wield_main, "Wield (inventory letter or ? to show inventory): ", being);
         }
 
         public Command Wield_main(AsciiKey press, IBeing being)
         {
-            if (press.Key == Keys.Escape)
-            {
-                WriteLine("Wield cancelled.");
-                NextStep = null;
-                return CommandIncomplete;
-            }
+            if (press.Key == Keys.Escape) return CancelMultiStep("Wield cancelled.");
 
             //0.2: Perhaps only 'likely' wields by default?
-            if (press.Key == Keys.OemQuestion)
-            {
-                ShowInventory(being, i => true);
-                return CommandIncomplete;
-            }
+            if (press.Key == Keys.OemQuestion) return ShowInventory(being, i => true);
 
             var item = ItemInInventoryLocation(press, being);
-            if (item != null)
-            {
-                NextStep = null;
-                return new Command(CmdAction.Wield, CmdDirection.None, item);
-            }
-            else
-            {
-                WriteLine($"Nothing in inventory slot {press.Character}.");
-            }
-            return CommandIncomplete;
+            if (item == null) return SameStep($"Nothing in inventory slot {press.Character}.");
+
+            return FinishedCommand(CmdAction.Wield, CmdDirection.None, item);
         }
 
         /// <summary> 0.2:  Currently, grab the topmost.  Later, choose. </summary>
         public Command PickUp(IBeing being)
         {
             var items = GameState.Map.ItemMap.GetItems(being.Position);
-
             var topItem = items.LastOrDefault();
-            if (topItem == null)
-            {
-                WriteLine("Nothing to pick up here.");
-                return CommandIncomplete;
-            }
+            if (topItem == null) return CancelMultiStep("Nothing to pick up here.");
 
-            return new Command(CmdAction.PickUp, CmdDirection.None, topItem);
+            return FinishedCommand(CmdAction.PickUp, CmdDirection.None, topItem);
         }
 
         #region Utility
@@ -434,19 +380,7 @@ namespace CopperBend.Engine
             return -1;
         }
 
-        /// <summary> If more input is ready, skip prompt and go to the next step </summary>
-        private Command FFwdOrPrompt(Func<AsciiKey, IBeing, Command> nextStep, string prompt, IBeing being)
-        {
-            NextStep = nextStep;
-            if (!Controls.IsInputReady())
-            {
-                Controls.Prompt(prompt);
-                return CommandIncomplete;
-            }
-            return NextStep(Controls.GetNextInput(), being);
-        }
-
-        public bool ShowInventory(IBeing being, Func<IItem, bool> filter = null)
+        public Command ShowInventory(IBeing being, Func<IItem, bool> filter = null)
         {
             if (filter == null) filter = (i) => true;
             char index = 'a';
@@ -461,12 +395,12 @@ namespace CopperBend.Engine
             if (index == 'a')
                 WriteLine("Got nothing on me.");
 
-            return index != 'a';
+            return CommandIncomplete;
         }
 
-        public void ShowInventory<T>(IBeing being)
+        public Command ShowInventory<T>(IBeing being)
         {
-            ShowInventory(being, (i) => i.Aspects.HasComponent<T>());
+            return ShowInventory(being, (i) => i.Aspects.HasComponent<T>());
         }
 
         private void WriteLine(string line)

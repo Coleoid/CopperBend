@@ -4,9 +4,9 @@
     {
         Unknown = 0,
         NoGameRunning,
+        PlayerTurn,
+        WorldTurns,
         MenuOpen,
-        GameWorldActing,
-        PlayerActing,
         MessagesPendingUserInput,
         LargeMessagePending,
     }

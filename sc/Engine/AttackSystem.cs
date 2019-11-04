@@ -238,8 +238,7 @@ Apply post-attack effects
                     {
                         log.Info("Game over, man.");
                         //1.+: Game modes (agent of power, hardcore, savescummer)
-                        Panel.GameOver(being);
-                        return;
+                        throw new PlayerDiedException();
                     }
 
                     //0.1: drop fewer items

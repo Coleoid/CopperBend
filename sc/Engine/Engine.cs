@@ -110,7 +110,6 @@ namespace CopperBend.Engine
                 WriteLine = AddMessage,
                 Prompt = MessageWindow.Prompt,
                 More = this.PromptUserForMoreAndPend,
-                GameOver = GameOver,
             };
 
             OpenGameMenu();
@@ -168,13 +167,13 @@ namespace CopperBend.Engine
             Player.CommandSource = new InputCommandSource(Describer, GameState, Dispatcher, log);
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
-            PushEngineMode(EngineMode.GameWorldActing, null);
+            PushEngineMode(EngineMode.WorldTurns, null);
             GameInProgress = true;
             log.Info("Began new game");
         }
 
         /// <summary> I hope you had fun! </summary>
-        public void GameOver(IBeing player)
+        public void GameOver(IBeing player, PlayerDiedException pde)
         {
             //Dispatcher.WriteLine("After you're dead, the town of Copper Bend in Kulkecharra Valley is");
             //Dispatcher.WriteLine("overrun by the blight.  Every creature flees, is absorbed");
@@ -251,7 +250,15 @@ namespace CopperBend.Engine
         public override void Update(TimeSpan timeElapsed)
         {
             QueueInput();
-            ActOnMode();  // <<== 
+
+            try
+            {
+                ActOnMode();  // <<== 
+            }
+            catch (PlayerDiedException pde)
+            {
+                GameOver(Player, pde);
+            }
 
             if (GameInProgress)
             {
@@ -325,7 +332,7 @@ namespace CopperBend.Engine
             CallbackStack.Push(callback);
 
             // Don't log the mode shift between player's turn and world's turn.
-            if (oldMode != EngineMode.GameWorldActing || CurrentMode != EngineMode.PlayerActing)
+            if (oldMode != EngineMode.WorldTurns || CurrentMode != EngineMode.PlayerTurn)
                 log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
         }
 
@@ -335,7 +342,7 @@ namespace CopperBend.Engine
             CallbackStack.Pop();
 
             // Don't log the mode shift between player's turn and world's turn.
-            if (oldMode != EngineMode.PlayerActing || CurrentMode != EngineMode.GameWorldActing)
+            if (oldMode != EngineMode.PlayerTurn || CurrentMode != EngineMode.WorldTurns)
                 log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
         }
         #endregion 
@@ -351,14 +358,14 @@ namespace CopperBend.Engine
 
             //  When the player is busy or incapacitated,
             //  time passes and other actors act.
-            case EngineMode.GameWorldActing:
+            case EngineMode.WorldTurns:
                 HandleScheduledEvents();
                 break;
 
             //  When the player is choosing their action
             //  or enough small messages have been printed that the
             //  UI is waiting with a '- more -' style prompt
-            case EngineMode.PlayerActing:
+            case EngineMode.PlayerTurn:
             case EngineMode.MessagesPendingUserInput:
                 HandleGatheringInput();
                 break;
@@ -451,7 +458,7 @@ namespace CopperBend.Engine
 
         public void HandleScheduledEvents()
         {
-            while (CurrentMode == EngineMode.GameWorldActing)
+            while (CurrentMode == EngineMode.WorldTurns)
             {
                 var nextAction = Schedule.GetNextAction();
                 Dispatcher.Dispatch(nextAction);

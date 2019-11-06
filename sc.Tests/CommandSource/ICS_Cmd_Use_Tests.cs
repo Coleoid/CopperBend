@@ -20,7 +20,7 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __writeLine.Received().Invoke("cancelled.");
-            Assert.That(_source.InMultiStepCommand, Is.False);
+            Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __writeLine.Received().Invoke("Nothing usable on me.");
-            Assert.That(_source.InMultiStepCommand, Is.False);
+            Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace CopperBend.Engine.Tests
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.West));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
 
-            Assert.That(_source.InMultiStepCommand, Is.False);
+            Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
         // Use_with_nonUsable_wielded_must_choose_item()
@@ -69,13 +69,13 @@ namespace CopperBend.Engine.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
             __prompt.Received().Invoke("Use item: ");
 
             Queue(Keys.C);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
             __prompt.Received().Invoke("Direction to use the hoe, or [a-z?] to choose item: ");
 
             Queue(Keys.NumPad9);
@@ -83,7 +83,7 @@ namespace CopperBend.Engine.Tests
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
-            Assert.That(_source.InMultiStepCommand, Is.False);
+            Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -95,7 +95,7 @@ namespace CopperBend.Engine.Tests
             Queue(Keys.U, Keys.C, Keys.NumPad9);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
-            Assert.That(_source.InMultiStepCommand, Is.False);
+            Assert.That(_source.IsAssemblingCommand, Is.False);
 
             Queue(Keys.U, Keys.Down);
             Cmd = _source.GetCommand(__being);
@@ -118,7 +118,7 @@ namespace CopperBend.Engine.Tests
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
-            Assert.That(_source.InMultiStepCommand, Is.False);
+            Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -131,13 +131,13 @@ namespace CopperBend.Engine.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
             __prompt.Received().Invoke("Direction to use the knife, or [a-z?] to choose item: ");
 
             Queue(Keys.C);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
             __prompt.Received().Invoke("Direction to use the hoe, or [a-z?] to choose item: ");
 
             Queue(Keys.NumPad9);
@@ -145,7 +145,7 @@ namespace CopperBend.Engine.Tests
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
-            Assert.That(_source.InMultiStepCommand, Is.False);
+            Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -157,28 +157,28 @@ namespace CopperBend.Engine.Tests
             Queue(Keys.U, Keys.D);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
             __writeLine.Received().Invoke("The key [d] does not match an inventory item.  Pick another.");
             __writeLine.ClearReceivedCalls();
 
             //Queue(Keys.B);
             //Cmd = _source.GetCommand(__being);
             //Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            //Assert.That(_source.InMultiStepCommand);
+            //Assert.That(_source.IsAssemblingCommand);
             //__writeLine.Received().Invoke("The smooth fruit is not a usable item.  Pick another.");
             //__writeLine.ClearReceivedCalls();
 
             Queue(Keys.OemPeriod);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
             __writeLine.Received().Invoke("The key [.] does not match an inventory item.  Pick another.");
             __writeLine.ClearReceivedCalls();
 
             Queue(Keys.Right);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
             __writeLine.Received().Invoke("The key [Right] does not match an inventory item.  Pick another.");
             __writeLine.ClearReceivedCalls();
         }

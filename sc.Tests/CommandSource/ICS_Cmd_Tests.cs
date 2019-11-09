@@ -53,7 +53,7 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __writeLine.Received().Invoke("Nothing to eat or drink on me.");
-            Assert.IsFalse(_source.InMultiStepCommand);
+            Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
         [Test]
@@ -65,8 +65,8 @@ namespace CopperBend.Engine.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("Consume cancelled.");
-            Assert.IsFalse(_source.InMultiStepCommand);
+            __writeLine.Received().Invoke("cancelled.");
+            Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
         [Test]
@@ -79,13 +79,13 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __prompt.Received().Invoke("Consume (inventory letter or ? to show inventory): ");
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
 
             Queue(Keys.B);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Consume));
             Assert.That(Cmd.Item, Is.SameAs(fruit));
-            Assert.IsFalse(_source.InMultiStepCommand);
+            Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
             __writeLine.Received().Invoke("I can't eat or drink a knife.");
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
         }
 
         [Test]
@@ -111,7 +111,7 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
             __writeLine.Received().Invoke("Nothing in inventory slot d.");
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
         }
 
         ////[Test]  // not until I care more AND work out the UI flow
@@ -145,7 +145,7 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __writeLine.Received().Invoke("Nothing to drop.");
-            Assert.IsFalse(_source.InMultiStepCommand);
+            Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
         [Test]
@@ -158,7 +158,7 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __writeLine.Received().Invoke("Drop cancelled.");
-            Assert.IsFalse(_source.InMultiStepCommand);
+            Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
         [Test]
@@ -171,14 +171,14 @@ namespace CopperBend.Engine.Tests
 
             __prompt.Received().Invoke("Drop (inventory letter or ? to show inventory): ");
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
 
             Queue(Keys.B);
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Drop));
             Assert.That(Cmd.Item, Is.SameAs(fruit));
-            Assert.IsFalse(_source.InMultiStepCommand);
+            Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
         [Test]
@@ -192,7 +192,7 @@ namespace CopperBend.Engine.Tests
             __prompt.DidNotReceive().Invoke("Drop (inventory letter or ? to show inventory): ");
             __writeLine.Received().Invoke("Nothing in inventory slot d.");
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.InMultiStepCommand);
+            Assert.That(_source.IsAssemblingCommand);
         }
 
 

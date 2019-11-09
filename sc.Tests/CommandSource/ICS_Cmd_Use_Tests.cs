@@ -164,7 +164,7 @@ namespace CopperBend.Engine.Tests
             //Queue(Keys.B);
             //Cmd = _source.GetCommand(__being);
             //Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            //Assert.That(_source.InMultiStepCommand);
+            //Assert.That(_source.IsAssemblingCommand);
             //__writeLine.Received().Invoke("The smooth fruit is not a usable item.  Pick another.");
             //__writeLine.ClearReceivedCalls();
 

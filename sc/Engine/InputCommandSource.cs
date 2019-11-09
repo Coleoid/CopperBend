@@ -48,6 +48,14 @@ namespace CopperBend.Engine
             }
         }
 
+        /// <summary>
+        /// The InputCommandSource builds a Command based on 
+        /// keyboard input.  It may take thousands of Update()
+        /// callbacks before a Command other than CommandIncomplete
+        /// is returned.  The en
+        /// </summary>
+        /// <param name="being"></param>
+        /// <returns></returns>
         public Command GetCommand(IBeing being)
         {
             // Most of the time, when waiting on a human, we're going
@@ -128,22 +136,22 @@ namespace CopperBend.Engine
                 if (!GameState.Story.HasClearedBlight)
                 {
                     blightDirection = dir;
-                    Controls.WriteLine("Lookin' at the scum covering the ground sets my teeth on edge.  I'm growling.");
-                    return NextStepIs(Direction_decide_to_Clear_Blight, "Am I goin' after this stuff bare-handed? ", being);
+                    Controls.WriteLine("The scum covering the ground sets my teeth on edge.  I'm growling.");
+                    return NextStepIs(Direction_decide_to_Clear_Blight, "Am I going after this stuff bare-handed? ", being);
                 }
             }
 
             return FinishedCommand(CmdAction.Direction, dir);
         }
 
-        //0.1.STORY  first time clearing blight
         CmdDirection blightDirection;
         public Command Direction_decide_to_Clear_Blight(AsciiKey press, IBeing being)
         {
-            //0.1: change decision mechanic to key == dir towards area blight
+            //0.1.STORY: change decision mechanic to key == dir towards area blight
             if (press.Key == Keys.Escape || press.Character == 'n')
             {
-                return SameStep("Not yet.");
+                WriteLine("Not yet.");
+                return CommandIncomplete;
             }
 
             GameState.Story.HasClearedBlight = true;

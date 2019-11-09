@@ -334,6 +334,9 @@ namespace CopperBend.Engine
             // Don't log the mode shift between player's turn and world's turn.
             if (oldMode != EngineMode.WorldTurns || CurrentMode != EngineMode.PlayerTurn)
                 log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
+
+            if (oldMode == CurrentMode)
+                if (!Debugger.IsAttached) Debugger.Launch();
         }
 
         internal void PopEngineMode()

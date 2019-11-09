@@ -143,7 +143,10 @@ namespace CopperBend.Engine
         private void add_message_to_list(string message)
         {
             if (isNewLine)
+            {
+
                 _lines.Add(message);
+            }
             else
                 _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  // macro-yecch-tacular.
 

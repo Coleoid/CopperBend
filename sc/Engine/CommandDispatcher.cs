@@ -179,6 +179,7 @@ namespace CopperBend.Engine
                 {
                     ScheduleAgent(being, 4);
                     GameState.MarkDirtyCoord(newPosition);
+                    GameState.Map.VisibilityChanged = true;
                 }
                 else
                 {

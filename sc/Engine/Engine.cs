@@ -454,8 +454,9 @@ namespace CopperBend.Engine
 
         private void HandleGatheringInput()
         {
+            //  Let's change this to have the callbacks directly responsible...
             bool leaveMode = CurrentCallback();
-            if (leaveMode) PopEngineMode();
+            //if (leaveMode) PopEngineMode();
         }
         #endregion
 
@@ -501,7 +502,7 @@ namespace CopperBend.Engine
 
         private void PromptUserForMoreAndPend()
         {
-            AddMessage("-- more --");
+            MessageWindow.WriteLine("-- more --");
             PushEngineMode(EngineMode.MessagesPendingUserInput, HandleMessagesPending);
         }
 

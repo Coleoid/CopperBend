@@ -36,9 +36,13 @@ namespace CopperBend.Engine
                 if (cmd.Action == CmdAction.Incomplete) return false;
 
                 var actionWasTaken = Controls.CommandBeing(being, cmd);
-                if (actionWasTaken) NextStep = null;
-
-                return actionWasTaken;
+                if (actionWasTaken)
+                {
+                    NextStep = null;
+                    Controls.PopEngineMode();
+                    return true;
+                }
+                return false; // bool return is vestigial
             }
 
             var commandGiven = deliverCommandFromInput();
@@ -136,7 +140,7 @@ namespace CopperBend.Engine
                 if (!GameState.Story.HasClearedBlight)
                 {
                     blightDirection = dir;
-                    Controls.WriteLine("The scum covering the ground sets my teeth on edge.  I'm growling.");
+                    Controls.WriteLine("The filth covering the ground sets my teeth on edge.  I'm growling.");
                     return NextStepIs(Direction_decide_to_Clear_Blight, "Am I going after this stuff bare-handed? ", being);
                 }
             }

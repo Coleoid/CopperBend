@@ -30,26 +30,20 @@ namespace CopperBend.Engine
 
         public void GiveCommand(IBeing being)
         {
-            bool deliverCommandFromInput()
+            void deliverCommandFromInput()
             {
                 var cmd = GetCommand(being);
-                if (cmd.Action == CmdAction.Incomplete) return false;
+                if (cmd.Action == CmdAction.Incomplete) return;
 
                 var actionWasTaken = Controls.CommandBeing(being, cmd);
                 if (actionWasTaken)
                 {
                     NextStep = null;
                     Controls.PopEngineMode();
-                    return true;
                 }
-                return false; // bool return is vestigial
             }
 
-            var commandGiven = deliverCommandFromInput();
-            if (!commandGiven)
-            {
-                Controls.PushEngineMode(EngineMode.PlayerTurn, deliverCommandFromInput);
-            }
+            Controls.PushEngineMode(EngineMode.PlayerTurn, deliverCommandFromInput);
         }
 
         /// <summary>

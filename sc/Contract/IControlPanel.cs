@@ -24,7 +24,7 @@ namespace CopperBend.Contract
         void ScheduleAgent(IScheduleAgent agent, int tickOff);
 
         /// <summary> When an action interrupts the entire game, in some way. </summary>
-        Action<EngineMode, Func<bool>> PushEngineMode { get; }
+        Action<EngineMode, Action> PushEngineMode { get; }
         Action PopEngineMode { get; }
 
         Coord CoordInDirection(Coord start, CmdDirection direction);

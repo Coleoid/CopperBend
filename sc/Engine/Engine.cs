@@ -69,7 +69,7 @@ namespace CopperBend.Engine
 
             InputQueue = new Queue<AsciiKey>();
             ModeStack = new Stack<EngineMode>();
-            CallbackStack = new Stack<Func<bool>>();
+            CallbackStack = new Stack<Action>();
 
             //  Is there any current concrete reason I'm splitting this here?
             Init();
@@ -281,7 +281,7 @@ namespace CopperBend.Engine
                 {
                     InputQueue.Clear();
                     MenuWindow.Show();
-                    PushEngineMode(EngineMode.MenuOpen, () => true);
+                    PushEngineMode(EngineMode.MenuOpen, () => { });
                     return;
                 }
 
@@ -311,42 +311,42 @@ namespace CopperBend.Engine
         //  about what we're doing.
 
         private readonly Stack<EngineMode> ModeStack;
-        private readonly Stack<Func<bool>> CallbackStack;
+        private readonly Stack<Action> CallbackStack;
 
-        internal EngineMode CurrentMode
-        {
-            get => (ModeStack?.Count == 0)
-                ? EngineMode.Unknown
-                : ModeStack.Peek();
-        }
+        internal EngineMode CurrentMode { get; set; } = EngineMode.Unknown;
 
-        internal Func<bool> CurrentCallback { get => CallbackStack.Peek(); }
+        internal Action CurrentCallback { get; set; } = () => { };
 
-        internal void PushEngineMode(EngineMode newMode, Func<bool> callback)
+        internal void PushEngineMode(EngineMode newMode, Action callback)
         {
             if (newMode == EngineMode.Unknown)
                 throw new Exception($"Should never EnterMode({newMode}).");
 
             var oldMode = CurrentMode;
-            ModeStack.Push(newMode);
-            CallbackStack.Push(callback);
-
-            // Don't log the mode shift between player's turn and world's turn.
-            if (oldMode != EngineMode.WorldTurns || CurrentMode != EngineMode.PlayerTurn)
-                log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
+            ModeStack.Push(CurrentMode);
+            CurrentMode = newMode;
+            CallbackStack.Push(CurrentCallback);
+            CurrentCallback = callback;
 
             if (oldMode == CurrentMode)
                 if (!Debugger.IsAttached) Debugger.Launch();
+
+            // Don't log mode shifts from world's turn to player's turn.
+            if (oldMode == EngineMode.WorldTurns && CurrentMode == EngineMode.PlayerTurn) return;
+
+            log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
         }
 
         internal void PopEngineMode()
         {
-            var oldMode = ModeStack.Pop();
-            CallbackStack.Pop();
+            var oldMode = CurrentMode;
+            CurrentMode = ModeStack.Pop();
+            CurrentCallback = CallbackStack.Pop();
 
-            // Don't log the mode shift between player's turn and world's turn.
-            if (oldMode != EngineMode.PlayerTurn || CurrentMode != EngineMode.WorldTurns)
-                log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
+            // Don't log mode shifts from player's turn to world's turn.
+            if (oldMode == EngineMode.PlayerTurn && CurrentMode == EngineMode.WorldTurns) return;
+
+            log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
         }
         #endregion 
 
@@ -370,7 +370,7 @@ namespace CopperBend.Engine
             //  UI is waiting with a '- more -' style prompt
             case EngineMode.PlayerTurn:
             case EngineMode.MessagesPendingUserInput:
-                HandleGatheringInput();
+                CurrentCallback();
                 break;
 
             //  The large message pane (inventory, log, ...) overlays most of the game
@@ -452,12 +452,6 @@ namespace CopperBend.Engine
             }
         }
 
-        private void HandleGatheringInput()
-        {
-            //  Let's change this to have the callbacks directly responsible...
-            bool leaveMode = CurrentCallback();
-            //if (leaveMode) PopEngineMode();
-        }
         #endregion
 
         public void HandleScheduledEvents()
@@ -506,7 +500,7 @@ namespace CopperBend.Engine
             PushEngineMode(EngineMode.MessagesPendingUserInput, HandleMessagesPending);
         }
 
-        private bool HandleMessagesPending()
+        private void HandleMessagesPending()
         {
             for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
             {
@@ -515,11 +509,8 @@ namespace CopperBend.Engine
                     ResetMessagesSentSincePause();
                     PopEngineMode();
                     ShowMessages();  // ...which may have enough messages to pend us again.
-                    return true;
                 }
             }
-
-            return false;
         }
         #endregion
 

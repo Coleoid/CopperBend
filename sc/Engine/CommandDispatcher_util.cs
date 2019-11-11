@@ -154,7 +154,7 @@ namespace CopperBend.Engine
         }
 
         public bool PlayerMoved { get; set; }
-        public Action<EngineMode, Func<bool>> PushEngineMode { get; set; }
+        public Action<EngineMode, Action> PushEngineMode { get; set; }
         public Action PopEngineMode { get; set; }
 
         public Func<bool> IsInputReady { get; set; }

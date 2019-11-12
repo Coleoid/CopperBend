@@ -328,8 +328,9 @@ namespace CopperBend.Engine
             CallbackStack.Push(CurrentCallback);
             CurrentCallback = callback;
 
-            if (oldMode == CurrentMode)
-                if (!Debugger.IsAttached) Debugger.Launch();
+            // fires when restarting game 12 nov 19
+            //if (oldMode == CurrentMode)
+            //    if (!Debugger.IsAttached) Debugger.Launch();
 
             // Don't log mode shifts from world's turn to player's turn.
             if (oldMode == EngineMode.WorldTurns && CurrentMode == EngineMode.PlayerTurn) return;
@@ -360,15 +361,19 @@ namespace CopperBend.Engine
                 break;
 
             //  When the player is busy or incapacitated,
-            //  time passes and other actors act.
+            //  time passes in the game world, events occur.
             case EngineMode.WorldTurns:
                 HandleScheduledEvents();
                 break;
 
             //  When the player is choosing their action
-            //  or enough small messages have been printed that the
-            //  UI is waiting with a '- more -' style prompt
             case EngineMode.PlayerTurn:
+                CurrentCallback();
+                ResetMessagesSentSincePause();
+                break;
+
+            //  When enough small messages have been printed that the
+            //  UI is waiting with a '- more -' style prompt
             case EngineMode.MessagesPendingUserInput:
                 CurrentCallback();
                 break;

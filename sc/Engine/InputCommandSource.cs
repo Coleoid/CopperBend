@@ -145,16 +145,35 @@ namespace CopperBend.Engine
         CmdDirection blightDirection;
         public Command Direction_decide_to_Clear_Blight(AsciiKey press, IBeing being)
         {
-            //0.1.STORY: change decision mechanic to key == dir towards area blight
-            if (press.Key == Keys.Escape || press.Character == 'n')
+            //  Decision mechanic: hit 'y', or travel in a direction
+            // towards blight (in which case, the decision direction will
+            // be the attack direction, even if different from the original
+            // direction).  Any other response cancels move/attack.
+            bool affirm = press.Key == Keys.Y;
+
+            if (!affirm)
             {
-                WriteLine("Not yet.");
-                return CommandIncomplete;
+                var dir = DirectionOf(press);
+                if (dir != CmdDirection.None)
+                {
+                    var dirCoord = Controls.CoordInDirection(being.Position, dir);
+                    var dirBlight = GameState.Map.BlightMap.GetItem(dirCoord);
+
+                    affirm = (dirBlight != null);
+                    if (affirm) blightDirection = dir;
+                }
             }
 
-            GameState.Story.HasClearedBlight = true;
-            WriteLine("Yes.  Now.");
-            return FinishedCommand(CmdAction.Direction, blightDirection);
+            if (affirm)
+            {
+                GameState.Story.HasClearedBlight = true;
+                WriteLine("Yes.  Now.");
+                return FinishedCommand(CmdAction.Direction, blightDirection);
+            }
+            else
+            {
+                return CancelMultiStep("Not yet.");
+            }
         }
 
 

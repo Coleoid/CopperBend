@@ -131,7 +131,7 @@ Apply post-attack effects
 
             IEnumerable<AttackDamage> damages = RollDamages(attack.AttackMethod);
 
-            ResistDamages(damages, attack.DefenseMethod);
+            damages = ResistDamages(damages, attack.DefenseMethod);
 
             RegisterDamage(damages, attack);
         }
@@ -192,13 +192,14 @@ Apply post-attack effects
 
 
             //TODO:  Check if the attacker has any modifiers to the AttackMethod
-            //  e.g., Aura of Smite Sauce:  +2 to Impact_blunt, +2 against Unholy
-            //  benefits apply after rolling damage?
-            //  needs to query defender for 'against' matches
+            //  e.g., Aura of Smite Sauce:  +2 to impact.blunt, +2 vs Unholy
+            //  * Modifiers apply after rolling damage?
+            //  * Query defender for 'vs' matches
             //  e.g., Rage:  x 1.5 damage, x .75 defense, x 2.5 fatigue
-            //  defense debuff applied during resist_damages
-            //  fatigue multiplier applied in step 5
-            //  ...these go way beyond modifying the AttackMethod.  Time to think again.
+            //  * defense debuff applied **during resist_damages**
+            //  * fatigue multiplier applied in step 5
+            //  ...these go way beyond modifying the AttackMethod.
+            //  Time to think some more.
         }
 
         public IEnumerable<IAreaBlight> NeighborBlightsOf(IAreaBlight areaBlight)
@@ -277,6 +278,18 @@ Apply post-attack effects
             //}
         }
 
+        public string AttackMessage(Attack attack)
+        {
+            string message = string.Empty;
+
+            //int attackTotalDamage = attack.AttackMethod.
+
+            //if (attack.Defender.Health )
+
+            return message;
+        }
+
+
         public IEnumerable<AttackDamage> RollDamages(IAttackMethod attack)
         {
             var damages = new List<AttackDamage>();
@@ -295,7 +308,7 @@ Apply post-attack effects
             return Dice.Roll(effect.DamageRange);
         }
 
-        public void ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
+        public IEnumerable<AttackDamage> ResistDamages(IEnumerable<AttackDamage> damages, IDefenseMethod defense)
         {
             Dictionary<string, string> drs = defense?.Resistances;
             if (drs == null)
@@ -329,6 +342,8 @@ Apply post-attack effects
                 //  Resistance can't make the damage worse, or cause healing
                 damage.Current -= Math.Clamp(resisted, 0, damage.Current);
             }
+
+            return damages;
         }
 
         #region Messages

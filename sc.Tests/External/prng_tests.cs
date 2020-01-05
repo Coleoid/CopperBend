@@ -6,6 +6,7 @@ using Troschuetz.Random.Generators;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NUnit.Framework;
+using System.Text.RegularExpressions;
 
 namespace External.Tests
 {
@@ -41,6 +42,14 @@ namespace External.Tests
         //        Assert.That(r1_out, Is.EqualTo(r2_out));
         //    }
         //}
+
+
+        [Test]
+        public void OddRegex()
+        {
+            Assert.IsFalse(Regex.IsMatch("<", @"[%]*"));
+        }
+
 
         [Test]
         public void Serializing_XorShift128Generator_keeps_sequence()

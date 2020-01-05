@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
@@ -158,13 +159,13 @@ namespace CopperBend.Engine.Tests
             Assert.That(damages[0].Initial, Is.EqualTo(8));
             Assert.That(damages[0].Current, Is.EqualTo(8), "initial and current begin equal");
 
-            asys.ResistDamages(damages, leather_armor);
+            var out_dmgs = asys.ResistDamages(damages, leather_armor).ToList();
 
-            Assert.That(damages[0].Initial, Is.EqualTo(8), "resistance doesn't alter initial value");
+            Assert.That(out_dmgs[0].Initial, Is.EqualTo(8), "resistance doesn't alter initial value");
 
-            Assert.That(damages[0].Current, Is.EqualTo(6), "leather resists blunt damage poorly");
-            Assert.That(damages[1].Current, Is.EqualTo(3), "leather resists other physical damage better");
-            Assert.That(damages[2].Current, Is.EqualTo(2), "leather resists energy damage well");
+            Assert.That(out_dmgs[0].Current, Is.EqualTo(6), "leather resists blunt damage poorly");
+            Assert.That(out_dmgs[1].Current, Is.EqualTo(3), "leather resists other physical damage better");
+            Assert.That(out_dmgs[2].Current, Is.EqualTo(2), "leather resists energy damage well");
         }
 
         [TestCase(9, "energetic.lightning", 4)]
@@ -179,9 +180,9 @@ namespace CopperBend.Engine.Tests
                 new AttackDamage(initial, type),
             };
 
-            asys.ResistDamages(damages, ring_armor);  //  default for ring is 1/2 ..5
+            var out_dmgs = asys.ResistDamages(damages, ring_armor);  //  default for ring is 1/2 ..5
 
-            Assert.That(damages[0].Current, Is.EqualTo(expected));
+            Assert.That(out_dmgs.First().Current, Is.EqualTo(expected));
         }
 
         // Note, our hero is strong against all vital.blight damage.

@@ -127,15 +127,13 @@ Apply post-attack effects
 
         public void ResolveAttack(Attack attack)
         {
-            IEnumerable<AttackDamage> damages;
-
             CheckForSpecials(attack);
 
-            damages = RollDamages(attack.AttackMethod);
+            IEnumerable<AttackDamage> damages = RollDamages(attack.AttackMethod);
 
             ResistDamages(damages, attack.DefenseMethod);
 
-            RegisterDamage(attack.Defender, damages);
+            RegisterDamage(damages, attack);
         }
 
         /// <summary>
@@ -209,21 +207,21 @@ Apply post-attack effects
             return BlightMap.GetItems(coord.Neighbors());
         }
 
-        public void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages)
+        public void RegisterDamage(IEnumerable<AttackDamage> damages, Attack attack)
         {
             int amount = damages.Sum(d => d.Current);
             if (amount < 1) return;
 
-            target.Hurt(amount);
+            attack.Defender.Hurt(amount);
 
-            MessageDamage(target, damages);
+            MessageDamage(attack.Defender, damages);
 
-            if (target.Health < 1)
+            if (attack.Defender.Health < 1)
             {
                 //              🦋
                 //  (ツ)_/¯
                 //  Is this an angel?
-                Destroyed.Enqueue(target);
+                Destroyed.Enqueue(attack.Defender);
                 log.Info($"Target destroyed.");
             }
         }
@@ -269,13 +267,14 @@ Apply post-attack effects
 
         private void MessageDamage(IDelible target, IEnumerable<AttackDamage> damages)
         {
-            if (target.Health > 0)
-            {
-                //Message(attacker, Messages.BarehandBlightDamage);
-            }
-            else
-            {
-            }
+            //if (target.Health > 0)
+            //{
+            //    Message()
+            //    //Message(attacker, Messages.BarehandBlightDamage);
+            //}
+            //else
+            //{
+            //}
         }
 
         public IEnumerable<AttackDamage> RollDamages(IAttackMethod attack)

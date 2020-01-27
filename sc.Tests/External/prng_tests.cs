@@ -45,13 +45,6 @@ namespace External.Tests
 
 
         [Test]
-        public void OddRegex()
-        {
-            Assert.IsFalse(Regex.IsMatch("<", @"[%]*"));
-        }
-
-
-        [Test]
         public void Serializing_XorShift128Generator_keeps_sequence()
         {
             var r1 = new XorShift128Generator();

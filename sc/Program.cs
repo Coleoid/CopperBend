@@ -21,6 +21,7 @@ namespace CopperBend.Application
 
         public static int Main(string[] args)
         {
+            // populate command-line arguments, then call OnExecute()
             return CommandLineApplication.Execute<Program>(args);
         }
 
@@ -32,17 +33,16 @@ namespace CopperBend.Application
             var repo = LogManager.CreateRepository("CB");
             XmlConfigurator.Configure(repo, new FileInfo("sc.log.config"));
             log = LogManager.GetLogger("CB", "CB");
-            //log = repo.GetLogger("CB");
             log.Info("\n======================================");
             log.Info("Run started");
 
-            int gameWidth = 80;
+            int gameWidth = 160;
             int gameHeight = 60;
 
             try
             {
-                Game.Create("Zaratustra.font", gameWidth, gameHeight);
-                //Game.Create(gameWidth, gameHeight);
+                //Game.Create("Cheepicus_14x14.font", gameWidth, gameHeight);
+                Game.Create(gameWidth, gameHeight);
 
                 //  Engine is now a console, which cannot be created before .Run() below.
                 //  .OnInitialize must be set before .Run is called.

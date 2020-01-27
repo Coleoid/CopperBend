@@ -2,8 +2,6 @@
 using Size = System.Drawing.Size;
 using MG = Microsoft.Xna.Framework;
 using SadConsole;
-using SadGlobe = SadConsole.Global;
-using SadConsole.Controls;
 using GoRogue;
 using log4net;
 using CopperBend.Contract;
@@ -13,13 +11,15 @@ namespace CopperBend.Engine
     public class UIBuilder
     {
         public readonly Size GameSize;
-        //public Font Font;
         private readonly ILog log;
+        public FontMaster MapFontMaster { get; set; }
+        public Font MapFont { get; set; }
 
-        public UIBuilder(Size gameSize, Font font, ILog logger)
+        public UIBuilder(Size gameSize, FontMaster mapFontMaster, ILog logger)
         {
             GameSize = gameSize;
-            //Font = font;
+            MapFontMaster = mapFontMaster;
+            MapFont = MapFontMaster.GetFont(Font.FontSizes.One);
             log = logger;
         }
 
@@ -50,7 +50,7 @@ namespace CopperBend.Engine
             int viewWidth = windowSize.Width - 2;
             int viewHeight = windowSize.Height - 2;
 
-            Window menuWindow = new Window(windowSize.Width, windowSize.Height)  //0.2 textier font
+            Window menuWindow = new Window(windowSize.Width, windowSize.Height)
             {
                 CanDrag = true,
                 Title = title.Align(HorizontalAlignment.Center, viewWidth),
@@ -58,7 +58,7 @@ namespace CopperBend.Engine
             };
             log.DebugFormat("Created menu window, [{0}].", menuWindow.AbsoluteArea);
 
-            var menuConsole = new ControlsConsole(viewWidth, viewHeight)  //0.2 textier font
+            var menuConsole = new ControlsConsole(viewWidth, viewHeight)
             {
                 DefaultBackground = MG.Color.Black,
             };
@@ -78,23 +78,23 @@ namespace CopperBend.Engine
             int viewWidth = windowSize.Width - 2;
             int viewHeight = windowSize.Height - 2;
 
-            Window mapWindow = new Window(windowSize.Width, windowSize.Height)
+            Window mapWindow = new Window(windowSize.Width, windowSize.Height, MapFont)
             {
                 CanDrag = true,
-                Title = title.Align(HorizontalAlignment.Center, viewWidth)
+                Title = title.Align(HorizontalAlignment.Center, viewWidth),
             };
             log.DebugFormat("Created map window, [{0}].", mapWindow.AbsoluteArea);
 
             var mapConsole = new ScrollingConsole(
-                fullMap.Width, fullMap.Height, SadGlobe.FontDefault,
+                fullMap.Width, fullMap.Height, MapFont,
                 new MG.Rectangle(0, 0, viewWidth, viewHeight));
 
             // Fit the MapConsole inside the MapWindow border
             mapConsole.Position = new Coord(1, 1);
-            log.DebugFormat("Created map console, map size [{0},{1}], viewport size [{2}].", fullMap.Width, fullMap.Height, mapWindow.ViewPort);
 
             mapWindow.Children.Add(mapConsole);
 
+            log.DebugFormat("Created map console, map size [{0},{1}], viewport size [{2}].", fullMap.Width, fullMap.Height, mapWindow.ViewPort);
             return (mapConsole, mapWindow);
         }
     }

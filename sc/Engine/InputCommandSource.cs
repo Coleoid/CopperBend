@@ -44,6 +44,7 @@ namespace CopperBend.Engine
             }
 
             Controls.PushEngineMode(EngineMode.PlayerTurn, deliverCommandFromInput);
+            deliverCommandFromInput();
         }
 
         /// <summary>

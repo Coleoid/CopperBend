@@ -8,7 +8,7 @@ using log4net;
 using SadConsole;
 using SadConsole.Input;
 using SadConsole.Components;
-using SadConState = SadConsole.Global;
+using SadGlobal = SadConsole.Global;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
@@ -23,7 +23,7 @@ namespace CopperBend.Engine
 
         public Size GameSize;
         public Size MapSize;
-        public Size MapWindowSize;
+        public Size MapWindowSize { get; set; }
         public Size MenuWindowSize;
 
         private ScrollingConsole MapConsole { get; set; }
@@ -60,8 +60,10 @@ namespace CopperBend.Engine
             IsVisible = true;
             IsFocused = true;
 
-            Parent = SadConState.CurrentScreen;
-            Kbd = SadConState.KeyboardState;
+            GameSize = new Size(gameWidth, gameHeight);
+
+            Parent = SadGlobal.CurrentScreen;
+            Kbd = SadGlobal.KeyboardState;
 
             InputQueue = new Queue<AsciiKey>();
             ModeStack = new Stack<EngineMode>();
@@ -86,8 +88,15 @@ namespace CopperBend.Engine
             GameInProgress = false;
             PushEngineMode(EngineMode.NoGameRunning, null);
 
-            Being.EntityFactory = new EntityFactory();
+            var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
+
+            UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
+
+            Being.EntityFactory = new EntityFactory(mapFontMaster);
             Schedule = new Schedule(log);
+
+            MapWindowSize = new Size(GameSize.Width * 1 / 3, GameSize.Height - 8);
+            MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
 
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
 
@@ -147,11 +156,6 @@ namespace CopperBend.Engine
             FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
             MessageQueue = new Queue<string>();
-
-            //0.2.GFX: Set a non-square font in message areas
-            //var fontMaster = SadConsole.Global.LoadFont("terminal16x16_gs_ro.font");
-            //var font = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
-            //SadConsole.Global.FontDefault = font;
 
             GameState = new GameState
             {

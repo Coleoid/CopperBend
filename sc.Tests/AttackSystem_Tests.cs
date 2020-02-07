@@ -189,7 +189,7 @@ namespace CopperBend.Engine.Tests
         [TestCase("physical.impact.point", true)]
         [TestCase("physical.impact.blunt", true)]
         [TestCase("energetic.fire", false)]
-        public void Blight_splashback(string damageType, bool willSplashBack)
+        public void Blight_splashback_on_physical_impact(string damageType, bool willSplashBack)
         {
             // Anyone directly physically assaulting AreaBlight is 
             // hit with immediate vital.blight.toxin damage.
@@ -228,8 +228,7 @@ namespace CopperBend.Engine.Tests
         {
             var asys = new AttackSystem(null, __log);
 
-            var player = new Being(Color.LawnGreen, Color.Black, '@');
-            player.IsPlayer = true;
+            var player = new Being(Color.LawnGreen, Color.Black, '@') { IsPlayer = true };
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
             var blight = new AreaBlight();
             Attack attack = new Attack
@@ -248,6 +247,8 @@ namespace CopperBend.Engine.Tests
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(2));
 
             var splashBack = asys.AttackQueue.Dequeue();
+            Assert.NotNull(splashBack);
+
             var newAttack = asys.AttackQueue.Dequeue();
             var newAM = newAttack.AttackMethod;
             var newAE = newAM.AttackEffects[0];
@@ -259,9 +260,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Nature_strikes_neighboring_blight_through_our_hero()
         {
-
-            var player = new Being(Color.LawnGreen, Color.Black, '@');
-            player.IsPlayer = true;
+            var player = new Being(Color.LawnGreen, Color.Black, '@') { IsPlayer = true };
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
             var blight = new AreaBlight();
             Attack attack = new Attack
@@ -282,8 +281,7 @@ namespace CopperBend.Engine.Tests
             blightMap.Add(nbor_2, (3, 1));
             blightMap.Add(stranger, (8, 2));
 
-            var asys = new AttackSystem(null, __log);
-            asys.BlightMap = blightMap;
+            var asys = new AttackSystem(null, __log) { BlightMap = blightMap };
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
@@ -292,6 +290,8 @@ namespace CopperBend.Engine.Tests
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(4));
 
             var splashBack = asys.AttackQueue.Dequeue();
+            Assert.NotNull(splashBack);
+
             var newAttack = asys.AttackQueue.Dequeue();
             Assert.That(newAttack.Defender, Is.EqualTo(blight));
 

@@ -31,7 +31,7 @@ namespace CopperBend.Model.Aspects.Tests
         }
 
         [Test]
-        public void Usable_can_express_our_needs()
+        public void Usable_can_build_a_hoe()
         {
             var hoe = new Item((0, 0));
             hoe.AddAspect(new Usable("till ground with", UseTargetFlags.Direction)
@@ -40,6 +40,15 @@ namespace CopperBend.Model.Aspects.Tests
             hoe.AddAspect(new Usable("remove weeds with", UseTargetFlags.Direction)
                 .AddEffect("weed", 1)
                 .AddCosts(("time", 24), ("energy", 5)));
+        }
+
+        [Test]
+        public void Usable_can_build_a_pen()
+        {
+            var pen = new Item((0, 0));
+            pen.AddAspect(new Usable("write on object with", UseTargetFlags.Item)
+                .AddEffect("write", 1)
+                .AddCosts(("time", 20), ("energy", 2)));
         }
 
         [Test]

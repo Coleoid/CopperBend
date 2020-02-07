@@ -13,7 +13,6 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using System.Text;
 using System.Diagnostics;
 
 namespace CopperBend.Engine
@@ -46,7 +45,7 @@ namespace CopperBend.Engine
         private bool GameInProgress;
         private int TickWhenGameLastSaved;
         private string TopSeed;
-        private bool JumpToDebugger = true;
+        private readonly bool JumpToDebugger = true;
 
         #region Init
         public Engine(int gameWidth, int gameHeight, ILog logger, string topSeed = null)
@@ -61,9 +60,6 @@ namespace CopperBend.Engine
             IsVisible = true;
             IsFocused = true;
 
-            GameSize = new Size(gameWidth, gameHeight);
-            UIBuilder = new UIBuilder(GameSize, null, log); //font
-
             Parent = SadConState.CurrentScreen;
             Kbd = SadConState.KeyboardState;
 
@@ -71,7 +67,11 @@ namespace CopperBend.Engine
             ModeStack = new Stack<EngineMode>();
             CallbackStack = new Stack<Action>();
 
-            //  Is there any current concrete reason I'm splitting this here?
+            GameSize = new Size(gameWidth, gameHeight);
+            MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
+            MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
+
+            //  This may leave the constructor brittle
             Init();
         }
 
@@ -81,14 +81,13 @@ namespace CopperBend.Engine
         private ICompoundMap FullMap;
         public void Init()
         {
+            UIBuilder = new UIBuilder(GameSize, null, log); //font
+
             GameInProgress = false;
             PushEngineMode(EngineMode.NoGameRunning, null);
 
             Being.EntityFactory = new EntityFactory();
             Schedule = new Schedule(log);
-
-            MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
-            MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
 
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
 
@@ -129,14 +128,13 @@ namespace CopperBend.Engine
 
         public void BeginNewGame()
         {
+            TopSeed = GenerateSimpleTopSeed();
             log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
             Cosmogenesis(TopSeed);
             Describer.Scramble();
 
-            //0.1: Map loading is so hard-codey
-            var loader = new Persist.MapLoader();
+            var loader = new Persist.MapLoader(log);
             FullMap = loader.FarmMap();
-            log.Debug("Loaded the farmyard map");
 
             Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             Schedule.AddAgent(Player, 12);
@@ -176,13 +174,12 @@ namespace CopperBend.Engine
         public void GameOver(IBeing player, PlayerDiedException pde)
         {
             //Dispatcher.WriteLine("After you're dead, the town of Copper Bend in Kulkecharra Valley is");
-            //Dispatcher.WriteLine("overrun by the blight.  Every creature flees, is absorbed");
-            //Dispatcher.WriteLine("for energy, or suffers a brief quasi-life as the blight");
-            //Dispatcher.WriteLine("strives to learn how we move.  What will stand in its way?");
+            //Dispatcher.WriteLine("overrun by the Rot.  Every creature flees, is absorbed");
+            //Dispatcher.WriteLine("for energy, or suffers a brief quasi-life as the Rot");
+            //Dispatcher.WriteLine("strives to understand and replace life.  What will stand in its way?");
 
-            //WriteStats();
-            //ClearStats();
-            //PromptUserForMoreAndPend();
+            WriteGameOverReport(pde);
+            ClearStats();
 
             PopEngineMode();
             GameInProgress = false;
@@ -191,7 +188,7 @@ namespace CopperBend.Engine
             OpenGameMenu();
         }
 
-        public void WriteStats() { } //0.0: WriteStats
+        public void WriteGameOverReport(PlayerDiedException pde) { } //0.0: WriteGameOverReport
         public void ClearStats() { } //0.0: ClearStats
 
         private void ShutDownGame()

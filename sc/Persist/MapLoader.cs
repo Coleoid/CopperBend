@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using log4net;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Color = Microsoft.Xna.Framework.Color;
@@ -16,11 +17,13 @@ namespace CopperBend.Persist
 {
     public class MapLoader
     {
+        private readonly ILog log;
         //0.1: Extract Atlas into Compendium
         Dictionary<string, TerrainType> TerrainTypes;
 
-        public MapLoader()
+        public MapLoader(ILog logger)
         {
+            log = logger;
             InitTerrain();
         }
 
@@ -253,6 +256,7 @@ namespace CopperBend.Persist
             return map;
         }
 
+        //0.1: Map loading is so hard-codey
         private CompoundMap _farmMap = null;
         internal CompoundMap FarmMap()
         {
@@ -261,8 +265,11 @@ namespace CopperBend.Persist
                 _farmMap = MapFromYAML(FarmMapYaml);
                 _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1.MAP  get start location from map
                 Coord ShedCoord = (28, 4);
-                var hoe = Equipper.BuildItem("hoe");
-                _farmMap.ItemMap.Add(hoe, ShedCoord);
+                var gear = Equipper.BuildItem("hoe");
+                _farmMap.ItemMap.Add(gear, ShedCoord);
+                gear = Equipper.BuildItem("gloves");
+                _farmMap.ItemMap.Add(gear, ShedCoord);
+
                 //  Obscure point on the edge to test map transitions
                 //_farmMap.AddEventAtLocation(new Point(41, 1), new CommandEntry(GameCommand.GoToFarmhouse, null));
 
@@ -272,6 +279,7 @@ namespace CopperBend.Persist
                 //_farmMap.AddEventAtLocation(new Point(5, 18), new CommandEntry(GameCommand.NotReadyToLeave, null));
             }
 
+            log.Debug("Loaded the farmyard map");
             return _farmMap;
         }
 

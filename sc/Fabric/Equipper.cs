@@ -45,6 +45,10 @@ namespace CopperBend.Fabric
                 //  These items intentionally left useless
                 break;
 
+            case "gloves":
+                //  They affect the incident 'My Hands', is that rep'd here?
+                break;
+
             default:
                 throw new Exception($"Don't know how to build a [{itemName}].");
             }

@@ -4,6 +4,12 @@ using CopperBend.Contract;
 
 namespace CopperBend.Model.Aspects
 {
+    /// <summary> Things which the player (and others) can use. </summary>
+    /// <remarks>
+    /// They present action options via UI, to the player.
+    /// Undecided how to communicate these options to
+    /// software agents, so e.g., a clever enemy could drink a potion.
+    /// </remarks>
     public class Usable : IUsable
     {
         public string VerbPhrase { get; set; }

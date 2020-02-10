@@ -10,7 +10,7 @@ namespace CopperBend.Model
         public uint ID { get; private set; }
         #endregion
 
-        public Entity SadConEntity { get; set; } = null;
+        public IEntity SadConEntity { get; set; } = null;
 
         protected CbEntity(uint id = uint.MaxValue)
         {

@@ -83,12 +83,13 @@ namespace CopperBend.Engine
         private ICompoundMap FullMap;
         public void Init()
         {
-            UIBuilder = new UIBuilder(GameSize, null, log); //font
+            var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
+            UIBuilder = new UIBuilder(GameSize, mapFontMaster, log); //font
 
             GameInProgress = false;
             PushEngineMode(EngineMode.NoGameRunning, null);
 
-            var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
+            //var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
 
             UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
 

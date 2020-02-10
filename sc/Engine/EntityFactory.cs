@@ -16,12 +16,12 @@ namespace CopperBend.Engine
             MapFont = MapFontMaster.GetFont(Font.FontSizes.One);
         }
 
-        public Entity GetSadCon(IGetSadCon cb)
+        public IEntity GetSadCon(IGetSadCon cb)
         {
             return NewSCEntity(cb.Foreground, cb.Background, cb.Glyph);
         }
 
-        private Entity NewSCEntity(Color foreground, Color background, int glyph)
+        private IEntity NewSCEntity(Color foreground, Color background, int glyph)
         {
             return new Entity(foreground, background, glyph) { Font = MapFont };
         }

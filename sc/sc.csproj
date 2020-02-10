@@ -26,8 +26,13 @@
     <PackageReference Include="MonoGame.Content.Builder" Version="3.7.0.9" />
     <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.8.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="SadConsole" Version="8.99.0" />
     <PackageReference Include="YamlDotNet" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SadConsole">
+      <HintPath>..\lib\SadConsole.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

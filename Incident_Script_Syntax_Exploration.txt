@@ -1,29 +1,50 @@
 Incident Script Syntax Exploration
 
+
+
 ---
-Flow [= r_leaves_for_farm]
+Flow decide_to_see_farm
+
+Merotta:
+    say "He's clean.  Any fool can see that.  That cursed crap's always easy to see."
+
+Belo:
+    move to meeting_table
+    (@ ^.start) say "And it's always changing.  Bock says that Rot thing hit the stranger and fell apart?  Doesn't sound right.  What if it _went into_ him?"
+
+Merotta:
+    say "Then we would see it.  Or smell it!"
+
+Kellet:
+    say "Bock saw him work the land.  Tacker's place--filthy, now.  So this:  When I fetched him back, what I saw, where he worked:  Clean land.  Sprouts.  Redfruit and beans, I think.  This."
+
+Belo:
+    wait 36
+    say "Bock, show me.  Before it gets dark.  Runcel, come with us."
+    create party Tacker (Belo, Bock, Runcel)
+
+End flow
+
+
+---
+Flow [= party_leaves_for_farm]
     (@ decide_to_see_farm.end)
 
-Runcel and party: (@ .start) [= r_leaving_1]
-    // (@ .start) means this action begins at the start of this flow
-    // [= r_leaving_1] means this action has this label
-    move to (33, 14)
+Tacker party: (@ .start) [= r_leaving_1]
+    move to 33, 14
 
 Kellet: (@ r_leaving_1.start + 48) [= k_approach]
     say "Runcel, wait!"
     move to Runcel
 
-Runcel: (@ r_leaving_1.end)
+Runcel: (@ k_approach.start + 30)
+    stop move
     say "..."
     (@ ^ + 24) say "What?"
-        // ^ means above action, defaults to end, can do ^.start, ^.end
-        // default timing on actions is (@ ^.end),
-        //   i.e., after the prior action is done.
-        // ?? may be useful to chain via ^^^ ?
 
 Kellet:
     (@ k_approach.end)
-    say "I saw the Tacker Farm is Rot to the north."
+    say "Tacker Farm, the Rot to the north.  Watch."
 
 Runcel:
     wait 24
@@ -32,13 +53,40 @@ Runcel:
 Kellet:
     wait 6
     say "Yes."
-    join party "Runcel"
+    join party Tacker
 
-Runcel and party:
+Tacker party:
     exit map via door at 30, 4
 
 End flow
 
----
-Flow 
+Notes:
+    // (@ .start) means this action begins at the start of this flow
+    // [= r_leaving_1] means this action has this label
 
+    // ^ means prior action, defaults to end, can do ^.start, ^.end
+    // Default timing on actions is after the prior action is done.
+    // ?? may be useful to chain via ^^^ ?
+    // Could have done same with 'wait 24', 'say "What?"'
+
+    move to (within 2)
+    move onto (within 0)
+    move within 5
+    stay within 5?
+
+
+---  This one is nonsensical:
+Flow [= Bock_is_generally_hyper]  ()
+
+Bock:
+    shuffle friends into friend_deck
+
+Bock:
+    deal from friend_deck into Chosen_friend
+    move to Chosen_friend
+    say $Chosen_friend.name + "!"
+    say "Rutabaga, rutabaga!"
+    wait 60
+    restart unless friend_deck.empty
+
+End flow

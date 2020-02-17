@@ -48,76 +48,8 @@ namespace CopperBend.Engine.Tests
     // Can (set|offset) (lower|upper) bound on a defense
 
     [TestFixture]
-    public class AttackSystem_Tests
+    public class AttackSystem_Tests : AttackSystem_TestBase
     {
-        AttackMethod tac;
-        AttackEffect tac_impact;
-        AttackEffect tac_flame;
-
-        AttackMethod bfh;
-        AttackEffect bfh_impact;
-        AttackEffect bfh_flame;
-
-        DefenseMethod leather_armor;
-        DefenseMethod ring_armor;
-
-        ILog __log; 
-
-        [SetUp]
-        public void SetUp()
-        {
-            __log = Substitute.For<ILog>();
-            Being.IDGenerator = new GoRogue.IDGenerator();
-            Being.EntityFactory = Substitute.For<IEntityFactory>();
-            AreaBlight.IDGenerator = Being.IDGenerator;
-
-            // Torch as club, crunch and burn
-            tac = new AttackMethod();
-            tac_impact = new AttackEffect
-            {
-                Type = "physical.impact.blunt",
-                DamageRange = "1d5"
-            };
-            tac_flame = new AttackEffect
-            {
-                Type = "energetic.fire",
-                DamageRange = "1d3 - 1"
-            };
-            tac.AttackEffects.Add(tac_impact);
-            tac.AttackEffects.Add(tac_flame);
-
-            // Brekka-onu's Flame Hammer, bigger crunch, bigger burn
-            bfh = new AttackMethod();
-            bfh_impact = new AttackEffect
-            {
-                Type = "physical.impact.blunt",
-                DamageRange = "2d6 + 4"
-            };
-            bfh_flame = new AttackEffect
-            {
-                Type = "energetic.fire",
-                DamageRange = "1d4 + 2"
-            };
-            bfh.AttackEffects.Add(bfh_impact);
-            bfh.AttackEffects.Add(bfh_flame);
-
-            leather_armor = new DefenseMethod();
-            leather_armor.Resistances["physical.impact.blunt"] = "1/4 ..4";
-            leather_armor.Resistances["physical"] = "1/2 ..4";
-            leather_armor.Resistances["energetic"] = "2/3 ..4";
-            leather_armor.Resistances["magical"] = "1/3 ..1";
-            leather_armor.Resistances["vital"] = "1/3 ..2";
-            //leather_armor.Resistances["default"] = "1/3 ..3";  //not needed with all branches covered
-
-            ring_armor = new DefenseMethod();
-            ring_armor.Resistances["physical.impact.blunt"] = "1/2 ..6";
-            ring_armor.Resistances["physical"] = "2/3 ..8";
-            ring_armor.Resistances["energetic.fire"] = "2/3 ..5";
-            ring_armor.Resistances["default"] = "1/2 ..5";
-
-            //0.2: Keep the tree of damage types in data, and type-check attacks/defenses at load time...
-        }
-
         [Test]
         public void AAA_Gather_Startup_Costs()
         {
@@ -185,11 +117,10 @@ namespace CopperBend.Engine.Tests
             Assert.That(out_dmgs.First().Current, Is.EqualTo(expected));
         }
 
-        // Note, our hero is strong against all vital.blight damage.
         [TestCase("physical.impact.point", true)]
         [TestCase("physical.impact.blunt", true)]
         [TestCase("energetic.fire", false)]
-        public void Blight_splashback_on_physical_impact(string damageType, bool willSplashBack)
+        public void Physical_impact_on_Rot_causes_splashback_damage(string damageType, bool willSplashBack)
         {
             // Anyone directly physically assaulting AreaBlight is 
             // hit with immediate vital.blight.toxin damage.
@@ -223,6 +154,10 @@ namespace CopperBend.Engine.Tests
             Assert.That(newAttack.Attacker, Is.EqualTo(blight));
         }
 
+        //TODO: Ranged_physical_impact_on_Rot_skips_splashback_damage
+        //TODO: Missed_physical_impact_on_Rot_skips_splashback_damage
+        // Note, our hero is strong against all vital.blight damage.
+
         [Test]
         public void Nature_strikes_the_blight_through_our_hero()
         {
@@ -255,6 +190,30 @@ namespace CopperBend.Engine.Tests
             Assert.That(newAE.Type, Is.EqualTo("vital.nature.itself"));
             Assert.That(newAttack.Defender, Is.EqualTo(blight));
             Assert.That(newAttack.Attacker, Is.EqualTo(player));
+        }
+
+        [Test]
+        public void Nature_does_not_strike_the_rot_via_other_sources()
+        {
+            var asys = new AttackSystem(null, __log);
+
+            var flameRat = new Being(Color.Red, Color.Black, 'r');
+            var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
+            var rot = new AreaBlight();
+            Attack attack = new Attack
+            {
+                Attacker = flameRat,
+                AttackMethod = am,
+                Defender = rot,
+                DefenseMethod = rot.GetDefenseMethod(am)
+            };
+
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
+
+            asys.BlightMap = new BlightMap();
+            asys.CheckForSpecials(attack);
+
+            Assert.That(asys.AttackQueue.Count, Is.EqualTo(1));
         }
 
         [Test]

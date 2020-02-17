@@ -27,7 +27,7 @@ namespace CopperBend.Persist.Tests
 
             var entityFactory = Substitute.For<IEntityFactory>();
             entityFactory.GetSadCon(Arg.Any<IGetSadCon>())
-                .Returns(Substitute.For<Entity>());
+                .Returns(Substitute.For<IEntity>());
             Being.EntityFactory = entityFactory;
         }
 

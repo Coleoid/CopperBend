@@ -1,13 +1,13 @@
 {
   "runtimeTarget": {
     "name": ".NETStandard,Version=v2.0/",
-    "signature": "767d2a40f1564b5a7ada6da136dd8c2c73d91f81"
+    "signature": ""
   },
   "compilationOptions": {},
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "SadConsole/8.4.1-debug": {
+      "SadConsole/8.9.1": {
         "dependencies": {
           "Microsoft.SourceLink.GitHub": "1.0.0-beta2-18618-05",
           "MonoGame.Content.Builder": "3.7.0.9",
@@ -53,7 +53,7 @@
     }
   },
   "libraries": {
-    "SadConsole/8.4.1-debug": {
+    "SadConsole/8.9.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -68,7 +68,7 @@
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-jEgvbuzP7ZijrdbDgFMJRnRy4XkBY3lwTUjucfqp7EJy30wgoYTFiIr29a9uMkcfPUjyOOTg5Zd0Bq69rDF2MA==",
+      "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
       "path": "microsoft.netcore.platforms/1.1.0",
       "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
     },
@@ -103,7 +103,7 @@
     "NETStandard.Library/2.0.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-YnmdrpidbBS8TJnOxPaq0hpoVVzEQDxg58axt8MORca6zFZBpJYHhjDgWvXV37m9nFLLOjPWj3krVr+fzaxt2g==",
+      "sha512": "sha512-7eEsfllPZgUuQ2UL0btAeOgkwfMb6cpA58+H6nmWyDQ2MtZBoBYWErLsCB+I7X+tsngfgEQNR1b1pZm4JFHDLQ==",
       "path": "netstandard.library/2.0.3",
       "hashPath": "netstandard.library.2.0.3.nupkg.sha512"
     },

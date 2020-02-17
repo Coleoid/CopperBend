@@ -84,12 +84,10 @@ namespace CopperBend.Engine
         public void Init()
         {
             var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
-            UIBuilder = new UIBuilder(GameSize, mapFontMaster, log); //font
+            UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
 
             GameInProgress = false;
             PushEngineMode(EngineMode.NoGameRunning, null);
-
-            //var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
 
             UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
 
@@ -215,20 +213,10 @@ namespace CopperBend.Engine
             MapConsole = null;
             MapWindow = null;
 
-            //Schedule.AddAgent(Player, 12);
             Schedule.Clear();
-
-            //Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             Player = null;
-
-            //FullMap = loader.FarmMap();
             FullMap = null;
 
-            //var loader = new Persist.MapLoader();
-            //Describer.Scramble();
-            //Cosmogenesis(TopSeed);
-
-            //----
             log.Info("Shut down game");
         }
 

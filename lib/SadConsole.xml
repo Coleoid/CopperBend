@@ -822,6 +822,11 @@
             <summary>
             Processes the effects added to cells with <see cref="o:SetEffect" /></summary>
         </member>
+        <member name="P:SadConsole.CellSurface.EraseGlyph">
+            <summary>
+            The glyph used by the <see cref="M:SadConsole.CellSurface.Erase(System.Int32,System.Int32,System.Int32)" /> method. Defaults to 0.
+            </summary>
+        </member>
         <member name="M:SadConsole.CellSurface.SetPixels(Microsoft.Xna.Framework.Color[])">
             <summary>
             Sets each background of a cell to the array of colors. Must be the same length as this cell surface.
@@ -1235,6 +1240,36 @@
             <param name="amount">How much to scroll.</param>
             <param name="wrap">When false, a blank line appears at the right. When true, the left line appears at the right.</param>
         </member>
+        <member name="M:SadConsole.CellSurface.Erase(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Starting at the specified coordinate, clears the glyph, mirror, and decorators, for the specified count of cells.
+            </summary>
+            <param name="x">The x position.</param>
+            <param name="y">The y position.</param>
+            <param name="count">The count of glyphs to erase.</param>
+            <returns>The cells processed by this method.</returns>
+            <remarks>
+            Cells altered by this method has the <see cref="F:SadConsole.Cell.Glyph" /> set to <see cref="P:SadConsole.CellSurface.EraseGlyph" />, the <see cref="P:SadConsole.Cell.Decorators" /> array reset, and the <see cref="F:SadConsole.Cell.Mirror" /> set to <see cref="F:Microsoft.Xna.Framework.Graphics.SpriteEffects.None" />.
+            </remarks>
+        </member>
+        <member name="M:SadConsole.CellSurface.Erase(System.Int32,System.Int32)">
+            <summary>
+            Clears the glyph, mirror, and decorators, for the specified cell.
+            </summary>
+            <param name="x">The x position.</param>
+            <param name="y">The y position.</param>
+            <remarks>
+            The cell altered by this method has the <see cref="F:SadConsole.Cell.Glyph" /> set to <see cref="P:SadConsole.CellSurface.EraseGlyph" />, the <see cref="P:SadConsole.Cell.Decorators" /> array reset, and the <see cref="F:SadConsole.Cell.Mirror" /> set to <see cref="F:Microsoft.Xna.Framework.Graphics.SpriteEffects.None" />.
+            </remarks>
+        </member>
+        <member name="M:SadConsole.CellSurface.Erase">
+            <summary>
+            Erases all cells which clears the glyph, mirror, and decorators.
+            </summary>
+            <remarks>
+            All cells have <see cref="F:SadConsole.Cell.Glyph" /> set to <see cref="P:SadConsole.CellSurface.EraseGlyph" />, the <see cref="P:SadConsole.Cell.Decorators" /> array reset, and the <see cref="F:SadConsole.Cell.Mirror" /> set to <see cref="F:Microsoft.Xna.Framework.Graphics.SpriteEffects.None" />.
+            </remarks>
+        </member>
         <member name="M:SadConsole.CellSurface.Clear">
             <summary>
             Clears the console data. Characters are reset to 0, the foreground and background are set to default, and effect set to none. Clears cell decorators.
@@ -1260,8 +1295,7 @@
             <summary>
             Clears an area of cells. Character is reset to 0, the foreground and background is set to default, and effect is set to none. Clears cell decorators.
             </summary>
-            <param name="area">
-            </param>
+            <param name="area">The area to clear.</param>
         </member>
         <member name="M:SadConsole.CellSurface.Fill(System.Nullable{Microsoft.Xna.Framework.Color},System.Nullable{Microsoft.Xna.Framework.Color},System.Nullable{System.Int32},System.Nullable{Microsoft.Xna.Framework.Graphics.SpriteEffects})">
             <summary>
@@ -1352,6 +1386,15 @@
             <param name="y">The y coordinate of the destination.</param>
             <param name="destination">The destination surface.</param>
         </member>
+        <member name="M:SadConsole.CellSurface.Copy(Microsoft.Xna.Framework.Rectangle,SadConsole.CellSurface,System.Int32,System.Int32)">
+            <summary>
+            Copies an area of this cell surface to the destination surface.
+            </summary>
+            <param name="area">The area to copy.</param>
+            <param name="destination">The destination surface.</param>
+            <param name="destinationX">The x coordinate to copy to.</param>
+            <param name="destinationY">The y coordinate to copy to.</param>
+        </member>
         <member name="M:SadConsole.CellSurface.Copy(System.Int32,System.Int32,System.Int32,System.Int32,SadConsole.CellSurface,System.Int32,System.Int32)">
             <summary>
             Copies the contents of this cell surface at the specified x,y coordinates to the destination, only with the specified width and height, and copies it to the specified <paramref name="destinationX" /> and <paramref name="destinationY" /> position.
@@ -1441,6 +1484,13 @@
             <summary>
             Glyph indexes for an empty line 0. 
             </summary>
+        </member>
+        <member name="M:SadConsole.CellSurface.CreateLine(System.Int32)">
+            <summary>
+            Creates an array of glyphs that can be used as a connected line.
+            </summary>
+            <param name="singleGlyph">The glyph to use for the connected line array.</param>
+            <returns>An array of glyphs.</returns>
         </member>
         <member name="M:SadConsole.CellSurface.ValidateLineStyle(System.Int32[]@)">
             <summary>
@@ -1682,6 +1732,11 @@
         <member name="T:SadConsole.Components.EntityViewSyncComponent">
             <summary>
             Add to an <see cref="T:SadConsole.Entities.Entity" /> to sync the visibility and position offset with a parent <see cref="T:SadConsole.Console" />. 
+            </summary>
+        </member>
+        <member name="P:SadConsole.Components.EntityViewSyncComponent.HandleIsVisible">
+            <summary>
+            If set to true, controls the <see cref="P:SadConsole.Console.IsVisible" /> property of the attached object.
             </summary>
         </member>
         <member name="M:SadConsole.Components.EntityViewSyncComponent.Update(SadConsole.Console,System.TimeSpan)">
@@ -2049,6 +2104,11 @@
             Entities to draw on each console this component is added to.
             </summary>
         </member>
+        <member name="P:SadConsole.Components.MultipleConsoleEntityDrawingComponent.HandleIsVisible">
+            <summary>
+            If set to true, controls the <see cref="P:SadConsole.Console.IsVisible" /> property of the attached object.
+            </summary>
+        </member>
         <member name="M:SadConsole.Components.MultipleConsoleEntityDrawingComponent.Update(SadConsole.Console,System.TimeSpan)">
             <summary>
             Called by a host on the update frame.
@@ -2086,6 +2146,11 @@
         <member name="F:SadConsole.Console.ComponentsKeyboard">
             <summary>
             A filtered list from <see cref="P:SadConsole.Console.Components" /> where <see cref="P:SadConsole.Components.IConsoleComponent.IsKeyboard" /> is <see langword="true" />.
+            </summary>
+        </member>
+        <member name="F:SadConsole.Console.ComponentsEmpty">
+            <summary>
+            A filtered list from <see cref="P:SadConsole.Console.Components" /> that is not set for update, draw, mouse, or keyboard.
             </summary>
         </member>
         <member name="P:SadConsole.Console.Components">
@@ -2176,6 +2241,16 @@
             <param name="font">The font used with rendering.</param>
             <param name="cells">Seeds the cells with existing values. Array size must match <paramref name="width" /> * <paramref name="height" />.</param>
         </member>
+        <member name="M:SadConsole.Console.#ctor(System.Int32,System.Int32,SadConsole.Cell[],SadConsole.Font,System.Boolean)">
+            <summary>
+            Creates a new console. This is a custom constructor that leaves the creation of leaves <see cref="P:SadConsole.Console.RenderCells" /> and <see cref="P:SadConsole.Console.LastRenderResult" /> creation up to the the child class.
+            </summary>
+            <param name="width">The width of the console.</param>
+            <param name="height">The height of the console.</param>
+            <param name="cells">Seeds the cells with existing values. Array size must match <paramref name="width" /> * <paramref name="height" />.</param>
+            <param name="font">The font used with rendering.</param>
+            <param name="skipRenderCreation">Must be set to true.</param>
+        </member>
         <member name="M:SadConsole.Console.OnCellsReset">
             <summary>
             Calls <see cref="M:SadConsole.Console.SetRenderCells" />.
@@ -2224,6 +2299,20 @@
             <summary>
             Called when the paused status of the object changes.
             </summary>
+        </member>
+        <member name="M:SadConsole.Console.GetComponents``1">
+            <summary>
+            Gets components of the specified types.
+            </summary>
+            <typeparam name="TComponent">THe component to find</typeparam>
+            <returns>The components found.</returns>
+        </member>
+        <member name="M:SadConsole.Console.GetComponent``1">
+            <summary>
+            Gets the first component of the specified type.
+            </summary>
+            <typeparam name="TComponent">THe component to find</typeparam>
+            <returns>The component if found, otherwise null.</returns>
         </member>
         <member name="M:SadConsole.Console.Save(System.String)">
             <summary>
@@ -2407,6 +2496,14 @@
             <param name="timeElapsed">Time since the last call.</param>
             <remarks>Only processes if <see cref="P:SadConsole.Console.IsPaused" /> is <see langword="false" />.</remarks>
         </member>
+        <member name="M:SadConsole.Console.SetGlyph(System.Int32,System.Int32,System.String)">
+            <summary>
+            Changes the glyph of a specified cell to a glyph definition from the font.
+            </summary>
+            <param name="x">The x location of the cell.</param>
+            <param name="y">The y location of the cell.</param>
+            <param name="glyphName">The name of the glyph definition to use. If invalid, sets it to 0.</param>
+        </member>
         <member name="M:SadConsole.Console.SetRenderCells">
             <summary>
             Configures <see cref="P:SadConsole.Console.RenderCells" />, <see cref="P:SadConsole.Console.RenderRects" />, and <see cref="P:SadConsole.Console.LastRenderResult" /> for rendering.
@@ -2549,6 +2646,11 @@
             Removes the console from the active stack. If the instance is the current active console, the active console is set to the last console in the previous console.
             </summary>
             <param name="console">The console to remove.</param>
+        </member>
+        <member name="M:SadConsole.ConsoleStack.Pop">
+            <summary>
+            Removes the top console from the stack.
+            </summary>
         </member>
         <member name="T:SadConsole.ContainerConsole">
             <summary>
@@ -2704,7 +2806,7 @@
         </member>
         <member name="M:SadConsole.ControlsConsole.Invalidate">
             <summary>
-            Signals that the console should be considered dirty and reapplies the <see cref="P:SadConsole.ControlsConsole.Theme" />.
+            Signals that the console should be considered dirty and reapplies the <see cref="P:SadConsole.ControlsConsole.Theme" />. When overridden, call this method first.
             </summary>
         </member>
         <member name="M:SadConsole.ControlsConsole.Update(System.TimeSpan)">
@@ -3173,6 +3275,48 @@
             </summary>
             <param name="width">Width of the control.</param>
             <param name="height">Height of the control.</param>
+        </member>
+        <member name="T:SadConsole.Controls.Label">
+            <summary>
+            A simple surface for drawing text that can be moved and sized like a control.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Controls.Label.ShowUnderline">
+            <summary>
+            When <see langword="true" />, shows an underline on the text.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Controls.Label.ShowStrikethrough">
+            <summary>
+            When <see langword="true" />, shows a strikethrough on the text.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Controls.Label.TextColor">
+            <summary>
+            Optional text color for the label. Otherwise the theme controls the color.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Controls.Label.Alignment">
+            <summary>
+            Sets the horizontal alignment of the label. Defaults to <see cref="F:SadConsole.HorizontalAlignment.Left" />.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Controls.Label.DisplayText">
+            <summary>
+            The text to display on the label. The label size is set in the constructor and cannot be changed.
+            </summary>
+        </member>
+        <member name="M:SadConsole.Controls.Label.#ctor(System.String)">
+            <summary>
+            A control to display simple one-line text.
+            </summary>
+            <param name="displayText">The text to display. Sets the width based on the length.</param>
+        </member>
+        <member name="M:SadConsole.Controls.Label.#ctor(System.Int32)">
+            <summary>
+            A control to display simple one-line text.
+            </summary>
+            <param name="length">The initial length of the label without any text.</param>
         </member>
         <member name="T:SadConsole.Controls.ListBox" />
         <member name="E:SadConsole.Controls.ListBox.SelectedItemChanged">
@@ -4545,6 +4689,63 @@
             Called when the visibility of the object changes.
             </summary>
         </member>
+        <member name="T:SadConsole.Entities.IEntity">
+            <summary>
+            For projects which use SadConsole and want to be able to write
+            unit tests for objects which use SadConsole Entities.  Currently
+            only complete enough to succeed.  Fuller solution would include
+            the full public API, and require creating IConsole, too.
+            </summary>
+        </member>
+        <member name="E:SadConsole.Entities.IEntity.Moved">
+            <summary>
+            Triggered when the entity changes position.
+            </summary>
+        </member>
+        <member name="E:SadConsole.Entities.IEntity.AnimationStateChanged">
+            <summary>
+            Automatically forwards the <see cref="E:SadConsole.AnimatedConsole.AnimationStateChanged" /> event.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Entities.IEntity.Name">
+            <summary>
+            A friendly name of the game object.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Entities.IEntity.Animation">
+            <summary>
+            The current animation.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Entities.IEntity.Animations">
+            <summary>
+            Collection of animations associated with this game object.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Entities.IEntity.Position">
+            <summary>
+            The position of the screen object.
+            </summary>
+            <remarks>From Console.  This position has no substance.</remarks>
+        </member>
+        <member name="P:SadConsole.Entities.IEntity.PositionOffset">
+            <summary>
+            Offsets the position by this amount.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Entities.IEntity.Components">
+            <summary>
+            A collection of components processed by this console.
+            </summary>
+            <remarks>From Console.</remarks>
+        </member>
+        <member name="M:SadConsole.Entities.IEntity.OnCalculateRenderPosition" />
+        <member name="M:SadConsole.Entities.IEntity.Save(System.String)">
+            <summary>
+            Saves the <see cref="T:SadConsole.Entities.Entity" /> to a file.
+            </summary>
+            <param name="file">The destination file.</param>
+        </member>
         <member name="T:SadConsole.Entities.Zone">
             <summary>
             Defines an area for a scene.
@@ -4819,12 +5020,28 @@
         </member>
         <member name="M:SadConsole.FontMaster.GetDecorator(System.String,Microsoft.Xna.Framework.Color)">
             <summary>
-            Gets a <see cref="T:SadConsole.CellDecorator" /> by name from the <see cref="P:SadConsole.FontMaster.GlyphDefinitions" /> dictionary.
+            Gets a <see cref="T:SadConsole.CellDecorator" /> by the <see cref="T:SadConsole.FontMaster.GlyphDefinition" /> defined by the font file.
             </summary>
             <param name="name">The name of the decorator to get.</param>
             <param name="color">The color to apply to the decorator.</param>
             <returns>The decorator instance.</returns>
             <remarks>If the decorator does not exist, <see cref="P:SadConsole.CellDecorator.Empty" /> is returned.</remarks>
+        </member>
+        <member name="M:SadConsole.FontMaster.GetGlyphDefinition(System.String)">
+            <summary>
+            Gets a <see cref="T:SadConsole.FontMaster.GlyphDefinition" /> by name that is defined by the font file.
+            </summary>
+            <param name="name">The name of the glyph definition.</param>
+            <returns>The glyph definition.</returns>
+            <remarks>If the glyph definition doesn't exist, return s<see cref="P:SadConsole.FontMaster.GlyphDefinition.Empty" />.</remarks>
+        </member>
+        <member name="M:SadConsole.FontMaster.HasGlyphDefinition(System.String)">
+            <summary>
+            Returns <see langword="true" /> when the glyph has been defined by name.
+            </summary>
+            <param name="name">The name of the glyph</param>
+            <returns>
+                <see langword="true" /> when the glyph name exists, otherwise <see langword="false" />.</returns>
         </member>
         <member name="M:SadConsole.FontMaster.Generate">
             <summary>
@@ -4972,7 +5189,12 @@
         </member>
         <member name="T:SadConsole.Game">
             <summary>
-            A MonoGame <see cref="T:SadConsole.Game" /> instance that runs SadConsole. This is used when you don't provide one and call <see cref="!:Engine.Initialize(string, int, int)" />.
+            A MonoGame <see cref="T:SadConsole.Game" /> instance that runs SadConsole.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Game.Instance">
+            <summary>
+            The game instance.
             </summary>
         </member>
         <member name="F:SadConsole.Game.OnUpdate">
@@ -5648,6 +5870,11 @@
             Raised when the instruction completes but is going to repeat.
             </summary>
         </member>
+        <member name="P:SadConsole.Instructions.InstructionBase.RemoveOnFinished">
+            <summary>
+            When true, this instruction will automatically remove itself from the parent's <see cref="P:SadConsole.Console.Components" /> collection.
+            </summary>
+        </member>
         <member name="P:SadConsole.Instructions.InstructionBase.IsFinished">
             <summary>
             Flags the instruction as completed or not. If completed, the <see cref="E:SadConsole.Instructions.InstructionBase.Finished" /> event will be raised.
@@ -5675,7 +5902,7 @@
             Executes the instruction. This base class method should be called from derived classes. If the IsFinished property is set to true, will try to repeat if needed and will raise all appropriate events.
             </summary>
         </member>
-        <member name="M:SadConsole.Instructions.InstructionBase.OnFinished">
+        <member name="M:SadConsole.Instructions.InstructionBase.OnFinished(SadConsole.Console)">
             <summary>
             Called when the instruction finishes.
             </summary>
@@ -6262,6 +6489,11 @@
             Various settings for SadConsole.
             </summary>
         </member>
+        <member name="F:SadConsole.Settings.DefaultConsoleUseKeyboard">
+            <summary>
+            Gets and sets the default value for <see cref="P:SadConsole.Console.UseKeyboard" /> when the console is created.
+            </summary>
+        </member>
         <member name="F:SadConsole.Settings.ClearColor">
             <summary>
             The color to automatically clear the device with.
@@ -6678,6 +6910,45 @@
             </summary>
             <returns>A new theme instance.</returns>
         </member>
+        <member name="T:SadConsole.Themes.LabelTheme">
+            <summary>
+            A basic theme for a drawing surface that simply fills the surface based on the state.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Themes.LabelTheme.UseNormalStateOnly">
+            <summary>
+            When true, only uses <see cref="F:SadConsole.Themes.ThemeStates.Normal" /> for drawing.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Themes.LabelTheme.DecoratorUnderline">
+            <summary>
+            The decorator to use when the <see cref="P:SadConsole.Controls.Label.ShowUnderline" /> is <see langword="true" />.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Themes.LabelTheme.DecoratorStrikethrough">
+            <summary>
+            The decorator to use when the <see cref="P:SadConsole.Controls.Label.ShowStrikethrough" /> is <see langword="true" />.
+            </summary>
+        </member>
+        <member name="M:SadConsole.Themes.LabelTheme.Attached(SadConsole.Controls.ControlBase)">
+            <summary>
+            Called when the theme is attached to a control.
+            </summary>
+            <param name="control">The control that will use this theme instance.</param>
+        </member>
+        <member name="M:SadConsole.Themes.LabelTheme.UpdateAndDraw(SadConsole.Controls.ControlBase,System.TimeSpan)">
+            <summary>
+            Draws the control state to the control.
+            </summary>
+            <param name="control">The control to draw.</param>
+            <param name="time">The time since the last update frame call.</param>
+        </member>
+        <member name="M:SadConsole.Themes.LabelTheme.Clone">
+            <summary>
+            Creates a new theme instance based on the current instance.
+            </summary>
+            <returns>A new theme instance.</returns>
+        </member>
         <member name="T:SadConsole.Themes.Library">
             <summary>
             The library of themes. Holds the themes of all controls.
@@ -6736,6 +7007,11 @@
         <member name="P:SadConsole.Themes.Library.DrawingSurfaceTheme">
             <summary>
             Theme for <see cref="T:SadConsole.Controls.DrawingSurface" />.
+            </summary>
+        </member>
+        <member name="P:SadConsole.Themes.Library.LabelTheme">
+            <summary>
+            Theme for <see cref="T:SadConsole.Controls.Label" />.
             </summary>
         </member>
         <member name="P:SadConsole.Themes.Library.ControlsConsoleTheme">
@@ -7232,9 +7508,14 @@
             A simple timer with callback.
             </summary>
         </member>
-        <member name="F:SadConsole.Timer.TriggeredCallback">
+        <member name="E:SadConsole.Timer.TimerElapsed">
             <summary>
-            Callback to trigger when the time elapses.
+            Called when the timer elapses.
+            </summary>
+        </member>
+        <member name="E:SadConsole.Timer.TimerRestart">
+            <summary>
+            Called when the timer restarts.
             </summary>
         </member>
         <member name="P:SadConsole.Timer.Repeat">
@@ -7247,28 +7528,27 @@
             How many milliseconds to cause the timer to trigger.
             </summary>
         </member>
-        <member name="P:SadConsole.Timer.IsOff">
+        <member name="P:SadConsole.Timer.IsPaused">
             <summary>
             When true, the timer does not count time.
             </summary>
         </member>
-        <member name="M:SadConsole.Timer.#ctor(System.Double,System.Action{SadConsole.Timer,System.Double})">
+        <member name="M:SadConsole.Timer.#ctor(System.TimeSpan)">
             <summary>
             Creates a new timer.
             </summary>
-            <param name="triggerTime">How many milliseconds to trigger the callback.</param>
-            <param name="callback">The callback that is called when the trigger time has passed.</param>
+            <param name="triggerTime">Duration of the timer.</param>
         </member>
-        <member name="M:SadConsole.Timer.Update(System.Double)">
+        <member name="M:SadConsole.Timer.Update(SadConsole.Console,System.TimeSpan)">
             <summary>
             Updates the timer with the time since the last call.
             </summary>
-            <param name="timeElapsed">
-            </param>
+            <param name="console">The parent object.</param>
+            <param name="delta">The time since the last frame update.</param>
         </member>
         <member name="M:SadConsole.Timer.Restart">
             <summary>
-            Restarts the timer; sets <see cref="P:SadConsole.Timer.IsOff" /> to false.
+            Restarts the timer; sets <see cref="P:SadConsole.Timer.IsPaused" /> to false.
             </summary>
         </member>
         <member name="T:SadConsole.Window">
@@ -7341,11 +7621,6 @@
             Gets or sets the title displayed on the window.
             </summary>
         </member>
-        <member name="P:SadConsole.Window.Theme">
-            <summary>
-            Gets or sets the theme of the window.
-            </summary>
-        </member>
         <member name="M:SadConsole.Window.#ctor(System.Int32,System.Int32)">
             <summary>
             Creates a new window with the specified with and height in cells.
@@ -7370,7 +7645,7 @@
         </member>
         <member name="M:SadConsole.Window.Invalidate">
             <summary>
-            Causes the window to be redrawn with the selected <see cref="P:SadConsole.Window.Theme" />.
+            Causes the window to be redrawn with the selected <see cref="!:Theme" />. When overridden, call this method first.
             </summary>
         </member>
         <member name="M:SadConsole.Window.ProcessMouse(SadConsole.Input.MouseConsoleState)">

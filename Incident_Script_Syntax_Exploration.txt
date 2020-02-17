@@ -1,0 +1,44 @@
+Incident Script Syntax Exploration
+
+---
+Flow [= r_leaves_for_farm]
+    (@ decide_to_see_farm.end)
+
+Runcel and party: (@ .start) [= r_leaving_1]
+    // (@ .start) means this action begins at the start of this flow
+    // [= r_leaving_1] means this action has this label
+    move to (33, 14)
+
+Kellet: (@ r_leaving_1.start + 48) [= k_approach]
+    say "Runcel, wait!"
+    move to Runcel
+
+Runcel: (@ r_leaving_1.end)
+    say "..."
+    (@ ^ + 24) say "What?"
+        // ^ means above action, defaults to end, can do ^.start, ^.end
+        // default timing on actions is (@ ^.end),
+        //   i.e., after the prior action is done.
+        // ?? may be useful to chain via ^^^ ?
+
+Kellet:
+    (@ k_approach.end)
+    say "I saw the Tacker Farm is Rot to the north."
+
+Runcel:
+    wait 24
+    say "Come along with us."
+
+Kellet:
+    wait 6
+    say "Yes."
+    join party "Runcel"
+
+Runcel and party:
+    exit map via door at 30, 4
+
+End flow
+
+---
+Flow 
+

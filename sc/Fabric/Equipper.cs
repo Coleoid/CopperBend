@@ -7,15 +7,14 @@ using CopperBend.Model.Aspects;
 
 namespace CopperBend.Fabric
 {
-    public class Equipper
+    public static class Equipper
     {
         public static Item BuildItem(string itemName, int quantity = 1)
         {
             Guard.AgainstNullArgument(itemName);
 
             var wantedPlant = Regex.Match(itemName, "^(seed|fruit):(.*)");
-            if (wantedPlant.Success) 
-                return BuildPlant(wantedPlant);
+            if (wantedPlant.Success) return BuildPlant(wantedPlant);
 
             var item = new Item((0, 0)) { Name = itemName, ItemType = itemName, Quantity = quantity };
             switch (itemName)
@@ -80,7 +79,7 @@ namespace CopperBend.Fabric
             {
             case "fruit":
                 item.AddAspect(
-                    new Ingestible(foodValue:210)  //0.2: draw from data
+                    new Ingestible(foodValue: 210)  //0.2: draw from data
                     {
                         IsFruit = true,
                         PlantID = details.ID,

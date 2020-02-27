@@ -45,11 +45,11 @@ namespace CopperBend.Contract
 
     public class TerrainType
     {
-        public string Name;
-        public Cell Looks; // name for bleh
-        public bool CanSeeThrough;
-        public bool CanWalkThrough;
-        public bool CanPlant;
+        public string Name { get; set; }
+        public Cell Looks { get; set; } // name for bleh
+        public bool CanSeeThrough { get; set; }
+        public bool CanWalkThrough { get; set; }
+        public bool CanPlant { get; set; }
     }
 
     //public class Region

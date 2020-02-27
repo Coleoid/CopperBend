@@ -10,14 +10,14 @@ namespace CopperBend.Engine
 {
     public class UIBuilder
     {
-        public readonly Size GameSize;
+        private readonly Size gameSize;
         private readonly ILog log;
         public FontMaster MapFontMaster { get; set; }
         public Font MapFont { get; set; }
 
         public UIBuilder(Size gameSize, FontMaster mapFontMaster, ILog logger)
         {
-            GameSize = gameSize;
+            this.gameSize = gameSize;
             MapFontMaster = mapFontMaster;
             MapFont = MapFontMaster.GetFont(Font.FontSizes.One);
             log = logger;
@@ -25,11 +25,10 @@ namespace CopperBend.Engine
 
         public MessageLogWindow CreateMessageLog()
         {
-            var messageLog = new MessageLogWindow(GameSize.Width, 8, "Message Log")
+            var messageLog = new MessageLogWindow(gameSize.Width, 8, "Message Log")
             {
-                Position = new Coord(0, GameSize.Height - 8),
+                Position = new Coord(0, gameSize.Height - 8),
                 DefaultBackground = MG.Color.Black,
-                
             };
 
             ////  Garbage to visually test the window

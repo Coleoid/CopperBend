@@ -30,7 +30,7 @@ namespace CopperBend.Model
             Energy = MaxEnergy = 140;
             Awareness = 6;
 
-            InventoryList = new List<IItem>();
+            inventoryList = new List<IItem>();
             Foreground = foreground;
             Background = background;
             Glyph = glyph;
@@ -58,10 +58,10 @@ namespace CopperBend.Model
 
 
         //0.1  Wrong place.  Collect a volume of standard effects?
-        readonly AttackEffect lifeChampion = new AttackEffect
+        private readonly AttackEffect lifeChampion = new AttackEffect
         {
             Type = "vital.nature",
-            DamageRange = "2d3+4" // 6-10
+            DamageRange = "2d3+4", // 6-10
         };
 
         //  IAttacker
@@ -91,8 +91,9 @@ namespace CopperBend.Model
         {
             var defenseMethod = new DefenseMethod();
 
-            if (IsPlayer) //0.1  Nice. and. Crispy.
+            if (IsPlayer)
             {
+                //0.1  Nice. and. Crispy.
                 //0.1: I want roughly this, but for the short term, I'm testing dying, so...
                 //defenseMethod.Resistances.Add("vital.blight", "4/5");
                 defenseMethod.Resistances.Add("default", "1/5");
@@ -115,25 +116,25 @@ namespace CopperBend.Model
         public IItem Gloves { get; internal set; }
 
         public bool IsPlayer { get; set; }
-        
+
         //  Inventory has extra game effects, so I want to be sure I
         //  don't casually add/remove directly from the list, from outside.
-        private List<IItem> InventoryList;
+        private readonly List<IItem> inventoryList;
         public IReadOnlyCollection<IItem> Inventory
         {
-            get => new ReadOnlyCollection<IItem>(InventoryList);
+            get => new ReadOnlyCollection<IItem>(inventoryList);
         }
 
         //public string Name { get => ScEntity.Name; set => ScEntity.Name = value; }
         public string Name { get; set; }
-        
+
         public void AddToInventory(IItem item)
         {
             //0.2.INV  limit stack size of some items
             var existingItem = Inventory
                 .FirstOrDefault(i => i.StacksWith(item));
             if (existingItem == null)
-                InventoryList.Add(item);
+                inventoryList.Add(item);
             else
                 existingItem.Quantity += item.Quantity;
                 // and 'delete' item?
@@ -141,24 +142,24 @@ namespace CopperBend.Model
 
         public bool HasInInventory(IItem item)
         {
-            return InventoryList.Any(i => i == item);
+            return inventoryList.Any(i => i == item);
         }
 
         public IItem RemoveFromInventory(int inventorySlot, int quantity = 0)
         {
-            if (inventorySlot >= InventoryList.Count()) return null;
+            if (inventorySlot >= inventoryList.Count) return null;
 
-            IItem item = InventoryList.ElementAt(inventorySlot);
+            IItem item = inventoryList.ElementAt(inventorySlot);
             return RemoveFromInventory(item, quantity);
         }
 
         public IItem RemoveFromInventory(IItem item, int quantity = 0)
         {
-            if (!InventoryList.Contains(item)) return null;
+            if (!inventoryList.Contains(item)) return null;
 
             if (quantity == 0 || quantity >= item.Quantity)
             {
-                InventoryList.Remove(item);
+                inventoryList.Remove(item);
                 if (WieldedTool == item)
                     WieldedTool = null;
                 return item;
@@ -171,7 +172,7 @@ namespace CopperBend.Model
         public void Wield(IItem item)
         {
             WieldedTool = item;
-            if (item != null && !InventoryList.Any(i => i == item))
+            if (item != null && !inventoryList.Any(i => i == item))
                 AddToInventory(item);
         }
 
@@ -187,7 +188,7 @@ namespace CopperBend.Model
             {
                 Action = ScheduleAction.GetCommand,
                 Offset = offset,
-                Agent = this
+                Agent = this,
             };
         }
 

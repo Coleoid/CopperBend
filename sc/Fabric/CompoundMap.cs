@@ -13,6 +13,11 @@ namespace CopperBend.Fabric
 {
     public class CompoundMap : ICompoundMap
     {
+        public CompoundMap()
+        {
+            LocatedTriggers = new List<LocatedTrigger>();
+        }
+
         public int Width { get; set; }
         public int Height { get; set; }
 
@@ -20,10 +25,12 @@ namespace CopperBend.Fabric
         public MultiSpatialMap<IBeing> BeingMap { get; set; }
         public IItemMap ItemMap { get; set; }
         public IBlightMap BlightMap { get; set; }
-        public List<LocatedTrigger> LocatedTriggers { get; set; }
+        public List<LocatedTrigger> LocatedTriggers { get; }
 
         public FOV FOV { get; set; }
         public bool VisibilityChanged { get; set; }
+        public EffectsManager EffectsManager { get; private set; }
+
 
         public List<Coord> CoordsWithChanges { get; } = new List<Coord>();
 
@@ -54,10 +61,8 @@ namespace CopperBend.Fabric
             throw new NotImplementedException();
         }
 
-        public EffectsManager EffectsManager { get; private set; }
 
-
-        /// <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known </summary>
+        /// <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known. </summary>
         public void SetInitialConsoleCells(ScrollingConsole console, ISpaceMap spaceMap)
         {
             var unknownCell = new Cell(Color.Black, Color.Black, ' ');
@@ -142,7 +147,9 @@ namespace CopperBend.Fabric
                 var blight = BlightMap.GetItem(position);
                 Fade fade = null;
                 if (blight?.Health > 0)
+                {
                     fade = GetFadeForBlightExtent(blight.Health, rawCell.Background);
+                }
                 EffectsManager.SetEffect(console.Cells[position.Y * Width + position.X], fade);
             }
         }
@@ -180,7 +187,7 @@ namespace CopperBend.Fabric
                     DestinationBackground = new ColorGradient(midColors),
                     FadeDuration = 2.3 + rand.NextDouble() * 1.1,
                     Repeat = true,
-                    UseCellBackground = true
+                    UseCellBackground = true,
                 };
                 return midFade;
             }
@@ -193,7 +200,7 @@ namespace CopperBend.Fabric
                     DestinationBackground = new ColorGradient(highColors),
                     FadeDuration = 1.3 + rand.NextDouble() * .7,
                     Repeat = true,
-                    UseCellBackground = true
+                    UseCellBackground = true,
                 };
                 return highFade;
             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace CopperBend.Fabric
@@ -29,23 +30,23 @@ namespace CopperBend.Fabric
             var match = Regex.Match(description, @"(\d+)/(\d+)(?: ([-+] ?\d+))?(?: (\d*)\.\.(\d*))?");
             if (!match.Success)
                 throw new FormatException($"Cannot construct a clamped ratio with notation [{description}].");
-            Numerator = int.Parse(match.Groups[1].Value);
-            Denominator = int.Parse(match.Groups[2].Value);
+            Numerator = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            Denominator = int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
 
             var offText = match.Groups[3].Value;
             Offset = string.IsNullOrEmpty(offText)
                 ? 0
-                : int.Parse(offText);
+                : int.Parse(offText, CultureInfo.InvariantCulture);
 
             var minText = match.Groups[4].Value;
             LBound = string.IsNullOrEmpty(minText)
                 ? int.MinValue
-                : int.Parse(minText);
+                : int.Parse(minText, CultureInfo.InvariantCulture);
 
             var maxText = match.Groups[5].Value;
             UBound = string.IsNullOrEmpty(maxText)
                 ? int.MaxValue
-                : int.Parse(maxText);
+                : int.Parse(maxText, CultureInfo.InvariantCulture);
         }
 
         public int Apply(int input)
@@ -53,8 +54,8 @@ namespace CopperBend.Fabric
             var lBound = InputMovesClamp ? Math.Min(input, LBound) : LBound;
             var uBound = InputMovesClamp ? Math.Max(input, UBound) : UBound;
 
-            double raw = (input * Numerator) / (double) Denominator;
-            int result = (int) Math.Round(raw, MidpointRounding);
+            double raw = (input * Numerator) / (double)Denominator;
+            int result = (int)Math.Round(raw, MidpointRounding);
             result += Offset;
 
             result = Math.Clamp(result, lBound, uBound);

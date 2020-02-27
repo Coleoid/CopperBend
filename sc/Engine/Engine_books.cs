@@ -35,11 +35,8 @@ namespace CopperBend.Engine
             var tome = new TomeOfChaos(topSeed);
 
             //0.2:  Move from indexing on the Maps enum to loading from YAML
-            tome.MapGenerators = new Dictionary<Maps, AbstractGenerator>
-            {
-                [Maps.TackerFarm] = new XorShift128Generator(tome.MapTopGenerator.Next()),
-                [Maps.TownBastion] = new XorShift128Generator(tome.MapTopGenerator.Next())
-            };
+            tome.MapGenerators[Maps.TackerFarm] = new XorShift128Generator(tome.MapTopGenerator.Next());
+            tome.MapGenerators[Maps.TownBastion] = new XorShift128Generator(tome.MapTopGenerator.Next());
 
             return tome;
         }
@@ -79,7 +76,7 @@ namespace CopperBend.Engine
             {
                 ID = 1,
                 MainName = "Boomer",
-                GrowthTime = 400
+                GrowthTime = 400,
             };
             herbal.PlantByID[plant.ID] = plant;
             herbal.PlantByName[plant.MainName] = plant;
@@ -88,7 +85,7 @@ namespace CopperBend.Engine
             {
                 ID = 2,
                 MainName = "Healer",
-                GrowthTime = 400
+                GrowthTime = 400,
             };
             herbal.PlantByID[plant.ID] = plant;
             herbal.PlantByName[plant.MainName] = plant;
@@ -97,11 +94,11 @@ namespace CopperBend.Engine
             {
                 ID = 3,
                 MainName = "Thornfriend",
-                GrowthTime = 400
+                GrowthTime = 400,
             };
             herbal.PlantByID[plant.ID] = plant;
             herbal.PlantByName[plant.MainName] = plant;
-            
+
             return herbal;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CopperBend.Contract;
@@ -22,7 +23,7 @@ namespace CopperBend.Engine
             ScrambleFruit();
         }
 
-        public List<string> SeedAdjectives = new List<string>
+        public List<string> SeedAdjectives { get; } = new List<string>
         {
             "abrasive",
             "blistered",
@@ -76,7 +77,7 @@ namespace CopperBend.Engine
             }
         }
 
-        public List<string> FruitAdjectives = new List<string>
+        public List<string> FruitAdjectives { get; } = new List<string>
         {
             "abrasive",
             "aromatic",
@@ -127,9 +128,9 @@ namespace CopperBend.Engine
 
         public string Describe(string name, DescMods mods = DescMods.None, int quantity = 1, string adj = "")
         {
-            string art = string.Empty;
+            string art;
 
-            adj = mods.HasFlag(DescMods.NoAdjective) ? "" : adj;
+            adj = mods.HasFlag(DescMods.NoAdjective) ? string.Empty : adj;
             if (adj.Length > 0) adj += " ";
 
             if (mods.HasFlag(DescMods.Article))
@@ -154,15 +155,15 @@ namespace CopperBend.Engine
             }
             else
             {
-                art = mods.HasFlag(DescMods.Quantity) ? $"{quantity} " : "";
+                art = mods.HasFlag(DescMods.Quantity) ? $"{quantity} " : string.Empty;
             }
 
-            var s = (quantity == 1) ? "" : "s";
+            var s = (quantity == 1) ? string.Empty : "s";
             var description = $"{art}{adj}{name}{s}";
 
             if (mods.HasFlag(DescMods.LeadingCapital) && !string.IsNullOrEmpty(description))
             {
-                description = char.ToUpper(description[0]) + description.Substring(1);
+                description = char.ToUpper(description[0], CultureInfo.InvariantCulture) + description.Substring(1);
             }
 
             return description;

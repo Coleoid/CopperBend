@@ -22,10 +22,19 @@
     <PackageReference Include="GoRogue" Version="2.5.1" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.5.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Mono.Cecil" Version="0.11.1" />
     <PackageReference Include="MonoGame.Content.Builder" Version="3.7.0.9" />
     <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.8.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="YamlDotNet" Version="8.0.0" />
   </ItemGroup>
 

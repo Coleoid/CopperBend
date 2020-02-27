@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using GoRogue;
 using CopperBend.Contract;
-using System.Collections.Generic;
 using CopperBend.Fabric;
 
 namespace CopperBend.Model
@@ -14,7 +14,7 @@ namespace CopperBend.Model
         }
 
         #region standard IHasID
-        public static IDGenerator IDGenerator;
+        public static IDGenerator IDGenerator { get; set; }
         public uint ID { get; private set; }
         #endregion
 

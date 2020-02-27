@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -15,11 +16,12 @@ using CopperBend.Model;
 
 namespace CopperBend.Persist
 {
+#pragma warning disable SA1402 // File may only contain a single type
     public class MapLoader
     {
         private readonly ILog log;
         //0.1: Extract Atlas into Compendium
-        Dictionary<string, TerrainType> TerrainTypes;
+        private Dictionary<string, TerrainType> terrainTypes;
 
         public MapLoader(ILog logger)
         {
@@ -30,7 +32,8 @@ namespace CopperBend.Persist
         //0.2: Bring this into Cosmogenesis
         private void InitTerrain()
         {
-            TerrainTypes = new Dictionary<string, TerrainType>();
+            terrainTypes = SpaceMap.TerrainTypes;
+
             var dirtBG = new Color(50, 30, 13);
             var growingBG = new Color(28, 54, 22);
             var stoneBG = new Color(28, 30, 22);
@@ -166,16 +169,14 @@ namespace CopperBend.Persist
                 Looks = new Cell(Color.AliceBlue, stoneBG, '>'),
             };
             StoreTerrainType(type);
-
-            SpaceMap.TerrainTypes = TerrainTypes;
         }
 
         public void StoreTerrainType(TerrainType type)
         {
-            if (TerrainTypes.ContainsKey(type.Name))
+            if (terrainTypes.ContainsKey(type.Name))
                 throw new Exception($"Already have type {type.Name} stored.");
 
-            TerrainTypes[type.Name] = type;
+            terrainTypes[type.Name] = type;
         }
 
         public CompoundMap LoadDevMap(string mapName, GameState state)
@@ -195,7 +196,7 @@ namespace CopperBend.Persist
         {
             MapData data = DataFromYAML(mapYaml);
             var width = data.Terrain.Max(t => t.Length);
-            var height = data.Terrain.Count();
+            var height = data.Terrain.Count;
 
             var map = new CompoundMap
             {
@@ -204,7 +205,6 @@ namespace CopperBend.Persist
                 SpaceMap = new SpaceMap(width, height),
                 BeingMap = new MultiSpatialMap<IBeing>(),
                 ItemMap = new ItemMap(),
-                LocatedTriggers = new List<LocatedTrigger>(),
                 BlightMap = new BlightMap(),
             };
 
@@ -232,23 +232,21 @@ namespace CopperBend.Persist
             foreach (var overlay in data.Blight ?? new List<BlightOverlayData>())
             {
                 var nums = Regex.Split(overlay.Location, ",");
-                int x_off = int.Parse(nums[0]);
-                int y_off = int.Parse(nums[1]);
+                int x_off = int.Parse(nums[0], CultureInfo.InvariantCulture);
+                int y_off = int.Parse(nums[1], CultureInfo.InvariantCulture);
                 var w = overlay.Terrain.Max(t => t.Length);
-                var h = overlay.Terrain.Count();
+                var h = overlay.Terrain.Count;
                 for (int y = 0; y < h; y++)
                 {
-                    string row = overlay.Terrain[y];
+                    var row = overlay.Terrain[y].ToCharArray();
                     for (int x = 0; x < w; x++)
                     {
-                        var symbol = (x < row.Length)
-                            ? row.Substring(x, 1)
-                            : ".";
+                        char symbol = (x < row.Length) ? row[x] : '.';
 
-                        bool isD = symbol.CompareTo("0") > -1 && symbol.CompareTo("9") < 1;
-                        int extent = isD ? int.Parse(symbol) : 0;
+                        bool isD = '0' <= symbol && symbol <= '9';
+                        int extent = isD ? symbol - '0' : 0;
                         if (extent > 0)
-                            map.BlightMap.Add(new AreaBlight {Health = extent}, (x + x_off, y + y_off));
+                            map.BlightMap.Add(new AreaBlight { Health = extent }, (x + x_off, y + y_off));
                     }
                 }
             }
@@ -257,18 +255,18 @@ namespace CopperBend.Persist
         }
 
         //0.1: Map loading is so hard-codey
-        private CompoundMap _farmMap = null;
+        private CompoundMap farmMap = null;
         internal CompoundMap FarmMap()
         {
-            if (_farmMap == null)
+            if (farmMap == null)
             {
-                _farmMap = MapFromYAML(FarmMapYaml);
-                _farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1.MAP  get start location from map
-                Coord ShedCoord = (28, 4);
+                farmMap = MapFromYAML(farmMapYaml);
+                farmMap.SpaceMap.PlayerStartPoint = (23, 21);  //0.1.MAP  get start location from map
+                Coord shedCoord = (28, 4);
                 var gear = Equipper.BuildItem("hoe");
-                _farmMap.ItemMap.Add(gear, ShedCoord);
+                farmMap.ItemMap.Add(gear, shedCoord);
                 gear = Equipper.BuildItem("gloves");
-                _farmMap.ItemMap.Add(gear, ShedCoord);
+                farmMap.ItemMap.Add(gear, shedCoord);
 
                 //  Obscure point on the edge to test map transitions
                 //_farmMap.AddEventAtLocation(new Point(41, 1), new CommandEntry(GameCommand.GoToFarmhouse, null));
@@ -280,41 +278,42 @@ namespace CopperBend.Persist
             }
 
             log.Debug("Loaded the farmyard map");
-            return _farmMap;
+            return farmMap;
         }
 
-        private CompoundMap _farmhouseMap = null;
+        private CompoundMap farmhouseMap = null;
         internal CompoundMap FarmhouseMap()
         {
-            if (_farmhouseMap == null)
+            if (farmhouseMap == null)
             {
-                _farmhouseMap = MapFromYAML(RootCellarYaml);
+                farmhouseMap = MapFromYAML(rootCellarYaml);
                 //_farmhouseMap.PlayerStartsAt = new Point(2, 7);
             }
 
-            return _farmhouseMap;
+            return farmhouseMap;
         }
 
         public TerrainType TerrainFrom(string name)
         {
-            name = name.ToLower();
-            var foundType = TerrainTypes.ContainsKey(name) ? name : "Unknown";
-            return TerrainTypes[foundType];
+            name = name.ToLowerInvariant();
+            var foundType = terrainTypes.ContainsKey(name) ? name : "Unknown";
+            return terrainTypes[foundType];
         }
 
         public MapData DataFromYAML(string mapYaml)
         {
-            var reader = new StringReader(mapYaml);
+            using var reader = new StringReader(mapYaml);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            return deserializer.Deserialize<MapData>(reader);
+            var mapData = deserializer.Deserialize<MapData>(reader);
+            return mapData;
         }
 
         internal CompoundMap DemoMap()
         {
-            string DemoMapYaml = @"---
+            string demoMapYaml = @"---
 name:  Demo
 
 legend:
@@ -333,7 +332,7 @@ terrain:
  - '#..............#'
  - '################'
 ";
-            var map = MapFromYAML(DemoMapYaml);
+            var map = MapFromYAML(demoMapYaml);
 
             //var rock = new Item(new Point(5, 1))
             //{
@@ -356,7 +355,7 @@ terrain:
 
 
         #region Farm and farmhouse map YAML
-        private readonly string FarmMapYaml = @"---
+        private readonly string farmMapYaml = @"---
 name:  Farm
 
 legend:
@@ -447,7 +446,7 @@ blight:
 ";
 
 
-        private readonly string RootCellarYaml = @"---
+        private readonly string rootCellarYaml = @"---
 name:  Root Cellar
 
 legend:
@@ -478,16 +477,17 @@ terrain:
     public class MapData
     {
         public string Name { get; set; }
-        public Dictionary<string, string> Legend { get; set; } = new Dictionary<string, string>();
-        public List<string> Terrain { get; set; } = new List<string>();
-        public List<BlightOverlayData> Blight { get; set; } = new List<BlightOverlayData>();
-        public List<string> FirstSightMessage { get; set; } = new List<string>();
+        public Dictionary<string, string> Legend { get; } = new Dictionary<string, string>();
+        public List<string> Terrain { get; } = new List<string>();
+        public List<BlightOverlayData> Blight { get; } = new List<BlightOverlayData>();
+        public List<string> FirstSightMessage { get; } = new List<string>();
     }
 
     public class BlightOverlayData
     {
         public string Name { get; set; }
         public string Location { get; set; }
-        public List<string> Terrain { get; set; } = new List<string>();
+        public List<string> Terrain { get; } = new List<string>();
     }
+#pragma warning restore SA1402 // File may only contain a single type
 }

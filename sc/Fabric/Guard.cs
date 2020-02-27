@@ -4,7 +4,7 @@ using GoRogue;
 
 namespace CopperBend.Fabric
 {
-    public class Guard
+    public static class Guard
     {
         public static void Against(bool condition, string message = "Condition violated")
         {
@@ -23,10 +23,12 @@ namespace CopperBend.Fabric
         public static IEnumerable<Coord> Neighbors(this Coord self)
         {
             for (int y = self.Y - 1; y < self.Y + 2; y++)
-            for (int x = self.X - 1; x < self.X + 2; x++)
             {
-                if (x == self.X && y == self.Y) continue;
-                yield return new Coord(x, y);
+                for (int x = self.X - 1; x < self.X + 2; x++)
+                {
+                    if (x == self.X && y == self.Y) continue;
+                    yield return new Coord(x, y);
+                }
             }
         }
     }

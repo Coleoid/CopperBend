@@ -1,8 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
+using Microsoft.Xna.Framework;
 using Troschuetz.Random.Generators;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -37,18 +38,18 @@ namespace CopperBend.Persist
         public Color Color_FromString(string text)
         {
             var match = Regex.Match(text, @"R:(\d+) G:(\d+) B:(\d+) A:(\d+)");
-            int r = int.Parse(match.Groups[1].Value);
-            int g = int.Parse(match.Groups[2].Value);
-            int b = int.Parse(match.Groups[3].Value);
-            int a = int.Parse(match.Groups[4].Value);
+            int r = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            int g = int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+            int b = int.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture);
+            int a = int.Parse(match.Groups[4].Value, CultureInfo.InvariantCulture);
             return new Color(r, g, b, a);
         }
 
         public Point Point_FromString(string text)
         {
             var match = Regex.Match(text, @"X:(\d+) Y:(\d+)");
-            int x = int.Parse(match.Groups[1].Value);
-            int y = int.Parse(match.Groups[2].Value);
+            int x = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            int y = int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
             return new Point(x, y);
         }
 
@@ -59,14 +60,12 @@ namespace CopperBend.Persist
             return rng;
         }
 
-        public static Object ByteArrayToObject(byte[] arrBytes)
+        public static object ByteArrayToObject(byte[] arrBytes)
         {
-            using (var memStream = new MemoryStream(arrBytes))
-            {
-                var binForm = new BinaryFormatter();
-                var obj = binForm.Deserialize(memStream);
-                return obj;
-            }
+            using var memStream = new MemoryStream(arrBytes);
+            var binForm = new BinaryFormatter();
+            var obj = binForm.Deserialize(memStream);
+            return obj;
         }
 
         public string SerializedRNG(AbstractGenerator generator)
@@ -76,14 +75,12 @@ namespace CopperBend.Persist
             return gen_b64;
         }
 
-        public static byte[] ObjectToByteArray(Object obj)
+        public static byte[] ObjectToByteArray(object target)
         {
             BinaryFormatter bf = new BinaryFormatter();
-            using (var ms = new MemoryStream())
-            {
-                bf.Serialize(ms, obj);
-                return ms.ToArray();
-            }
+            using var ms = new MemoryStream();
+            bf.Serialize(ms, target);
+            return ms.ToArray();
         }
 
     }

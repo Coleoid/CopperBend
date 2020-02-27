@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using Size = System.Drawing.Size;
 using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
+using Size = System.Drawing.Size;
 using log4net;
 using SadConsole;
 using SadConsole.Input;
@@ -13,39 +14,40 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using System.Diagnostics;
 
 namespace CopperBend.Engine
 {
+    /// <summary> Main game mechanisms. </summary>
     public partial class Engine : ContainerConsole
     {
+        private const int messageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
         private readonly ILog log;
 
-        public Size GameSize;
-        public Size MapSize;
+        public Size GameSize { get; set; }
+        public Size MapSize { get; set; }
         public Size MapWindowSize { get; set; }
-        public Size MenuWindowSize;
+        public Size MenuWindowSize { get; set; }
 
         private ScrollingConsole MapConsole { get; set; }
-        public Window MapWindow;
-        public MessageLogWindow MessageWindow;
-        private Window MenuWindow;
-        private ControlsConsole MenuConsole;
-        
-        private readonly Keyboard Kbd;
-        public Queue<AsciiKey> InputQueue;
-        private Being Player;
+        public Window MapWindow { get; set; }
+        public MessageLogWindow MessageWindow { get; set; }
+        private Window MenuWindow { get; set; }
+        private ControlsConsole MenuConsole { get; set; }
 
-        private GameState GameState;
-        private Schedule Schedule;
-        private CommandDispatcher Dispatcher;
-        private Describer Describer;
-        private UIBuilder UIBuilder;
+        private Keyboard Kbd { get; }
+        public Queue<AsciiKey> InputQueue { get; }
+        private Being Player { get; set; }
 
-        private bool GameInProgress;
-        private int TickWhenGameLastSaved;
-        private string TopSeed;
-        private readonly bool JumpToDebugger = true;
+        private GameState GameState { get; set; }
+        private Schedule Schedule { get; set; }
+        private CommandDispatcher Dispatcher { get; set; }
+        private Describer Describer { get; set; }
+        private UIBuilder UIBuilder { get; set; }
+
+        private bool GameInProgress { get; set; }
+        private int TickWhenGameLastSaved { get; set; }
+        private string TopSeed { get; set; }
+        private readonly bool jumpToDebugger = true;
 
         #region Init
         public Engine(int gameWidth, int gameHeight, ILog logger, string topSeed = null)
@@ -66,8 +68,8 @@ namespace CopperBend.Engine
             Kbd = SadGlobal.KeyboardState;
 
             InputQueue = new Queue<AsciiKey>();
-            ModeStack = new Stack<EngineMode>();
-            CallbackStack = new Stack<Action>();
+            modeStack = new Stack<EngineMode>();
+            callbackStack = new Stack<Action>();
 
             GameSize = new Size(gameWidth, gameHeight);
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
@@ -80,7 +82,7 @@ namespace CopperBend.Engine
         //0.1: Tease apart distinct start-up goals:
         //  Loading a saved game,
         //  Debug stuff?
-        private ICompoundMap FullMap;
+        private ICompoundMap fullMap;
         public void Init()
         {
             var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
@@ -142,24 +144,24 @@ namespace CopperBend.Engine
             Describer.Scramble();
 
             var loader = new Persist.MapLoader(log);
-            FullMap = loader.FarmMap();
+            fullMap = loader.FarmMap();
 
-            Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
+            Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint);
             Schedule.AddAgent(Player, 12);
 
-            (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
+            (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", fullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player.Console);
-            FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
-            FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
-            FullMap.UpdateFOV(MapConsole, Player.Position);
+            fullMap.SetInitialConsoleCells(MapConsole, fullMap.SpaceMap);
+            fullMap.FOV = new FOV(fullMap.GetView_CanSeeThrough());
+            fullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
-            MessageQueue = new Queue<string>();
+            messageQueue = new Queue<string>();
 
             GameState = new GameState
             {
                 Player = Player,
-                Map = FullMap,
+                Map = fullMap,
                 Story = Engine.Compendium.Dramaticon,
             };
             Dispatcher.GameState = GameState;
@@ -206,7 +208,7 @@ namespace CopperBend.Engine
 
             GameState = null;
 
-            FullMap.FOV = null;
+            fullMap.FOV = null;
 
             MapConsole.Children.Remove(Player.Console);
             Children.Remove(MapWindow);
@@ -215,7 +217,7 @@ namespace CopperBend.Engine
 
             Schedule.Clear();
             Player = null;
-            FullMap = null;
+            fullMap = null;
 
             log.Info("Shut down game");
         }
@@ -225,7 +227,7 @@ namespace CopperBend.Engine
             var player = new Player(Color.AntiqueWhite, Color.Transparent, '@')
             {
                 Name = "Suvail",
-                Position = playerLocation
+                Position = playerLocation,
             };
             player.AddComponent(new EntityViewSyncComponent());
             player.AddToInventory(Equipper.BuildItem("hoe"));
@@ -243,7 +245,7 @@ namespace CopperBend.Engine
 
             try
             {
-                ActOnMode();  // <<== 
+                ActOnMode();  // <<==
             }
             catch (PlayerDiedException pde)
             {
@@ -300,8 +302,8 @@ namespace CopperBend.Engine
         //  ...and we can later leave the quest details without confusion
         //  about what we're doing.
 
-        private readonly Stack<EngineMode> ModeStack;
-        private readonly Stack<Action> CallbackStack;
+        private readonly Stack<EngineMode> modeStack;
+        private readonly Stack<Action> callbackStack;
 
         internal EngineMode CurrentMode { get; set; } = EngineMode.Unknown;
 
@@ -313,9 +315,9 @@ namespace CopperBend.Engine
                 throw new Exception($"Should never EnterMode({newMode}).");
 
             var oldMode = CurrentMode;
-            ModeStack.Push(CurrentMode);
+            modeStack.Push(CurrentMode);
             CurrentMode = newMode;
-            CallbackStack.Push(CurrentCallback);
+            callbackStack.Push(CurrentCallback);
             CurrentCallback = callback;
 
             // fires when restarting game 12 nov 19
@@ -331,15 +333,15 @@ namespace CopperBend.Engine
         internal void PopEngineMode()
         {
             var oldMode = CurrentMode;
-            CurrentMode = ModeStack.Pop();
-            CurrentCallback = CallbackStack.Pop();
+            CurrentMode = modeStack.Pop();
+            CurrentCallback = callbackStack.Pop();
 
             // Don't log mode shifts from player's turn to world's turn.
             if (oldMode == EngineMode.PlayerTurn && CurrentMode == EngineMode.WorldTurns) return;
 
             log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
         }
-        #endregion 
+        #endregion
 
         internal void ActOnMode()
         {
@@ -377,12 +379,16 @@ namespace CopperBend.Engine
             case EngineMode.Unknown:
             case EngineMode.NoGameRunning:
             default:
-                if (JumpToDebugger) // compile to false for production builds
+                // JumpToDebugger compiles to false for production builds
+                if (jumpToDebugger)
                 {
                     if (!Debugger.IsAttached) Debugger.Launch();
                     else Debugger.Break();
                 }
-                else throw new Exception($"Hit the game loop in {CurrentMode} mode.");
+                else
+                {
+                    throw new Exception($"Hit the game loop in {CurrentMode} mode.");
+                }
                 break;
             }
         }
@@ -459,33 +465,32 @@ namespace CopperBend.Engine
         }
 
         #region Short Message log
-        private Queue<string> MessageQueue;
-        private int MessagesSentSincePause = 0;
-        private int MessageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
+        private Queue<string> messageQueue;
+        private int messagesSentSincePause = 0;
 
         public void AddMessage(string newMessage)
         {
-            MessageQueue.Enqueue(newMessage);
+            messageQueue.Enqueue(newMessage);
             ShowMessages();
         }
 
         //0.1: ResetMessagesSentSincePause() needs to be called all through the ICS.
-        public void ResetMessagesSentSincePause() => MessagesSentSincePause = 0;
+        public void ResetMessagesSentSincePause() => messagesSentSincePause = 0;
 
         private void ShowMessages()
         {
             //0.2: There are probably other modes where we want to suspend messages.
-            while (CurrentMode != EngineMode.MessagesPendingUserInput && MessageQueue.Any())
+            while (CurrentMode != EngineMode.MessagesPendingUserInput && messageQueue.Any())
             {
-                if (MessagesSentSincePause >= MessageLimitBeforePause)
+                if (messagesSentSincePause >= messageLimitBeforePause)
                 {
                     PromptUserForMoreAndPend();
                     return;
                 }
 
-                var nextMessage = MessageQueue.Dequeue();
+                var nextMessage = messageQueue.Dequeue();
                 MessageWindow.WriteLine(nextMessage);
-                MessagesSentSincePause++;
+                messagesSentSincePause++;
             }
         }
 
@@ -512,10 +517,10 @@ namespace CopperBend.Engine
         public void SyncMapChanges()
         {
             //  If any spaces changed whether they can be seen through, rebuild FOV
-            if (FullMap.VisibilityChanged)
+            if (fullMap.VisibilityChanged)
             {
-                FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
-                FullMap.VisibilityChanged = false;
+                fullMap.FOV = new FOV(fullMap.GetView_CanSeeThrough());
+                fullMap.VisibilityChanged = false;
                 Dispatcher.PlayerMoved = true;
             }
 
@@ -523,21 +528,21 @@ namespace CopperBend.Engine
             {
                 //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
 
-                FullMap.UpdateFOV(MapConsole, Player.Position);
+                fullMap.UpdateFOV(MapConsole, Player.Position);
                 MapConsole.CenterViewPortOnPoint(Player.Position);
                 Dispatcher.PlayerMoved = false;
             }
 
-            if (!FullMap.CoordsWithChanges.Any()) return;
-            var changedAndInFOV = FullMap.CoordsWithChanges
-                .Intersect(FullMap.FOV.CurrentFOV);
-            FullMap.UpdateViewOfCoords(MapConsole, changedAndInFOV);
-            FullMap.CoordsWithChanges.Clear();
+            if (!fullMap.CoordsWithChanges.Any()) return;
+            var changedAndInFOV = fullMap.CoordsWithChanges
+                .Intersect(fullMap.FOV.CurrentFOV);
+            fullMap.UpdateViewOfCoords(MapConsole, changedAndInFOV);
+            fullMap.CoordsWithChanges.Clear();
         }
 
         private void AnimateBackground(TimeSpan timeElapsed)
         {
-            FullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
+            fullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
         }
 
         #region LargeMessages, currently empty

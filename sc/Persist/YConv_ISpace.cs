@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Microsoft.Xna.Framework;
 using YamlDotNet.Serialization;
@@ -7,12 +9,14 @@ using CopperBend.Contract;
 using YamlDotNet.Core.Events;
 using CopperBend.Model;
 using CopperBend.Fabric;
-using System.Collections.Generic;
 
 namespace CopperBend.Persist
 {
     public class YConv_ISpace : Persistence_util, IYamlTypeConverter
     {
+        //0.1: pragma will come off after code fills out.
+#pragma warning disable CA1801 // Remove unused parameter
+#pragma warning disable IDE0060 // Remove unused parameter
         #region IYamlTypeConverter
         public bool Accepts(Type type)
         {
@@ -41,10 +45,10 @@ namespace CopperBend.Persist
         }
         #endregion
 
-        private void EmitSpace(IEmitter emitter, ISpace ISpace)
+        private void EmitSpace(IEmitter emitter, ISpace ispace)
         {
-            var space = (Space)ISpace;
-            EmitKVP(emitter, "ID", space.ID.ToString());
+            var space = (Space)ispace;
+            EmitKVP(emitter, "ID", space.ID.ToString(CultureInfo.InvariantCulture));
             EmitKVP(emitter, "Terrain", space.Terrain.Name);
 
             var kst = FlagString(space.IsKnown, space.IsSown, space.IsTilled);
@@ -75,11 +79,11 @@ namespace CopperBend.Persist
 
         private ISpace ParseSpace(IParser parser)
         {
-            uint id = uint.Parse(GetValueNext(parser, "ID"));
+            uint id = uint.Parse(GetValueNext(parser, "ID"), CultureInfo.InvariantCulture);
 
             var space = new Space(id)
             {
-                Terrain = GetTerrainType(GetValueNext(parser, "Terrain"))
+                Terrain = GetTerrainType(GetValueNext(parser, "Terrain")),
             };
 
             var flagText = GetValueNext(parser, "Flags");
@@ -96,10 +100,12 @@ namespace CopperBend.Persist
             return null;
         }
 
-        private void EmitPlayer(IEmitter emitter, ISpace ISpace)
+        private void EmitPlayer(IEmitter emitter, ISpace space)
         {
-            EmitSpace(emitter, ISpace);
+            EmitSpace(emitter, space);
             //var player = (Player)ISpace;
         }
     }
+#pragma warning restore CA1801 // Remove unused parameter
+#pragma warning restore IDE0060 // Remove unused parameter
 }

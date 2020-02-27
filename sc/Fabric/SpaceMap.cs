@@ -6,13 +6,12 @@ namespace CopperBend.Fabric
 {
     public class SpaceMap : SpatialMap<ISpace>, ISpaceMap
     {
-        public static Dictionary<string, TerrainType> TerrainTypes { get; set; }
+        public static Dictionary<string, TerrainType> TerrainTypes { get; } = new Dictionary<string, TerrainType>();
         public static TerrainType TilledSoil => TerrainTypes[Terrains.SoilTilled];
         public static TerrainType PlantedSoil => TerrainTypes[Terrains.SoilPlanted];
         public Coord PlayerStartPoint { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-
 
         public SpaceMap(int width, int height)
         : base(width * height)
@@ -98,7 +97,7 @@ namespace CopperBend.Fabric
         }
 
         #region standard IHasID
-        public static IDGenerator IDGenerator;
+        public static IDGenerator IDGenerator { get; set; }
         public uint ID { get; private set; }
         #endregion
 

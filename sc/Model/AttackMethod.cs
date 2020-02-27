@@ -3,10 +3,11 @@ using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
+#pragma warning disable SA1402 // File may only contain a single type
     public class AttackMethod : IAttackMethod
     {
-        public List<IAttackEffect> AttackEffects { get; set; }
-        public List<IModifier> AttackModifiers { get; set; }
+        public List<IAttackEffect> AttackEffects { get; }
+        public List<IModifier> AttackModifiers { get; }
 
         public AttackMethod(string type, string range)
             : this()
@@ -24,7 +25,7 @@ namespace CopperBend.Model
         {
             AddEffect(new AttackEffect {
                 Type = type,
-                DamageRange = range
+                DamageRange = range,
             });
         }
 
@@ -35,7 +36,7 @@ namespace CopperBend.Model
 
     public class DefenseMethod : IDefenseMethod
     {
-        public Dictionary<string, string> Resistances { get; set; }
+        public Dictionary<string, string> Resistances { get; }
 
         public DefenseMethod()
         {
@@ -61,5 +62,6 @@ namespace CopperBend.Model
         public int Initial { get; set; }
         public int Current { get; set; }
     }
+#pragma warning restore SA1402 // File may only contain a single type
 
 }

@@ -70,7 +70,6 @@ namespace CopperBend.Engine.Tests
                 Name = "closed door"
             };
 
-            SpaceMap.TerrainTypes = new Dictionary<string, TerrainType>();
             SpaceMap.TerrainTypes[ttWall.Name] = ttWall;
             SpaceMap.TerrainTypes[ttFloor.Name] = ttFloor;
             SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;

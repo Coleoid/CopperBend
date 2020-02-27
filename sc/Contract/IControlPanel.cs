@@ -68,7 +68,7 @@ namespace CopperBend.Contract
         Unknown = 0,
         PlantSeed,
         EatFruit,
-        Blight
+        Blight,
     }
 
     public interface ILogWindow

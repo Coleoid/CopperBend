@@ -1,5 +1,5 @@
-﻿using GoRogue;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using GoRogue;
 
 namespace CopperBend.Contract
 {
@@ -7,9 +7,9 @@ namespace CopperBend.Contract
     {
         // Some parts of AdvancedSpatialMap aren't in ISaptialMap, so I patch them in
         IAreaBlight GetItem(Coord position);
-        IAreaBlight GetItem(int X, int Y);
+        IAreaBlight GetItem(int x, int y);
 
         // This one Just Makes Sense
-        IEnumerable<IAreaBlight> GetItems(IEnumerable<Coord> coords);
+        IEnumerable<IAreaBlight> GetNonNullItems(IEnumerable<Coord> coords);
     }
 }

@@ -1,6 +1,5 @@
-﻿using CopperBend.Contract;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using CopperBend.Contract;
 
 namespace CopperBend.Model.Aspects
 {
@@ -31,6 +30,6 @@ namespace CopperBend.Model.Aspects
         Egg = 16,
         Flesh = 32,
         Organs = 64,
-        Carrion = 128
+        Carrion = 128,
     }
 }

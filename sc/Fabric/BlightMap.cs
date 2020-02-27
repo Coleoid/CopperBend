@@ -1,12 +1,12 @@
-﻿using CopperBend.Contract;
+﻿using System.Collections.Generic;
+using CopperBend.Contract;
 using GoRogue;
-using System.Collections.Generic;
 
 namespace CopperBend.Fabric
 {
     public class BlightMap : SpatialMap<IAreaBlight>, IBlightMap
     {
-        public IEnumerable<IAreaBlight> GetItems(IEnumerable<Coord> coords)
+        public IEnumerable<IAreaBlight> GetNonNullItems(IEnumerable<Coord> coords)
         {
             foreach (var coord in coords)
             {

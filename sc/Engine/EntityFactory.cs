@@ -5,12 +5,12 @@ using SadConsole;
 
 namespace CopperBend.Engine
 {
-    public class EntityFactory: IEntityFactory
+    public class EntityFactory : IEntityFactory
     {
-        FontMaster MapFontMaster { get; set; }
+        private FontMaster MapFontMaster { get; set; }
         public Font MapFont { get; set; }
 
-        public EntityFactory(FontMaster mapFontMaster) 
+        public EntityFactory(FontMaster mapFontMaster)
         {
             MapFontMaster = mapFontMaster;
             MapFont = MapFontMaster.GetFont(Font.FontSizes.One);

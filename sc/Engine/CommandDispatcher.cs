@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using log4net;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using System.Diagnostics;
 
 namespace CopperBend.Engine
 {
+    /// <summary> This is the main logic slice of the CommandDispatcher. </summary>
     public partial class CommandDispatcher
     {
         private ISchedule Schedule { get; set; }
@@ -19,8 +20,8 @@ namespace CopperBend.Engine
         private IItemMap ItemMap => GameState.Map.ItemMap;
         private IBlightMap BlightMap => GameState.Map.BlightMap;
 
-        private IDescriber Describer;
-        private IMessageLogWindow MessageLog;
+        private readonly IDescriber describer;
+        private readonly IMessageLogWindow messageLog;
         private ILog log;
 
         // becomes external dependency soon
@@ -37,14 +38,13 @@ namespace CopperBend.Engine
             log = logger;
             Schedule = schedule;
             GameState = gameState;
-            Describer = describer;
-            MessageLog = messageLog;
+            this.describer = describer;
+            this.messageLog = messageLog;
             AttackSystem = new AttackSystem(this, logger);
             //AttackSystem.BlightMap = gameState.Map.BlightMap;
 
-            WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) MessageLog.WriteLine(message); };
+            WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) this.messageLog.WriteLine(message); };
         }
-
 
         public void Dispatch(ScheduleEntry nextAction)
         {
@@ -72,35 +72,29 @@ namespace CopperBend.Engine
 
         public bool CommandBeing(IBeing being, Command command)
         {
-            switch (command.Action)
+            return command.Action switch
             {
-            case CmdAction.Consume:   return Do_Consume(being, command);
-            case CmdAction.Direction: return Do_Direction(being, command.Direction);
-            case CmdAction.Drop:      return Do_Drop(being, command);
-            case CmdAction.PickUp:    return Do_PickUp(being, command);
-            case CmdAction.Use:       return Do_Usable(being, command);
-            case CmdAction.Wait:      return Do_Wait(being, command);
-            case CmdAction.Wield:     return Do_Wield(being, command.Item);
-
-            case CmdAction.Unknown:
-            case CmdAction.Unset:
-            case CmdAction.Incomplete:
-            default:
-                throw new Exception($"Not ready to do {command.Action}.");
-            }
+                CmdAction.Consume => Do_Consume(being, command),
+                CmdAction.Direction => Do_Direction(being, command.Direction),
+                CmdAction.Drop => Do_Drop(being, command),
+                CmdAction.PickUp => Do_PickUp(being, command),
+                CmdAction.Use => Do_Usable(being, command),
+                CmdAction.Wait => Do_Wait(being, command),
+                CmdAction.Wield => Do_Wield(being, command.Item),
+                _ => throw new Exception($"Not ready to do {command.Action}."),
+            };
         }
 
 
         public bool Do_Consume(IBeing being, Command command)
         {
-            IIngestible ingestible = command.Usable as IIngestible;
-            if (ingestible == null)
+            if (!(command.Usable is IIngestible ingestible))
                 ingestible = command.Item.Aspects.GetComponent<IIngestible>();
             Guard.AgainstNullArgument(ingestible, "Nothing ingestible in consume command");
 
             IItem item = command.Item;
             Guard.AgainstNullArgument(item, "No item in consume command");
-            string description = Describer.Describe(item);
+            string description = describer.Describe(item);
             Guard.Against(item.Quantity < 1, $"Only have {item.Quantity} {description}.");
             //0.2: eat from ground, or directly from plant, or someone feeds someone
             Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory");
@@ -112,7 +106,7 @@ namespace CopperBend.Engine
             if (ingestible.IsFruit)
             {
                 var plantType = Engine.Compendium.Herbal.PlantByID[ingestible.PlantID];
-                
+
                 // pocket some seeds
                 int seedCount = 2; //0.1
                 if (seedCount > 0)
@@ -183,16 +177,16 @@ namespace CopperBend.Engine
                 }
                 else
                 {
-                    MessageLog.WriteLine("Door's stuck.");
+                    messageLog.WriteLine("Door's stuck.");
                 }
                 return success;
             }
 
             if (!SpaceMap.CanWalkThrough(newPosition))
             {
-                var np = Describer.Describe(space.Terrain.Name, DescMods.Article);
+                var np = describer.Describe(space.Terrain.Name, DescMods.Article);
                 WriteLineIfPlayer(being, $"I can't walk through {np}.");
-                
+
                 ClearPendingInput();
                 return false;
             }
@@ -215,18 +209,18 @@ namespace CopperBend.Engine
                 var itemsHere = ItemMap.GetItems(newPosition);
                 if (itemsHere.Count() > 7)
                 {
-                    MessageLog.WriteLine("A pile of things here.");
+                    messageLog.WriteLine("A pile of things here.");
                 }
                 else if (itemsHere.Count() > 1)
                 {
-                    MessageLog.WriteLine("Some things here.");
+                    messageLog.WriteLine("Some things here.");
                 }
                 else if (itemsHere.Count() == 1)
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
-                    var np = Describer.Describe(item, DescMods.Article);
-                    MessageLog.WriteLine($"There {beVerb} {np} here.");
+                    var np = describer.Describe(item, DescMods.Article);
+                    messageLog.WriteLine($"There {beVerb} {np} here.");
                 }
                 else
                 {
@@ -258,21 +252,21 @@ namespace CopperBend.Engine
             {
                 being.AddToInventory(item);
                 ScheduleAgent(being, 4);
-                MessageLog.WriteLine($"Picked up {item.Name}");
+                messageLog.WriteLine($"Picked up {item.Name}");
             }
             else
             {
-                MessageLog.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
+                messageLog.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
             }
             return pickedUp;
         }
 
-        int Time_spent_on_usable = 0;
+        private int time_spent_on_usable = 0;
         private bool Do_Usable(IBeing being, Command command)
         {
             Guard.AgainstNullArgument(command.Usable, "Need Usable component of command");
 
-            Time_spent_on_usable = 0;
+            time_spent_on_usable = 0;
             bool action_taken = false;
 
             foreach (var effect in command.Usable.Effects)
@@ -298,8 +292,9 @@ namespace CopperBend.Engine
                     break;
 
                 default:
+                    log.Error("usable isn't.");
                     var vp = command.Usable.VerbPhrase;
-                    var np = Describer.Describe(command.Item, DescMods.Article);
+                    var np = describer.Describe(command.Item, DescMods.Article);
                     throw new Exception($"Don't have code to cause [{effect.Effect}] Effect when I {vp} {np}.");
                 }
             }
@@ -311,9 +306,9 @@ namespace CopperBend.Engine
                 {
                     PayCost(being, command.Item, cost);
                 }
-            
-                if (Time_spent_on_usable > 0)
-                    ScheduleAgent(being, Time_spent_on_usable);
+
+                if (time_spent_on_usable > 0)
+                    ScheduleAgent(being, time_spent_on_usable);
             }
 
             return action_taken;
@@ -332,7 +327,7 @@ namespace CopperBend.Engine
                 break;
 
             case "time":
-                Time_spent_on_usable += cost.Amount;
+                time_spent_on_usable += cost.Amount;
                 break;
 
             case "this":
@@ -380,14 +375,14 @@ namespace CopperBend.Engine
 
             if (!space.IsTilled)
             {
-                string qualifier = space.CanTill ? "untilled " : "";
-                MessageLog.WriteLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
+                string qualifier = space.CanTill ? "untilled " : string.Empty;
+                messageLog.WriteLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
                 return false;
             }
 
             if (space.IsSown)
             {
-                MessageLog.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
+                messageLog.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
                 return false;
             }
 
@@ -404,7 +399,11 @@ namespace CopperBend.Engine
         }
 
 
+#pragma warning disable CA1801 // Remove unused parameter
+#pragma warning disable IDE0060 // Remove unused parameter
         private bool Do_Wait(IBeing being, Command command)
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore CA1801 // Remove unused parameter
         {
             Schedule.AddAgent(being, 6);
             return true;

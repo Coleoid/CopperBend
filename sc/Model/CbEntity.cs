@@ -6,7 +6,7 @@ namespace CopperBend.Model
     public abstract class CbEntity : IHasID
     {
         #region standard IHasID
-        public static IDGenerator IDGenerator;
+        public static IDGenerator IDGenerator { get; set; }
         public uint ID { get; private set; }
         #endregion
 
@@ -14,7 +14,7 @@ namespace CopperBend.Model
 
         protected CbEntity(uint id = uint.MaxValue)
         {
-            ID = (id == uint.MaxValue? IDGenerator.UseID() : id);
+            ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
         }
     }
 }

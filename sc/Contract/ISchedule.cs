@@ -18,7 +18,7 @@ namespace CopperBend.Contract
     {
         public IScheduleAgent Agent { get; set; }
         public ScheduleAction Action { get; set; }
-        public Dictionary<string, string> Data { get; set; }
+        public Dictionary<string, string> Data { get; }
         public int Offset { get; set; }
     }
 

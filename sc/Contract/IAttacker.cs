@@ -23,14 +23,14 @@ namespace CopperBend.Contract
 
     public interface IAttackMethod
     {
-        List<IAttackEffect> AttackEffects { get; set; }
-        List<IModifier> AttackModifiers { get; set; }
+        List<IAttackEffect> AttackEffects { get; }
+        List<IModifier> AttackModifiers { get; }
         void AddEffect(IAttackEffect effect);
     }
 
     public interface IDefenseMethod
     {
-        Dictionary<string, string> Resistances { get; set; }
+        Dictionary<string, string> Resistances { get; }
     }
 
     public interface IAttackEffect

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -8,6 +9,8 @@ using CopperBend.Model;
 
 namespace CopperBend.Persist
 {
+#pragma warning disable IDE0060 // Remove unused parameter
+#pragma warning disable CA1801 // Remove unused parameter
     public class YConv_IBook : Persistence_util, IYamlTypeConverter
     {
         #region IYamlTypeConverter
@@ -61,34 +64,16 @@ namespace CopperBend.Persist
 
         public IBook DispatchParse(IParser parser, string type)
         {
-            IBook book = null;
-            switch (type)
+            IBook book = type switch
             {
-            case "Compendium":
-                book = ParseCompendium(parser);
-                break;
-
-            case "TomeOfChaos":
-                book = ParseTome(parser);
-                break;
-
-            case "Herbal":
-                book = ParseHerbal(parser);
-                break;
-
-            case "SocialRegister":
-                book = ParseSocialRegister(parser);
-                break;
-
-            case "Dramaticon":
-                book = ParseDramaticon(parser);
-                break;
-
-            //0.1.SAVE:  Read remainder of Compendium
-
-            default:
-                throw new NotImplementedException($"NI: Dispatch parse of book type [{type}].");
-            }
+                "Compendium" => ParseCompendium(parser),
+                "TomeOfChaos" => ParseTome(parser),
+                "Herbal" => ParseHerbal(parser),
+                "SocialRegister" => ParseSocialRegister(parser),
+                "Dramaticon" => ParseDramaticon(parser),
+                //0.1.SAVE:  Read remainder of Compendium
+                _ => throw new NotImplementedException($"NI: Dispatch parse of book type [{type}]."),
+            };
             return book;
         }
 
@@ -156,10 +141,9 @@ namespace CopperBend.Persist
         private TomeOfChaos ParseTome(IParser parser)
         {
             parser.Consume<MappingStart>();
-            TomeOfChaos tome = null;
 
             var topSeed = GetValueNext(parser, "TopSeed");
-            tome = new TomeOfChaos(topSeed);
+            var tome = new TomeOfChaos(topSeed);
 
             var rng_b64 = GetValueNext(parser, "TopGenerator");
             tome.TopGenerator = RngFromBase64(rng_b64);
@@ -213,13 +197,13 @@ namespace CopperBend.Persist
             emitter.Emit(new Scalar("Plant"));
             emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
 
-            EmitKVP(emitter, "ID", plantDetails.ID.ToString());
+            EmitKVP(emitter, "ID", plantDetails.ID.ToString(CultureInfo.InvariantCulture));
             EmitKVP(emitter, "MainName", plantDetails.MainName);
             EmitKVP(emitter, "FruitAdjective", plantDetails.FruitAdjective);
-            EmitKVP(emitter, "FruitKnown", plantDetails.FruitKnown.ToString());
+            EmitKVP(emitter, "FruitKnown", plantDetails.FruitKnown.ToString(CultureInfo.InvariantCulture));
             EmitKVP(emitter, "SeedAdjective", plantDetails.SeedAdjective);
-            EmitKVP(emitter, "SeedKnown", plantDetails.SeedKnown.ToString());
-            EmitKVP(emitter, "GrowthTime", plantDetails.GrowthTime.ToString());
+            EmitKVP(emitter, "SeedKnown", plantDetails.SeedKnown.ToString(CultureInfo.InvariantCulture));
+            EmitKVP(emitter, "GrowthTime", plantDetails.GrowthTime.ToString(CultureInfo.InvariantCulture));
 
             emitter.Emit(new MappingEnd());
         }
@@ -229,13 +213,13 @@ namespace CopperBend.Persist
             parser.Consume<MappingStart>();
             var details = new PlantDetails();
 
-            details.ID = uint.Parse(GetValueNext(parser, "ID"));
+            details.ID = uint.Parse(GetValueNext(parser, "ID"), CultureInfo.InvariantCulture);
             details.MainName = GetValueNext(parser, "MainName");
             details.FruitAdjective = GetValueNext(parser, "FruitAdjective");
             details.FruitKnown = bool.Parse(GetValueNext(parser, "FruitKnown"));
             details.SeedAdjective = GetValueNext(parser, "SeedAdjective");
             details.SeedKnown = bool.Parse(GetValueNext(parser, "SeedKnown"));
-            details.GrowthTime = int.Parse(GetValueNext(parser, "GrowthTime"));
+            details.GrowthTime = int.Parse(GetValueNext(parser, "GrowthTime"), CultureInfo.InvariantCulture);
 
             parser.Consume<MappingEnd>();
             return details;
@@ -266,4 +250,6 @@ namespace CopperBend.Persist
         }
         #endregion
     }
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore CA1801 // Remove unused parameter
 }

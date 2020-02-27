@@ -6,7 +6,7 @@ namespace CopperBend.Model
     {
         public override string BeingType { get; set; } = "Monster";
 
-        public Monster(Color foreground, Color background, int glyph = 'M', uint id = uint.MaxValue) 
+        public Monster(Color foreground, Color background, int glyph = 'M', uint id = uint.MaxValue)
             : base(foreground, background, glyph, id)
         {
         }

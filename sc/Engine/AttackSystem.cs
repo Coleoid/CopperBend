@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GoRogue.DiceNotation;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using System.Linq;
 using log4net;
 
 namespace CopperBend.Engine
@@ -80,14 +80,6 @@ Apply post-attack effects
 
     */
 
-    public class Attack
-    {
-        public IAttacker Attacker { get; set; }
-        public IAttackMethod AttackMethod { get; set; }
-        public IDefender Defender { get; set; }
-        public IDefenseMethod DefenseMethod { get; set; }
-    }
-
     public class AttackSystem
     {
         private readonly ILog log;
@@ -100,8 +92,8 @@ Apply post-attack effects
         }
 
         public IControlPanel Panel { get; set; }
-        public Queue<IDelible> Destroyed { get; set; }
-        public Queue<Attack> AttackQueue { get; set; }
+        public Queue<IDelible> Destroyed { get; }
+        public Queue<Attack> AttackQueue { get; }
 
         public void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
         {
@@ -109,15 +101,15 @@ Apply post-attack effects
                 Attacker = attacker,
                 AttackMethod = attack,
                 Defender = defender,
-                DefenseMethod = defense
+                DefenseMethod = defense,
             });
         }
         public void AddAttack(Attack attack) => AttackQueue.Enqueue(attack);
 
-        
+
         public void ResolveAttackQueue()
         {
-            while (AttackQueue.Count() > 0)
+            while (AttackQueue.Count > 0)
             {
                 ResolveAttack(AttackQueue.Dequeue());
             }
@@ -146,8 +138,8 @@ Apply post-attack effects
         {
             //  Blight splashback
             if (attack.Defender is AreaBlight blight &&
-                attack.AttackMethod.AttackEffects.Any(ae => 
-                ae.Type.StartsWith("physical"))
+                attack.AttackMethod.AttackEffects.Any(ae =>
+                ae.Type.StartsWith("physical", StringComparison.InvariantCulture))
             )
             {
                 log.Info("Blight strikeback");
@@ -158,7 +150,7 @@ Apply post-attack effects
                     Attacker = blight,
                     Defender = newDefender,
                     AttackMethod = newAM,
-                    DefenseMethod = newDefender.GetDefenseMethod(newAM)
+                    DefenseMethod = newDefender.GetDefenseMethod(newAM),
                 });
             }
 
@@ -167,7 +159,7 @@ Apply post-attack effects
                 attack.Attacker is Being being &&
                 being.IsPlayer &&
                 attack.AttackMethod.AttackEffects.Any(ae =>
-                ae.Type.StartsWith("physical"))
+                ae.Type.StartsWith("physical", StringComparison.InvariantCulture))
             )
             {
                 log.Info("Nature through our hero");
@@ -177,7 +169,7 @@ Apply post-attack effects
                     Attacker = being,
                     Defender = areaBlight,
                     AttackMethod = newAM,
-                    DefenseMethod = areaBlight.GetDefenseMethod(newAM)
+                    DefenseMethod = areaBlight.GetDefenseMethod(newAM),
                 });
 
                 foreach (IAreaBlight neighborBlight in NeighborBlightsOf(areaBlight))
@@ -187,7 +179,7 @@ Apply post-attack effects
                         Attacker = being,
                         Defender = neighborBlight,
                         AttackMethod = newAM,
-                        DefenseMethod = neighborBlight.GetDefenseMethod(newAM)
+                        DefenseMethod = neighborBlight.GetDefenseMethod(newAM),
                     });
                 }
             }
@@ -207,7 +199,7 @@ Apply post-attack effects
         public IEnumerable<IAreaBlight> NeighborBlightsOf(IAreaBlight areaBlight)
         {
             var coord = BlightMap.GetPosition(areaBlight);
-            return BlightMap.GetItems(coord.Neighbors());
+            return BlightMap.GetNonNullItems(coord.Neighbors());
         }
 
         public void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages)
@@ -336,7 +328,7 @@ Apply post-attack effects
                         break;
                     }
                 }
-                if (foundResistance == string.Empty) continue;
+                if (foundResistance.Length == 0) continue;
 
                 var resisted = new ClampedRatio(foundResistance).Apply(damage.Current);
 
@@ -349,7 +341,7 @@ Apply post-attack effects
 
         #region Messages
 
-        Dictionary<Messages, bool> SeenMessages { get; set; } = new Dictionary<Messages, bool>();
+        private Dictionary<Messages, bool> SeenMessages { get; } = new Dictionary<Messages, bool>();
         public IBlightMap BlightMap { get; set; }
 
         /// <summary> First time running across this message in this game run? </summary>
@@ -401,4 +393,11 @@ Apply post-attack effects
         #endregion
     }
 
+    public class Attack
+    {
+        public IAttacker Attacker { get; set; }
+        public IAttackMethod AttackMethod { get; set; }
+        public IDefender Defender { get; set; }
+        public IDefenseMethod DefenseMethod { get; set; }
+    }
 }

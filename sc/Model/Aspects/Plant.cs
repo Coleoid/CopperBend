@@ -3,20 +3,6 @@ using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
-    public class PlantDetails
-    {
-        public uint ID;
-        public string MainName { get; set; }
-        public int GrowthTime { get; set; }
-        public bool SeedKnown;
-        public bool FruitKnown;
-        public string SeedAdjective;
-        public string FruitAdjective;
-        public string SeedDescriptionAsKnown => $"{(SeedKnown ? MainName : SeedAdjective)} seed";
-        public string FruitDescriptionAsKnown => FruitKnown ? MainName : $"{FruitAdjective} fruit";
-        public List<(PlantPart, PlantUse, string)> Uses;  //0.+
-    }
-
     public class Plant : IScheduleAgent
     {
         public PlantDetails PlantDetails { get; set; }
@@ -50,9 +36,22 @@ namespace CopperBend.Model
             return new ScheduleEntry
             {
                 Action = ScheduleAction.PlantGrows,
-                Offset = offset
+                Offset = offset,
             };
         }
     }
 
+    public class PlantDetails
+    {
+        public uint ID { get; set; }
+        public string MainName { get; set; }
+        public int GrowthTime { get; set; }
+        public bool SeedKnown { get; set; }
+        public bool FruitKnown { get; set; }
+        public string SeedAdjective { get; set; }
+        public string FruitAdjective { get; set; }
+        public string SeedDescriptionAsKnown => $"{(SeedKnown ? MainName : SeedAdjective)} seed";
+        public string FruitDescriptionAsKnown => FruitKnown ? MainName : $"{FruitAdjective} fruit";
+        public List<(PlantPart, PlantUse, string)> Uses { get; }  //0.+
+    }
 }

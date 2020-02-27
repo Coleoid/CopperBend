@@ -11,7 +11,6 @@
     {
         Unset = 0,
         BarehandBlightDamage,
-        BlightDamageSpreads
+        BlightDamageSpreads,
     }
-
 }

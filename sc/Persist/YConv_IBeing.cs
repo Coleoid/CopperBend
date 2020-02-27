@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Microsoft.Xna.Framework;
 using YamlDotNet.Serialization;
 using YamlDotNet.Core;
@@ -74,21 +75,21 @@ namespace CopperBend.Persist
         {
             var being = (Being)iBeing;
             EmitKVP(emitter, "BeingType", being.BeingType);
-            EmitKVP(emitter, "ID", being.ID.ToString());
+            EmitKVP(emitter, "ID", being.ID.ToString(CultureInfo.InvariantCulture));
 
             EmitKVP(emitter, "Foreground", being.Foreground.ToString());
             EmitKVP(emitter, "Background", being.Background.ToString());
-            EmitKVP(emitter, "Glyph", ((char)being.Glyph).ToString());
+            EmitKVP(emitter, "Glyph", ((char)being.Glyph).ToString(CultureInfo.InvariantCulture));
 
             EmitKVP(emitter, "Name", being.Name ?? string.Empty);
-            EmitKVP(emitter, "Awareness", being.Awareness.ToString());
-            EmitKVP(emitter, "Health", being.Health.ToString());
+            EmitKVP(emitter, "Awareness", being.Awareness.ToString(CultureInfo.InvariantCulture));
+            EmitKVP(emitter, "Health", being.Health.ToString(CultureInfo.InvariantCulture));
             EmitKVP(emitter, "Position", being.Position.ToString());
         }
 
         private IBeing ParseBeing(IParser parser)
         {
-            uint id = uint.Parse(GetValueNext(parser, "ID"));
+            uint id = uint.Parse(GetValueNext(parser, "ID"), CultureInfo.InvariantCulture);
 
             string fgText = GetValueNext(parser, "Foreground");
             string bgText = GetValueNext(parser, "Background");
@@ -99,8 +100,8 @@ namespace CopperBend.Persist
             var being = new Being(fg, bg, glyph, id);
 
             being.Name = GetValueNext(parser, "Name");
-            being.Awareness = int.Parse(GetValueNext(parser, "Awareness"));
-            being.Health = int.Parse(GetValueNext(parser, "Health"));
+            being.Awareness = int.Parse(GetValueNext(parser, "Awareness"), CultureInfo.InvariantCulture);
+            being.Health = int.Parse(GetValueNext(parser, "Health"), CultureInfo.InvariantCulture);
             being.Position = Point_FromString(GetValueNext(parser, "Position"));
             return being;
         }

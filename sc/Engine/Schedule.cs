@@ -10,13 +10,13 @@ namespace CopperBend.Engine
     public class Schedule : ISchedule
     {
         private readonly ILog log;
-        private readonly SortedDictionary<int, List<ScheduleEntry>> TickEntries;
+        private readonly SortedDictionary<int, List<ScheduleEntry>> tickEntries;
         public int CurrentTick { get; private set; }
 
         public Schedule(ILog logger)
         {
             log = logger;
-            TickEntries = new SortedDictionary<int, List<ScheduleEntry>>();
+            tickEntries = new SortedDictionary<int, List<ScheduleEntry>>();
             CurrentTick = 0;
         }
 
@@ -24,17 +24,17 @@ namespace CopperBend.Engine
         public ScheduleEntry GetNextAction()
         {
             log.DebugFormat("Schedule.GetNextAction @ tick {0}", CurrentTick);
-            if (TickEntries.Count() == 0)
+            if (tickEntries.Count == 0)
                 throw new Exception("The Schedule should never empty out");
 
-            var busyTick = TickEntries.First();
-            while (busyTick.Value.Count() == 0)
+            var busyTick = tickEntries.First();
+            while (busyTick.Value.Count == 0)
             {
-                TickEntries.Remove(busyTick.Key);
+                tickEntries.Remove(busyTick.Key);
                 //log.Debug($"Removed empty tick {busyTick.Key} from the schedule");
-                if (TickEntries.Count() == 0)
+                if (tickEntries.Count == 0)
                     throw new Exception("The Schedule should never empty out");
-                busyTick = TickEntries.First();
+                busyTick = tickEntries.First();
             }
             CurrentTick = busyTick.Key;
 
@@ -61,25 +61,25 @@ namespace CopperBend.Engine
             Guard.Against(entry.Action == ScheduleAction.Unset);
 
             int actionTick = CurrentTick + entry.Offset;
-            if (!TickEntries.ContainsKey(actionTick))
+            if (!tickEntries.ContainsKey(actionTick))
             {
-                TickEntries.Add(actionTick, new List<ScheduleEntry>());
+                tickEntries.Add(actionTick, new List<ScheduleEntry>());
             }
-            TickEntries[actionTick].Add(entry);
+            tickEntries[actionTick].Add(entry);
         }
 
         public void RemoveAgent(IScheduleAgent agent)
         {
-            foreach (var key in TickEntries.Keys)
+            foreach (var key in tickEntries.Keys)
             {
-                var entries = TickEntries[key];
+                var entries = tickEntries[key];
                 entries.RemoveAll(e => e.Agent == agent);
             }
         }
 
         public void Clear()
         {
-            TickEntries.Clear();
+            tickEntries.Clear();
             CurrentTick = 0;
         }
     }

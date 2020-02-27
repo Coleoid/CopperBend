@@ -6,81 +6,57 @@ using GoRogue;
 
 namespace CopperBend.Engine
 {
-    public interface IMessageLogWindow
-    {
-        void Draw(TimeSpan drawTime);
-        void Update(TimeSpan time);
-
-        /// <summary> add a complete line to the messages </summary>
-        void WriteLine(string message);
-
-        /// <summary> add an unfinished line to the messages </summary>
-        void Prompt(string message);
-
-        //void Show();
-        //void Hide();
-        //void Center();
-        //void Print(int x, int y, string text);
-        //void Print(int x, int y, string text, Color foreground);
-        //void Print(int x, int y, string text, Color foreground, Color background);
-        //void Print(int x, int y, string text, Color foreground, Color background, SpriteEffects mirror);
-        //void Print(int x, int y, string text, SpriteEffects mirror);
-        //void Print(int x, int y, string text, Cell appearance, ICellEffect effect);
-        //int Width { get; }
-        //int Height { get; }
-        //Cell[] Cells { get; }
-    }
-
     public class MessageLogWindow : Window, IMessageLogWindow
     {
         //max number of lines to store in message log
-        private static readonly int _maxLines = 100;
-        private readonly List<string> _lines;
+        private const int MaxLines = 100;
+        private const int WindowBorderThickness = 2;
 
+        private readonly List<string> lines;
 
-        private ScrollingConsole _messageConsole;
-        private SadConsole.Controls.ScrollBar _messageScrollBar;
-        private int _scrollBarCurrentPosition;
+        private readonly ScrollingConsole messageConsole;
+        private readonly SadConsole.Controls.ScrollBar messageScrollBar;
+        private int scrollBarCurrentPosition;
 
         // account for the thickness of the window border to prevent UI element spillover
-        private readonly int _windowBorderThickness = 2;
 
-        public MessageLogWindow(int width, int height, string title) : base(width, height)
+        public MessageLogWindow(int width, int height, string title)
+            : base(width, height)
         {
             DefaultBackground = Color.DarkOliveGreen;
             // Ensure that the window background is the correct colour
             //Theme.WindowTheme.FillStyle.Background = DefaultBackground;
             //Theme.WindowTheme.BorderStyle.Background = Color.DarkOliveGreen;//the goggles
-            _lines = new List<string>();
+            lines = new List<string>();
             CanDrag = true;
             Title = title.Align(HorizontalAlignment.Center, Width);
 
             // add the message console, reposition, enable the viewport, and add it to the window
-            _messageConsole = new ScrollingConsole(width - _windowBorderThickness, _maxLines); //0.1: change msgs to rect. font
-            _messageConsole.Position = new Coord(1, 1);
-            _messageConsole.ViewPort = new Rectangle(0, 0, width - 1, height - _windowBorderThickness);
-            _messageConsole.DefaultBackground = Color.Black;
-            _messageConsole.Font = Global.FontDefault.Master.GetFont(Font.FontSizes.One);
+            messageConsole = new ScrollingConsole(width - WindowBorderThickness, MaxLines); //0.1: change msgs to rect. font
+            messageConsole.Position = new Coord(1, 1);
+            messageConsole.ViewPort = new Rectangle(0, 0, width - 1, height - WindowBorderThickness);
+            messageConsole.DefaultBackground = Color.Black;
+            messageConsole.Font = Global.FontDefault.Master.GetFont(Font.FontSizes.One);
 
             // create a scrollbar and attach it to an event handler, then add it to the Window
-            _messageScrollBar = new SadConsole.Controls.ScrollBar(Orientation.Vertical, height - _windowBorderThickness)
+            messageScrollBar = new SadConsole.Controls.ScrollBar(Orientation.Vertical, height - WindowBorderThickness)
             {
-                Position = new Coord(_messageConsole.Width + 1, _messageConsole.Position.X),
+                Position = new Coord(messageConsole.Width + 1, messageConsole.Position.X),
                 IsEnabled = false,
             };
-            _messageScrollBar.ValueChanged += MessageScrollBar_ValueChanged;
-            Add(_messageScrollBar);
+            messageScrollBar.ValueChanged += MessageScrollBar_ValueChanged;
+            Add(messageScrollBar);
 
             // enable mouse input
             UseMouse = true;
 
             // Add the child consoles to the window
-            Children.Add(_messageConsole);
+            Children.Add(messageConsole);
         }
 
-        void MessageScrollBar_ValueChanged(object sender, EventArgs e)
+        private void MessageScrollBar_ValueChanged(object sender, EventArgs e)
         {
-            _messageConsole.ViewPort = new Rectangle(0, _messageScrollBar.Value + _windowBorderThickness, _messageConsole.Width, _messageConsole.ViewPort.Height);
+            messageConsole.ViewPort = new Rectangle(0, messageScrollBar.Value + WindowBorderThickness, messageConsole.Width, messageConsole.ViewPort.Height);
         }
 
         public override void Draw(TimeSpan drawTime)
@@ -93,25 +69,25 @@ namespace CopperBend.Engine
             base.Update(time);
 
             // Ensure that the scrollbar tracks the current position of the _messageConsole.
-            if (_messageConsole.TimesShiftedUp != 0 | _messageConsole.Cursor.Position.Y >= _messageConsole.ViewPort.Height + _scrollBarCurrentPosition)
+            if (messageConsole.TimesShiftedUp != 0 | messageConsole.Cursor.Position.Y >= messageConsole.ViewPort.Height + scrollBarCurrentPosition)
             {
                 //enable the scrollbar once the messagelog has filled up with enough text to warrant scrolling
-                _messageScrollBar.IsEnabled = true;
+                messageScrollBar.IsEnabled = true;
 
                 // Make sure we've never scrolled the entire size of the buffer
-                if (_scrollBarCurrentPosition < _messageConsole.Height - _messageConsole.ViewPort.Height)
+                if (scrollBarCurrentPosition < messageConsole.Height - messageConsole.ViewPort.Height)
                     // Record how much we've scrolled to enable how far back the bar can see
-                    _scrollBarCurrentPosition += _messageConsole.TimesShiftedUp != 0 ? _messageConsole.TimesShiftedUp : 1;
+                    scrollBarCurrentPosition += messageConsole.TimesShiftedUp != 0 ? messageConsole.TimesShiftedUp : 1;
 
                 // Determines the scrollbar's max vertical position
                 // Thanks @Kaev for simplifying this math!
-                _messageScrollBar.Maximum = _scrollBarCurrentPosition - _windowBorderThickness;
+                messageScrollBar.Maximum = scrollBarCurrentPosition - WindowBorderThickness;
 
                 // This will follow the cursor since we move the render area in the event.
-                _messageScrollBar.Value = _scrollBarCurrentPosition;
+                messageScrollBar.Value = scrollBarCurrentPosition;
 
                 // Reset the shift amount.
-                _messageConsole.TimesShiftedUp = 0;
+                messageConsole.TimesShiftedUp = 0;
             }
         }
 
@@ -120,10 +96,10 @@ namespace CopperBend.Engine
         /// <summary> add a complete line to the messages </summary>
         public void WriteLine(string message)
         {
-            add_message_to_list(message);
-            Coord cursor = (cursor_x, _lines.Count);
-            _messageConsole.Cursor.Position = cursor;
-            _messageConsole.Cursor.Print(message + "\n");
+            Add_message_to_list(message);
+            Coord cursor = (cursor_x, lines.Count);
+            messageConsole.Cursor.Position = cursor;
+            messageConsole.Cursor.Print(message + "\n");
             cursor_x = 1;
             isNewLine = true;
         }
@@ -131,83 +107,86 @@ namespace CopperBend.Engine
         /// <summary> add an unfinished line to the messages </summary>
         public void Prompt(string message)
         {
-            add_message_to_list(message);
-            Coord cursor = (cursor_x, _lines.Count);
-            _messageConsole.Cursor.Position = cursor;
-            _messageConsole.Cursor.Print(message);
+            Add_message_to_list(message);
+            Coord cursor = (cursor_x, lines.Count);
+            messageConsole.Cursor.Position = cursor;
+            messageConsole.Cursor.Print(message);
             cursor_x += message.Length;
             isNewLine = false;
         }
 
-        private void add_message_to_list(string message)
+        private void Add_message_to_list(string message)
         {
             if (isNewLine)
             {
-
-                _lines.Add(message);
+                lines.Add(message);
             }
             else
-                _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  // macro-yecch-tacular.
+            {
+                lines[lines.Count - 1] = lines[lines.Count - 1] + message;  // macro-yecch-tacular.
+            }
 
-            if (_lines.Count > _maxLines) { _lines.RemoveRange(0, _lines.Count - _maxLines); }
+            if (lines.Count > MaxLines) { lines.RemoveRange(0, lines.Count - MaxLines); }
         }
     }
 
 
     public class NarrativeWindow : Window //, IMessageLogWindow
     {
+        private const int WindowBorderThickness = 2;
+
         ////max number of lines to store in message log
-        private static int _maxLines;
-        private readonly List<string> _lines;
+        private static int maxLines;
+        private readonly List<string> lines;
 
 
-        private ScrollingConsole _messageConsole;
-        private SadConsole.Controls.ScrollBar _messageScrollBar;
-        private int _scrollBarCurrentPosition;
+        private readonly ScrollingConsole messageConsole;
+        private readonly SadConsole.Controls.ScrollBar messageScrollBar;
+        private int scrollBarCurrentPosition;
 
         // account for the thickness of the window border to prevent UI element spillover
-        private readonly int _windowBorderThickness = 2;
 
-        public NarrativeWindow(int width, int height, string title) : base(width, height)
+        public NarrativeWindow(int width, int height, string title)
+            : base(width, height)
         {
-            _maxLines = height;
+            maxLines = height;
             DefaultBackground = Color.DarkOliveGreen;
             // Ensure that the window background is the correct colour
             //Theme.WindowTheme.FillStyle.Background = DefaultBackground;
             //Theme.WindowTheme.BorderStyle.Background = Color.DarkOliveGreen;//the goggles
-            _lines = new List<string>();
+            lines = new List<string>();
             CanDrag = true;
             Title = title.Align(HorizontalAlignment.Center, Width);
 
             // add the message console, reposition, enable the viewport, and add it to the window
-            _messageConsole = new ScrollingConsole(width - _windowBorderThickness, _maxLines)
+            messageConsole = new ScrollingConsole(width - WindowBorderThickness, maxLines)
             {
                 Position = new Coord(1, 1),
-                ViewPort = new Rectangle(0, 0, width - 1, height - _windowBorderThickness),
+                ViewPort = new Rectangle(0, 0, width - 1, height - WindowBorderThickness),
                 DefaultBackground = Color.Black,
-                Font = Global.FontDefault.Master.GetFont(Font.FontSizes.One)
+                Font = Global.FontDefault.Master.GetFont(Font.FontSizes.One),
                 //Font = ?? //0.1: change msgs to rect. font
             };
 
             // create a scrollbar and attach it to an event handler, then add it to the Window
-            _messageScrollBar = new SadConsole.Controls.ScrollBar(Orientation.Vertical, height - _windowBorderThickness)
+            messageScrollBar = new SadConsole.Controls.ScrollBar(Orientation.Vertical, height - WindowBorderThickness)
             {
-                Position = new Coord(_messageConsole.Width + 1, _messageConsole.Position.X),
+                Position = new Coord(messageConsole.Width + 1, messageConsole.Position.X),
                 IsEnabled = false,
             };
-            _messageScrollBar.ValueChanged += MessageScrollBar_ValueChanged;
-            Add(_messageScrollBar);
+            messageScrollBar.ValueChanged += MessageScrollBar_ValueChanged;
+            Add(messageScrollBar);
 
             // enable mouse input
             UseMouse = true;
 
             // Add the child consoles to the window
-            Children.Add(_messageConsole);
+            Children.Add(messageConsole);
         }
 
-        void MessageScrollBar_ValueChanged(object sender, EventArgs e)
+        private void MessageScrollBar_ValueChanged(object sender, EventArgs e)
         {
-            _messageConsole.ViewPort = new Rectangle(0, _messageScrollBar.Value + _windowBorderThickness, _messageConsole.Width, _messageConsole.ViewPort.Height);
+            messageConsole.ViewPort = new Rectangle(0, messageScrollBar.Value + WindowBorderThickness, messageConsole.Width, messageConsole.ViewPort.Height);
         }
 
         public override void Draw(TimeSpan drawTime)
@@ -220,25 +199,25 @@ namespace CopperBend.Engine
             base.Update(time);
 
             // Ensure that the scrollbar tracks the current position of the _messageConsole.
-            if (_messageConsole.TimesShiftedUp != 0 | _messageConsole.Cursor.Position.Y >= _messageConsole.ViewPort.Height + _scrollBarCurrentPosition)
+            if (messageConsole.TimesShiftedUp != 0 | messageConsole.Cursor.Position.Y >= messageConsole.ViewPort.Height + scrollBarCurrentPosition)
             {
                 //enable the scrollbar once the messagelog has filled up with enough text to warrant scrolling
-                _messageScrollBar.IsEnabled = true;
+                messageScrollBar.IsEnabled = true;
 
                 // Make sure we've never scrolled the entire size of the buffer
-                if (_scrollBarCurrentPosition < _messageConsole.Height - _messageConsole.ViewPort.Height)
+                if (scrollBarCurrentPosition < messageConsole.Height - messageConsole.ViewPort.Height)
                     // Record how much we've scrolled to enable how far back the bar can see
-                    _scrollBarCurrentPosition += _messageConsole.TimesShiftedUp != 0 ? _messageConsole.TimesShiftedUp : 1;
+                    scrollBarCurrentPosition += messageConsole.TimesShiftedUp != 0 ? messageConsole.TimesShiftedUp : 1;
 
                 // Determines the scrollbar's max vertical position
                 // Thanks @Kaev for simplifying this math!
-                _messageScrollBar.Maximum = _scrollBarCurrentPosition - _windowBorderThickness;
+                messageScrollBar.Maximum = scrollBarCurrentPosition - WindowBorderThickness;
 
                 // This will follow the cursor since we move the render area in the event.
-                _messageScrollBar.Value = _scrollBarCurrentPosition;
+                messageScrollBar.Value = scrollBarCurrentPosition;
 
                 // Reset the shift amount.
-                _messageConsole.TimesShiftedUp = 0;
+                messageConsole.TimesShiftedUp = 0;
             }
         }
 
@@ -247,10 +226,10 @@ namespace CopperBend.Engine
         /// <summary> add a complete line to the messages </summary>
         public void WriteLine(string message)
         {
-            add_message_to_list(message);
-            Coord cursor = (cursor_x, _lines.Count);
-            _messageConsole.Cursor.Position = cursor;
-            _messageConsole.Cursor.Print(message + "\n");
+            Add_message_to_list(message);
+            Coord cursor = (cursor_x, lines.Count);
+            messageConsole.Cursor.Position = cursor;
+            messageConsole.Cursor.Print(message + "\n");
             cursor_x = 1;
             isNewLine = true;
         }
@@ -258,25 +237,26 @@ namespace CopperBend.Engine
         /// <summary> add an unfinished line to the messages </summary>
         public void Prompt(string message)
         {
-            add_message_to_list(message);
-            Coord cursor = (cursor_x, _lines.Count);
-            _messageConsole.Cursor.Position = cursor;
-            _messageConsole.Cursor.Print(message);
+            Add_message_to_list(message);
+            Coord cursor = (cursor_x, lines.Count);
+            messageConsole.Cursor.Position = cursor;
+            messageConsole.Cursor.Print(message);
             cursor_x += message.Length;
             isNewLine = false;
         }
 
-        private void add_message_to_list(string message)
+        private void Add_message_to_list(string message)
         {
             if (isNewLine)
             {
-
-                _lines.Add(message);
+                lines.Add(message);
             }
             else
-                _lines[_lines.Count - 1] = _lines[_lines.Count - 1] + message;  // macro-yecch-tacular.
+            {
+                lines[lines.Count - 1] = lines[lines.Count - 1] + message;  // macro-yecch-tacular.
+            }
 
-            if (_lines.Count > _maxLines) { _lines.RemoveRange(0, _lines.Count - _maxLines); }
+            if (lines.Count > maxLines) { lines.RemoveRange(0, lines.Count - maxLines); }
         }
     }
 }

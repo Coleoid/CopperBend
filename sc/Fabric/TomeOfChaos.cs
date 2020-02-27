@@ -19,18 +19,20 @@ namespace CopperBend.Fabric
         public string TopSeed { get; private set; }
         public int TopSeedInt { get; private set; }
         public AbstractGenerator TopGenerator { get; set; }
-        
+
         public AbstractGenerator LearnableGenerator { get; set; }
         public AbstractGenerator MapTopGenerator { get; set; }
-        public Dictionary<Maps, AbstractGenerator> MapGenerators { get; set; }
+        public Dictionary<Maps, AbstractGenerator> MapGenerators { get; }
 
 
         public TomeOfChaos(string topSeed)
         {
             TopSeed = topSeed;
-            using (MD5 md5Hasher = MD5.Create())
+            MapGenerators = new Dictionary<Maps, AbstractGenerator>();
+
+            using (SHA256 shaHasher = SHA256.Create())
             {
-                var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(TopSeed));
+                var hashed = shaHasher.ComputeHash(Encoding.UTF8.GetBytes(TopSeed));
                 TopSeedInt = BitConverter.ToInt32(hashed, 0);
             }
             TopGenerator = new NR3Generator(TopSeedInt);

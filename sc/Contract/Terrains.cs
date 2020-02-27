@@ -1,6 +1,6 @@
 ﻿namespace CopperBend.Contract
 {
-    public class Terrains
+    public static class Terrains
     {
         public static string DoorClosed { get; } = "closed door";
         public static string DoorOpen { get; } = "open door";

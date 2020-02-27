@@ -87,7 +87,6 @@ namespace CopperBend.Engine.Tests
                 CanPlant = false,
             };
 
-            SpaceMap.TerrainTypes = new Dictionary<string, TerrainType>();
             SpaceMap.TerrainTypes[ttFloor.Name] = ttFloor;
             SpaceMap.TerrainTypes[ttWall.Name] = ttWall;
             SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;
@@ -116,8 +115,10 @@ namespace CopperBend.Engine.Tests
             __describer = Substitute.For<IDescriber>();
             __messageOutput = Substitute.For<IMessageLogWindow>();
 
-            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput, __log);
-            _dispatcher.ClearPendingInput = () => { };
+            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput, __log)
+            {
+                ClearPendingInput = () => { }
+            };
 
             Being.EntityFactory = Substitute.For<IEntityFactory>();
         }

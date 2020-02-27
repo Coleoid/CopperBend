@@ -7,7 +7,7 @@ namespace CopperBend.Model
 {
     public class Item : IItem
     {
-        public static IDGenerator IDGenerator;
+        public static IDGenerator IDGenerator { get; set; }
         public string ItemType { get; set; } = "Item";
         public uint ID { get; private set; }
         public ComponentContainer Aspects { get; set; }

@@ -13,7 +13,7 @@ namespace CopperBend.Contract
         Leaf,
         Flower,
         Fruit,
-        Seed
+        Seed,
     }
 
     [Flags]
@@ -27,6 +27,6 @@ namespace CopperBend.Contract
         Flavor = 16,
         Beauty = 32,
         Magic = 64,
-        Symbolism = 128
+        Symbolism = 128,
     }
 }

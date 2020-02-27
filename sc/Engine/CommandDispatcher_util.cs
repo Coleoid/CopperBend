@@ -6,6 +6,7 @@ using CopperBend.Contract;
 
 namespace CopperBend.Engine
 {
+    /// <summary> Holds utility behaviors to reduce clutter in logic file. </summary>
     public partial class CommandDispatcher : IControlPanel
     {
         private const int lowercase_a = 97;
@@ -118,7 +119,7 @@ namespace CopperBend.Engine
             SpaceMap.Till(space);
         }
 
-        public Dictionary<Exp, int> XP { get; set; } = new Dictionary<Exp, int>();
+        public Dictionary<Exp, int> XP { get; } = new Dictionary<Exp, int>();
         public void AddExperience(uint plantID, Exp experience)
         {
             if (!XP.ContainsKey(experience))

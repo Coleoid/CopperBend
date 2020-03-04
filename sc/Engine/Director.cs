@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using CopperBend.Contract;
-using SadConsole.Entities;
+using CopperBend.Model;
 
 namespace CopperBend.Engine
 {
@@ -20,46 +19,65 @@ namespace CopperBend.Engine
         // pull off script command sources
         // maybe send "refresh plan" to existing, reactivated CSes
 
-        public static IEntityFactory EntityFactory { get; set; }
-        public Dictionary<string, IEntity> Cast { get; }
+        public Dictionary<string, IBeing> Cast { get; }
 
         public Director()
         {
-            Cast = new Dictionary<string, IEntity>();
+            Cast = new Dictionary<string, IBeing>();
         }
 
         public void RunScript(ScriptTree scriptTree)
         {
-            CastEntities(scriptTree.EntitiesWanted);
+            CastBeings(scriptTree.BeingsWanted);
+
+            SetStage(scriptTree.Location);
         }
 
-        public void CastEntities(List<string> entitiesWanted)
+        public void CastBeings(List<string> beingsWanted)
         {
-            foreach (var entityWanted in entitiesWanted)
+            foreach (var beingWanted in beingsWanted)
             {
-                Cast[entityWanted] = FindEntity(entityWanted);
+                Cast[beingWanted] = FindBeing(beingWanted) ?? BuildNewBeing(beingWanted);
             }
         }
 
-        //  may belong elsewhere soon
-        public IEntity FindEntity(string entityWanted)
+        public void SetStage(string location)
         {
-            IEntity entity = null;
 
+        }
+
+        //  may belong elsewhere soon
+        public IBeing FindBeing(string entityWanted)
+        {
+            IBeing being = null;
+
+            // Phase 2: ?
+
+            return being;
+        }
+
+        //  definitely belongs elsewhere soon
+        public Being BuildNewBeing(string entityWanted)
+        {
             // build a rat for test one
-            // dwuh? entity = EntityFactory.GetSadCon()
+            Being being = new Being(Color.Purple, Color.Black, 'r')
+            {
+                Name = "rat",  // I only wanted to see you dancing in the purple rat
+            };
 
-            return entity;
+            return being;
         }
     }
 
 
     public class ScriptTree
     {
-        public List<string> EntitiesWanted { get; internal set; }
+        public List<string> BeingsWanted { get; internal set; }
+        public string Location { get; internal set; }
+
         public ScriptTree()
         {
-            EntitiesWanted = new List<string>();
+            BeingsWanted = new List<string>();
         }
     }
 }

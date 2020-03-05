@@ -88,9 +88,9 @@ namespace CopperBend.Engine
         public bool RemoveFromAppropriateMap(IDelible mote)
         {
             // remove from whichever map
-            if (mote is IAreaBlight blight)
+            if (mote is IAreaRot rot)
             {
-                BlightMap.Remove(blight);
+                RotMap.Remove(rot);
                 return true;
             }
 

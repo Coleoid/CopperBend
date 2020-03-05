@@ -25,8 +25,8 @@ namespace CopperBend.Fabric.Tests
             int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
             int next_tf_2 = tome_2.MapRndNext(Maps.TackerFarm);
 
-            int next_tb_1 = tome_1.MapRndNext(Maps.TownBastion);
-            int next_tb_2 = tome_2.MapRndNext(Maps.TownBastion);
+            int next_tb_1 = tome_1.MapRndNext(Maps.TownBarricade);
+            int next_tb_2 = tome_2.MapRndNext(Maps.TownBarricade);
 
             Assert.That(next_tb_1, Is.Not.EqualTo(next_tf_1));
             Assert.That(next_tb_2, Is.Not.EqualTo(next_tf_2));
@@ -40,9 +40,9 @@ namespace CopperBend.Fabric.Tests
             var tome_2 = Engine.Engine.InitTome(topSeed);
 
             int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
-            int next_tb_1 = tome_1.MapRndNext(Maps.TownBastion);
+            int next_tb_1 = tome_1.MapRndNext(Maps.TownBarricade);
 
-            int next_tb_2 = tome_2.MapRndNext(Maps.TownBastion);
+            int next_tb_2 = tome_2.MapRndNext(Maps.TownBarricade);
             int next_tf_2 = tome_2.MapRndNext(Maps.TackerFarm);
 
             Assert.That(next_tb_1, Is.EqualTo(next_tb_2));

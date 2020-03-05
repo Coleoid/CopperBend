@@ -205,7 +205,7 @@ namespace CopperBend.Persist
                 SpaceMap = new SpaceMap(width, height),
                 BeingMap = new MultiSpatialMap<IBeing>(),
                 ItemMap = new ItemMap(),
-                BlightMap = new BlightMap(),
+                RotMap = new RotMap(),
             };
 
             for (int y = 0; y < height; y++)
@@ -229,7 +229,7 @@ namespace CopperBend.Persist
                 }
             }
 
-            foreach (var overlay in data.Blight ?? new List<BlightOverlayData>())
+            foreach (var overlay in data.Rot ?? new List<RotOverlayData>())
             {
                 var nums = Regex.Split(overlay.Location, ",");
                 int x_off = int.Parse(nums[0], CultureInfo.InvariantCulture);
@@ -246,7 +246,7 @@ namespace CopperBend.Persist
                         bool isD = '0' <= symbol && symbol <= '9';
                         int extent = isD ? symbol - '0' : 0;
                         if (extent > 0)
-                            map.BlightMap.Add(new AreaBlight { Health = extent }, (x + x_off, y + y_off));
+                            map.RotMap.Add(new AreaRot { Health = extent }, (x + x_off, y + y_off));
                     }
                 }
             }
@@ -412,7 +412,7 @@ terrain:
  - ',,,,,#,,,,,,,,,,,,,,,,,,,,wwww,,,,,,,,,,,,,,,#'  # 30
  - ',,,,,#########################################'
 
-blight:
+rot:
   - name: one
     location: 6,0
     terrain:
@@ -479,11 +479,11 @@ terrain:
         public string Name { get; set; }
         public Dictionary<string, string> Legend { get; } = new Dictionary<string, string>();
         public List<string> Terrain { get; } = new List<string>();
-        public List<BlightOverlayData> Blight { get; } = new List<BlightOverlayData>();
+        public List<RotOverlayData> Rot { get; } = new List<RotOverlayData>();
         public List<string> FirstSightMessage { get; } = new List<string>();
     }
 
-    public class BlightOverlayData
+    public class RotOverlayData
     {
         public string Name { get; set; }
         public string Location { get; set; }

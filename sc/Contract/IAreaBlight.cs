@@ -3,7 +3,7 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    public interface IAreaBlight : IHasID, IDelible, IAttacker, IDefender
+    public interface IAreaRot : IHasID, IDelible, IAttacker, IDefender
     {
     }
 }

@@ -18,7 +18,7 @@ namespace CopperBend.Engine
         protected ISpaceMap SpaceMap => GameState.Map.SpaceMap;
         private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
         private IItemMap ItemMap => GameState.Map.ItemMap;
-        private IBlightMap BlightMap => GameState.Map.BlightMap;
+        private IRotMap RotMap => GameState.Map.RotMap;
 
         private readonly IDescriber describer;
         private readonly IMessageLogWindow messageLog;
@@ -41,7 +41,7 @@ namespace CopperBend.Engine
             this.describer = describer;
             this.messageLog = messageLog;
             AttackSystem = new AttackSystem(this, logger);
-            //AttackSystem.BlightMap = gameState.Map.BlightMap;
+            //AttackSystem.RotMap = gameState.Map.RotMap;
 
             WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) this.messageLog.WriteLine(message); };
         }
@@ -134,7 +134,7 @@ namespace CopperBend.Engine
             IDefender target = BeingMap.GetItems(newPosition).FirstOrDefault();
 
             if (target == null)
-                target = BlightMap.GetItem(newPosition);
+                target = RotMap.GetItem(newPosition);
 
             if (target == null)
                 return Do_Move(being, newPosition);

@@ -4,9 +4,9 @@ using GoRogue;
 
 namespace CopperBend.Fabric
 {
-    public class BlightMap : SpatialMap<IAreaBlight>, IBlightMap
+    public class RotMap : SpatialMap<IAreaRot>, IRotMap
     {
-        public IEnumerable<IAreaBlight> GetNonNullItems(IEnumerable<Coord> coords)
+        public IEnumerable<IAreaRot> GetNonNullItems(IEnumerable<Coord> coords)
         {
             foreach (var coord in coords)
             {

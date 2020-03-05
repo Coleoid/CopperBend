@@ -6,9 +6,9 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Model
 {
-    public class AreaBlight : IHasID, IDelible, IAreaBlight
+    public class AreaRot : IHasID, IDelible, IAreaRot
     {
-        public AreaBlight(uint id = uint.MaxValue)
+        public AreaRot(uint id = uint.MaxValue)
         {
             ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
         }

@@ -126,26 +126,26 @@ namespace CopperBend.Engine
         {
             var newPosition = controls.CoordInDirection(being.Position, dir);
 
-            var targetBlight = gameState.Map.BlightMap.GetItem(newPosition);
-            if (targetBlight != null)
+            var targetRot = gameState.Map.RotMap.GetItem(newPosition);
+            if (targetRot != null)
             {
                 //0.1.STORY  improve impact of this landmark event
-                if (!gameState.Story.HasClearedBlight)
+                if (!gameState.Story.HasClearedRot)
                 {
-                    blightDirection = dir;
+                    rotDirection = dir;
                     controls.WriteLine("The filth covering the ground sets my teeth on edge.  I'm growling.");
-                    return NextStepIs(Direction_decide_to_Clear_Blight, "Am I going after this stuff bare-handed? ", being);
+                    return NextStepIs(Direction_decide_to_Clear_Rot, "Am I going after this stuff bare-handed? ", being);
                 }
             }
 
             return FinishedCommand(CmdAction.Direction, dir);
         }
 
-        private CmdDirection blightDirection;
-        public Command Direction_decide_to_Clear_Blight(AsciiKey press, IBeing being)
+        private CmdDirection rotDirection;
+        public Command Direction_decide_to_Clear_Rot(AsciiKey press, IBeing being)
         {
             //  Decision mechanic: hit 'y', or travel in a direction
-            // towards blight (in which case, the decision direction will
+            // towards rot (in which case, the decision direction will
             // be the attack direction, even if different from the original
             // direction).  Any other response cancels move/attack.
             bool affirm = press.Key == Keys.Y;
@@ -156,19 +156,19 @@ namespace CopperBend.Engine
                 if (dir != CmdDirection.None)
                 {
                     var dirCoord = controls.CoordInDirection(being.Position, dir);
-                    var dirBlight = gameState.Map.BlightMap.GetItem(dirCoord);
+                    var dirRot = gameState.Map.RotMap.GetItem(dirCoord);
 
-                    affirm = (dirBlight != null);
-                    if (affirm) blightDirection = dir;
+                    affirm = (dirRot != null);
+                    if (affirm) rotDirection = dir;
                 }
             }
 
             if (affirm)
             {
-                gameState.Story.HasClearedBlight = true;
+                gameState.Story.HasClearedRot = true;
                 WriteLine("Yes.  Now.");
                 log.Info("Decided to clear Rot.");
-                return FinishedCommand(CmdAction.Direction, blightDirection);
+                return FinishedCommand(CmdAction.Direction, rotDirection);
             }
             else
             {

@@ -17,18 +17,18 @@ namespace CopperBend.Engine.Tests
         public void Physical_impact_on_Rot_causes_splashback_damage(string damageType, bool willSplashBack)
         {
             // Anyone directly physically assaulting rot is 
-            // hit with immediate vital.blight.toxin damage.
+            // hit with immediate vital.rot.toxin damage.
             var asys = new AttackSystem(null, __log);
 
             var flameRat = new Being(Color.Red, Color.Black, 'r');
             var am = new AttackMethod(damageType, "1d3 +2");
-            var blight = new AreaBlight();
+            var rot = new AreaRot();
             Attack attack = new Attack
             {
                 Attacker = flameRat,
                 AttackMethod = am,
-                Defender = blight,
-                DefenseMethod = blight.GetDefenseMethod(am)
+                Defender = rot,
+                DefenseMethod = rot.GetDefenseMethod(am)
             };
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
@@ -42,9 +42,9 @@ namespace CopperBend.Engine.Tests
             var newAttack = asys.AttackQueue.Dequeue();
             var newAM = newAttack.AttackMethod;
             var newAE = newAM.AttackEffects[0];
-            Assert.That(newAE.Type, Is.EqualTo("vital.blight.toxin"));
+            Assert.That(newAE.Type, Is.EqualTo("vital.rot.toxin"));
             Assert.That(newAttack.Defender, Is.EqualTo(flameRat));
-            Assert.That(newAttack.Attacker, Is.EqualTo(blight));
+            Assert.That(newAttack.Attacker, Is.EqualTo(rot));
         }
 
         [Test]
@@ -54,11 +54,11 @@ namespace CopperBend.Engine.Tests
 
             var flameRat = new Being(Color.Red, Color.Black, 'r');
             var am = new AttackMethod("physical.impact.point", "1d3 +2");
-            var rot = new AreaBlight();
+            var rot = new AreaRot();
 
             flameRat.Position = new Point(3, 3);
             //rot.Position = new Point(8, 8);  //  Not a thing.
-            var rotmap = new BlightMap();
+            var rotmap = new RotMap();
             rotmap.Add(rot, new GoRogue.Coord(8, 8));
 
             Attack attack = new Attack

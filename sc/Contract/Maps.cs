@@ -4,13 +4,13 @@
     {
         Unset = 0,
         TackerFarm,
-        TownBastion,
+        TownBarricade,
     }
 
     public enum Messages
     {
         Unset = 0,
-        BarehandBlightDamage,
-        BlightDamageSpreads,
+        BarehandRotDamage,
+        RotDamageSpreads,
     }
 }

@@ -3,13 +3,13 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    public interface IBlightMap : ISpatialMap<IAreaBlight>, IReadOnlySpatialMap<IAreaBlight>
+    public interface IRotMap : ISpatialMap<IAreaRot>, IReadOnlySpatialMap<IAreaRot>
     {
         // Some parts of AdvancedSpatialMap aren't in ISaptialMap, so I patch them in
-        IAreaBlight GetItem(Coord position);
-        IAreaBlight GetItem(int x, int y);
+        IAreaRot GetItem(Coord position);
+        IAreaRot GetItem(int x, int y);
 
         // This one Just Makes Sense
-        IEnumerable<IAreaBlight> GetNonNullItems(IEnumerable<Coord> coords);
+        IEnumerable<IAreaRot> GetNonNullItems(IEnumerable<Coord> coords);
     }
 }

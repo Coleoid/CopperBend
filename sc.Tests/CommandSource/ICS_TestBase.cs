@@ -87,7 +87,7 @@ namespace CopperBend.Engine.Tests
                 Map = new CompoundMap
                 {
                     BeingMap = new GoRogue.MultiSpatialMap<IBeing>(),
-                    BlightMap = new BlightMap(),
+                    RotMap = new RotMap(),
                     SpaceMap = CreateSmallTestMap(),
                     ItemMap = new ItemMap(),
                 },

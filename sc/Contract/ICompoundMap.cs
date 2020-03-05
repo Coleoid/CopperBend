@@ -16,7 +16,7 @@ namespace CopperBend.Contract
         ISpaceMap SpaceMap { get; }
         MultiSpatialMap<IBeing> BeingMap { get; }
         IItemMap ItemMap { get; }
-        IBlightMap BlightMap { get; }
+        IRotMap RotMap { get; }
 
         List<LocatedTrigger> LocatedTriggers { get; }
 
@@ -29,12 +29,12 @@ namespace CopperBend.Contract
 
         bool CanSeeThrough(Coord position);
         bool CanWalkThrough(Coord position);
-        /// <summary> Can Plant considering terrain, blight, existing plants, and ownership. </summary>
+        /// <summary> Can Plant considering terrain, rot, existing plants, and ownership. </summary>
         bool CanPlant(Coord position);
 
         IMapView<bool> GetView_CanSeeThrough();
         IMapView<bool> GetView_CanWalkThrough();
-        IMapView<int> GetView_BlightStrength();
+        IMapView<int> GetView_RotStrength();
 
         EffectsManager EffectsManager { get; }
 
@@ -77,7 +77,7 @@ namespace CopperBend.Contract
     //    }
     //}
 
-    //public class BlightRegion : Region
+    //public class RotRegion : Region
     //{
 
     //    public int Strength { get; set; }

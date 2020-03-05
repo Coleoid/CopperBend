@@ -108,7 +108,7 @@ namespace CopperBend.Fabric
         public bool CanSeeThrough => Terrain.CanSeeThrough;
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
-        //0.2.MAP  check for modifiers (permission, hostile aura, blight, ...)
+        //0.2.MAP  check for modifiers (permission, hostile aura, rot, ...)
         public bool CanPlant => Terrain.CanPlant && IsTilled && !IsSown;
         public bool CanTill => Terrain.CanPlant && !IsTilled;
 

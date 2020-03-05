@@ -68,7 +68,7 @@ Apply post-attack effects
 
     Convert Destroyed list
         Remove from schedule
-        Remove from being, blight, or item map
+        Remove from being, rot, or item map
         Drop items (roll for loot?)
         Check story line / quest triggers
 
@@ -136,26 +136,26 @@ Apply post-attack effects
         /// </summary>
         public void CheckForSpecials(Attack attack)
         {
-            //  Blight splashback
-            if (attack.Defender is AreaBlight blight &&
+            //  Rot splashback
+            if (attack.Defender is AreaRot rot &&
                 attack.AttackMethod.AttackEffects.Any(ae =>
                 ae.Type.StartsWith("physical", StringComparison.InvariantCulture))
             )
             {
-                log.Info("Blight strikeback");
+                log.Info("Rot strikeback");
                 var newDefender = (IDefender)attack.Attacker;
-                var newAM = new AttackMethod("vital.blight.toxin", "3d3");
+                var newAM = new AttackMethod("vital.rot.toxin", "3d3");
                 AttackQueue.Enqueue(new Attack
                 {
-                    Attacker = blight,
+                    Attacker = rot,
                     Defender = newDefender,
                     AttackMethod = newAM,
                     DefenseMethod = newDefender.GetDefenseMethod(newAM),
                 });
             }
 
-            //  Nature strikes the blight through our hero
-            if (attack.Defender is AreaBlight areaBlight &&
+            //  Nature strikes the rot through our hero
+            if (attack.Defender is AreaRot areaRot &&
                 attack.Attacker is Being being &&
                 being.IsPlayer &&
                 attack.AttackMethod.AttackEffects.Any(ae =>
@@ -167,19 +167,19 @@ Apply post-attack effects
                 AttackQueue.Enqueue(new Attack
                 {
                     Attacker = being,
-                    Defender = areaBlight,
+                    Defender = areaRot,
                     AttackMethod = newAM,
-                    DefenseMethod = areaBlight.GetDefenseMethod(newAM),
+                    DefenseMethod = areaRot.GetDefenseMethod(newAM),
                 });
 
-                foreach (IAreaBlight neighborBlight in NeighborBlightsOf(areaBlight))
+                foreach (IAreaRot neighborRot in NeighborRotsOf(areaRot))
                 {
                     AttackQueue.Enqueue(new Attack
                     {
                         Attacker = being,
-                        Defender = neighborBlight,
+                        Defender = neighborRot,
                         AttackMethod = newAM,
-                        DefenseMethod = neighborBlight.GetDefenseMethod(newAM),
+                        DefenseMethod = neighborRot.GetDefenseMethod(newAM),
                     });
                 }
             }
@@ -196,10 +196,10 @@ Apply post-attack effects
             //  Time to think some more.
         }
 
-        public IEnumerable<IAreaBlight> NeighborBlightsOf(IAreaBlight areaBlight)
+        public IEnumerable<IAreaRot> NeighborRotsOf(IAreaRot areaRot)
         {
-            var coord = BlightMap.GetPosition(areaBlight);
-            return BlightMap.GetNonNullItems(coord.Neighbors());
+            var coord = RotMap.GetPosition(areaRot);
+            return RotMap.GetNonNullItems(coord.Neighbors());
         }
 
         public void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages)
@@ -255,16 +255,16 @@ Apply post-attack effects
 
 
         //TODO: Destruction/kill messages... somewhere
-        // The blight burns to a crisp
-        // ( My hands | The green sparks ) destroy the blight
-        // ( The flames destroy | The arrow destroys ) the blight
-        // ( My hands tear | The arrow tears ) the blight apart
+        // The rot burns to a crisp
+        // ( My hands | The green sparks ) destroy the rot
+        // ( The flames destroy | The arrow destroys ) the rot
+        // ( My hands tear | The arrow tears ) the rot apart
 
         private void MessageDamage(IDelible target, IEnumerable<AttackDamage> damages)
         {
             if (target.Health > 0)
             {
-                //Message(attacker, Messages.BarehandBlightDamage);
+                //Message(attacker, Messages.BarehandRotDamage);
             }
             else
             {
@@ -342,7 +342,7 @@ Apply post-attack effects
         #region Messages
 
         private Dictionary<Messages, bool> SeenMessages { get; } = new Dictionary<Messages, bool>();
-        public IBlightMap BlightMap { get; set; }
+        public IRotMap RotMap { get; set; }
 
         /// <summary> First time running across this message in this game run? </summary>
         public bool FirstTimeFor(Messages key)
@@ -365,7 +365,7 @@ Apply post-attack effects
 
             switch (messageKey)
             {
-            case Messages.BarehandBlightDamage:
+            case Messages.BarehandRotDamage:
                 if (FirstTimeFor(messageKey))
                 {
                     //0.2  promote to alert
@@ -379,7 +379,7 @@ Apply post-attack effects
 
                 break;
 
-            case Messages.BlightDamageSpreads:
+            case Messages.RotDamageSpreads:
                 Panel.WriteLine("The damage to this stuff spreads outward.  Good.");
                 break;
 

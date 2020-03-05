@@ -36,7 +36,7 @@ namespace CopperBend.Engine
 
             //0.2:  Move from indexing on the Maps enum to loading from YAML
             tome.MapGenerators[Maps.TackerFarm] = new XorShift128Generator(tome.MapTopGenerator.Next());
-            tome.MapGenerators[Maps.TownBastion] = new XorShift128Generator(tome.MapTopGenerator.Next());
+            tome.MapGenerators[Maps.TownBarricade] = new XorShift128Generator(tome.MapTopGenerator.Next());
 
             return tome;
         }
@@ -59,7 +59,7 @@ namespace CopperBend.Engine
             CbEntity.IDGenerator = gen;
             Item.IDGenerator = gen;
             Space.IDGenerator = gen;
-            AreaBlight.IDGenerator = gen;
+            AreaRot.IDGenerator = gen;
         }
 
         public static Herbal InitHerbal()

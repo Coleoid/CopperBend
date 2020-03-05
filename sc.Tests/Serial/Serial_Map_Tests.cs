@@ -81,31 +81,31 @@
 //        }
 
 //        [Test]
-//        public void CRT_AreaBlight()
+//        public void CRT_AreaRot()
 //        {
-//            var blight = new AreaBlight(22) { Health = 14 };
+//            var rot = new AreaRot(22) { Health = 14 };
 
-//            var json = JsonConvert.SerializeObject(blight);
+//            var json = JsonConvert.SerializeObject(rot);
 //            //System.Console.Error.WriteLine(json);
-//            var newBlight = JsonConvert.DeserializeObject<IAreaBlight>(json);
+//            var newRot = JsonConvert.DeserializeObject<IAreaRot>(json);
 
-//            Assert.That(newBlight.ID, Is.EqualTo(22));
-//            Assert.That(newBlight.Health, Is.EqualTo(14));
+//            Assert.That(newRot.ID, Is.EqualTo(22));
+//            Assert.That(newRot.Health, Is.EqualTo(14));
 //        }
 
 //        [Test]
-//        public void CRT_BlightMap()
+//        public void CRT_RotMap()
 //        {
 //            //0.2: int ctor arg = deserializing workaround
-//            var map = new BlightMap(1) { Name = "Bofungus" };
-//            var blight = new AreaBlight(888) { Health = 11 };
-//            map.AddItem(blight, (7, 11));
-//            map.AddItem(new AreaBlight() { Health = 8 }, (7, 12));
+//            var map = new RotMap(1) { Name = "Bofungus" };
+//            var rot = new AreaRot(888) { Health = 11 };
+//            map.AddItem(rot, (7, 11));
+//            map.AddItem(new AreaRot() { Health = 8 }, (7, 12));
 
 //            var json = JsonConvert.SerializeObject(map);
 //            //System.Console.Error.WriteLine(json);
 //            //Debugger.Launch();
-//            var newMap = JsonConvert.DeserializeObject<BlightMap>(json);
+//            var newMap = JsonConvert.DeserializeObject<RotMap>(json);
 
 //            Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
 //            var entry = newMap.GetItem((7, 11));

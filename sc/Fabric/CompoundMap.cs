@@ -24,7 +24,7 @@ namespace CopperBend.Fabric
         public ISpaceMap SpaceMap { get; set; }
         public MultiSpatialMap<IBeing> BeingMap { get; set; }
         public IItemMap ItemMap { get; set; }
-        public IBlightMap BlightMap { get; set; }
+        public IRotMap RotMap { get; set; }
         public List<LocatedTrigger> LocatedTriggers { get; }
 
         public FOV FOV { get; set; }
@@ -38,7 +38,7 @@ namespace CopperBend.Fabric
         public bool CanWalkThrough(Coord location) => SpaceMap.CanWalkThrough(location);
         public bool CanPlant(Coord location) => SpaceMap.CanPlant(location);
 
-        public IMapView<int> GetView_BlightStrength()
+        public IMapView<int> GetView_RotStrength()
         {
             throw new NotImplementedException();
         }
@@ -144,18 +144,18 @@ namespace CopperBend.Fabric
 
                 console.SetCellAppearance(position.X, position.Y, targetCell);
 
-                var blight = BlightMap.GetItem(position);
+                var rot = RotMap.GetItem(position);
                 Fade fade = null;
-                if (blight?.Health > 0)
+                if (rot?.Health > 0)
                 {
-                    fade = GetFadeForBlightExtent(blight.Health, rawCell.Background);
+                    fade = GetFadeForRotExtent(rot.Health, rawCell.Background);
                 }
                 EffectsManager.SetEffect(console.Cells[position.Y * Width + position.X], fade);
             }
         }
 
         //0.2  review for wasteful object creation
-        public Fade GetFadeForBlightExtent(int extent, Color bgColor)
+        public Fade GetFadeForRotExtent(int extent, Color bgColor)
         {
             var rand = new Random();
 

@@ -61,19 +61,22 @@ Tacker party:
 End flow
 
 Notes:
-    // (@ .start) means this action begins at the start of this flow
-    // [= r_leaving_1] means this action has this label
 
-    // ^ means prior action, defaults to end, can do ^.start, ^.end
-    // Default timing on actions is after the prior action is done.
-    // ?? may be useful to chain via ^^^ ?
-    // Could have done same with 'wait 24', 'say "What?"'
+    (@ .start) means this action begins at the start of this flow
+    [= r_leaving_1] means this action has this label
 
-    move to (within 2)
-    move onto (within 0)
-    move within 5
-    stay within 5?
+    ^ means prior action, defaults to end, can do ^.start, ^.end
+    Default timing on actions is after the prior action is done.
+    ?? may be useful to chain via ^^^ ?
+    Could have done same with 'wait 24', 'say "What?"'
 
+    move command:
+        move to (within 2)
+        move onto (within 0)
+        move within 5
+        stay within 5?
+
+    Only broken into two flows for exploration, there's no present need
 
 ---  This one is nonsensical:
 Flow [= Bock_is_generally_hyper]  ()
@@ -90,3 +93,116 @@ Bock:
     restart unless friend_deck.empty
 
 End flow
+
+
+==================================
+v2
+
+---
+Flow decide_to_see_farm
+
+    Merotta:
+        say "He's clean.  Any fool can see that.  That cursed crap's always easy to see."
+
+    Belo:
+        move to meeting_table
+        @ ^.start, say "And it's always changing.  Bock says that Rot thing hit the stranger and fell apart?  Doesn't sound right.  What if it _went into_ him?"
+
+    Merotta:
+        say "Then we would see it.  Or smell it!"
+
+    Kellet:
+        say "Bock saw him work the land.  Tacker's place--filthy, now.  So this:  When I fetched him back, what I saw, where he worked:  Clean land.  Sprouts.  Redfruit and beans, I think.  This."
+
+    Belo:
+        wait 36
+        say "Bock, show me.  Before it gets dark.  Runcel, come with us."
+        create party Tacker (Belo, Bock, Runcel)
+
+End flow
+
+
+---
+Flow party_leaves_for_farm
+    @ decide_to_see_farm.end
+
+    Tacker party: p_leaving
+        @ .start
+        move to 33, 14
+
+    Kellet: k_approach
+        @ p_leaving.start + 48
+        say "Runcel, wait!"
+        move to Runcel
+
+    Runcel:
+        @ k_approach.start + 30
+        stop move
+        say "..."
+        @ ^ + 24, say "What?"
+
+    Kellet:
+        @ k_approach.end
+        say "Tacker Farm, the Rot to the north.  Watch."
+
+    Runcel:
+        wait 24
+        say "Come along with us."
+
+    Kellet:
+        wait 6
+        say "Yes."
+        join party Tacker
+
+    Tacker party:
+        exit map via 20, 2
+
+End flow
+
+
+//  This isn't quite the same, it's an ongoing strategy
+// during free player action
+
+Flow bock_spying
+
+    Bock:
+        coords weeds are (28-33, 49-50) (32, 52), (33, 51-52)
+        pick coord entry_location from weeds //inprog
+        enter map at entry_location
+        stay in weeds
+        stay 10 away from Suvail
+        stay close to Suvail
+
+
+    Suvail:
+        think "Someone watching me."
+
+End flow
+
+...it's simpler to not have Bock in place at all.
+
+Trigger bock_spying_1
+    after planted_five
+    after rand 2400 - 4800
+    narrate "Someone watching me."  // etc.
+End trigger  // not satisfying
+
+...the trigger script language will need some more thought.
+
+Triggers have conditions,
+perhaps compounded complexly,
+    logical ops
+    sequenced
+
+of many types
+
+
+...and outcomes:
+    Messages
+    Incidents
+    Map changes
+    Inventory, player status, relationships, la la la.
+
+
+
+

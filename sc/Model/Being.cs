@@ -69,12 +69,12 @@ namespace CopperBend.Model
         {
             //0.2:  Different beings get different natural weaponry.  No more wolves with fists.
             var attack = WieldedTool?.AttackMethod ?? new AttackMethod("physical.impact.blunt", "1d3+2");
-            if (defender is AreaBlight)
+            if (defender is AreaRot)
             {
                 if (IsPlayer && WieldedTool == null && Gloves == null)
                 {
                     attack.AddEffect(lifeChampion);
-                    //TODO: can message from Being: Message(this, Messages.BarehandBlightDamage);
+                    //TODO: can message from Being: Message(this, Messages.BarehandRotDamage);
                 }
             }
 
@@ -95,7 +95,7 @@ namespace CopperBend.Model
             {
                 //0.1  Nice. and. Crispy.
                 //0.1: I want roughly this, but for the short term, I'm testing dying, so...
-                //defenseMethod.Resistances.Add("vital.blight", "4/5");
+                //defenseMethod.Resistances.Add("vital.rot", "4/5");
                 defenseMethod.Resistances.Add("default", "1/5");
             }
             else

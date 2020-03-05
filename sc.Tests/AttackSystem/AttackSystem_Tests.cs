@@ -122,20 +122,20 @@ namespace CopperBend.Engine.Tests
         [TestCase("energetic.fire", false)]
         public void Physical_impact_on_Rot_causes_splashback_damage(string damageType, bool willSplashBack)
         {
-            // Anyone directly physically assaulting AreaBlight is 
-            // hit with immediate vital.blight.toxin damage.
+            // Anyone directly physically assaulting AreaRot is 
+            // hit with immediate vital.rot.toxin damage.
             //0.2: ranged physical damage should avoid splashback.
             var asys = new AttackSystem(null, __log);
 
             var flameRat = new Being(Color.Red, Color.Black, 'r');
             var am = new AttackMethod(damageType, "1d3 +2");
-            var blight = new AreaBlight();
+            var rot = new AreaRot();
             Attack attack = new Attack
             {
                 Attacker = flameRat,
                 AttackMethod = am,
-                Defender = blight,
-                DefenseMethod = blight.GetDefenseMethod(am)
+                Defender = rot,
+                DefenseMethod = rot.GetDefenseMethod(am)
             };
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
@@ -149,34 +149,34 @@ namespace CopperBend.Engine.Tests
             var newAttack = asys.AttackQueue.Dequeue();
             var newAM = newAttack.AttackMethod;
             var newAE = newAM.AttackEffects[0];
-            Assert.That(newAE.Type, Is.EqualTo("vital.blight.toxin"));
+            Assert.That(newAE.Type, Is.EqualTo("vital.rot.toxin"));
             Assert.That(newAttack.Defender, Is.EqualTo(flameRat));
-            Assert.That(newAttack.Attacker, Is.EqualTo(blight));
+            Assert.That(newAttack.Attacker, Is.EqualTo(rot));
         }
 
         //TODO: Ranged_physical_impact_on_Rot_skips_splashback_damage
         //TODO: Missed_physical_impact_on_Rot_skips_splashback_damage
-        // Note, our hero is strong against all vital.blight damage.
+        // Note, our hero is strong against all vital.rot damage.
 
         [Test]
-        public void Nature_strikes_the_blight_through_our_hero()
+        public void Nature_strikes_the_rot_through_our_hero()
         {
             var asys = new AttackSystem(null, __log);
 
             var player = new Being(Color.LawnGreen, Color.Black, '@') { IsPlayer = true };
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
-            var blight = new AreaBlight();
+            var rot = new AreaRot();
             Attack attack = new Attack
             {
                 Attacker = player,
                 AttackMethod = am,
-                Defender = blight,
-                DefenseMethod = blight.GetDefenseMethod(am)
+                Defender = rot,
+                DefenseMethod = rot.GetDefenseMethod(am)
             };
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
-            asys.BlightMap = new BlightMap();
+            asys.RotMap = new RotMap();
             asys.CheckForSpecials(attack);
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(2));
@@ -188,7 +188,7 @@ namespace CopperBend.Engine.Tests
             var newAM = newAttack.AttackMethod;
             var newAE = newAM.AttackEffects[0];
             Assert.That(newAE.Type, Is.EqualTo("vital.nature.itself"));
-            Assert.That(newAttack.Defender, Is.EqualTo(blight));
+            Assert.That(newAttack.Defender, Is.EqualTo(rot));
             Assert.That(newAttack.Attacker, Is.EqualTo(player));
         }
 
@@ -199,7 +199,7 @@ namespace CopperBend.Engine.Tests
 
             var flameRat = new Being(Color.Red, Color.Black, 'r');
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
-            var rot = new AreaBlight();
+            var rot = new AreaRot();
             Attack attack = new Attack
             {
                 Attacker = flameRat,
@@ -210,37 +210,37 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
-            asys.BlightMap = new BlightMap();
+            asys.RotMap = new RotMap();
             asys.CheckForSpecials(attack);
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(1));
         }
 
         [Test]
-        public void Nature_strikes_neighboring_blight_through_our_hero()
+        public void Nature_strikes_neighboring_rot_through_our_hero()
         {
             var player = new Being(Color.LawnGreen, Color.Black, '@') { IsPlayer = true };
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
-            var blight = new AreaBlight();
+            var rot = new AreaRot();
             Attack attack = new Attack
             {
                 Attacker = player,
                 AttackMethod = am,
-                Defender = blight,
-                DefenseMethod = blight.GetDefenseMethod(am)
+                Defender = rot,
+                DefenseMethod = rot.GetDefenseMethod(am)
             };
 
-            BlightMap blightMap = new BlightMap();
+            RotMap rotMap = new RotMap();
             //...add two neighbor ABs, and one further away
-            var nbor_1 = new AreaBlight();
-            var nbor_2 = new AreaBlight();
-            var stranger = new AreaBlight();
-            blightMap.Add(blight, (2, 2));
-            blightMap.Add(nbor_1, (2, 3));
-            blightMap.Add(nbor_2, (3, 1));
-            blightMap.Add(stranger, (8, 2));
+            var nbor_1 = new AreaRot();
+            var nbor_2 = new AreaRot();
+            var stranger = new AreaRot();
+            rotMap.Add(rot, (2, 2));
+            rotMap.Add(nbor_1, (2, 3));
+            rotMap.Add(nbor_2, (3, 1));
+            rotMap.Add(stranger, (8, 2));
 
-            var asys = new AttackSystem(null, __log) { BlightMap = blightMap };
+            var asys = new AttackSystem(null, __log) { RotMap = rotMap };
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
@@ -252,7 +252,7 @@ namespace CopperBend.Engine.Tests
             Assert.NotNull(splashBack);
 
             var newAttack = asys.AttackQueue.Dequeue();
-            Assert.That(newAttack.Defender, Is.EqualTo(blight));
+            Assert.That(newAttack.Defender, Is.EqualTo(rot));
 
             newAttack = asys.AttackQueue.Dequeue();
             Assert.That(newAttack.Defender, Is.EqualTo(nbor_2));

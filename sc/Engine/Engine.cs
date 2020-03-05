@@ -165,7 +165,7 @@ namespace CopperBend.Engine
                 Story = Engine.Compendium.Dramaticon,
             };
             Dispatcher.GameState = GameState;
-            Dispatcher.AttackSystem.BlightMap = GameState.Map.BlightMap;
+            Dispatcher.AttackSystem.RotMap = GameState.Map.RotMap;
 
             Player.CommandSource = new InputCommandSource(Describer, GameState, Dispatcher, log);
             MapConsole.CenterViewPortOnPoint(Player.Position);
@@ -203,7 +203,7 @@ namespace CopperBend.Engine
 
             Player.CommandSource = null;
 
-            Dispatcher.AttackSystem.BlightMap = null;
+            Dispatcher.AttackSystem.RotMap = null;
             Dispatcher.GameState = null;
 
             GameState = null;

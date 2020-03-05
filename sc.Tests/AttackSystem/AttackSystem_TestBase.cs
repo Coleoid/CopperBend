@@ -29,7 +29,7 @@ namespace CopperBend.Engine.Tests
             __log = Substitute.For<ILog>();
             Being.IDGenerator = new GoRogue.IDGenerator();
             Being.EntityFactory = Substitute.For<IEntityFactory>();
-            AreaBlight.IDGenerator = Being.IDGenerator;
+            AreaRot.IDGenerator = Being.IDGenerator;
 
             // Torch as club, crunch and burn
             tac = new AttackMethod();

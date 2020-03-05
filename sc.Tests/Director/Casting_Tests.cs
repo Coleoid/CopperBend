@@ -18,7 +18,7 @@ namespace CopperBend.Engine.Tests
                 .Returns(Substitute.For<IEntity>());
             Being.SadConEntityFactory = entityFactory;
 
-            Engine.ConnectIDGenerator(new GoRogue.IDGenerator());
+            Engine.Cosmogenesis("casting");
         }
 
         [Test]

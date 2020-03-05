@@ -44,6 +44,7 @@ namespace CopperBend.Fabric
     // No plan for this to change per run, so likely not in save file.
     public class Dramaticon : IBook
     {
+        // ...though the first thing I use it for is player state.
         public bool HasClearedRot { get; internal set; }
     }
 

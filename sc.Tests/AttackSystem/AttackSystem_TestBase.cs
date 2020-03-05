@@ -23,14 +23,17 @@ namespace CopperBend.Engine.Tests
 
         public ILog __log;
 
+        public void Prepare_game_entity_creation()
+        {
+            Engine.ConnectIDGenerator(new GoRogue.IDGenerator());
+            Being.SadConEntityFactory = Substitute.For<ISadConEntityFactory>();
+        }
+
         [SetUp]
         public void SetUp()
         {
             __log = Substitute.For<ILog>();
-            var idGen = new GoRogue.IDGenerator();
-            Being.SetIDGenerator(idGen);
-            Being.SadConEntityFactory = Substitute.For<ISadConEntityFactory>();
-            AreaRot.SetIDGenerator(idGen);
+            Prepare_game_entity_creation();
 
             // Torch as club, crunch and burn
             tac = new AttackMethod();

@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using log4net;
 using Microsoft.Xna.Framework;
-using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
@@ -116,47 +113,6 @@ namespace CopperBend.Engine.Tests
 
             Assert.That(out_dmgs.First().Current, Is.EqualTo(expected));
         }
-
-        [TestCase("physical.impact.point", true)]
-        [TestCase("physical.impact.blunt", true)]
-        [TestCase("energetic.fire", false)]
-        public void Physical_impact_on_Rot_causes_splashback_damage(string damageType, bool willSplashBack)
-        {
-            // Anyone directly physically assaulting AreaRot is 
-            // hit with immediate vital.rot.toxin damage.
-            //0.2: ranged physical damage should avoid splashback.
-            var asys = new AttackSystem(null, __log);
-
-            var flameRat = new Being(Color.Red, Color.Black, 'r');
-            var am = new AttackMethod(damageType, "1d3 +2");
-            var rot = new AreaRot();
-            Attack attack = new Attack
-            {
-                Attacker = flameRat,
-                AttackMethod = am,
-                Defender = rot,
-                DefenseMethod = rot.GetDefenseMethod(am)
-            };
-
-            Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
-
-            asys.CheckForSpecials(attack);
-
-            int newAttackCount = willSplashBack ? 1 : 0;
-            Assert.That(asys.AttackQueue.Count, Is.EqualTo(newAttackCount));
-            if (!willSplashBack) return;
-
-            var newAttack = asys.AttackQueue.Dequeue();
-            var newAM = newAttack.AttackMethod;
-            var newAE = newAM.AttackEffects[0];
-            Assert.That(newAE.Type, Is.EqualTo("vital.rot.toxin"));
-            Assert.That(newAttack.Defender, Is.EqualTo(flameRat));
-            Assert.That(newAttack.Attacker, Is.EqualTo(rot));
-        }
-
-        //TODO: Ranged_physical_impact_on_Rot_skips_splashback_damage
-        //TODO: Missed_physical_impact_on_Rot_skips_splashback_damage
-        // Note, our hero is strong against all vital.rot damage.
 
         [Test]
         public void Nature_strikes_the_rot_through_our_hero()

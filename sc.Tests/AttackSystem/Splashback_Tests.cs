@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using CopperBend.Fabric;
+﻿using CopperBend.Fabric;
 using CopperBend.Model;
 using Microsoft.Xna.Framework;
 using NUnit.Framework;

@@ -7,9 +7,16 @@ namespace CopperBend.Model
 {
     public class Item : IItem
     {
-        public static IDGenerator IDGenerator { get; set; }
-        public string ItemType { get; set; } = "Item";
+        #region My IHasID
+        public static void SetIDGenerator(IDGenerator generator)
+        {
+            IDGenerator = generator;
+        }
+        private static IDGenerator IDGenerator { get; set; }
         public uint ID { get; private set; }
+        #endregion
+
+        public string ItemType { get; set; } = "Item";
         public ComponentContainer Aspects { get; set; }
 
         public Item(Coord location, int quantity = 1, uint id = uint.MaxValue)

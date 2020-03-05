@@ -3,12 +3,12 @@ using Color = Microsoft.Xna.Framework.Color;
 
 namespace CopperBend.Contract
 {
-    public interface IEntityFactory
+    public interface ISadConEntityFactory
     {
-        IEntity GetSadCon(IGetSadCon cb);
+        IEntity GetSadCon(ISadConInitData cb);
     }
 
-    public interface IGetSadCon
+    public interface ISadConInitData
     {
         Color Foreground { get; set; }
         Color Background { get; set; }

@@ -56,10 +56,10 @@ namespace CopperBend.Engine
         public static void ConnectIDGenerator(IDGenerator gen)
         {
             Compendium.IDGenerator = gen;
-            CbEntity.IDGenerator = gen;
-            Item.IDGenerator = gen;
-            Space.IDGenerator = gen;
-            AreaRot.IDGenerator = gen;
+            CbEntity.SetIDGenerator(gen);
+            Item.SetIDGenerator(gen);
+            Space.SetIDGenerator(gen);
+            AreaRot.SetIDGenerator(gen);
         }
 
         public static Herbal InitHerbal()

@@ -7,11 +7,18 @@ namespace CopperBend.Engine.Tests
     public class Engine_Tests
     {
         [Test]
-        public void Can_init_ID_generator_service()
+        public void Cosmogenesis_sets_ID_generator_service()
         {
-            Item.IDGenerator = null;
+            Item.SetIDGenerator(null);
+            AreaRot.SetIDGenerator(null);
             Engine.Cosmogenesis("seed");
-            Assert.That(Item.IDGenerator, Is.Not.Null);
+
+            var item = new Item((2, 2));
+            var rot = new AreaRot();
+
+            Assert.That(item, Is.Not.Null);
+            Assert.That(rot, Is.Not.Null);
+            Assert.That(item.ID, Is.EqualTo(rot.ID - 1));
         }
 
         //[Test]

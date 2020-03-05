@@ -13,12 +13,12 @@ namespace CopperBend.Engine.Tests
         [SetUp]
         public void SetUp()
         {
-            var entityFactory = Substitute.For<IEntityFactory>();
-            entityFactory.GetSadCon(Arg.Any<IGetSadCon>())
+            var entityFactory = Substitute.For<ISadConEntityFactory>();
+            entityFactory.GetSadCon(Arg.Any<ISadConInitData>())
                 .Returns(Substitute.For<IEntity>());
-            Being.EntityFactory = entityFactory;
+            Being.SadConEntityFactory = entityFactory;
 
-            CbEntity.IDGenerator = new GoRogue.IDGenerator();
+            Engine.ConnectIDGenerator(new GoRogue.IDGenerator());
         }
 
         [Test]

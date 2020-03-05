@@ -93,7 +93,7 @@ namespace CopperBend.Engine
 
             UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
 
-            Being.EntityFactory = new EntityFactory(mapFontMaster);
+            Being.SadConEntityFactory = new SadConEntityFactory(mapFontMaster);
             Schedule = new Schedule(log);
 
             MapWindowSize = new Size(GameSize.Width * 1 / 3, GameSize.Height - 8);

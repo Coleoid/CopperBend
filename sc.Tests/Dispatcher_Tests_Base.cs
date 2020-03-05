@@ -120,7 +120,7 @@ namespace CopperBend.Engine.Tests
                 ClearPendingInput = () => { }
             };
 
-            Being.EntityFactory = Substitute.For<IEntityFactory>();
+            Being.SadConEntityFactory = Substitute.For<ISadConEntityFactory>();
         }
 
         public SpaceMap CreateSmallTestMap()

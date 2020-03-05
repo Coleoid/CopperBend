@@ -5,8 +5,12 @@ namespace CopperBend.Model
 {
     public abstract class CbEntity : IHasID
     {
-        #region standard IHasID
-        public static IDGenerator IDGenerator { get; set; }
+        #region My IHasID
+        public static void SetIDGenerator(IDGenerator generator)
+        {
+            IDGenerator = generator;
+        }
+        private static IDGenerator IDGenerator { get; set; }
         public uint ID { get; private set; }
         #endregion
 

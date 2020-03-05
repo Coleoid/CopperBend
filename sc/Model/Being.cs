@@ -8,10 +8,10 @@ using CopperBend.Contract;
 
 namespace CopperBend.Model
 {
-    public class Being : CbEntity, IBeing, IGetSadCon, IHasID
+    public class Being : CbEntity, IBeing, ISadConInitData, IHasID
     {
         public virtual string BeingType { get; set; } = "Being";
-        public static IEntityFactory EntityFactory { get; set; }
+        public static ISadConEntityFactory SadConEntityFactory { get; set; }
 
         public int Health { get; set; }
         public int MaxHealth { get; set; }
@@ -34,7 +34,7 @@ namespace CopperBend.Model
             Foreground = foreground;
             Background = background;
             Glyph = glyph;
-            SadConEntity = EntityFactory.GetSadCon(this);
+            SadConEntity = SadConEntityFactory.GetSadCon(this);
         }
 
         public Point Position { get => SadConEntity.Position; set => SadConEntity.Position = value; }

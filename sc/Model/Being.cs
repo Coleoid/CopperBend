@@ -11,7 +11,6 @@ namespace CopperBend.Model
     public class Being : CbEntity, IBeing, ISadConInitData, IHasID
     {
         public virtual string BeingType { get; set; } = "Being";
-        public static ISadConEntityFactory SadConEntityFactory { get; set; }
 
         public int Health { get; set; }
         public int MaxHealth { get; set; }
@@ -23,7 +22,7 @@ namespace CopperBend.Model
         public Color Background { get; set; }
         public int Glyph { get; set; }
 
-        public Being(Color foreground, Color background, int glyph, uint id = uint.MaxValue)
+        public Being(Guid blocker, Color foreground, Color background, int glyph, uint id = uint.MaxValue)
             : base(id)
         {
             Health = MaxHealth = 20;
@@ -34,7 +33,6 @@ namespace CopperBend.Model
             Foreground = foreground;
             Background = background;
             Glyph = glyph;
-            SadConEntity = SadConEntityFactory.GetSadCon(this);
         }
 
         public Point Position { get => SadConEntity.Position; set => SadConEntity.Position = value; }

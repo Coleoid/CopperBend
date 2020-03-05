@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using CopperBend.Contract;
 using CopperBend.Model;
+using CopperBend.Fabric;
 
 namespace CopperBend.Engine
 {
@@ -59,6 +60,12 @@ namespace CopperBend.Engine
         //  definitely belongs elsewhere soon
         public Being BuildNewBeing(string entityWanted)
         {
+            var creator = Engine.Compendium.BeingCreator;
+            Being being = creator.CreateBeing(Color.Purple, Color.Black, 'r')
+            {
+                Name = "rat",  // I only wanted to see you dancing in the purple rat
+            };
+
             // build a rat for test one
             Being being = new Being(Color.Purple, Color.Black, 'r')
             {

@@ -28,6 +28,9 @@ namespace CopperBend.Engine
 
             var story = InitStory();
             ConnectStory(story);
+
+            var creator = InitBeingCreator();
+            ConnectCreator(creator);
         }
 
         public static TomeOfChaos InitTome(string topSeed)
@@ -116,6 +119,11 @@ namespace CopperBend.Engine
         public static void ConnectStory(Dramaticon story)
         {
             Compendium.Dramaticon = story;
+        }
+
+        public static BeingCreator InitBeingCreator()
+        {
+            return new BeingCreator()
         }
 
         private static string GenerateSimpleTopSeed()

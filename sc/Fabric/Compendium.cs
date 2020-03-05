@@ -13,6 +13,7 @@ namespace CopperBend.Fabric
         public SocialRegister SocialRegister { get; set; }
         public Dramaticon Dramaticon { get; set; }
         public IDGenerator IDGenerator { get; internal set; }
+        public BeingCreator BeingCreator { get; internal set; }
     }
 
     // The Herbal contains plant types, and what the player knows about them

@@ -6,6 +6,7 @@ using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
 using CopperBend.Fabric;
+using CopperBend.Logic;
 
 namespace CopperBend.Persist.Tests
 {
@@ -32,8 +33,8 @@ namespace CopperBend.Persist.Tests
             var entityFactory = Substitute.For<ISadConEntityFactory>();
             entityFactory.GetSadCon(Arg.Any<ISadConInitData>())
                 .Returns(Substitute.For<IEntity>());
-            Engine.Engine.Cosmogenesis("serial being!", entityFactory);
-            _beingCreator = Engine.Engine.BeingCreator;
+            Engine.Cosmogenesis("serial being!", entityFactory);
+            _beingCreator = Engine.BeingCreator;
             ycIBeing.BeingCreator = _beingCreator;
         }
 

@@ -6,7 +6,7 @@ using SadConsole.Input;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     public class InputCommandSource : ICommandSource
     {

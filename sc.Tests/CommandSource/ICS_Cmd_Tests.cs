@@ -7,7 +7,7 @@ using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class ICS_Cmd_Tests : ICS_TestBase

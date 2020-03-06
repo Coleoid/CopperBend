@@ -4,7 +4,7 @@ using CopperBend.Contract;
 using CopperBend.Model;
 using CopperBend.Fabric;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     public class Director
     {

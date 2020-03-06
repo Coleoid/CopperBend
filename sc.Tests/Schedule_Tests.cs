@@ -4,7 +4,7 @@ using log4net;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
 
     [TestFixture]

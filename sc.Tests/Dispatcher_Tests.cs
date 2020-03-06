@@ -9,7 +9,7 @@ using NUnit.Framework;
 using CopperBend.Fabric;
 using SadConsole.Entities;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class Dispatcher_Tests : Dispatcher_Tests_Base

@@ -1,5 +1,5 @@
 ﻿using CopperBend.Contract;
-using CopperBend.Engine;
+using CopperBend.Logic;
 using NUnit.Framework;
 
 namespace CopperBend.Fabric.Tests
@@ -19,8 +19,8 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void MapSeeds_lead_to_different_values(string topSeed)
         {
-            var tome_1 = Engine.Engine.InitTome(topSeed + "a");
-            var tome_2 = Engine.Engine.InitTome(topSeed + "b");
+            var tome_1 = Engine.InitTome(topSeed + "a");
+            var tome_2 = Engine.InitTome(topSeed + "b");
 
             int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
             int next_tf_2 = tome_2.MapRndNext(Maps.TackerFarm);
@@ -36,8 +36,8 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void MapSeeds_remain_stable_when_used_in_different_orders(string topSeed)
         {
-            var tome_1 = Engine.Engine.InitTome(topSeed);
-            var tome_2 = Engine.Engine.InitTome(topSeed);
+            var tome_1 = Engine.InitTome(topSeed);
+            var tome_2 = Engine.InitTome(topSeed);
 
             int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
             int next_tb_1 = tome_1.MapRndNext(Maps.TownBarricade);
@@ -53,8 +53,8 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void LearnableSeeds_lead_to_different_values(string topSeed)
         {
-            var tome_1 = Engine.Engine.InitTome(topSeed + "a");
-            var tome_2 = Engine.Engine.InitTome(topSeed + "b");
+            var tome_1 = Engine.InitTome(topSeed + "a");
+            var tome_2 = Engine.InitTome(topSeed + "b");
 
             int next_se_1 = tome_1.LearnableRndNext();
             int next_se_2 = tome_2.LearnableRndNext();

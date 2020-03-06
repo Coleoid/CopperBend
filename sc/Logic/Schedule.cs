@@ -5,7 +5,7 @@ using log4net;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     public class Schedule : ISchedule
     {

@@ -4,7 +4,7 @@ using CopperBend.Contract;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class ICS_Cmd_Use_Tests : ICS_TestBase

@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Logic;
 using CopperBend.Model;
 using CopperBend.Model.Aspects;
 
@@ -64,7 +65,7 @@ namespace CopperBend.Fabric
 
         public static Item BuildPlant(string plantPart, string plantName)
         {
-            var byName = Engine.Engine.Compendium.Herbal.PlantByName; //0.2: Awk.Awk.Awkwa.War.WaRd[tUr].TLE;
+            var byName = Engine.Compendium.Herbal.PlantByName; //0.2: Awk.Awk.Awkwa.War.WaRd[tUr].TLE;
             if (!byName.ContainsKey(plantName))
                 throw new Exception($"Don't know the plant [{plantName}].");
 

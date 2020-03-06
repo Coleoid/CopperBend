@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using CopperBend.Logic;
 using log4net;
 using log4net.Config;
 using McMaster.Extensions.CommandLineUtils;
@@ -21,7 +22,7 @@ namespace CopperBend.Application
 
 #pragma warning disable IDE0052 // Remove unread private members
         //  Engine Engine engine.  Here to satisfy a warning, it generates a new one.  C'est la vie.
-        private Engine.Engine engine;
+        private Engine engine;
 #pragma warning restore IDE0052 // Remove unread private members
 
         public static int Main(string[] args)
@@ -51,7 +52,7 @@ namespace CopperBend.Application
 
                 //  Engine is now a console, which cannot be created before .Run() below.
                 //  .OnInitialize must be set before .Run is called.
-                Game.OnInitialize = () => engine = new Engine.Engine(gameWidth, gameHeight, log, InitialSeed);
+                Game.OnInitialize = () => engine = new Engine(gameWidth, gameHeight, log, InitialSeed);
                 Game.Instance.Window.Title = "Copper Bend";
                 Game.Instance.Run();
             }

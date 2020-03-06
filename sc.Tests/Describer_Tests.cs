@@ -4,7 +4,7 @@ using CopperBend.Model;
 using NUnit.Framework;
 using NSubstitute;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class Describer_Tests

@@ -6,7 +6,7 @@ using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class AttackSystem_TestBase

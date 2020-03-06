@@ -5,7 +5,7 @@ using CopperBend.Model;
 using CopperBend.Contract;
 using Microsoft.Xna.Framework;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class Casting_Tests

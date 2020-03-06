@@ -5,7 +5,7 @@ using CopperBend.Model;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     /* === Attack Phases
      *

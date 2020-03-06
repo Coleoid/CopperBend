@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class Splashback_Tests : AttackSystem_TestBase

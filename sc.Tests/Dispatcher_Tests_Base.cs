@@ -8,7 +8,7 @@ using NSubstitute;
 using NUnit.Framework;
 using SadConsole.Entities;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     public class Dispatcher_Tests_Base
     {

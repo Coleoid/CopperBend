@@ -4,7 +4,7 @@ using SadConsole.Input;
 using Coord = GoRogue.Coord;
 using CopperBend.Contract;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     /// <summary> Holds utility behaviors to reduce clutter in logic file. </summary>
     public partial class CommandDispatcher : IControlPanel

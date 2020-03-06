@@ -5,7 +5,7 @@ using CopperBend.Fabric;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace CopperBend.Engine.Tests
+namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class Dispatcher_Use_Tests : Dispatcher_Tests_Base

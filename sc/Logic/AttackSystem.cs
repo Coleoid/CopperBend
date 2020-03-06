@@ -7,7 +7,7 @@ using CopperBend.Fabric;
 using CopperBend.Model;
 using log4net;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
 
     /*

@@ -4,7 +4,7 @@ using Color = Microsoft.Xna.Framework.Color;
 using SadConsole;
 using GoRogue;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     public class MessageLogWindow : Window, IMessageLogWindow
     {

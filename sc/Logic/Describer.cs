@@ -6,7 +6,7 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using Troschuetz.Random.Generators;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     public class Describer : IDescriber
     {

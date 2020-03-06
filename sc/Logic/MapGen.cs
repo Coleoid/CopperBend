@@ -9,7 +9,7 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     //  Placeholder, roughly from AnsiWare tutorial--not currently in use
     //public class MapGen

@@ -7,7 +7,7 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     /// <summary> This is the main logic slice of the CommandDispatcher. </summary>
     public partial class CommandDispatcher

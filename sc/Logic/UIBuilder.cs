@@ -6,7 +6,7 @@ using GoRogue;
 using log4net;
 using CopperBend.Contract;
 
-namespace CopperBend.Engine
+namespace CopperBend.Logic
 {
     public class UIBuilder
     {

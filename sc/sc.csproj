@@ -14,6 +14,11 @@
     <ApplicationIcon />
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>CopperBend.xml</DocumentationFile>
+    <OutputPath>Content\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>

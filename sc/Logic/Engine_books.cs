@@ -9,6 +9,7 @@ using CopperBend.Model;
 
 namespace CopperBend.Logic
 {
+    /// <summary> This portion of the Engine handles Well-Knowns, in a book idiom. </summary>
     public partial class Engine
     {
         public static Compendium Compendium { get; set; }

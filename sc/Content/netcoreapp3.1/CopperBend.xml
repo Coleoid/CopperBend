@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CopperBend</name>
+    </assembly>
+    <members>
+        <member name="M:CopperBend.Contract.IModifier.WasUsed(System.Int32)">
+            <summary>
+            Some modifiers are expended, like "blocks a total of 80 damage" or
+            "Sharpness enchantment wears off after five hits".  Used modifiers
+            get WasUsed(amount) calls that they do what they want with.
+            </summary>
+            <param name="amount">how much effect the modifier had</param>
+        </member>
+        <member name="T:CopperBend.Contract.ICommandSource">
+            <summary> A CommandSource supplies a being's action decisions </summary>
+        </member>
+        <member name="P:CopperBend.Contract.ICompoundMap.VisibilityChanged">
+            <summary> When a space changes its CanSeeThrough, set this flag true </summary>
+        </member>
+        <member name="P:CopperBend.Contract.ICompoundMap.CoordsWithChanges">
+            <summary> When a space's appearance (may) change, add its coords to this list </summary>
+        </member>
+        <member name="M:CopperBend.Contract.ICompoundMap.CanPlant(GoRogue.Coord)">
+            <summary> Can Plant considering terrain, rot, existing plants, and ownership. </summary>
+        </member>
+        <member name="P:CopperBend.Contract.LocatedTrigger.Trigger">
+            <summary> Whatever moved into the </summary>
+        </member>
+        <member name="M:CopperBend.Contract.IControlPanel.CommandBeing(CopperBend.Contract.IBeing,CopperBend.Contract.Command)">
+            <summary> The main purpose of the CommandDispatcher. </summary>
+        </member>
+        <member name="M:CopperBend.Contract.IControlPanel.ScheduleAgent(CopperBend.Contract.IScheduleAgent,System.Int32)">
+            <summary> When an agent will decide what to do when its turn comes. </summary>
+        </member>
+        <member name="P:CopperBend.Contract.IControlPanel.PushEngineMode">
+            <summary> When an action interrupts the entire game, in some way. </summary>
+        </member>
+        <member name="M:CopperBend.Fabric.CompoundMap.SetInitialConsoleCells(SadConsole.ScrollingConsole,CopperBend.Contract.ISpaceMap)">
+            <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known. </summary>
+        </member>
+        <member name="M:CopperBend.Logic.AttackSystem.CheckForSpecials(CopperBend.Logic.Attack)">
+            <summary>
+            There are only a few odd damage cases, for now, so
+            stuffing them in a little zoo should keep them (and us) safe.
+            </summary>
+        </member>
+        <member name="M:CopperBend.Logic.AttackSystem.FirstTimeFor(CopperBend.Contract.Messages)">
+            <summary> First time running across this message in this game run? </summary>
+        </member>
+        <member name="M:CopperBend.Logic.AttackSystem.Message(CopperBend.Contract.IBeing,CopperBend.Contract.Messages)">
+            <summary>
+            This allows messages to adapt based on the Being involved and
+            what messages have already been seen, how many times, et c.
+            </summary>
+        </member>
+        <member name="T:CopperBend.Logic.CommandDispatcher">
+            <summary> This is the main logic slice of the CommandDispatcher. </summary>
+            <summary> Holds utility behaviors to reduce clutter in logic file. </summary>
+        </member>
+        <member name="T:CopperBend.Logic.Engine">
+            <summary> Main game mechanisms. </summary>
+            <summary> This portion of the Engine handles Well-Knowns, in a book idiom. </summary>
+        </member>
+        <member name="M:CopperBend.Logic.Engine.GameOver(CopperBend.Contract.IBeing,CopperBend.Contract.PlayerDiedException)">
+            <summary> I hope you had fun! </summary>
+        </member>
+        <member name="M:CopperBend.Logic.IMessageLogWindow.WriteLine(System.String)">
+            <summary> add a complete line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Logic.IMessageLogWindow.Prompt(System.String)">
+            <summary> add an unfinished line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Logic.InputCommandSource.GetCommand(CopperBend.Contract.IBeing)">
+            <summary>
+            The InputCommandSource builds a Command based on
+            keyboard input.  It may take thousands of Update()
+            callbacks before a Command other than CommandIncomplete
+            is returned.
+            </summary>
+        </member>
+        <member name="M:CopperBend.Logic.InputCommandSource.NextStepIs(System.Func{SadConsole.Input.AsciiKey,CopperBend.Contract.IBeing,CopperBend.Contract.Command},System.String,CopperBend.Contract.IBeing)">
+            <summary> If more input is ready, skip prompt and go to the next step </summary>
+        </member>
+        <member name="M:CopperBend.Logic.InputCommandSource.PickUp(CopperBend.Contract.IBeing)">
+            <summary> 0.2:  Currently, grab the topmost.  Later, choose. </summary>
+        </member>
+        <member name="M:CopperBend.Logic.MessageLogWindow.WriteLine(System.String)">
+            <summary> add a complete line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Logic.MessageLogWindow.Prompt(System.String)">
+            <summary> add an unfinished line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Logic.NarrativeWindow.WriteLine(System.String)">
+            <summary> add a complete line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Logic.NarrativeWindow.Prompt(System.String)">
+            <summary> add an unfinished line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Logic.Schedule.GetNextAction">
+            <summary> Get next scheduled action, ordered by tick of occurrence, then FIFO per tick </summary>
+        </member>
+        <member name="T:CopperBend.Model.Aspects.Usable">
+            <summary> Things which the player (and others) can use. </summary>
+            <remarks>
+            They present action options via UI, to the player.
+            Undecided how to communicate these options to
+            software agents, so e.g., a clever enemy could drink a potion.
+            </remarks>
+        </member>
+    </members>
+</doc>

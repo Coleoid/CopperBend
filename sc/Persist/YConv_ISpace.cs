@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using Microsoft.Xna.Framework;
 using YamlDotNet.Serialization;
 using YamlDotNet.Core;
 using CopperBend.Contract;
 using YamlDotNet.Core.Events;
-using CopperBend.Model;
 using CopperBend.Fabric;
 
 namespace CopperBend.Persist
@@ -35,7 +33,7 @@ namespace CopperBend.Persist
         public object ReadYaml(IParser parser, Type type)
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            ISpace space = null;
+            ISpace space;
 
             parser.Consume<MappingStart>();
             space = ParseSpace(parser);
@@ -98,12 +96,6 @@ namespace CopperBend.Persist
         private TerrainType GetTerrainType(string name)
         {
             return null;
-        }
-
-        private void EmitPlayer(IEmitter emitter, ISpace space)
-        {
-            EmitSpace(emitter, space);
-            //var player = (Player)ISpace;
         }
     }
 #pragma warning restore CA1801 // Remove unused parameter

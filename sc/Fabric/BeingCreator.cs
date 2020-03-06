@@ -18,7 +18,7 @@ namespace CopperBend.Fabric
         {
             var being = beingName switch
             {
-                "player" => new Player(Guid.NewGuid(), Color.LawnGreen, Color.Black, '@')
+                "player" => new Being(Guid.NewGuid(), Color.LawnGreen, Color.Black, '@')
                 {
                     Name = "Suvail",
                     IsPlayer = true,

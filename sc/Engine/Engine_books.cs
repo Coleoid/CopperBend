@@ -12,8 +12,9 @@ namespace CopperBend.Engine
     public partial class Engine
     {
         public static Compendium Compendium { get; set; }
+        public static BeingCreator BeingCreator { get; set; }
 
-        public static void Cosmogenesis(string topSeed)
+        public static void Cosmogenesis(string topSeed, ISadConEntityFactory factory)
         {
             Compendium = new Compendium();
 
@@ -29,7 +30,7 @@ namespace CopperBend.Engine
             var story = InitStory();
             ConnectStory(story);
 
-            var creator = InitBeingCreator();
+            var creator = InitBeingCreator(factory);
             ConnectCreator(creator);
         }
 
@@ -121,9 +122,14 @@ namespace CopperBend.Engine
             Compendium.Dramaticon = story;
         }
 
-        public static BeingCreator InitBeingCreator()
+        public static BeingCreator InitBeingCreator(ISadConEntityFactory factory)
         {
-            return new BeingCreator()
+            return new BeingCreator(factory);
+        }
+
+        public static void ConnectCreator(BeingCreator creator)
+        {
+            Compendium.BeingCreator = creator;
         }
 
         private static string GenerateSimpleTopSeed()

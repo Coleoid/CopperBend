@@ -5,6 +5,7 @@ using CopperBend.Contract;
 using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
+using CopperBend.Fabric;
 
 namespace CopperBend.Persist.Tests
 {
@@ -13,6 +14,7 @@ namespace CopperBend.Persist.Tests
     {
         private ISerializer _serializer;
         private IDeserializer _deserializer;
+        private BeingCreator _beingCreator;
 
         [SetUp]
         public void SetUp()
@@ -28,14 +30,15 @@ namespace CopperBend.Persist.Tests
             var entityFactory = Substitute.For<ISadConEntityFactory>();
             entityFactory.GetSadCon(Arg.Any<ISadConInitData>())
                 .Returns(Substitute.For<IEntity>());
-            Being.SadConEntityFactory = entityFactory;
+            Engine.Engine.Cosmogenesis("serial being!", entityFactory);
+            _beingCreator = Engine.Engine.BeingCreator;
         }
 
         [Test]
         public void CRT_Being()
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            var being = new Being(Color.Bisque, Color.Azure, 'g', 77);
+            var being = _beingCreator.CreateBeing(Color.Bisque, Color.Azure, 'g', 77);
 
             var yaml = _serializer.Serialize(being);
             Assert.That(yaml, Is.Not.Null);
@@ -52,7 +55,7 @@ namespace CopperBend.Persist.Tests
         public void CRT_Being_full()
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            var being = new Being(Color.DarkSeaGreen, Color.Black, 'g', 77);
+            var being = _beingCreator.CreateBeing(Color.DarkSeaGreen, Color.Black, 'g', 77);
             being.Name = "Gred";
             being.Awareness = 2;
             being.Health = 22;

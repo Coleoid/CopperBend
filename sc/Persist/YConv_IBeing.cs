@@ -6,11 +6,14 @@ using YamlDotNet.Core;
 using CopperBend.Contract;
 using YamlDotNet.Core.Events;
 using CopperBend.Model;
+using CopperBend.Fabric;
 
 namespace CopperBend.Persist
 {
     public class YConv_IBeing : Persistence_util, IYamlTypeConverter
     {
+        public BeingCreator BeingCreator { get; set; }
+
         #region IYamlTypeConverter
         public bool Accepts(Type type)
         {
@@ -51,21 +54,15 @@ namespace CopperBend.Persist
         public object ReadYaml(IParser parser, Type type)
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            IBeing being = null;
 
             parser.Consume<MappingStart>();
             var beingType = GetValueNext(parser, "BeingType");
 
-            switch (beingType)
+            IBeing being = beingType switch
             {
-            case "Being":
-                being = ParseBeing(parser);
-                break;
-
-            default:
-                throw new NotImplementedException($"Not ready to Read being type [{beingType}].");
-            }
-
+                "Being" => ParseBeing(parser),
+                _ => throw new NotImplementedException($"Not ready to Read being type [{beingType}]."),
+            };
             parser.Consume<MappingEnd>();
             return being;
         }
@@ -97,7 +94,7 @@ namespace CopperBend.Persist
 
             Color fg = Color_FromString(fgText);
             Color bg = Color_FromString(bgText);
-            var being = new Being(fg, bg, glyph, id);
+            var being = BeingCreator.CreateBeing(fg, bg, glyph, id);
 
             being.Name = GetValueNext(parser, "Name");
             being.Awareness = int.Parse(GetValueNext(parser, "Awareness"), CultureInfo.InvariantCulture);

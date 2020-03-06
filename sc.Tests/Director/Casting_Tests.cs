@@ -16,9 +16,8 @@ namespace CopperBend.Engine.Tests
             var entityFactory = Substitute.For<ISadConEntityFactory>();
             entityFactory.GetSadCon(Arg.Any<ISadConInitData>())
                 .Returns(Substitute.For<IEntity>());
-            Being.SadConEntityFactory = entityFactory;
 
-            Engine.Cosmogenesis("casting");
+            Engine.Cosmogenesis("casting", entityFactory);
         }
 
         [Test]

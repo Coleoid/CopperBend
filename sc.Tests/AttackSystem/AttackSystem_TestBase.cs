@@ -25,8 +25,7 @@ namespace CopperBend.Engine.Tests
 
         public void Prepare_game_entity_creation()
         {
-            Engine.Cosmogenesis("attack!");
-            Being.SadConEntityFactory = Substitute.For<ISadConEntityFactory>();
+            Engine.Cosmogenesis("attack!", Substitute.For<ISadConEntityFactory>());
         }
 
         [SetUp]

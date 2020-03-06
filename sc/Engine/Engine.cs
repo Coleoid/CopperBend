@@ -43,7 +43,7 @@ namespace CopperBend.Engine
         private CommandDispatcher Dispatcher { get; set; }
         private Describer Describer { get; set; }
         private UIBuilder UIBuilder { get; set; }
-
+        public ISadConEntityFactory SadConEntityFactory { get; private set; }
         private bool GameInProgress { get; set; }
         private int TickWhenGameLastSaved { get; set; }
         private string TopSeed { get; set; }
@@ -93,7 +93,7 @@ namespace CopperBend.Engine
 
             UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
 
-            Being.SadConEntityFactory = new SadConEntityFactory(mapFontMaster);
+            SadConEntityFactory = new SadConEntityFactory(mapFontMaster);
             Schedule = new Schedule(log);
 
             MapWindowSize = new Size(GameSize.Width * 1 / 3, GameSize.Height - 8);
@@ -138,9 +138,9 @@ namespace CopperBend.Engine
 
         public void BeginNewGame()
         {
-            TopSeed = GenerateSimpleTopSeed();
+            TopSeed = GenerateSimpleTopSeed();  //BUG:  I don't want this on first run.
             log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
-            Cosmogenesis(TopSeed);
+            Cosmogenesis(TopSeed, SadConEntityFactory);
             Describer.Scramble();
 
             var loader = new Persist.MapLoader(log);
@@ -224,17 +224,14 @@ namespace CopperBend.Engine
 
         private Being CreatePlayer(Coord playerLocation)
         {
-            var player = new Player(Color.AntiqueWhite, Color.Transparent, '@')
-            {
-                Name = "Suvail",
-                Position = playerLocation,
-            };
+            var player = BeingCreator.CreateBeing("player");
             player.AddComponent(new EntityViewSyncComponent());
             player.AddToInventory(Equipper.BuildItem("hoe"));
             player.AddToInventory(Equipper.BuildItem("seed:Healer", 2));
+            player.Position = playerLocation;
+            player.Console.Position = playerLocation;
 
             log.Debug("Created player.");
-            player.Console.Position = playerLocation;
             return player;
         }
         #endregion

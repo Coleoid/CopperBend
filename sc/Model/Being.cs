@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 using GoRogue;
 using CopperBend.Contract;
+using SadConsole.Components;
 
 namespace CopperBend.Model
 {
@@ -200,6 +201,11 @@ namespace CopperBend.Model
             Energy -= amount;
             //0.1: as energy hits 0, actions prevented.
             //0.2: as energy nears 0, chance of ill effects.
+        }
+
+        internal void AddComponent(IConsoleComponent component)
+        {
+            SadConEntity.Components.Add(component);
         }
     }
 }

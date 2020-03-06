@@ -1,4 +1,5 @@
-﻿using Color = Microsoft.Xna.Framework.Color;
+﻿using System;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace CopperBend.Model
 {
@@ -6,8 +7,8 @@ namespace CopperBend.Model
     {
         public override string BeingType { get; set; } = "Monster";
 
-        public Monster(Color foreground, Color background, int glyph = 'M', uint id = uint.MaxValue)
-            : base(foreground, background, glyph, id)
+        public Monster(Guid blocker, Color foreground, Color background, int glyph = 'M', uint id = uint.MaxValue)
+            : base(blocker, foreground, background, glyph, id)
         {
         }
     }

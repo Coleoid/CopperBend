@@ -16,17 +16,23 @@ namespace CopperBend.Fabric
 
         public Being CreateBeing(string beingName)
         {
-            if (beingName == "player")
+            var being = beingName switch
             {
-                return new Player(Guid.NewGuid(), Color.AntiqueWhite, Color.Transparent, '@')
+                "player" => new Player(Guid.NewGuid(), Color.LawnGreen, Color.Black, '@')
                 {
                     Name = "Suvail",
-                };
-            }
-            else
-            {
-                throw new Exception($"Don't know how to CreateBeing(\"{beingName}\").");
-            }
+                    IsPlayer = true,
+                },
+                "flame rat" => new Being(Guid.NewGuid(), Color.Red, Color.Black, 'r')
+                {
+                    Name = "flame rat",
+                },
+                _ => throw new Exception($"Don't know how to CreateBeing(\"{beingName}\")."),
+            };
+
+            being.SadConEntity = SadConEntityFactory.GetSadCon(being);
+
+            return being;
         }
 
         public Being CreateBeing(Color foreground, Color background, int glyph, uint id = uint.MaxValue)

@@ -1,4 +1,5 @@
 ﻿using CopperBend.Contract;
+using CopperBend.Fabric;
 using CopperBend.Model;
 using log4net;
 using NSubstitute;
@@ -22,10 +23,14 @@ namespace CopperBend.Engine.Tests
         public DefenseMethod ring_armor;
 
         public ILog __log;
+        public ISadConEntityFactory __sadConEntityFactory;
+        public BeingCreator BeingCreator;
 
         public void Prepare_game_entity_creation()
         {
-            Engine.Cosmogenesis("attack!", Substitute.For<ISadConEntityFactory>());
+            __sadConEntityFactory = Substitute.For<ISadConEntityFactory>();
+            Engine.Cosmogenesis("attack!", __sadConEntityFactory);
+            BeingCreator = Engine.BeingCreator;
         }
 
         [SetUp]

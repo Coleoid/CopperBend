@@ -18,7 +18,7 @@ namespace CopperBend.Engine.Tests
             // hit with immediate vital.rot.toxin damage.
             var asys = new AttackSystem(null, __log);
 
-            var flameRat = new Being(Color.Red, Color.Black, 'r');
+            var flameRat = BeingCreator.CreateBeing("flame rat");
             var am = new AttackMethod(damageType, "1d3 +2");
             var rot = new AreaRot();
             Attack attack = new Attack
@@ -50,7 +50,7 @@ namespace CopperBend.Engine.Tests
         {
             var asys = new AttackSystem(null, __log);
 
-            var flameRat = new Being(Color.Red, Color.Black, 'r');
+            var flameRat = BeingCreator.CreateBeing("flame rat");
             var am = new AttackMethod("physical.impact.point", "1d3 +2");
             var rot = new AreaRot();
 

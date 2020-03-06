@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using Microsoft.Xna.Framework;
-using YamlDotNet.Serialization;
 using YamlDotNet.Core;
-using CopperBend.Contract;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
+using CopperBend.Contract;
 using CopperBend.Model;
 using CopperBend.Fabric;
 
@@ -106,7 +106,6 @@ namespace CopperBend.Persist
         private void EmitPlayer(IEmitter emitter, IBeing iBeing)
         {
             EmitBeing(emitter, iBeing);
-            //var player = (Player)iBeing;
         }
     }
 }

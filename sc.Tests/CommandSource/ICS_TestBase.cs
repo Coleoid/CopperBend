@@ -4,12 +4,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SadConsole.Input;
 using log4net;
-using log4net.Config;
-using log4net.Repository;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using CopperBend.Model.Aspects;
 using NSubstitute;
 using NUnit.Framework;
 using System;
@@ -75,7 +72,7 @@ namespace CopperBend.Engine.Tests
             SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;
             SpaceMap.TerrainTypes[ttDoorClosed.Name] = ttDoorClosed;
 
-            Engine.Cosmogenesis("bang");
+            Engine.Cosmogenesis("bang", Substitute.For<ISadConEntityFactory>());
         }
         #endregion
 

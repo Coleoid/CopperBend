@@ -12,7 +12,7 @@ namespace CopperBend.Engine
     public partial class Engine
     {
         public static Compendium Compendium { get; set; }
-        public static BeingCreator BeingCreator { get; set; }
+        public static BeingCreator BeingCreator { get => Compendium.BeingCreator; }
 
         public static void Cosmogenesis(string topSeed, ISadConEntityFactory factory)
         {

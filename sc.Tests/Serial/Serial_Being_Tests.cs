@@ -19,12 +19,14 @@ namespace CopperBend.Persist.Tests
         [SetUp]
         public void SetUp()
         {
+            var ycIBeing = new YConv_IBeing();
+
             _serializer = new SerializerBuilder()
-                .WithTypeConverter(new YConv_IBeing())
+                .WithTypeConverter(ycIBeing)
                 .Build();
 
             _deserializer = new DeserializerBuilder()
-                .WithTypeConverter(new YConv_IBeing())
+                .WithTypeConverter(ycIBeing)
                 .Build();
 
             var entityFactory = Substitute.For<ISadConEntityFactory>();
@@ -32,6 +34,7 @@ namespace CopperBend.Persist.Tests
                 .Returns(Substitute.For<IEntity>());
             Engine.Engine.Cosmogenesis("serial being!", entityFactory);
             _beingCreator = Engine.Engine.BeingCreator;
+            ycIBeing.BeingCreator = _beingCreator;
         }
 
         [Test]

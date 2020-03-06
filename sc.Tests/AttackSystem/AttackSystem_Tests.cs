@@ -2,7 +2,6 @@
 using System.Linq;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using Microsoft.Xna.Framework;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
@@ -119,7 +118,7 @@ namespace CopperBend.Engine.Tests
         {
             var asys = new AttackSystem(null, __log);
 
-            var player = new Being(Color.LawnGreen, Color.Black, '@') { IsPlayer = true };
+            var player = BeingCreator.CreateBeing("player");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
             var rot = new AreaRot();
             Attack attack = new Attack
@@ -153,7 +152,7 @@ namespace CopperBend.Engine.Tests
         {
             var asys = new AttackSystem(null, __log);
 
-            var flameRat = new Being(Color.Red, Color.Black, 'r');
+            var flameRat = BeingCreator.CreateBeing("flame rat");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
             var rot = new AreaRot();
             Attack attack = new Attack
@@ -175,7 +174,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Nature_strikes_neighboring_rot_through_our_hero()
         {
-            var player = new Being(Color.LawnGreen, Color.Black, '@') { IsPlayer = true };
+            var player = BeingCreator.CreateBeing("player");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
             var rot = new AreaRot();
             Attack attack = new Attack

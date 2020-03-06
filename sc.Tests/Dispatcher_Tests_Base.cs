@@ -6,7 +6,7 @@ using CopperBend.Fabric;
 using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
-
+using SadConsole.Entities;
 
 namespace CopperBend.Engine.Tests
 {
@@ -18,6 +18,8 @@ namespace CopperBend.Engine.Tests
         protected GameState _gameState = null;
         protected IDescriber __describer = null;
         protected IMessageLogWindow __messageOutput = null;
+        protected ISadConEntityFactory __factory = null;
+        protected BeingCreator BeingCreator;
 
         protected TerrainType ttFloor;
         protected TerrainType ttWall;
@@ -95,7 +97,12 @@ namespace CopperBend.Engine.Tests
             SpaceMap.TerrainTypes[ttSoilTilled.Name] = ttSoilTilled;
             SpaceMap.TerrainTypes[ttSoilPlanted.Name] = ttSoilPlanted;
 
-            Engine.Cosmogenesis("bang");
+            __factory = Substitute.For<ISadConEntityFactory>();
+            __factory.GetSadCon(Arg.Any<ISadConInitData>())
+                .Returns(Substitute.For<IEntity>());
+
+            Engine.Cosmogenesis("bang", __factory);
+            BeingCreator = Engine.BeingCreator;
         }
 
         [SetUp]
@@ -119,8 +126,6 @@ namespace CopperBend.Engine.Tests
             {
                 ClearPendingInput = () => { }
             };
-
-            Being.SadConEntityFactory = Substitute.For<ISadConEntityFactory>();
         }
 
         public SpaceMap CreateSmallTestMap()

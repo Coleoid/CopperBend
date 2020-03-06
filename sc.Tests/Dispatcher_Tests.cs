@@ -7,13 +7,13 @@ using CopperBend.Model.Aspects;
 using NSubstitute;
 using NUnit.Framework;
 using CopperBend.Fabric;
+using SadConsole.Entities;
 
 namespace CopperBend.Engine.Tests
 {
     [TestFixture]
     public class Dispatcher_Tests : Dispatcher_Tests_Base
     {
-
         void Assert_MessageSent_Iff_Player(bool isPlayer, string message)
         {
             if (isPlayer)
@@ -28,7 +28,7 @@ namespace CopperBend.Engine.Tests
         {
             __describer.Describe((Item)null).ReturnsForAnyArgs("Thing");
 
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             var item = new Item((0, 0), 1);
             var consumable = new Ingestible
             {
@@ -47,7 +47,7 @@ namespace CopperBend.Engine.Tests
         {
             __describer.Describe((Item)null).ReturnsForAnyArgs("Thing");
 
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             var item = new Item((0, 0), 1);
             var consumable = new Ingestible
             {
@@ -72,7 +72,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Consume_all_of_wielded_empties_hands()
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             var item = new Item((0, 0), 1);
             var consumable = new Ingestible(foodValue:22)
             {
@@ -92,7 +92,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Consume_part_of_wielded_leaves_remainder_wielded()
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             var item = new Item((0, 0), 3);
             var consumable = new Ingestible
             {
@@ -115,7 +115,7 @@ namespace CopperBend.Engine.Tests
         [TestCase(CmdDirection.Northeast, 17)]
         public void Direction_commands_take_time(CmdDirection direction, int tickOff)
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo((2, 2));
             var cmd = new Command(CmdAction.Direction, direction, null);
             _dispatcher.CommandBeing(being, cmd);
@@ -127,7 +127,9 @@ namespace CopperBend.Engine.Tests
         [TestCase(CmdDirection.Northeast, 3, 1)]
         public void Direction_commands_change_location(CmdDirection direction, int newX, int newY)
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            __factory.GetSadCon(Arg.Any<ISadConInitData>())
+                .Returns(Substitute.For<IEntity>());
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo((2, 2));
             var cmd = new Command(CmdAction.Direction, direction, null);
             _dispatcher.CommandBeing(being, cmd);
@@ -140,7 +142,7 @@ namespace CopperBend.Engine.Tests
         public void Moving_to_unwalkable_tile_does_nothing(CmdDirection direction)
         {
             __describer.Describe("").ReturnsForAnyArgs("a wall");
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo((3, 2));
             being.IsPlayer = true;
             var cmd = new Command(CmdAction.Direction, direction, null);
@@ -155,11 +157,8 @@ namespace CopperBend.Engine.Tests
         public void Moving_to_closed_door_opens_door_without_moving()
         {
             var startingPoint = new Point(3, 3);
-            var being = new Being(Color.White, Color.Black, '@')
-            {
-                IsPlayer = true,
-                Position = startingPoint,
-            };
+            var being = BeingCreator.CreateBeing("player");
+            being.Position = startingPoint;
             var doorSpace = _gameState.Map.SpaceMap.GetItem((3, 4));
 
             Assert.That(being.Position, Is.EqualTo(startingPoint));
@@ -178,11 +177,9 @@ namespace CopperBend.Engine.Tests
         public void Moving_onto_item_notifies_if_player(bool isPlayer)
         {
             var startingPoint = new Point(2, 2);
-            var being = new Being(Color.White, Color.Black, '@')
-            {
-                IsPlayer = isPlayer,
-                Position = startingPoint,
-            };
+            var being = BeingCreator.CreateBeing("player");
+            being.IsPlayer = isPlayer;
+            being.Position = startingPoint;
 
             var itemPoint = new Point(2, 1);
             var item = Equipper.BuildItem("knife");
@@ -203,7 +200,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Drop_throws_on_item_not_in_inventory()
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             var item = new Item((0, 0), 1);
             var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
 
@@ -214,7 +211,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Drop_moves_item_from_inventory_to_map()
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             var item = new Item((0, 0), 1);
             being.AddToInventory(item);
             var mySpot = new GoRogue.Coord(2, 2);
@@ -235,7 +232,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void Drop_wielded()
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             var item = new Item((0, 0), 1);
             being.Wield(item);
             Assert.That(being.WieldedTool, Is.SameAs(item));
@@ -273,7 +270,7 @@ namespace CopperBend.Engine.Tests
         [Test]
         public void PickUp_nothing_takes_no_time()
         {
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo((2, 2));
             var item = new Item((2,2), 1);
 
@@ -287,7 +284,7 @@ namespace CopperBend.Engine.Tests
         public void PickUp_takes_time()
         {
             var coord = new GoRogue.Coord(2, 2);
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo(coord);
             var item = new Item(coord, 1);
             _gameState.Map.ItemMap.Add(item, coord);
@@ -304,7 +301,7 @@ namespace CopperBend.Engine.Tests
         public void PickUp_moves_item_from_map_to_actor()
         {
             var coord = new GoRogue.Coord(2, 2);
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo(coord);
             var item = new Item(coord, 1);
             _gameState.Map.ItemMap.Add(item, coord);
@@ -322,7 +319,7 @@ namespace CopperBend.Engine.Tests
         public void Wield_sets_actor_WieldedTool()
         {
             var coord = new GoRogue.Coord(2, 2);
-            var being = new Being(Color.White, Color.Black, '@');
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo(coord);
             var item = new Item(coord, 1);
             being.AddToInventory(item);

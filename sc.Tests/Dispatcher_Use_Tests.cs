@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using GoRogue;
+﻿using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
 using CopperBend.Fabric;
@@ -13,7 +12,7 @@ namespace CopperBend.Engine.Tests
     {
         private Being SetUp_being_at_coord(Coord coord, int glyph, bool isPlayer = false)
         {
-            var being = new Being(Color.White, Color.Black, glyph);
+            var being = BeingCreator.CreateBeing("player");
             being.MoveTo(coord);
             being.IsPlayer = isPlayer;
 

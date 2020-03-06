@@ -6,7 +6,7 @@ using GoRogue;
 using log4net;
 using CopperBend.Contract;
 
-namespace CopperBend.Logic
+namespace CopperBend.Fabric
 {
     public class UIBuilder
     {
@@ -23,7 +23,7 @@ namespace CopperBend.Logic
             log = logger;
         }
 
-        public MessageLogWindow CreateMessageLog()
+        public IMessageLogWindow CreateMessageLog()
         {
             var messageLog = new MessageLogWindow(gameSize.Width, 8, "Message Log")
             {

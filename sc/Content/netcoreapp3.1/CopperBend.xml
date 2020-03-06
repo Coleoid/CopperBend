@@ -36,8 +36,26 @@
         <member name="P:CopperBend.Contract.IControlPanel.PushEngineMode">
             <summary> When an action interrupts the entire game, in some way. </summary>
         </member>
+        <member name="M:CopperBend.Contract.IMessageLogWindow.WriteLine(System.String)">
+            <summary> add a complete line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Contract.IMessageLogWindow.Prompt(System.String)">
+            <summary> add an unfinished line to the messages </summary>
+        </member>
         <member name="M:CopperBend.Fabric.CompoundMap.SetInitialConsoleCells(SadConsole.ScrollingConsole,CopperBend.Contract.ISpaceMap)">
             <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known. </summary>
+        </member>
+        <member name="M:CopperBend.Fabric.MessageLogWindow.WriteLine(System.String)">
+            <summary> add a complete line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Fabric.MessageLogWindow.Prompt(System.String)">
+            <summary> add an unfinished line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Fabric.NarrativeWindow.WriteLine(System.String)">
+            <summary> add a complete line to the messages </summary>
+        </member>
+        <member name="M:CopperBend.Fabric.NarrativeWindow.Prompt(System.String)">
+            <summary> add an unfinished line to the messages </summary>
         </member>
         <member name="M:CopperBend.Logic.AttackSystem.CheckForSpecials(CopperBend.Logic.Attack)">
             <summary>
@@ -62,14 +80,11 @@
             <summary> Main game mechanisms. </summary>
             <summary> This portion of the Engine handles Well-Knowns, in a book idiom. </summary>
         </member>
+        <member name="M:CopperBend.Logic.Engine.Init">
+            <summary> Initialize more complex game systems </summary>
+        </member>
         <member name="M:CopperBend.Logic.Engine.GameOver(CopperBend.Contract.IBeing,CopperBend.Contract.PlayerDiedException)">
             <summary> I hope you had fun! </summary>
-        </member>
-        <member name="M:CopperBend.Logic.IMessageLogWindow.WriteLine(System.String)">
-            <summary> add a complete line to the messages </summary>
-        </member>
-        <member name="M:CopperBend.Logic.IMessageLogWindow.Prompt(System.String)">
-            <summary> add an unfinished line to the messages </summary>
         </member>
         <member name="M:CopperBend.Logic.InputCommandSource.GetCommand(CopperBend.Contract.IBeing)">
             <summary>
@@ -84,18 +99,6 @@
         </member>
         <member name="M:CopperBend.Logic.InputCommandSource.PickUp(CopperBend.Contract.IBeing)">
             <summary> 0.2:  Currently, grab the topmost.  Later, choose. </summary>
-        </member>
-        <member name="M:CopperBend.Logic.MessageLogWindow.WriteLine(System.String)">
-            <summary> add a complete line to the messages </summary>
-        </member>
-        <member name="M:CopperBend.Logic.MessageLogWindow.Prompt(System.String)">
-            <summary> add an unfinished line to the messages </summary>
-        </member>
-        <member name="M:CopperBend.Logic.NarrativeWindow.WriteLine(System.String)">
-            <summary> add a complete line to the messages </summary>
-        </member>
-        <member name="M:CopperBend.Logic.NarrativeWindow.Prompt(System.String)">
-            <summary> add an unfinished line to the messages </summary>
         </member>
         <member name="M:CopperBend.Logic.Schedule.GetNextAction">
             <summary> Get next scheduled action, ordered by tick of occurrence, then FIFO per tick </summary>

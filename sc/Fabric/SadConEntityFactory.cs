@@ -3,7 +3,7 @@ using SadConsole.Entities;
 using CopperBend.Contract;
 using SadConsole;
 
-namespace CopperBend.Logic
+namespace CopperBend.Fabric
 {
     public class SadConEntityFactory : ISadConEntityFactory
     {

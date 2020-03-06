@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
 using SadConsole;
 using GoRogue;
+using CopperBend.Contract;
 
-namespace CopperBend.Logic
+namespace CopperBend.Fabric
 {
     public class MessageLogWindow : Window, IMessageLogWindow
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CopperBend.Logic
+namespace CopperBend.Contract
 {
     public interface IMessageLogWindow
     {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Color = Microsoft.Xna.Framework.Color;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using Size = System.Drawing.Size;
 using log4net;
@@ -47,6 +46,7 @@ namespace CopperBend.Logic
         private bool GameInProgress { get; set; }
         private int TickWhenGameLastSaved { get; set; }
         private string TopSeed { get; set; }
+        private ICompoundMap FullMap { get; set; }
         private readonly bool jumpToDebugger = true;
 
         #region Init
@@ -54,9 +54,6 @@ namespace CopperBend.Logic
             : base()
         {
             log = logger;
-
-            if (topSeed == null) topSeed = GenerateSimpleTopSeed();
-            log.Info($"Initial top seed:  {topSeed}");
             TopSeed = topSeed;
 
             IsVisible = true;
@@ -75,14 +72,13 @@ namespace CopperBend.Logic
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
             MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
 
-            //  This may leave the constructor brittle
             Init();
         }
 
         //0.1: Tease apart distinct start-up goals:
         //  Loading a saved game,
-        //  Debug stuff?
-        private ICompoundMap fullMap;
+        //  Loading debug "saved game" configurations
+        /// <summary> Initialize more complex game systems </summary>
         public void Init()
         {
             var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
@@ -138,30 +134,33 @@ namespace CopperBend.Logic
 
         public void BeginNewGame()
         {
-            TopSeed = GenerateSimpleTopSeed();  //BUG:  I don't want this on first run.
+            if (TopSeed == null)
+                TopSeed = GenerateSimpleTopSeed();
             log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
             Cosmogenesis(TopSeed, SadConEntityFactory);
+            TopSeed = null;
+            Equipper.Herbal = Compendium.Herbal;
             Describer.Scramble();
 
             var loader = new Persist.MapLoader(log);
-            fullMap = loader.FarmMap();
+            FullMap = loader.FarmMap();
 
-            Player = CreatePlayer(fullMap.SpaceMap.PlayerStartPoint);
+            Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
             Schedule.AddAgent(Player, 12);
 
-            (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", fullMap);
+            (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
             Children.Add(MapWindow);
             MapConsole.Children.Add(Player.Console);
-            fullMap.SetInitialConsoleCells(MapConsole, fullMap.SpaceMap);
-            fullMap.FOV = new FOV(fullMap.GetView_CanSeeThrough());
-            fullMap.UpdateFOV(MapConsole, Player.Position);
+            FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
+            FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
+            FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
             messageQueue = new Queue<string>();
 
             GameState = new GameState
             {
                 Player = Player,
-                Map = fullMap,
+                Map = FullMap,
                 Story = Engine.Compendium.Dramaticon,
             };
             Dispatcher.GameState = GameState;
@@ -208,7 +207,7 @@ namespace CopperBend.Logic
 
             GameState = null;
 
-            fullMap.FOV = null;
+            FullMap.FOV = null;
 
             MapConsole.Children.Remove(Player.Console);
             Children.Remove(MapWindow);
@@ -217,7 +216,7 @@ namespace CopperBend.Logic
 
             Schedule.Clear();
             Player = null;
-            fullMap = null;
+            FullMap = null;
 
             log.Info("Shut down game");
         }
@@ -226,10 +225,12 @@ namespace CopperBend.Logic
         {
             var player = BeingCreator.CreateBeing("player");
             player.AddComponent(new EntityViewSyncComponent());
-            player.AddToInventory(Equipper.BuildItem("hoe"));
-            player.AddToInventory(Equipper.BuildItem("seed:Healer", 2));
             player.Position = playerLocation;
             player.Console.Position = playerLocation;
+
+            //0.2: remove these pre-equipped items
+            player.AddToInventory(Equipper.BuildItem("hoe"));
+            player.AddToInventory(Equipper.BuildItem("seed:Healer", 2));
 
             log.Debug("Created player.");
             return player;
@@ -514,10 +515,10 @@ namespace CopperBend.Logic
         public void SyncMapChanges()
         {
             //  If any spaces changed whether they can be seen through, rebuild FOV
-            if (fullMap.VisibilityChanged)
+            if (FullMap.VisibilityChanged)
             {
-                fullMap.FOV = new FOV(fullMap.GetView_CanSeeThrough());
-                fullMap.VisibilityChanged = false;
+                FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
+                FullMap.VisibilityChanged = false;
                 Dispatcher.PlayerMoved = true;
             }
 
@@ -525,21 +526,21 @@ namespace CopperBend.Logic
             {
                 //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
 
-                fullMap.UpdateFOV(MapConsole, Player.Position);
+                FullMap.UpdateFOV(MapConsole, Player.Position);
                 MapConsole.CenterViewPortOnPoint(Player.Position);
                 Dispatcher.PlayerMoved = false;
             }
 
-            if (!fullMap.CoordsWithChanges.Any()) return;
-            var changedAndInFOV = fullMap.CoordsWithChanges
-                .Intersect(fullMap.FOV.CurrentFOV);
-            fullMap.UpdateViewOfCoords(MapConsole, changedAndInFOV);
-            fullMap.CoordsWithChanges.Clear();
+            if (!FullMap.CoordsWithChanges.Any()) return;
+            var changedAndInFOV = FullMap.CoordsWithChanges
+                .Intersect(FullMap.FOV.CurrentFOV);
+            FullMap.UpdateViewOfCoords(MapConsole, changedAndInFOV);
+            FullMap.CoordsWithChanges.Clear();
         }
 
         private void AnimateBackground(TimeSpan timeElapsed)
         {
-            fullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
+            FullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
         }
 
         #region LargeMessages, currently empty

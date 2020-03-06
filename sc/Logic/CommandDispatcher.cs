@@ -22,7 +22,7 @@ namespace CopperBend.Logic
 
         private readonly IDescriber describer;
         private readonly IMessageLogWindow messageLog;
-        private ILog log;
+        private readonly ILog log;
 
         // becomes external dependency soon
         public AttackSystem AttackSystem { get; set; }

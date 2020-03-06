@@ -3,9 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
+using SadConsole.Components;
 using GoRogue;
 using CopperBend.Contract;
-using SadConsole.Components;
 
 namespace CopperBend.Model
 {
@@ -92,15 +92,10 @@ namespace CopperBend.Model
 
             if (IsPlayer)
             {
-                //0.1  Nice. and. Crispy.
-                //0.1: I want roughly this, but for the short term, I'm testing dying, so...
+                //0.1: commented out short term, whil testing character death
                 //defenseMethod.Resistances.Add("vital.rot", "4/5");
-                defenseMethod.Resistances.Add("default", "1/5");
             }
-            else
-            {
-                defenseMethod.Resistances.Add("default", "1/5");
-            }
+            defenseMethod.Resistances.Add("default", "1/5");
 
             return defenseMethod;
         }
@@ -116,8 +111,8 @@ namespace CopperBend.Model
 
         public bool IsPlayer { get; set; }
 
-        //  Inventory has extra game effects, so I want to be sure I
-        //  don't casually add/remove directly from the list, from outside.
+        //  Inventory has extra game effects, so extra protection against
+        // accidentally manipulating the inventory from outside.
         private readonly List<IItem> inventoryList;
         public IReadOnlyCollection<IItem> Inventory
         {

@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using CopperBend.Contract;
 using CopperBend.Model;
-using CopperBend.Fabric;
 
 namespace CopperBend.Logic
 {
@@ -53,20 +52,15 @@ namespace CopperBend.Logic
             IBeing being = null;
 
             // Phase 2: ?
+            being = Engine.Compendium.SocialRegister.FindBeing(entityWanted);
 
             return being;
         }
 
-        //  definitely belongs elsewhere soon
         public Being BuildNewBeing(string entityWanted)
         {
             var creator = Engine.Compendium.BeingCreator;
-
-            // add method which takes name only
-            Being being = creator.CreateBeing(Color.Purple, Color.Black, 'r');
-            being.Name = "rat";
-
-            return being;
+            return creator.CreateBeing(entityWanted);
         }
     }
 

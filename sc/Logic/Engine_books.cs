@@ -111,6 +111,7 @@ namespace CopperBend.Logic
         {
             Compendium.Herbal = herbal;
             Describer.Herbal = herbal;
+            Equipper.Herbal = herbal;
         }
 
         public static Dramaticon InitStory()

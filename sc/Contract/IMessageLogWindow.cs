@@ -13,7 +13,7 @@ namespace CopperBend.Contract
         /// <summary> add an unfinished line to the messages </summary>
         void Prompt(string message);
 
-        //void Show();
+        void Show();
         //void Hide();
         //void Center();
         //void Print(int x, int y, string text);

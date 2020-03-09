@@ -29,7 +29,7 @@ namespace CopperBend.Logic
 
         private ScrollingConsole MapConsole { get; set; }
         public Window MapWindow { get; set; }
-        public MessageLogWindow MessageWindow { get; set; }
+        public IMessageLogWindow MessageWindow { get; set; }
         private Window MenuWindow { get; set; }
         private ControlsConsole MenuConsole { get; set; }
 
@@ -101,7 +101,7 @@ namespace CopperBend.Logic
             Children.Add(MenuWindow);
 
             MessageWindow = UIBuilder.CreateMessageLog();
-            Children.Add(MessageWindow);
+            Children.Add((SadConsole.Console)MessageWindow);
             MessageWindow.Show();
 
             Describer = new Describer();  // (must be attached to Herbal &c per-game)

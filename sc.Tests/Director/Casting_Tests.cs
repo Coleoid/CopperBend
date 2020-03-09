@@ -25,10 +25,10 @@ namespace CopperBend.Logic.Tests
         {
             var director = new Director();
 
-            IBeing newRat = director.BuildNewBeing("rat");
+            IBeing newRat = director.BuildNewBeing("flame rat");
 
             Assert.That(newRat, Is.Not.Null);
-            Assert.That(newRat.Foreground, Is.EqualTo(Color.Purple));  // I've seen odder things
+            Assert.That(newRat.Foreground, Is.EqualTo(Color.Red));
         }
 
         [Test]

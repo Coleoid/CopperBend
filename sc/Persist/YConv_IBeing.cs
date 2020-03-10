@@ -26,27 +26,7 @@ namespace CopperBend.Persist
 
             emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
 
-            //EmitKVP(emitter, "BeingType", being.BeingType);
-
-            switch (being.BeingType)
-            {
-            case "Being":
-                EmitBeing(emitter, being);
-                break;
-
-            case "Player":
-                EmitPlayer(emitter, being);
-                //emitter.Emit(new Scalar(null, "Compendium"));
-                //EmitCompendium(emitter, book);
-                break;
-
-            case "Monster":
-                //EmitTome(emitter, book);
-                break;
-
-            default:
-                throw new NotImplementedException($"Not ready to Write being type [{being.BeingType}].");
-            }
+            EmitBeing(emitter, being);
 
             emitter.Emit(new MappingEnd());
         }
@@ -56,19 +36,14 @@ namespace CopperBend.Persist
             //if (!Debugger.IsAttached) Debugger.Launch();
 
             parser.Consume<MappingStart>();
-            var beingType = GetValueNext(parser, "BeingType");
-
-            IBeing being = beingType switch
-            {
-                "Being" => ParseBeing(parser),
-                _ => throw new NotImplementedException($"Not ready to Read being type [{beingType}]."),
-            };
+            IBeing being = ParseBeing(parser);
             parser.Consume<MappingEnd>();
+
             return being;
         }
         #endregion
 
-        private void EmitBeing(IEmitter emitter, IBeing iBeing)
+        public void EmitBeing(IEmitter emitter, IBeing iBeing)
         {
             var being = (Being)iBeing;
             EmitKVP(emitter, "BeingType", being.BeingType);
@@ -84,8 +59,9 @@ namespace CopperBend.Persist
             EmitKVP(emitter, "Position", being.Position.ToString());
         }
 
-        private IBeing ParseBeing(IParser parser)
+        public IBeing ParseBeing(IParser parser)
         {
+            var type = GetValueNext(parser, "BeingType");
             uint id = uint.Parse(GetValueNext(parser, "ID"), CultureInfo.InvariantCulture);
 
             string fgText = GetValueNext(parser, "Foreground");
@@ -100,12 +76,9 @@ namespace CopperBend.Persist
             being.Awareness = int.Parse(GetValueNext(parser, "Awareness"), CultureInfo.InvariantCulture);
             being.Health = int.Parse(GetValueNext(parser, "Health"), CultureInfo.InvariantCulture);
             being.Position = Point_FromString(GetValueNext(parser, "Position"));
-            return being;
-        }
+            being.BeingType = type;
 
-        private void EmitPlayer(IEmitter emitter, IBeing iBeing)
-        {
-            EmitBeing(emitter, iBeing);
+            return being;
         }
     }
 }

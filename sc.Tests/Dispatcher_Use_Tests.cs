@@ -12,7 +12,7 @@ namespace CopperBend.Logic.Tests
     {
         private Being SetUp_being_at_coord(Coord coord, int glyph, bool isPlayer = false)
         {
-            var being = BeingCreator.CreateBeing("player");
+            var being = BeingCreator.CreateBeing("Suvail");
             being.MoveTo(coord);
             being.IsPlayer = isPlayer;
 

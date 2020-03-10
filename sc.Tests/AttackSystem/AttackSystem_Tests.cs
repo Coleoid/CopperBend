@@ -118,7 +118,7 @@ namespace CopperBend.Logic.Tests
         {
             var asys = new AttackSystem(null, __log);
 
-            var player = BeingCreator.CreateBeing("player");
+            var player = BeingCreator.CreateBeing("Suvail");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
             var rot = new AreaRot();
             Attack attack = new Attack
@@ -174,7 +174,7 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Nature_strikes_neighboring_rot_through_our_hero()
         {
-            var player = BeingCreator.CreateBeing("player");
+            var player = BeingCreator.CreateBeing("Suvail");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
             var rot = new AreaRot();
             Attack attack = new Attack

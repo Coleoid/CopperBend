@@ -6,6 +6,7 @@ using YamlDotNet.Core.Events;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using CopperBend.Logic;
 
 namespace CopperBend.Persist
 {
@@ -230,13 +231,82 @@ namespace CopperBend.Persist
         private void EmitSocialRegister(IEmitter emitter, IBook book)
         {
             if (book == null) return;
+            var reg = (SocialRegister)book;
+
+            var yBeing = new YConv_IBeing();
+            yBeing.BeingCreator = Engine.BeingCreator;
+
+            emitter.Emit(new Scalar(null, "SocialRegister"));
+            emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
+
+            foreach (var key in reg.WellKnownBeings.Keys)
+            {
+                emitter.Emit(new Scalar("Being"));
+                emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
+
+                yBeing.EmitBeing(emitter, reg.WellKnownBeings[key]);
+
+                emitter.Emit(new MappingEnd());
+            }
+
+            emitter.Emit(new MappingEnd());
         }
+
+        //private void EmitBeingDetails(IEmitter emitter, IBeing being)
+        //{
+        //    emitter.Emit(new Scalar("Being"));
+        //    emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
+
+        //    EmitKVP(emitter, "ID", being.ID);
+        //    EmitKVP(emitter, "Name", being.Name);
+        //    EmitKVP(emitter, "Foreground", being.Foreground.ToString());
+        //    EmitKVP(emitter, "Background", being.Background.ToString());
+        //    EmitKVP(emitter, "Glyph", being.Glyph);
+        //    EmitKVP(emitter, "Type", being.BeingType);
+
+        //    emitter.Emit(new MappingEnd());
+        //}
 
         private IBook ParseSocialRegister(IParser parser)
         {
+            parser.Consume<MappingStart>();
             SocialRegister socialRegister = new SocialRegister();
+
+            var yBeing = new YConv_IBeing();
+            yBeing.BeingCreator = Engine.BeingCreator;
+
+            while (parser.TryConsume<Scalar>(out var evt) && evt.Value == "Being")
+            {
+                parser.Consume<MappingStart>();
+                IBeing being = yBeing.ParseBeing(parser);
+                parser.Consume<MappingEnd>();
+
+                socialRegister.WellKnownBeings[being.Name] = being;
+            }
+
+            parser.Consume<MappingEnd>();
             return socialRegister;
         }
+
+        //private Being ParseBeingDetails(IParser parser)
+        //{
+        //    parser.Consume<MappingStart>();
+
+        //    var id = uint.Parse(GetValueNext(parser, "ID"), CultureInfo.InvariantCulture);
+        //    var name = GetValueNext(parser, "Name");
+        //    var fg = Color_FromString(GetValueNext(parser, "Foreground"));
+        //    var bg = Color_FromString(GetValueNext(parser, "Background"));
+        //    var glyph = int.Parse(GetValueNext(parser, "Glyph"), CultureInfo.InvariantCulture);
+        //    var type = GetValueNext(parser, "Type");
+
+        //    parser.Consume<MappingEnd>();
+
+        //    var being = Engine.BeingCreator.CreateBeing(fg, bg, glyph, id);
+        //    being.Name = name;
+        //    being.BeingType = type;
+
+        //    return being;
+        //}
 
         private void EmitDramaticon(IEmitter emitter, IBook book)
         {

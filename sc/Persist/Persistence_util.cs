@@ -29,6 +29,21 @@ namespace CopperBend.Persist
             return scalar.Value;
         }
 
+        public void EmitKVP(IEmitter emitter, string key, uint value)
+        {
+            EmitKVP(emitter, key, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void EmitKVP(IEmitter emitter, string key, int value)
+        {
+            EmitKVP(emitter, key, value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        //public void EmitKVP(IEmitter emitter, string key, object value)
+        //{
+        //    EmitKVP(emitter, key, value.ToString());
+        //}
+
         public void EmitKVP(IEmitter emitter, string key, string value)
         {
             emitter.Emit(new Scalar(null, key));

@@ -11,6 +11,12 @@ namespace CopperBend.Application
 {
     public class Program
     {
+        public static int Main(string[] args)
+        {
+            // populate command-line arguments, then call OnExecute()
+            return CommandLineApplication.Execute<Program>(args);
+        }
+
         [Option("-d|--Debug")]
         public bool LaunchDebugger { get; }
 
@@ -19,17 +25,6 @@ namespace CopperBend.Application
 
         [Option("-s|--seed")]
         public string InitialSeed { get; } = null;
-
-#pragma warning disable IDE0052 // Remove unread private members
-        //  Engine Engine engine.  Here to satisfy a warning, it generates a new one.  C'est la vie.
-        private Engine engine;
-#pragma warning restore IDE0052 // Remove unread private members
-
-        public static int Main(string[] args)
-        {
-            // populate command-line arguments, then call OnExecute()
-            return CommandLineApplication.Execute<Program>(args);
-        }
 
         public void OnExecute()
         {
@@ -44,10 +39,10 @@ namespace CopperBend.Application
 
             int gameWidth = 160;
             int gameHeight = 60;
+            Engine engine;
 
             try
             {
-                //Game.Create("Cheepicus_14x14.font", gameWidth, gameHeight);
                 Game.Create(gameWidth, gameHeight);
 
                 //  Engine is now a console, which cannot be created before .Run() below.

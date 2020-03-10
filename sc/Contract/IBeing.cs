@@ -7,13 +7,13 @@ namespace CopperBend.Contract
     public interface IBeing : IDelible, IScheduleAgent, IHasID, IAttacker, IDefender
     {
         string Name { get; set; }
-        int Awareness { get; set; }
-        bool IsPlayer { get; set; }
-
         Color Foreground { get; }
         Color Background { get; }
         int Glyph { get; }
         string BeingType { get; set; }
+
+        int Awareness { get; set; }
+        bool IsPlayer { get; set; }
 
         ICommandSource CommandSource { get; set; }
 

@@ -4,6 +4,8 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using NUnit.Framework;
 using CopperBend.Model;
+using NSubstitute;
+using CopperBend.Logic;
 
 namespace CopperBend.Persist.Tests
 {
@@ -117,6 +119,33 @@ namespace CopperBend.Persist.Tests
             Assert.That(newDetail.MainName, Is.EqualTo("Thornfriend"));
             //...
         }
+
+
+        [Test]
+        public void CRT_SocialRegister()
+        {
+            var scef = Substitute.For<ISadConEntityFactory>();
+            Engine.Cosmogenesis("with folks!", scef);
+
+            //if (!Debugger.IsAttached) Debugger.Launch();
+            var creator = new BeingCreator(scef);
+            var ourHero = creator.CreateBeing("Suvail");
+            var reg = new SocialRegister();
+            reg.LoadRegister(ourHero);
+
+            var yaml = _serializer.Serialize(reg);
+
+            Assert.That(yaml, Is.Not.Null);
+
+            var newBook = _deserializer.Deserialize<IBook>(yaml);
+            Assert.That(newBook, Is.TypeOf<SocialRegister>());
+            var newRegister = (SocialRegister)newBook;
+
+            var newDetail = newRegister.WellKnownBeings["Kellet Benison"];
+            Assert.That(newDetail.Name, Is.EqualTo("Kellet Benison"));
+        }
+
+
     }
 
 }

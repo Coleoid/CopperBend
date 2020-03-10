@@ -34,6 +34,7 @@ namespace CopperBend.Model
             Foreground = foreground;
             Background = background;
             Glyph = glyph;
+            Position = new Point(0, 0);
         }
 
         public Point Position { get => SadConEntity.Position; set => SadConEntity.Position = value; }
@@ -114,6 +115,7 @@ namespace CopperBend.Model
         //  Inventory has extra game effects, so extra protection against
         // accidentally manipulating the inventory from outside.
         private readonly List<IItem> inventoryList;
+
         public IReadOnlyCollection<IItem> Inventory
         {
             get => new ReadOnlyCollection<IItem>(inventoryList);

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CopperBend.Contract;
 using CopperBend.Model;
 using GoRogue;
@@ -34,25 +33,6 @@ namespace CopperBend.Fabric
         {
             PlantByID[plant.ID] = plant;
             PlantByName[plant.MainName] = plant;
-        }
-    }
-
-    // All significant beings, their current state and relationships
-    public class SocialRegister : IBook
-    {
-        private Dictionary<string, IBeing> WellKnownBeings { get; set; }
-
-        public void LoadRegister()
-        {
-            WellKnownBeings = new Dictionary<string, IBeing>();
-
-            //0.1: Needs to load NPCs from file
-
-        }
-
-        internal IBeing FindBeing(string entityWanted)
-        {
-            throw new NotImplementedException();
         }
     }
 

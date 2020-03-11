@@ -5,6 +5,7 @@ using log4net;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
+using SadConsole.Entities;
 
 namespace CopperBend.Logic.Tests
 {
@@ -29,6 +30,8 @@ namespace CopperBend.Logic.Tests
         public void Prepare_game_entity_creation()
         {
             __sadConEntityFactory = Substitute.For<ISadConEntityFactory>();
+            __sadConEntityFactory.GetSadCon(Arg.Any<ISadConInitData>())
+                .Returns(Substitute.For<IEntity>());
             Engine.Cosmogenesis("attack!", __sadConEntityFactory);
             BeingCreator = Engine.BeingCreator;
         }

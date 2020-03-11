@@ -30,7 +30,7 @@ namespace CopperBend.Fabric
                 _ => throw new Exception($"Don't know how to CreateBeing(\"{beingName}\")."),
             };
 
-            being.SadConEntity = SadConEntityFactory.GetSadCon(being);
+            being.SetSadCon(SadConEntityFactory);
 
             return being;
         }
@@ -38,7 +38,7 @@ namespace CopperBend.Fabric
         public Being CreateBeing(Color foreground, Color background, int glyph, uint id = uint.MaxValue)
         {
             var being = new Being(Guid.NewGuid(), foreground, background, glyph, id);
-            being.SadConEntity = SadConEntityFactory.GetSadCon(being);
+            being.SetSadCon(SadConEntityFactory);
             return being;
         }
     }

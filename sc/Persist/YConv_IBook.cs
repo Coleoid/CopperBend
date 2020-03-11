@@ -252,21 +252,6 @@ namespace CopperBend.Persist
             emitter.Emit(new MappingEnd());
         }
 
-        //private void EmitBeingDetails(IEmitter emitter, IBeing being)
-        //{
-        //    emitter.Emit(new Scalar("Being"));
-        //    emitter.Emit(new MappingStart(null, null, false, MappingStyle.Block));
-
-        //    EmitKVP(emitter, "ID", being.ID);
-        //    EmitKVP(emitter, "Name", being.Name);
-        //    EmitKVP(emitter, "Foreground", being.Foreground.ToString());
-        //    EmitKVP(emitter, "Background", being.Background.ToString());
-        //    EmitKVP(emitter, "Glyph", being.Glyph);
-        //    EmitKVP(emitter, "Type", being.BeingType);
-
-        //    emitter.Emit(new MappingEnd());
-        //}
-
         private IBook ParseSocialRegister(IParser parser)
         {
             parser.Consume<MappingStart>();
@@ -287,26 +272,6 @@ namespace CopperBend.Persist
             parser.Consume<MappingEnd>();
             return socialRegister;
         }
-
-        //private Being ParseBeingDetails(IParser parser)
-        //{
-        //    parser.Consume<MappingStart>();
-
-        //    var id = uint.Parse(GetValueNext(parser, "ID"), CultureInfo.InvariantCulture);
-        //    var name = GetValueNext(parser, "Name");
-        //    var fg = Color_FromString(GetValueNext(parser, "Foreground"));
-        //    var bg = Color_FromString(GetValueNext(parser, "Background"));
-        //    var glyph = int.Parse(GetValueNext(parser, "Glyph"), CultureInfo.InvariantCulture);
-        //    var type = GetValueNext(parser, "Type");
-
-        //    parser.Consume<MappingEnd>();
-
-        //    var being = Engine.BeingCreator.CreateBeing(fg, bg, glyph, id);
-        //    being.Name = name;
-        //    being.BeingType = type;
-
-        //    return being;
-        //}
 
         private void EmitDramaticon(IEmitter emitter, IBook book)
         {

@@ -13,6 +13,6 @@ namespace CopperBend.Contract
         Color Foreground { get; set; }
         Color Background { get; set; }
         int Glyph { get; set; }
-        IEntity SadConEntity { get; set; }
+        IEntity SadConEntity { get; }
     }
 }

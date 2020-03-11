@@ -34,6 +34,11 @@ namespace CopperBend.Model
             Foreground = foreground;
             Background = background;
             Glyph = glyph;
+        }
+
+        internal void SetSadCon(ISadConEntityFactory sadConEntityFactory)
+        {
+            SadConEntity = sadConEntityFactory.GetSadCon(this);
             Position = new Point(0, 0);
         }
 

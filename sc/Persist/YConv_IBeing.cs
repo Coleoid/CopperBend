@@ -56,6 +56,7 @@ namespace CopperBend.Persist
             EmitKVP(emitter, "Name", being.Name ?? string.Empty);
             EmitKVP(emitter, "Awareness", being.Awareness.ToString(CultureInfo.InvariantCulture));
             EmitKVP(emitter, "Health", being.Health.ToString(CultureInfo.InvariantCulture));
+            being.SetSadCon(BeingCreator.SadConEntityFactory);
             EmitKVP(emitter, "Position", being.Position.ToString());
         }
 

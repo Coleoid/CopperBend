@@ -25,6 +25,9 @@ namespace CopperBend.Persist.Tests
             _deserializer = new DeserializerBuilder()
                 .WithTypeConverter(new YConv_IBook())
                 .Build();
+
+            var scef = Substitute.For<ISadConEntityFactory>();
+            Engine.Cosmogenesis("Who wrote the book", scef);
         }
 
         [Test]
@@ -50,7 +53,7 @@ namespace CopperBend.Persist.Tests
 
             //TODO: slightly more muscular checks once these books go beyond placeholders
             Assert.That(newCompendium.Herbal, Is.Not.Null);
-            //Assert.That(newCompendium.SocialRegister, Is.Not.Null);
+            Assert.That(newCompendium.SocialRegister, Is.Not.Null);
             //Assert.That(newCompendium.Dramaticon, Is.Not.Null);
         }
 
@@ -106,7 +109,7 @@ namespace CopperBend.Persist.Tests
 
             herbal.AddPlant(thorny);
             herbal.AddPlant(boomy);
-            
+
             var yaml = _serializer.Serialize(herbal);
 
             Assert.That(yaml, Is.Not.Null);
@@ -117,18 +120,13 @@ namespace CopperBend.Persist.Tests
 
             var newDetail = newHerbal.PlantByID[77];
             Assert.That(newDetail.MainName, Is.EqualTo("Thornfriend"));
-            //...
         }
-
 
         [Test]
         public void CRT_SocialRegister()
         {
-            var scef = Substitute.For<ISadConEntityFactory>();
-            Engine.Cosmogenesis("with folks!", scef);
-
             //if (!Debugger.IsAttached) Debugger.Launch();
-            var creator = new BeingCreator(scef);
+            var creator = Engine.BeingCreator;
             var ourHero = creator.CreateBeing("Suvail");
             var reg = new SocialRegister();
             reg.LoadRegister(ourHero);
@@ -141,11 +139,10 @@ namespace CopperBend.Persist.Tests
             Assert.That(newBook, Is.TypeOf<SocialRegister>());
             var newRegister = (SocialRegister)newBook;
 
-            var newDetail = newRegister.WellKnownBeings["Kellet Benison"];
-            Assert.That(newDetail.Name, Is.EqualTo("Kellet Benison"));
+            var kellet = newRegister.WellKnownBeings["Kellet Benison"];
+            Assert.That(kellet.Name, Is.EqualTo("Kellet Benison"));
+            Assert.That(kellet.BeingType, Is.EqualTo("Townsfolk"));
+            Assert.That(kellet.Glyph, Is.EqualTo('K'));
         }
-
-
     }
-
 }

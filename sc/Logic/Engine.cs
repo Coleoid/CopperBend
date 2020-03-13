@@ -145,7 +145,9 @@ namespace CopperBend.Logic
             var loader = new Persist.MapLoader(log);
             FullMap = loader.FarmMap();
 
-            Player = CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
+            Player = Engine.Compendium.SocialRegister.CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
+            log.Debug("Created player character.");
+
             Schedule.AddAgent(Player, 12);
 
             (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
@@ -219,21 +221,6 @@ namespace CopperBend.Logic
             FullMap = null;
 
             log.Info("Shut down game");
-        }
-
-        private Being CreatePlayer(Coord playerLocation)
-        {
-            var player = BeingCreator.CreateBeing("player");
-            player.AddComponent(new EntityViewSyncComponent());
-            player.Position = playerLocation;
-            player.Console.Position = playerLocation;
-
-            //0.2: remove these pre-equipped items
-            player.AddToInventory(Equipper.BuildItem("hoe"));
-            player.AddToInventory(Equipper.BuildItem("seed:Healer", 2));
-
-            log.Debug("Created player.");
-            return player;
         }
         #endregion
 

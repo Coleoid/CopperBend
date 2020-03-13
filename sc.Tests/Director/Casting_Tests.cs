@@ -1,7 +1,6 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
 using SadConsole.Entities;
-using CopperBend.Model;
 using CopperBend.Contract;
 using Microsoft.Xna.Framework;
 
@@ -18,6 +17,8 @@ namespace CopperBend.Logic.Tests
                 .Returns(Substitute.For<IEntity>());
 
             Engine.Cosmogenesis("casting", entityFactory);
+            //var ourHero = Substitute.For<IBeing>();
+            //Engine.Compendium.SocialRegister.LoadRegister(ourHero);
         }
 
         [Test]
@@ -34,7 +35,12 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Can_cast_NPC()
         {
+            var director = new Director();
 
+            IBeing kellet = director.FindBeing("Kellet Benison");
+
+            Assert.That(kellet, Is.Not.Null);
+            Assert.That(kellet.Foreground, Is.EqualTo(Color.Red));
         }
 
         [Test]

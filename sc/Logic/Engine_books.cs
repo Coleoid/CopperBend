@@ -32,7 +32,10 @@ namespace CopperBend.Logic
             ConnectStory(story);
 
             var creator = InitBeingCreator(factory);
-            ConnectCreator(creator);
+            ConnectBeingCreator(creator);
+
+            var register = InitSocialRegister();
+            ConnectSocialRegister(register);
         }
 
         public static TomeOfChaos InitTome(string topSeed)
@@ -129,9 +132,24 @@ namespace CopperBend.Logic
             return new BeingCreator(factory);
         }
 
-        public static void ConnectCreator(BeingCreator creator)
+        public static void ConnectBeingCreator(BeingCreator creator)
         {
             Compendium.BeingCreator = creator;
+        }
+
+        public static SocialRegister InitSocialRegister()
+        {
+            var register = new SocialRegister();
+            register.BeingCreator = Compendium.BeingCreator;
+            return register;
+        }
+
+        public static void ConnectSocialRegister(SocialRegister register)
+        {
+            var pc = register.CreatePlayer((0, 0));
+            register.LoadRegister(pc);
+
+            Compendium.SocialRegister = register;
         }
 
         private static string GenerateSimpleTopSeed()

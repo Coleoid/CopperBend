@@ -2,19 +2,39 @@
 using System.Collections.Generic;
 using CopperBend.Contract;
 using CopperBend.Model;
+using GoRogue;
 using Microsoft.Xna.Framework;
+using SadConsole.Components;
 
 namespace CopperBend.Fabric
 {
     // All significant beings, their current state and relationships
     public class SocialRegister : IBook
     {
+        public BeingCreator BeingCreator { get; set; }
         public Dictionary<string, IBeing> WellKnownBeings { get; }
 
         public SocialRegister()
         {
             WellKnownBeings = new Dictionary<string, IBeing>();
         }
+
+
+        public Being CreatePlayer(Coord playerLocation)
+        {
+            var player = BeingCreator.CreateBeing(Color.ForestGreen, Color.Black, '@');
+            player.Name = "Suvail";
+            player.AddComponent(new EntityViewSyncComponent());
+            player.Position = playerLocation;
+            player.Console.Position = playerLocation;
+
+            //0.2: remove these pre-equipped items
+            player.AddToInventory(Equipper.BuildItem("hoe"));
+            player.AddToInventory(Equipper.BuildItem("seed:Healer", 2));
+
+            return player;
+        }
+
 
         public void LoadRegister(IBeing ourHero)
         {
@@ -48,7 +68,7 @@ namespace CopperBend.Fabric
             if (WellKnownBeings.ContainsKey(name))
                 throw new Exception("We've already got one.");
 
-            var b = new Being(Guid.NewGuid(), fg, bg, name[0]);
+            var b = BeingCreator.CreateBeing(fg, bg, name[0]);
             b.Name = name;
             b.BeingType = beingType;
             WellKnownBeings[name] = b;

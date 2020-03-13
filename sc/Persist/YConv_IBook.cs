@@ -14,6 +14,8 @@ namespace CopperBend.Persist
 #pragma warning disable CA1801 // Remove unused parameter
     public class YConv_IBook : Persistence_util, IYamlTypeConverter
     {
+        public Compendium Compendium { get; set; }
+
         #region IYamlTypeConverter
         public bool Accepts(Type type)
         {
@@ -99,16 +101,16 @@ namespace CopperBend.Persist
         private IBook ParseCompendium(IParser parser)
         {
             parser.Consume<MappingStart>();
-            var compendium = new Compendium();
+            //var Compendium = new Compendium();
             while (parser.TryConsume<Scalar>(out var next))
             {
                 var book = DispatchParse(parser, next.Value);
                 switch (next.Value)
                 {
-                case "TomeOfChaos": compendium.TomeOfChaos = (TomeOfChaos)book; break;
-                case "Herbal": compendium.Herbal = (Herbal)book; break;
-                case "SocialRegister": compendium.SocialRegister = (SocialRegister)book; break;
-                case "Dramaticon": compendium.Dramaticon = (Dramaticon)book; break;
+                case "TomeOfChaos": Compendium.TomeOfChaos = (TomeOfChaos)book; break;
+                case "Herbal": Compendium.Herbal = (Herbal)book; break;
+                case "SocialRegister": Compendium.SocialRegister = (SocialRegister)book; break;
+                case "Dramaticon": Compendium.Dramaticon = (Dramaticon)book; break;
 
                 default:
                     throw new NotImplementedException($"NI: attach [{next.Value}] to Compendium.");
@@ -116,7 +118,7 @@ namespace CopperBend.Persist
             }
 
             parser.Consume<MappingEnd>();
-            return compendium;
+            return Compendium;
         }
         #endregion
 

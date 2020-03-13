@@ -1,6 +1,7 @@
 ﻿using System;
 using SadConsole.Input;
 using GoRogue;
+using CopperBend.Fabric;
 
 //  Functional completeness levels:
 //  0.0  ---  Code is needed, and doesn't exist or work at all
@@ -24,8 +25,9 @@ namespace CopperBend.Contract
         void ScheduleAgent(IScheduleAgent agent, int tickOff);
 
         /// <summary> When an action interrupts the entire game, in some way. </summary>
-        Action<EngineMode, Action> PushEngineMode { get; }
-        Action PopEngineMode { get; }
+        Action<EngineMode, Action> PushEngineMode { get; set; }
+        IGameState GameState { get; set; }
+        Action PopEngineMode { get; set; }
 
         Coord CoordInDirection(Coord start, CmdDirection direction);
         void PutItemOnMap(IItem item, Coord coord);
@@ -36,6 +38,9 @@ namespace CopperBend.Contract
 
         void AddExperience(uint plantID, Exp experience);
         bool PlayerMoved { get; set; }
+        IAttackSystem AttackSystem { get; }
+
+        void Dispatch(ScheduleEntry nextAction);
 
         //bool CanActorSeeTarget(IBeing being, Coord target);
         //List<Coord> GetPathTo(Coord start, Coord target);

@@ -7,6 +7,7 @@ using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
 using SadConsole.Entities;
+using System;
 
 namespace CopperBend.Logic.Tests
 {
@@ -121,8 +122,9 @@ namespace CopperBend.Logic.Tests
             };
             __describer = Substitute.For<IDescriber>();
             __messageOutput = Substitute.For<IMessageLogWindow>();
+            Action<string> writeLine = (s) => { };
 
-            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, __messageOutput, __log)
+            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, writeLine, __log)
             {
                 ClearPendingInput = () => { }
             };

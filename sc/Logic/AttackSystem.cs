@@ -74,30 +74,26 @@ Apply post-attack effects
 
     */
 
-    /*
-    Another view:
-
-
-    */
-
-    public class AttackSystem
+    public class AttackSystem : IAttackSystem
     {
+        public IControlPanel Panel { get; set; }
         private readonly ILog log;
         public AttackSystem(IControlPanel panel, ILog logger)
         {
             Panel = panel;
+            log = logger;
+
             Destroyed = new Queue<IDelible>();
             AttackQueue = new Queue<Attack>();
-            log = logger;
         }
 
-        public IControlPanel Panel { get; set; }
         public Queue<IDelible> Destroyed { get; }
         public Queue<Attack> AttackQueue { get; }
 
         public void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
         {
-            AddAttack(new Attack {
+            AddAttack(new Attack
+            {
                 Attacker = attacker,
                 AttackMethod = attack,
                 Defender = defender,
@@ -390,14 +386,11 @@ Apply post-attack effects
             }
         }
 
-        #endregion
-    }
+        public void SetRotMap(IRotMap rotMap)
+        {
+            throw new NotImplementedException();
+        }
 
-    public class Attack
-    {
-        public IAttacker Attacker { get; set; }
-        public IAttackMethod AttackMethod { get; set; }
-        public IDefender Defender { get; set; }
-        public IDefenseMethod DefenseMethod { get; set; }
+        #endregion
     }
 }

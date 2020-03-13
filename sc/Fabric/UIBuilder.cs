@@ -8,7 +8,7 @@ using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {
-    public class UIBuilder
+    public class UIBuilder : IUIBuilder
     {
         private readonly Size gameSize;
         private readonly ILog log;
@@ -30,16 +30,6 @@ namespace CopperBend.Fabric
                 Position = new Coord(0, gameSize.Height - 8),
                 DefaultBackground = MG.Color.Black,
             };
-
-            ////  Garbage to visually test the window
-            //messageLog.Add("Testing");
-            //messageLog.Add("Testing B");
-            //messageLog.Add("Testing three");
-            //messageLog.Add("Testing 4");
-            //messageLog.Add("Testing V");
-            //messageLog.Add("Testing #6");
-            //messageLog.Add("Testing Seventh");
-            //messageLog.Add("Testing[7]");
 
             return messageLog;
         }

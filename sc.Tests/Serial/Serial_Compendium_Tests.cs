@@ -33,7 +33,7 @@ namespace CopperBend.Persist.Tests
         [Test]
         public void CRT_Compendium()
         {
-            var compendium = new Compendium
+            var compendium = new Compendium(null)
             {
                 TomeOfChaos = new TomeOfChaos("gloop"),
                 Herbal = new Herbal(),

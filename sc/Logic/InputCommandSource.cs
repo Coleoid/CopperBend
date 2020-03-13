@@ -13,16 +13,16 @@ namespace CopperBend.Logic
         private readonly Command commandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
         private readonly ILog log;
 
-        private readonly Describer describer;
-        private readonly GameState gameState;
+        private readonly IDescriber describer;
+        private readonly IGameState gameState;
         private readonly IControlPanel controls;
 
-        public InputCommandSource(Describer describer, GameState state, IControlPanel controls, ILog logger)
+        public InputCommandSource(IDescriber describer, IGameState state, IControlPanel controls, ILog logger)
         {
             this.describer = describer;
             this.gameState = state;
             this.controls = controls;
-            log = logger;
+            this.log = logger;
         }
 
         public bool IsAssemblingCommand => nextStep != null;

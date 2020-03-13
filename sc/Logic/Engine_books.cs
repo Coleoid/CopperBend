@@ -17,9 +17,9 @@ namespace CopperBend.Logic
 
         public static void Cosmogenesis(string topSeed, ISadConEntityFactory factory)
         {
-            Compendium = new Compendium();
-
             var generator = InitIDGenerator();
+            Compendium = new Compendium(generator);
+
             ConnectIDGenerator(generator);
 
             var tome = InitTome(topSeed);
@@ -52,7 +52,7 @@ namespace CopperBend.Logic
         public static void ConnectTome(TomeOfChaos tome)
         {
             Compendium.TomeOfChaos = tome;
-            Describer.TomeOfChaos = Compendium.TomeOfChaos;
+            //Describer.TomeOfChaos = Compendium.TomeOfChaos;
         }
 
         public static IDGenerator InitIDGenerator()
@@ -63,7 +63,6 @@ namespace CopperBend.Logic
 
         public static void ConnectIDGenerator(IDGenerator gen)
         {
-            Compendium.IDGenerator = gen;
             CbEntity.SetIDGenerator(gen);
             Item.SetIDGenerator(gen);
             Space.SetIDGenerator(gen);
@@ -113,7 +112,7 @@ namespace CopperBend.Logic
         public static void ConnectHerbal(Herbal herbal)
         {
             Compendium.Herbal = herbal;
-            Describer.Herbal = herbal;
+            //Describer.Herbal = herbal;
             Equipper.Herbal = herbal;
         }
 

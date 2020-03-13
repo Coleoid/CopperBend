@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using CopperBend.Logic;
 using log4net;
-using log4net.Config;
 using McMaster.Extensions.CommandLineUtils;
-using Game = SadConsole.Game;
+using Microsoft.Xna.Framework;
 
 namespace CopperBend.Application
 {
@@ -30,33 +28,41 @@ namespace CopperBend.Application
         {
             if (LaunchDebugger && !Debugger.IsAttached) Debugger.Launch();
 
-            ILog log;
-            var repo = LogManager.CreateRepository("CB");
-            XmlConfigurator.Configure(repo, new FileInfo("sc.log.config"));
-            log = LogManager.GetLogger("CB", "CB");
+            Composer composer = new Composer();
+            composer.Compose(InitialSeed, TestMode);
+
+            ILog log = composer.Logger;
             log.Info("\n======================================");
             log.Info("Run started");
 
-            int gameWidth = 160;
-            int gameHeight = 60;
-            Engine engine;
+            LaunchGame(composer, log);
 
+            log.Info("Run ended");
+
+            composer.Release();
+        }
+
+        public void LaunchGame(Composer composer, ILog log)
+        {
+            Game game;
             try
             {
-                Game.Create(gameWidth, gameHeight);
-
-                //  Engine is now a console, which cannot be created before .Run() below.
-                //  .OnInitialize must be set before .Run is called.
-                Game.OnInitialize = () => engine = new Engine(gameWidth, gameHeight, log, InitialSeed);
-                Game.Instance.Window.Title = "Copper Bend";
-                Game.Instance.Run();
+                game = composer.GetGameInstance();
             }
             catch (Exception ex)
             {
-                log.Fatal("Exception terminated app", ex);
+                log.Fatal("Exception terminated construction", ex);
+                return;
             }
-            log.Info("Run ended");
-            Game.Instance?.Dispose();
+
+            try
+            {
+                game.Run();
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("Exception terminated run", ex);
+            }
         }
     }
 }

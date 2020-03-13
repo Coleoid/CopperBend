@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v3.1": {
       "CopperBend/0.0.8": {
         "dependencies": {
+          "Autofac": "5.1.2",
           "GoRogue": "2.5.1",
           "McMaster.Extensions.CommandLineUtils": "2.5.0",
           "Microsoft.CodeAnalysis.CSharp.Workspaces": "3.4.0",
@@ -23,6 +24,14 @@
         },
         "runtime": {
           "CopperBend.dll": {}
+        }
+      },
+      "Autofac/5.1.2": {
+        "runtime": {
+          "lib/netstandard2.1/Autofac.dll": {
+            "assemblyVersion": "5.1.2.0",
+            "fileVersion": "5.1.2.0"
+          }
         }
       },
       "GoRogue/2.5.1": {
@@ -1296,6 +1305,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Autofac/5.1.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-iGEx5Cm6Uor6/bZkgCHHjJO8cEQvDSOxgzNmHGJgGOnLDCe0b8NpOlhotsqx8dFvBDCsEX/V3YGRR30sRQLsxw==",
+      "path": "autofac/5.1.2",
+      "hashPath": "autofac.5.1.2.nupkg.sha512"
     },
     "GoRogue/2.5.1": {
       "type": "package",

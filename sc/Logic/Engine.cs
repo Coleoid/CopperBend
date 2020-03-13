@@ -7,7 +7,6 @@ using Size = System.Drawing.Size;
 using log4net;
 using SadConsole;
 using SadConsole.Input;
-using SadConsole.Components;
 using SadGlobal = SadConsole.Global;
 using GoRogue;
 using CopperBend.Contract;
@@ -20,7 +19,6 @@ namespace CopperBend.Logic
     public partial class Engine : ContainerConsole
     {
         private const int messageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
-        private readonly ILog log;
 
         public Size GameSize { get; set; }
         public Size MapSize { get; set; }
@@ -33,66 +31,71 @@ namespace CopperBend.Logic
         private Window MenuWindow { get; set; }
         private ControlsConsole MenuConsole { get; set; }
 
-        private Keyboard Kbd { get; }
-        public Queue<AsciiKey> InputQueue { get; }
+        public Queue<AsciiKey> InputQueue { get; private set; }
         private Being Player { get; set; }
 
-        private GameState GameState { get; set; }
-        private Schedule Schedule { get; set; }
-        private CommandDispatcher Dispatcher { get; set; }
-        private Describer Describer { get; set; }
-        private UIBuilder UIBuilder { get; set; }
-        public ISadConEntityFactory SadConEntityFactory { get; private set; }
         private bool GameInProgress { get; set; }
         private int TickWhenGameLastSaved { get; set; }
         private string TopSeed { get; set; }
         private ICompoundMap FullMap { get; set; }
         private readonly bool jumpToDebugger = true;
 
+
+        // ===========  Constructor args
+        private readonly ILog log;
+        private ISchedule Schedule { get; set; }
+        private ISadConEntityFactory SadConEntityFactory { get; set; }
+        private Keyboard Keyboard { get; set; }
+        private IUIBuilder UIBuilder { get; set; }
+        private IDescriber Describer { get; set; }
+        private IGameState GameState { get; set; }
+        private IControlPanel Dispatcher { get; set; }
+
         #region Init
-        public Engine(int gameWidth, int gameHeight, ILog logger, string topSeed = null)
+        public Engine(
+                ILog logger,
+                ISchedule schedule,
+                ISadConEntityFactory scef,
+                Keyboard keyboard,
+                Size gameSize,
+                IUIBuilder uiBuilder,
+                IDescriber describer,
+                IGameState gameState,
+                IControlPanel dispatcher
+            )
             : base()
         {
             log = logger;
-            TopSeed = topSeed;
-
-            IsVisible = true;
-            IsFocused = true;
-
-            GameSize = new Size(gameWidth, gameHeight);
-
             Parent = SadGlobal.CurrentScreen;
-            Kbd = SadGlobal.KeyboardState;
-
-            InputQueue = new Queue<AsciiKey>();
-            modeStack = new Stack<EngineMode>();
-            callbackStack = new Stack<Action>();
-
-            GameSize = new Size(gameWidth, gameHeight);
-            MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
-            MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
-
-            Init();
+            Schedule = schedule;
+            SadConEntityFactory = scef;
+            Keyboard = keyboard;
+            GameSize = gameSize;
+            UIBuilder = uiBuilder;
+            Describer = describer;  // (must be attached to Herbal &c per-game)
+            GameState = gameState;
+            Dispatcher = dispatcher;
         }
 
         //0.1: Tease apart distinct start-up goals:
         //  Loading a saved game,
         //  Loading debug "saved game" configurations
         /// <summary> Initialize more complex game systems </summary>
-        public void Init()
+        public void Init(string topSeed = null)
         {
-            var mapFontMaster = SadGlobal.LoadFont("Cheepicus_14x14.font");
-            UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
+            TopSeed = topSeed;
+
+            IsVisible = true;
+            IsFocused = true;
+
+            InputQueue = new Queue<AsciiKey>();
+            modeStack = new Stack<EngineMode>();
+            callbackStack = new Stack<Action>();
 
             GameInProgress = false;
             PushEngineMode(EngineMode.NoGameRunning, null);
 
-            UIBuilder = new UIBuilder(GameSize, mapFontMaster, log);
-
-            SadConEntityFactory = new SadConEntityFactory(mapFontMaster);
-            Schedule = new Schedule(log);
-
-            MapWindowSize = new Size(GameSize.Width * 1 / 3, GameSize.Height - 8);
+            MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
             MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
 
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
@@ -104,18 +107,14 @@ namespace CopperBend.Logic
             Children.Add((SadConsole.Console)MessageWindow);
             MessageWindow.Show();
 
-            Describer = new Describer();  // (must be attached to Herbal &c per-game)
-            Dispatcher = new CommandDispatcher(Schedule, GameState, Describer, MessageWindow, log)
-            {
-                PushEngineMode = PushEngineMode,
-                PopEngineMode = PopEngineMode,
-                IsInputReady = () => InputQueue.Count > 0,
-                GetNextInput = InputQueue.Dequeue,
-                ClearPendingInput = InputQueue.Clear,
-                WriteLine = AddMessage,
-                Prompt = MessageWindow.Prompt,
-                More = this.PromptUserForMoreAndPend,
-            };
+            Dispatcher.PushEngineMode = PushEngineMode;
+            Dispatcher.PopEngineMode = PopEngineMode;
+            Dispatcher.IsInputReady = () => InputQueue.Count > 0;
+            Dispatcher.GetNextInput = InputQueue.Dequeue;
+            Dispatcher.ClearPendingInput = InputQueue.Clear;
+            Dispatcher.WriteLine = AddMessage;
+            Dispatcher.Prompt = MessageWindow.Prompt;
+            Dispatcher.More = this.PromptUserForMoreAndPend;
 
             OpenGameMenu();
         }
@@ -166,7 +165,7 @@ namespace CopperBend.Logic
                 Story = Engine.Compendium.Dramaticon,
             };
             Dispatcher.GameState = GameState;
-            Dispatcher.AttackSystem.RotMap = GameState.Map.RotMap;
+            Dispatcher.AttackSystem.SetRotMap(GameState.Map.RotMap);
 
             Player.CommandSource = new InputCommandSource(Describer, GameState, Dispatcher, log);
             MapConsole.CenterViewPortOnPoint(Player.Position);
@@ -250,7 +249,7 @@ namespace CopperBend.Logic
         public void QueueInput()
         {
             //0.K
-            foreach (var key in Kbd.KeysPressed)
+            foreach (var key in Keyboard.KeysPressed)
             {
                 // Escape key processing skips the normal input queue,
                 // to make 'Quit Game' as reliably available as possible.
@@ -287,8 +286,8 @@ namespace CopperBend.Logic
         //  ...and we can later leave the quest details without confusion
         //  about what we're doing.
 
-        private readonly Stack<EngineMode> modeStack;
-        private readonly Stack<Action> callbackStack;
+        private Stack<EngineMode> modeStack;
+        private Stack<Action> callbackStack;
 
         internal EngineMode CurrentMode { get; set; } = EngineMode.Unknown;
 

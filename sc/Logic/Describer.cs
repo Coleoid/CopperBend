@@ -10,8 +10,8 @@ namespace CopperBend.Logic
 {
     public class Describer : IDescriber
     {
-        public static Herbal Herbal { get; set; }
-        public static TomeOfChaos TomeOfChaos { get; set; }
+        public Herbal Herbal { get; set; }
+        public TomeOfChaos TomeOfChaos { get; set; }
 
         private AbstractGenerator rnd;
 

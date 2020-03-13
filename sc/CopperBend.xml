@@ -57,7 +57,7 @@
         <member name="M:CopperBend.Fabric.NarrativeWindow.Prompt(System.String)">
             <summary> add an unfinished line to the messages </summary>
         </member>
-        <member name="M:CopperBend.Logic.AttackSystem.CheckForSpecials(CopperBend.Logic.Attack)">
+        <member name="M:CopperBend.Logic.AttackSystem.CheckForSpecials(CopperBend.Model.Attack)">
             <summary>
             There are only a few odd damage cases, for now, so
             stuffing them in a little zoo should keep them (and us) safe.
@@ -80,7 +80,7 @@
             <summary> Main game mechanisms. </summary>
             <summary> This portion of the Engine handles Well-Knowns, in a book idiom. </summary>
         </member>
-        <member name="M:CopperBend.Logic.Engine.Init">
+        <member name="M:CopperBend.Logic.Engine.Init(System.String)">
             <summary> Initialize more complex game systems </summary>
         </member>
         <member name="M:CopperBend.Logic.Engine.GameOver(CopperBend.Contract.IBeing,CopperBend.Contract.PlayerDiedException)">

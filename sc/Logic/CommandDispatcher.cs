@@ -10,28 +10,27 @@ using CopperBend.Model;
 namespace CopperBend.Logic
 {
     /// <summary> This is the main logic slice of the CommandDispatcher. </summary>
-    public partial class CommandDispatcher
+    public partial class CommandDispatcher : IControlPanel
     {
-        private ISchedule Schedule { get; set; }
-        public IGameState GameState { get; set; }
-
         protected ISpaceMap SpaceMap => GameState.Map.SpaceMap;
         private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
         private IItemMap ItemMap => GameState.Map.ItemMap;
         private IRotMap RotMap => GameState.Map.RotMap;
 
-        private readonly IDescriber describer;
-        private readonly IMessageLogWindow messageLog;
-        private readonly ILog log;
-
         // becomes external dependency soon
-        public AttackSystem AttackSystem { get; set; }
+        public IAttackSystem AttackSystem { get; set; }
+
+        private ISchedule Schedule { get; set; }
+        public IGameState GameState { get; set; }
+        private readonly IDescriber describer;
+        private readonly Action<string> writeLine;
+        private readonly ILog log;
 
         public CommandDispatcher(
             ISchedule schedule,
             IGameState gameState,
             IDescriber describer,
-            IMessageLogWindow messageLog,
+            Action<string> writeLine,
             ILog logger
         )
         {
@@ -39,11 +38,11 @@ namespace CopperBend.Logic
             Schedule = schedule;
             GameState = gameState;
             this.describer = describer;
-            this.messageLog = messageLog;
+            this.writeLine = writeLine;
             AttackSystem = new AttackSystem(this, logger);
-            //AttackSystem.RotMap = gameState.Map.RotMap;
+            AttackSystem.RotMap = gameState.Map.RotMap;
 
-            WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) this.messageLog.WriteLine(message); };
+            WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) writeLine(message); };
         }
 
         public void Dispatch(ScheduleEntry nextAction)
@@ -177,7 +176,7 @@ namespace CopperBend.Logic
                 }
                 else
                 {
-                    messageLog.WriteLine("Door's stuck.");
+                    writeLine("Door's stuck.");
                 }
                 return success;
             }
@@ -209,18 +208,18 @@ namespace CopperBend.Logic
                 var itemsHere = ItemMap.GetItems(newPosition);
                 if (itemsHere.Count() > 7)
                 {
-                    messageLog.WriteLine("A pile of things here.");
+                    writeLine("A pile of things here.");
                 }
                 else if (itemsHere.Count() > 1)
                 {
-                    messageLog.WriteLine("Some things here.");
+                    writeLine("Some things here.");
                 }
                 else if (itemsHere.Count() == 1)
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
                     var np = describer.Describe(item, DescMods.Article);
-                    messageLog.WriteLine($"There {beVerb} {np} here.");
+                    writeLine($"There {beVerb} {np} here.");
                 }
                 else
                 {
@@ -252,11 +251,11 @@ namespace CopperBend.Logic
             {
                 being.AddToInventory(item);
                 ScheduleAgent(being, 4);
-                messageLog.WriteLine($"Picked up {item.Name}");
+                writeLine($"Picked up {item.Name}");
             }
             else
             {
-                messageLog.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
+                writeLine($"Item {item.Name} was no longer on the map, to pick up");
             }
             return pickedUp;
         }
@@ -376,13 +375,13 @@ namespace CopperBend.Logic
             if (!space.IsTilled)
             {
                 string qualifier = space.CanTill ? "untilled " : string.Empty;
-                messageLog.WriteLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
+                writeLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
                 return false;
             }
 
             if (space.IsSown)
             {
-                messageLog.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
+                writeLine($"The ground to my {command.Direction} is already sown with a seed.");
                 return false;
             }
 

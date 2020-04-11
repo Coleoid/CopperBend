@@ -45,7 +45,7 @@ namespace CopperBend.Logic.Tests
             Assert.That(newAttack.Attacker, Is.EqualTo(rot));
         }
 
-        [Test]
+        [Test, Ignore("Need to decide how to handle ranged damage")]
         public void Ranged_physical_damage_on_Rot_skips_splashback_damage()
         {
             var asys = new AttackSystem(null, __log);

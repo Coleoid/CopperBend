@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using GoRogue;
-using Troschuetz.Random.Generators;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
@@ -17,48 +15,24 @@ namespace CopperBend.Logic
 
         public static void Cosmogenesis(string topSeed, ISadConEntityFactory factory)
         {
-            var generator = InitIDGenerator();
-            Compendium = new Compendium(generator);
-
+            var generator = new IDGenerator();
             ConnectIDGenerator(generator);
 
-            var tome = InitTome(topSeed);
-            ConnectTome(tome);
+            var creator = new BeingCreator(factory);
 
-            var herbal = InitHerbal();
+            var publisher = new BookPublisher(creator);
+
+            var tome = publisher.Tome_FromNew(topSeed);
+
+            var herbal = publisher.Herbal_FromNew();
             ConnectHerbal(herbal);
 
-            var story = InitStory();
-            ConnectStory(story);
-
-            var creator = InitBeingCreator(factory);
-            ConnectBeingCreator(creator);
-
-            var register = InitSocialRegister();
+            var register = publisher.Register_FromNew(creator);
             ConnectSocialRegister(register);
-        }
 
-        public static TomeOfChaos InitTome(string topSeed)
-        {
-            var tome = new TomeOfChaos(topSeed);
+            var dramaticon = publisher.Dramaticon_FromNew();
 
-            //0.2:  Move from indexing on the Maps enum to loading from YAML
-            tome.MapGenerators[Maps.TackerFarm] = new XorShift128Generator(tome.MapTopGenerator.Next());
-            tome.MapGenerators[Maps.TownBarricade] = new XorShift128Generator(tome.MapTopGenerator.Next());
-
-            return tome;
-        }
-
-        public static void ConnectTome(TomeOfChaos tome)
-        {
-            Compendium.TomeOfChaos = tome;
-            //Describer.TomeOfChaos = Compendium.TomeOfChaos;
-        }
-
-        public static IDGenerator InitIDGenerator()
-        {
-            // The IDGenerator is below the Model
-            return new IDGenerator();
+            Compendium = new Compendium(generator, creator, tome, herbal, register, dramaticon);
         }
 
         public static void ConnectIDGenerator(IDGenerator gen)
@@ -69,86 +43,15 @@ namespace CopperBend.Logic
             AreaRot.SetIDGenerator(gen);
         }
 
-        public static Herbal InitHerbal()
-        {
-            Herbal herbal = new Herbal();
-
-            herbal.PlantByID = new Dictionary<uint, PlantDetails>();
-            herbal.PlantByName = new Dictionary<string, PlantDetails>();
-
-            PlantDetails plant;
-
-            //0.1.WORLD  Flesh out the plant list, and tuck it into YAML config.
-            plant = new PlantDetails
-            {
-                ID = 1,
-                MainName = "Boomer",
-                GrowthTime = 400,
-            };
-            herbal.PlantByID[plant.ID] = plant;
-            herbal.PlantByName[plant.MainName] = plant;
-
-            plant = new PlantDetails
-            {
-                ID = 2,
-                MainName = "Healer",
-                GrowthTime = 400,
-            };
-            herbal.PlantByID[plant.ID] = plant;
-            herbal.PlantByName[plant.MainName] = plant;
-
-            plant = new PlantDetails
-            {
-                ID = 3,
-                MainName = "Thornfriend",
-                GrowthTime = 400,
-            };
-            herbal.PlantByID[plant.ID] = plant;
-            herbal.PlantByName[plant.MainName] = plant;
-
-            return herbal;
-        }
-
         public static void ConnectHerbal(Herbal herbal)
         {
-            Compendium.Herbal = herbal;
-            //Describer.Herbal = herbal;
             Equipper.Herbal = herbal;
-        }
-
-        public static Dramaticon InitStory()
-        {
-            return new Dramaticon();
-        }
-
-        public static void ConnectStory(Dramaticon story)
-        {
-            Compendium.Dramaticon = story;
-        }
-
-        public static BeingCreator InitBeingCreator(ISadConEntityFactory factory)
-        {
-            return new BeingCreator(factory);
-        }
-
-        public static void ConnectBeingCreator(BeingCreator creator)
-        {
-            Compendium.BeingCreator = creator;
-        }
-
-        public static SocialRegister InitSocialRegister()
-        {
-            var register = new SocialRegister();
-            register.BeingCreator = Compendium.BeingCreator;
-            return register;
         }
 
         public static void ConnectSocialRegister(SocialRegister register)
         {
             var pc = register.CreatePlayer((0, 0));
             register.LoadRegister(pc);
-
-            Compendium.SocialRegister = register;
         }
 
         private static string GenerateSimpleTopSeed()

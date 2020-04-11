@@ -52,7 +52,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("Nothing to eat or drink on me.");
+            __messager.Received().WriteLine("Nothing to eat or drink on me.");
             Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
@@ -65,7 +65,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("cancelled.");
+            __messager.Received().WriteLine("cancelled.");
             Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
@@ -78,7 +78,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __prompt.Received().Invoke("Consume (inventory letter or ? to show inventory): ");
+            __messager.Received().Prompt("Consume (inventory letter or ? to show inventory): ");
             Assert.That(_source.IsAssemblingCommand);
 
             Queue(Keys.B);
@@ -97,7 +97,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
-            __writeLine.Received().Invoke("I can't eat or drink a knife.");
+            __messager.Received().WriteLine("I can't eat or drink a knife.");
             Assert.That(_source.IsAssemblingCommand);
         }
 
@@ -110,7 +110,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Incomplete));
-            __writeLine.Received().Invoke("Nothing in inventory slot d.");
+            __messager.Received().WriteLine("Nothing in inventory slot d.");
             Assert.That(_source.IsAssemblingCommand);
         }
 
@@ -144,7 +144,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("Nothing to drop.");
+            __messager.Received().WriteLine("Nothing to drop.");
             Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
@@ -157,7 +157,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("Drop cancelled.");
+            __messager.Received().WriteLine("Drop cancelled.");
             Assert.IsFalse(_source.IsAssemblingCommand);
         }
 
@@ -169,7 +169,7 @@ namespace CopperBend.Logic.Tests
             Queue(Keys.D);
             Cmd = _source.GetCommand(__being);
 
-            __prompt.Received().Invoke("Drop (inventory letter or ? to show inventory): ");
+            __messager.Received().Prompt("Drop (inventory letter or ? to show inventory): ");
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
 
@@ -184,13 +184,13 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Drop_unfilled_inventory_letter()
         {
-            var (_, fruit, _) = Fill_pack();
+            Fill_pack();
 
             Queue(Keys.D, Keys.D);
             Cmd = _source.GetCommand(__being);
 
-            __prompt.DidNotReceive().Invoke("Drop (inventory letter or ? to show inventory): ");
-            __writeLine.Received().Invoke("Nothing in inventory slot d.");
+            __messager.DidNotReceive().Prompt("Drop (inventory letter or ? to show inventory): ");
+            __messager.Received().WriteLine("Nothing in inventory slot d.");
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
         }
@@ -205,7 +205,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("Help:");
+            __messager.Received().WriteLine("Help:");
         }
 
 
@@ -238,7 +238,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("Nothing to pick up here.");
+            __messager.Received().WriteLine("Nothing to pick up here.");
         }
 
         [Test]

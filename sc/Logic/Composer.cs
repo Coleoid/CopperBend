@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using System.Drawing;
 using log4net;
 using log4net.Config;
-//using Autofac;
 using Game = SadConsole.Game;
 using XNAGame = Microsoft.Xna.Framework.Game;
 using SadGlobal = SadConsole.Global;
 using CopperBend.Fabric;
 using CopperBend.Contract;
-using CopperBend.Model;
-using GoRogue;
 
 namespace CopperBend.Logic
 {
@@ -23,33 +17,13 @@ namespace CopperBend.Logic
         {
             InitialSeed = seed;
 
-            //var builder = new ContainerBuilder();
-            //builder.RegisterInstance(Logger).As<ILog>();
-            //builder.RegisterType<Compendium>();
-            //builder.RegisterInstance(new IDGenerator()).As<IDGenerator>();
-
-
             var repo = LogManager.CreateRepository("CB");
             XmlConfigurator.Configure(repo, new FileInfo("sc.log.config"));
             Logger = LogManager.GetLogger("CB", "CB");
-
         }
+
         public ILog Logger { get; private set; }
 
-        //private ILog logger;
-        //public ILog Logger
-        //{
-        //    get
-        //    {
-        //        if (logger == null)
-        //        {
-        //            var repo = LogManager.CreateRepository("CB");
-        //            XmlConfigurator.Configure(repo, new FileInfo("sc.log.config"));
-        //            logger = LogManager.GetLogger("CB", "CB");
-        //        }
-        //        return logger;
-        //    }
-        //}
         private int gameWidth;
         private int gameHeight;
 
@@ -79,16 +53,21 @@ namespace CopperBend.Logic
             var uib = new UIBuilder(szGame, fmMap, Logger);
             var describer = new Describer();  // (must be attached to Herbal &c per-game)
             var gameState = new GameState();
+            var node = new ModeNode(Logger);
+            var msgr = new Messager(node);
 
-            //0.0: Only enough to hoist the dependency, so far.
-            Action<string> writeLine = (s) => { };
-            IControlPanel dispatcher = new CommandDispatcher(sched, gameState, describer, writeLine, Logger);
+            IControlPanel dispatcher = new CommandDispatcher(
+                Logger, sched,
+                gameState, describer,
+                msgr
+            );
 
             Engine engine = new Engine(
                 Logger, sched,
                 scefactory, kbd,
-                szGame, uib, describer, gameState, dispatcher
-                );
+                szGame, uib, describer, gameState, dispatcher,
+                node, msgr
+            );
 
             engine.Init(InitialSeed);
 

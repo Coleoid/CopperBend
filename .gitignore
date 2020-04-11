@@ -13,3 +13,5 @@ obj
 App/App.csproj.user
 sc/cb.log
 TestResults
+/sc/Content/*.*
+/sc/Content/**/*.*

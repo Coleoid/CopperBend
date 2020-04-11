@@ -1,5 +1,5 @@
 ﻿using System;
-using CopperBend.Contract;
+using CopperBend.Fabric.Tests;
 using log4net;
 using NSubstitute;
 using NUnit.Framework;
@@ -17,7 +17,9 @@ namespace CopperBend.Logic.Tests
         public void OneTimeSetUp()
         {
             __log = Substitute.For<ILog>();
-            Engine.Cosmogenesis("monobloc delenda est!", Substitute.For<ISadConEntityFactory>());
+            var scef = UTHelp.GetSubstituteFactory();
+
+            Engine.Cosmogenesis("monobloc delenda est!", scef);
         }
 
         [SetUp]

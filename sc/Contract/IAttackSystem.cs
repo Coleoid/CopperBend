@@ -14,8 +14,6 @@ namespace CopperBend.Contract
         void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense);
         string AttackMessage(Attack attack);
         void CheckForSpecials(Attack attack);
-        bool FirstTimeFor(Messages key);
-        void Message(IBeing being, Messages messageKey);
         IEnumerable<IAreaRot> NeighborRotsOf(IAreaRot areaRot);
         void ReapDestroyed();
         void RegisterDamage(IDelible target, IEnumerable<AttackDamage> damages);

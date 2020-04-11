@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
@@ -18,8 +17,6 @@ namespace CopperBend.Logic
     /// <summary> Main game mechanisms. </summary>
     public partial class Engine : ContainerConsole
     {
-        private const int messageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
-
         public Size GameSize { get; set; }
         public Size MapSize { get; set; }
         public Size MapWindowSize { get; set; }
@@ -31,7 +28,7 @@ namespace CopperBend.Logic
         private Window MenuWindow { get; set; }
         private ControlsConsole MenuConsole { get; set; }
 
-        public Queue<AsciiKey> InputQueue { get; private set; }
+        //public Queue<AsciiKey> InputQueue { get; private set; }
         private Being Player { get; set; }
 
         private bool GameInProgress { get; set; }
@@ -50,6 +47,8 @@ namespace CopperBend.Logic
         private IDescriber Describer { get; set; }
         private IGameState GameState { get; set; }
         private IControlPanel Dispatcher { get; set; }
+        private ModeNode ModeNode { get; set; }
+        private IMessager Messager { get; set; }
 
         #region Init
         public Engine(
@@ -61,7 +60,9 @@ namespace CopperBend.Logic
                 IUIBuilder uiBuilder,
                 IDescriber describer,
                 IGameState gameState,
-                IControlPanel dispatcher
+                IControlPanel dispatcher,
+                ModeNode modeNode,
+                IMessager messager
             )
             : base()
         {
@@ -75,6 +76,8 @@ namespace CopperBend.Logic
             Describer = describer;  // (must be attached to Herbal &c per-game)
             GameState = gameState;
             Dispatcher = dispatcher;
+            ModeNode = modeNode;
+            Messager = messager;
         }
 
         //0.1: Tease apart distinct start-up goals:
@@ -88,12 +91,8 @@ namespace CopperBend.Logic
             IsVisible = true;
             IsFocused = true;
 
-            InputQueue = new Queue<AsciiKey>();
-            modeStack = new Stack<EngineMode>();
-            callbackStack = new Stack<Action>();
-
             GameInProgress = false;
-            PushEngineMode(EngineMode.NoGameRunning, null);
+            ModeNode.PushEngineMode(EngineMode.NoGameRunning, null);
 
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
             MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
@@ -107,28 +106,19 @@ namespace CopperBend.Logic
             Children.Add((SadConsole.Console)MessageWindow);
             MessageWindow.Show();
 
-            Dispatcher.PushEngineMode = PushEngineMode;
-            Dispatcher.PopEngineMode = PopEngineMode;
-            Dispatcher.IsInputReady = () => InputQueue.Count > 0;
-            Dispatcher.GetNextInput = InputQueue.Dequeue;
-            Dispatcher.ClearPendingInput = InputQueue.Clear;
-            Dispatcher.WriteLine = AddMessage;
-            Dispatcher.Prompt = MessageWindow.Prompt;
-            Dispatcher.More = this.PromptUserForMoreAndPend;
-
             OpenGameMenu();
         }
 
         public void OpenGameMenu()
         {
-            Guard.Against(CurrentMode == EngineMode.MenuOpen);
+            Guard.Against(ModeNode.CurrentMode == EngineMode.MenuOpen);
 
             MenuConsole.Clear();
             MenuConsole.Print(2, 4, GameInProgress ? "R) Return to game" : "B) Begin new game");
             MenuConsole.Print(2, 6, "Q) Quit");
 
             MenuWindow.Show();
-            PushEngineMode(EngineMode.MenuOpen, null);
+            ModeNode.PushEngineMode(EngineMode.MenuOpen, null);
         }
 
         public void BeginNewGame()
@@ -156,7 +146,6 @@ namespace CopperBend.Logic
             FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
             FullMap.UpdateFOV(MapConsole, Player.Position);
             MapWindow.Show();
-            messageQueue = new Queue<string>();
 
             GameState = new GameState
             {
@@ -167,10 +156,10 @@ namespace CopperBend.Logic
             Dispatcher.GameState = GameState;
             Dispatcher.AttackSystem.SetRotMap(GameState.Map.RotMap);
 
-            Player.CommandSource = new InputCommandSource(Describer, GameState, Dispatcher, log);
+            Player.CommandSource = new InputCommandSource(log, Describer, GameState, Dispatcher, ModeNode, Messager);
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
-            PushEngineMode(EngineMode.WorldTurns, null);
+            ModeNode.PushEngineMode(EngineMode.WorldTurns, null);
             GameInProgress = true;
             log.Info("Began new game");
         }
@@ -186,7 +175,7 @@ namespace CopperBend.Logic
             WriteGameOverReport(pde);
             ClearStats();
 
-            PopEngineMode();
+            ModeNode.PopEngineMode();
             GameInProgress = false;
 
             ShutDownGame();
@@ -245,91 +234,10 @@ namespace CopperBend.Logic
             base.Update(timeElapsed);
         }
 
-        #region Handle input
-        public void QueueInput()
-        {
-            //0.K
-            foreach (var key in Keyboard.KeysPressed)
-            {
-                // Escape key processing skips the normal input queue,
-                // to make 'Quit Game' as reliably available as possible.
-                if (key == Keys.Escape && CurrentMode != EngineMode.MenuOpen)
-                {
-                    InputQueue.Clear();
-                    MenuWindow.Show();
-                    PushEngineMode(EngineMode.MenuOpen, () => { });
-                    return;
-                }
-
-                InputQueue.Enqueue(key);
-            }
-
-            //1.+: Capturing mouse events can wait until post 1.0.
-        }
-
-        private AsciiKey GetNextKeyPress()
-        {
-            if (InputQueue.Count == 0) return new AsciiKey { Key = Keys.None };
-            return InputQueue.Dequeue();
-        }
-        #endregion
-
-        #region Handle Game Modes
-        #region Mode Mechanisms
-        //  We can stack modes of the game to any level.
-        //  Say the schedule reaches the player, who enters a command
-        //  to inspect their quest/job list, the stack is:
-        //    Large, Input, Schedule, Start
-        //  Each mode on the stack has its own callback, so if we then
-        //  look into details of a quest, the states could be:
-        //    Large, Large, Input, Schedule, Start
-        //  ...and we can later leave the quest details without confusion
-        //  about what we're doing.
-
-        private Stack<EngineMode> modeStack;
-        private Stack<Action> callbackStack;
-
-        internal EngineMode CurrentMode { get; set; } = EngineMode.Unknown;
-
-        internal Action CurrentCallback { get; set; } = () => { };
-
-        internal void PushEngineMode(EngineMode newMode, Action callback)
-        {
-            if (newMode == EngineMode.Unknown)
-                throw new Exception($"Should never EnterMode({newMode}).");
-
-            var oldMode = CurrentMode;
-            modeStack.Push(CurrentMode);
-            CurrentMode = newMode;
-            callbackStack.Push(CurrentCallback);
-            CurrentCallback = callback;
-
-            // fires when restarting game 12 nov 19
-            //if (oldMode == CurrentMode)
-            //    if (!Debugger.IsAttached) Debugger.Launch();
-
-            // Don't log mode shifts from world's turn to player's turn.
-            if (oldMode == EngineMode.WorldTurns && CurrentMode == EngineMode.PlayerTurn) return;
-
-            log.Debug($"Enter mode {CurrentMode}, push down mode {oldMode}.");
-        }
-
-        internal void PopEngineMode()
-        {
-            var oldMode = CurrentMode;
-            CurrentMode = modeStack.Pop();
-            CurrentCallback = callbackStack.Pop();
-
-            // Don't log mode shifts from player's turn to world's turn.
-            if (oldMode == EngineMode.PlayerTurn && CurrentMode == EngineMode.WorldTurns) return;
-
-            log.Debug($"Pop mode {oldMode} off, enter mode {CurrentMode}.");
-        }
-        #endregion
 
         internal void ActOnMode()
         {
-            switch (CurrentMode)
+            switch (ModeNode.CurrentMode)
             {
             //  The game menu being open has priority
             case EngineMode.MenuOpen:
@@ -344,19 +252,19 @@ namespace CopperBend.Logic
 
             //  When the player is choosing their action
             case EngineMode.PlayerTurn:
-                CurrentCallback();
-                ResetMessagesSentSincePause();
+                ModeNode.CurrentCallback();
+                Messager.ResetMessagesSentSincePause();
                 break;
 
             //  When enough small messages have been printed that the
             //  UI is waiting with a '- more -' style prompt
             case EngineMode.MessagesPendingUserInput:
-                CurrentCallback();
+                ModeNode.CurrentCallback();
                 break;
 
             //  The large message pane (inventory, log, ...) overlays most of the game
             case EngineMode.LargeMessagePending:
-                HandleLargeMessage();
+                Messager.HandleLargeMessage();
                 break;
 
             //  Reaching this branch is always developer error
@@ -371,15 +279,28 @@ namespace CopperBend.Logic
                 }
                 else
                 {
-                    throw new Exception($"Hit the game loop in {CurrentMode} mode.");
+                    throw new Exception($"Hit the game loop in {ModeNode.CurrentMode} mode.");
                 }
                 break;
             }
         }
 
+        public void QueueInput()
+        {
+            bool ShouldClear()
+            {
+                MenuWindow.Show();
+                ModeNode.PushEngineMode(EngineMode.MenuOpen, () => { });
+                return true;
+            }
+            Messager.ShouldClearQueueOnEscape = ShouldClear;
+            Messager.QueueInput(Keyboard.KeysPressed);
+            //1.+: Capturing mouse events can wait until post 1.0.
+        }
+
         private void HandleGameMenu()
         {
-            for (AsciiKey press = GetNextKeyPress(); press.Key != Keys.None; press = GetNextKeyPress())
+            for (AsciiKey press = Messager.GetNextKeyPress(); press.Key != Keys.None; press = Messager.GetNextKeyPress())
             {
                 // Quit
                 if (press.Key == Keys.Q)
@@ -396,7 +317,7 @@ namespace CopperBend.Logic
                     // Return to game
                     if (press.Key == Keys.R || press.Key == Keys.Escape)
                     {
-                        PopEngineMode();
+                        ModeNode.PopEngineMode();
                         MenuWindow.Hide();
                         return;
                     }
@@ -416,7 +337,7 @@ namespace CopperBend.Logic
                     // Begin new game
                     if (press.Key == Keys.B)
                     {
-                        PopEngineMode();
+                        ModeNode.PopEngineMode();
                         MenuWindow.Hide();
                         BeginNewGame();
                         return;
@@ -425,7 +346,7 @@ namespace CopperBend.Logic
                     //0.0: Load saved game and resume play
                     if (press.Key == Keys.L)
                     {
-                        PopEngineMode();
+                        ModeNode.PopEngineMode();
                         MenuWindow.Hide();
                         //PickAndResumeSavedGame();
                         TickWhenGameLastSaved = Schedule.CurrentTick;
@@ -437,66 +358,14 @@ namespace CopperBend.Logic
             }
         }
 
-        #endregion
-
         public void HandleScheduledEvents()
         {
-            while (CurrentMode == EngineMode.WorldTurns)
+            while (ModeNode.CurrentMode == EngineMode.WorldTurns)
             {
                 var nextAction = Schedule.GetNextAction();
                 Dispatcher.Dispatch(nextAction);
             }
         }
-
-        #region Short Message log
-        private Queue<string> messageQueue;
-        private int messagesSentSincePause = 0;
-
-        public void AddMessage(string newMessage)
-        {
-            messageQueue.Enqueue(newMessage);
-            ShowMessages();
-        }
-
-        //0.1: ResetMessagesSentSincePause() needs to be called all through the ICS.
-        public void ResetMessagesSentSincePause() => messagesSentSincePause = 0;
-
-        private void ShowMessages()
-        {
-            //0.2: There are probably other modes where we want to suspend messages.
-            while (CurrentMode != EngineMode.MessagesPendingUserInput && messageQueue.Any())
-            {
-                if (messagesSentSincePause >= messageLimitBeforePause)
-                {
-                    PromptUserForMoreAndPend();
-                    return;
-                }
-
-                var nextMessage = messageQueue.Dequeue();
-                MessageWindow.WriteLine(nextMessage);
-                messagesSentSincePause++;
-            }
-        }
-
-        private void PromptUserForMoreAndPend()
-        {
-            MessageWindow.WriteLine("-- more --");
-            PushEngineMode(EngineMode.MessagesPendingUserInput, HandleMessagesPending);
-        }
-
-        private void HandleMessagesPending()
-        {
-            for (AsciiKey k = GetNextKeyPress(); k.Key != Keys.None; k = GetNextKeyPress())
-            {
-                if (k.Key == Keys.Space)
-                {
-                    ResetMessagesSentSincePause();
-                    PopEngineMode();
-                    ShowMessages();  // ...which may have enough messages to pend us again.
-                }
-            }
-        }
-        #endregion
 
         public void SyncMapChanges()
         {
@@ -528,32 +397,6 @@ namespace CopperBend.Logic
         {
             FullMap.EffectsManager.UpdateEffects(timeElapsed.TotalSeconds);
         }
-
-        #region LargeMessages, currently empty
-        //  The engine calls here when we're in EngineMode.LargeMessagePending
-        public void HandleLargeMessage()
-        {
-            //RLKeyPress press = GameWindow.GetNextKeyPress();
-            //while (press != null
-            //       && press.Key != RLKey.Escape
-            //       && press.Key != RLKey.Enter
-            //       && press.Key != RLKey.KeypadEnter
-            //       && press.Key != RLKey.Space
-            //)
-            //{
-            //    press = GameWindow.GetNextKeyPress();
-            //}
-
-            //if (press == null) return;
-
-            HideLargeMessage();
-        }
-
-        private void HideLargeMessage()
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
 
         //// The entities in the given map will be the MapConsole's only entities
         //private void SyncMapEntities(MultiSpatialMap<Being> map)

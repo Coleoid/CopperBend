@@ -10,7 +10,7 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Persist
 {
-    public class YConv_ISpace : Persistence_util, IYamlTypeConverter
+    public class YConv_ISpace : IYamlTypeConverter
     {
         //0.1: pragma will come off after code fills out.
 #pragma warning disable CA1801 // Remove unused parameter
@@ -46,11 +46,11 @@ namespace CopperBend.Persist
         private void EmitSpace(IEmitter emitter, ISpace ispace)
         {
             var space = (Space)ispace;
-            EmitKVP(emitter, "ID", space.ID.ToString(CultureInfo.InvariantCulture));
-            EmitKVP(emitter, "Terrain", space.Terrain.Name);
+            emitter.EmitKVP("ID", space.ID.ToString(CultureInfo.InvariantCulture));
+            emitter.EmitKVP("Terrain", space.Terrain.Name);
 
             var kst = FlagString(space.IsKnown, space.IsSown, space.IsTilled);
-            EmitKVP(emitter, "Flags", kst);
+            emitter.EmitKVP("Flags", kst);
         }
 
         private string FlagString(params bool[] flags)
@@ -77,14 +77,14 @@ namespace CopperBend.Persist
 
         private ISpace ParseSpace(IParser parser)
         {
-            uint id = uint.Parse(GetValueNext(parser, "ID"), CultureInfo.InvariantCulture);
+            uint id = parser.GetKVP_uint("ID");
 
             var space = new Space(id)
             {
-                Terrain = GetTerrainType(GetValueNext(parser, "Terrain")),
+                Terrain = GetTerrainType(parser.GetKVP_string("Terrain")),
             };
 
-            var flagText = GetValueNext(parser, "Flags");
+            var flagText = parser.GetKVP_string("Flags");
             var flags = FlagsFromString(flagText);
             space.IsKnown = flags[0];
             space.IsSown = flags[1];

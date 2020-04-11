@@ -4,7 +4,6 @@ using log4net;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using SadConsole.Input;
 using CopperBend.Contract;
-using CopperBend.Fabric;
 
 namespace CopperBend.Logic
 {
@@ -16,13 +15,17 @@ namespace CopperBend.Logic
         private readonly IDescriber describer;
         private readonly IGameState gameState;
         private readonly IControlPanel controls;
+        private readonly ModeNode modeNode;
+        private IMessager Messager { get; set; }
 
-        public InputCommandSource(IDescriber describer, IGameState state, IControlPanel controls, ILog logger)
+        public InputCommandSource(ILog logger, IDescriber describer, IGameState state, IControlPanel controls, ModeNode modeNode, IMessager messager)
         {
+            this.log = logger;
             this.describer = describer;
             this.gameState = state;
             this.controls = controls;
-            this.log = logger;
+            this.modeNode = modeNode;
+            Messager = messager;
         }
 
         public bool IsAssemblingCommand => nextStep != null;
@@ -39,27 +42,24 @@ namespace CopperBend.Logic
                 if (actionWasTaken)
                 {
                     nextStep = null;
-                    controls.PopEngineMode();
+                    modeNode.PopEngineMode();
                 }
             }
 
-            controls.PushEngineMode(EngineMode.PlayerTurn, DeliverCommandFromInput);
+            modeNode.PushEngineMode(EngineMode.PlayerTurn, DeliverCommandFromInput);
             DeliverCommandFromInput();
         }
 
         /// <summary>
-        /// The InputCommandSource builds a Command based on
-        /// keyboard input.  It may take thousands of Update()
-        /// callbacks before a Command other than CommandIncomplete
-        /// is returned.
+        /// The InputCommandSource builds a Command based on keyboard input.
+        /// It may take thousands of Update() callbacks before a Command
+        /// other than CommandIncomplete is returned.
         /// </summary>
         public Command GetCommand(IBeing being)
         {
-            // Most of the time, when waiting on a human, we're going
-            // to hit this line and return with no input and no command.
-            if (!controls.IsInputReady()) return commandIncomplete;
-
-            var press = controls.GetNextInput();
+            var press = Messager.GetNextKeyPress();
+            // Most of the time, we'll have no human input, hence no command.
+            if (press.Key == Keys.None) return commandIncomplete;
 
             // Most commands take multiple keystrokes to resolve.
             // When that's true, we've stored the next step to take for when
@@ -109,9 +109,10 @@ namespace CopperBend.Logic
         private Command NextStepIs(Func<AsciiKey, IBeing, Command> nextStep, string prompt, IBeing being)
         {
             this.nextStep = nextStep;
-            if (controls.IsInputReady()) return this.nextStep(controls.GetNextInput(), being);
+            var press = Messager.GetNextKeyPress();
+            if (press.Key != Keys.None) return this.nextStep(press, being);
 
-            controls.Prompt(prompt);
+            Messager.Prompt(prompt);
             return commandIncomplete;
         }
 
@@ -133,7 +134,7 @@ namespace CopperBend.Logic
                 if (!gameState.Story.HasClearedRot)
                 {
                     rotDirection = dir;
-                    controls.WriteLine("The filth covering the ground sets my teeth on edge.  I'm growling.");
+                    Messager.WriteLine("The filth covering the ground sets my teeth on edge.  I'm growling.");
                     return NextStepIs(Direction_decide_to_Clear_Rot, "Am I going after this stuff bare-handed? ", being);
                 }
             }
@@ -254,7 +255,7 @@ namespace CopperBend.Logic
             thisUsedItem ??= priorUsedItem ?? being.WieldedTool;
             if (thisUsedItem == null)
             {
-                if (!controls.IsInputReady())
+                if (!Messager.IsInputReady())
                     ShowInventory(being, i => i.IsUsable);
                 return NextStepIs(Use_Pick_Item, "Use item: ", being);
             }
@@ -397,11 +398,11 @@ namespace CopperBend.Logic
 
         private static int AlphaIndexOfKeyPress(AsciiKey press)
         {
-            int asciiNum = press.Character;
-            if ('a' <= asciiNum && asciiNum <= 'z')
-                return asciiNum - 'a';
-            else if ('A' <= asciiNum && asciiNum <= 'Z')
-                return asciiNum - 'A';
+            int ch = press.Character;
+            if ('a' <= ch && ch <= 'z')
+                return ch - 'a';
+            else if ('A' <= ch && ch <= 'Z')
+                return ch - 'A';
 
             return -1;
         }
@@ -431,7 +432,7 @@ namespace CopperBend.Logic
 
         private void WriteLine(string line)
         {
-            controls.WriteLine(line);
+            Messager.WriteLine(line);
         }
         #endregion
     }

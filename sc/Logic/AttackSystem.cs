@@ -335,62 +335,10 @@ Apply post-attack effects
             return damages;
         }
 
-        #region Messages
-
-        private Dictionary<Messages, bool> SeenMessages { get; } = new Dictionary<Messages, bool>();
         public IRotMap RotMap { get; set; }
-
-        /// <summary> First time running across this message in this game run? </summary>
-        public bool FirstTimeFor(Messages key)
-        {
-            var firstTime = !SeenMessages.ContainsKey(key);
-            if (firstTime)
-                SeenMessages.Add(key, true);
-
-            return firstTime;
-        }
-
-        /// <summary>
-        /// This allows messages to adapt based on the Being involved and
-        /// what messages have already been seen, how many times, et c.
-        /// </summary>
-        public void Message(IBeing being, Messages messageKey)
-        {
-            Guard.Against(messageKey == Messages.Unset, "Must set message key");
-            if (!being.IsPlayer) return;
-
-            switch (messageKey)
-            {
-            case Messages.BarehandRotDamage:
-                if (FirstTimeFor(messageKey))
-                {
-                    //0.2  promote to alert
-                    Panel.WriteLine("I tear a chunk off the ground.  It fights back--burns my hands.");
-                    Panel.WriteLine("The stuff withers away from where I grab it.");
-                }
-                else
-                {
-                    Panel.WriteLine("I hit it, and the stuff withers.");
-                }
-
-                break;
-
-            case Messages.RotDamageSpreads:
-                Panel.WriteLine("The damage to this stuff spreads outward.  Good.");
-                break;
-
-            default:
-                var need_message_for_key = $"Must code message for key [{messageKey}].";
-                Panel.WriteLine(need_message_for_key);
-                throw new Exception(need_message_for_key);
-            }
-        }
-
         public void SetRotMap(IRotMap rotMap)
         {
             throw new NotImplementedException();
         }
-
-        #endregion
     }
 }

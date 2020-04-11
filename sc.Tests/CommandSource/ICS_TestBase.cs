@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SadConsole.Input;
 using log4net;
+using NSubstitute;
+using NUnit.Framework;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using NSubstitute;
-using NUnit.Framework;
-using System;
+using SadConsole.Entities;
+using SadConsole.Components;
 
 namespace CopperBend.Logic.Tests
 {
@@ -22,9 +23,7 @@ namespace CopperBend.Logic.Tests
         protected Queue<AsciiKey> _inQ;
         protected IBeing __being;
         protected IControlPanel __controls;
-        protected Action<string> __prompt;
-        protected Action<string> __writeLine;
-        protected IMessageLogWindow __messageOutput = null;
+        protected IMessager __messager;
 
         #region OTSU
         protected TerrainType ttDoorOpen;
@@ -72,7 +71,16 @@ namespace CopperBend.Logic.Tests
             SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;
             SpaceMap.TerrainTypes[ttDoorClosed.Name] = ttDoorClosed;
 
-            Engine.Cosmogenesis("bang", Substitute.For<ISadConEntityFactory>());
+            var sef = Substitute.For<ISadConEntityFactory>();
+            sef.GetSadCon(Arg.Any<ISadConInitData>())
+                .Returns(ctx => {
+                    var ie = Substitute.For<IEntity>();
+                    var cs = new ObservableCollection<IConsoleComponent>();
+                    ie.Components.Returns(cs);
+                    return ie;
+                });
+
+            Engine.Cosmogenesis("bang", sef);
         }
         #endregion
 
@@ -90,21 +98,16 @@ namespace CopperBend.Logic.Tests
                 },
             };
             __controls = Substitute.For<IControlPanel>();
-            __prompt = Substitute.For<Action<string>>();
-            __writeLine = Substitute.For<Action<string>>();
-            __controls.Prompt = __prompt;
-            __controls.WriteLine = __writeLine;
-            __controls.WriteLineIfPlayer = (being, msg) =>
-            {
-                if (being.IsPlayer) __writeLine(msg);
-            };
-            __controls.IsInputReady = () => _inQ.Count() > 0;
-            __controls.GetNextInput = () => _inQ.Dequeue();
-            __controls.ClearPendingInput = () => _inQ.Clear();
-            //__messageOutput = Substitute.For<IMessageLogWindow>();
-            _source = new InputCommandSource(new Describer(), _gameState, __controls, __log);
-            __being = Substitute.For<IBeing>();
+            __messager = Substitute.For<IMessager>();
             _inQ = new Queue<AsciiKey>();
+            __messager.GetNextKeyPress()
+                .Returns((ci) => _inQ.Count > 0 ? _inQ.Dequeue() : new AsciiKey { Key = Keys.None });
+            __messager.IsInputReady()
+                .Returns((ci) => _inQ.Count > 0);
+
+            _source = new InputCommandSource(__log, new Describer(), _gameState, __controls, new ModeNode(__log), __messager);
+            __being = Substitute.For<IBeing>();
+            __being.IsPlayer = true;
         }
 
         public SpaceMap CreateSmallTestMap()

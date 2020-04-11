@@ -9,17 +9,6 @@ namespace CopperBend.Logic
     /// <summary> Holds utility behaviors to reduce clutter in logic file. </summary>
     public partial class CommandDispatcher : IControlPanel
     {
-        private const int lowercase_a = 97;
-        private const int lowercase_z = 123;
-
-        private int AlphaIndexOfKeyPress(AsciiKey key)
-        {
-            //if (!key.Character) return -1;
-            var asciiNum = (int)key.Character;
-            if (asciiNum < lowercase_a || lowercase_z < asciiNum) return -1;
-            return asciiNum - lowercase_a;
-        }
-
         public void ScheduleAgent(IScheduleAgent agent, int tickOff)
         {
             Schedule.AddAgent(agent, tickOff);
@@ -153,17 +142,5 @@ namespace CopperBend.Logic
 
             //0.3 may unify those collections and loops, may restructure flow
         }
-
-        public bool PlayerMoved { get; set; }
-        public Action<EngineMode, Action> PushEngineMode { get; set; }
-        public Action PopEngineMode { get; set; }
-
-        public Func<bool> IsInputReady { get; set; }
-        public Func<AsciiKey> GetNextInput { get; set; }
-        public Action ClearPendingInput { get; set; }
-        public Action<string> WriteLine { get; set; }
-        public Action<IBeing, string> WriteLineIfPlayer { get; set; }
-        public Action<string> Prompt { get; set; }
-        public Action More { get; set; }
     }
 }

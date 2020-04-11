@@ -1,6 +1,5 @@
-﻿using CopperBend.Contract;
+﻿using CopperBend.Fabric.Tests;
 using CopperBend.Model;
-using NSubstitute;
 using NUnit.Framework;
 
 namespace CopperBend.Logic.Tests
@@ -13,7 +12,10 @@ namespace CopperBend.Logic.Tests
         {
             Item.SetIDGenerator(null);
             AreaRot.SetIDGenerator(null);
-            Engine.Cosmogenesis("seed", Substitute.For<ISadConEntityFactory>());
+
+            var sef = UTHelp.GetSubstituteFactory();
+
+            Engine.Cosmogenesis("seed", sef);
 
             var item = new Item((2, 2));
             var rot = new AreaRot();

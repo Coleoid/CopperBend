@@ -2,7 +2,7 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
 using NUnit.Framework;
-using NSubstitute;
+using CopperBend.Fabric.Tests;
 
 namespace CopperBend.Logic.Tests
 {
@@ -12,7 +12,8 @@ namespace CopperBend.Logic.Tests
         [OneTimeSetUp]
         public void SetUp()
         {
-            Engine.Cosmogenesis("seed", Substitute.For<ISadConEntityFactory>());
+            var sef = UTHelp.GetSubstituteFactory();
+            Engine.Cosmogenesis("seed", sef);
         }
 
         [TestCase(1, "", "rock")]

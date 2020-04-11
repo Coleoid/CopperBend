@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using log4net;
 using GoRogue;
@@ -20,29 +19,29 @@ namespace CopperBend.Logic
         // becomes external dependency soon
         public IAttackSystem AttackSystem { get; set; }
 
+        private readonly ILog log;
         private ISchedule Schedule { get; set; }
         public IGameState GameState { get; set; }
         private readonly IDescriber describer;
-        private readonly Action<string> writeLine;
-        private readonly ILog log;
+        public bool PlayerMoved { get; set; }
+        public IMessager Messager { get; set; }
 
         public CommandDispatcher(
+            ILog logger,
             ISchedule schedule,
             IGameState gameState,
             IDescriber describer,
-            Action<string> writeLine,
-            ILog logger
+            IMessager messager
         )
         {
             log = logger;
             Schedule = schedule;
             GameState = gameState;
             this.describer = describer;
-            this.writeLine = writeLine;
+            Messager = messager;
+
             AttackSystem = new AttackSystem(this, logger);
             AttackSystem.RotMap = gameState.Map.RotMap;
-
-            WriteLineIfPlayer = (being, message) => { if (being.IsPlayer) writeLine(message); };
         }
 
         public void Dispatch(ScheduleEntry nextAction)
@@ -80,7 +79,7 @@ namespace CopperBend.Logic
                 CmdAction.Use => Do_Usable(being, command),
                 CmdAction.Wait => Do_Wait(being, command),
                 CmdAction.Wield => Do_Wield(being, command.Item),
-                _ => throw new Exception($"Not ready to do {command.Action}."),
+                _ => throw new Exception($"Not ready to for Command {command.Action}."),
             };
         }
 
@@ -160,7 +159,7 @@ namespace CopperBend.Logic
                 || SpaceMap.Width <= newPosition.X || SpaceMap.Height <= newPosition.Y)
             {
                 //0.1.MAP  add transitions to other maps
-                WriteLineIfPlayer(being, "Can't move off the map.");
+                Messager.WriteLineIfPlayer(being, "Can't move off the map.");
                 return false;
             }
             ISpace space = SpaceMap.GetItem(newPosition);
@@ -176,7 +175,7 @@ namespace CopperBend.Logic
                 }
                 else
                 {
-                    writeLine("Door's stuck.");
+                    Messager.WriteLine("Door's stuck.");
                 }
                 return success;
             }
@@ -184,9 +183,9 @@ namespace CopperBend.Logic
             if (!SpaceMap.CanWalkThrough(newPosition))
             {
                 var np = describer.Describe(space.Terrain.Name, DescMods.Article);
-                WriteLineIfPlayer(being, $"I can't walk through {np}.");
+                Messager.WriteLineIfPlayer(being, $"I can't walk through {np}.");
 
-                ClearPendingInput();
+                Messager.ClearPendingInput();
                 return false;
             }
 
@@ -208,18 +207,18 @@ namespace CopperBend.Logic
                 var itemsHere = ItemMap.GetItems(newPosition);
                 if (itemsHere.Count() > 7)
                 {
-                    writeLine("A pile of things here.");
+                    Messager.WriteLine("A pile of things here.");
                 }
                 else if (itemsHere.Count() > 1)
                 {
-                    writeLine("Some things here.");
+                    Messager.WriteLine("Some things here.");
                 }
                 else if (itemsHere.Count() == 1)
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
                     var np = describer.Describe(item, DescMods.Article);
-                    writeLine($"There {beVerb} {np} here.");
+                    Messager.WriteLine($"There {beVerb} {np} here.");
                 }
                 else
                 {
@@ -251,11 +250,11 @@ namespace CopperBend.Logic
             {
                 being.AddToInventory(item);
                 ScheduleAgent(being, 4);
-                writeLine($"Picked up {item.Name}");
+                Messager.WriteLine($"Picked up {item.Name}");
             }
             else
             {
-                writeLine($"Item {item.Name} was no longer on the map, to pick up");
+                Messager.WriteLine($"Item {item.Name} was no longer on the map, to pick up");
             }
             return pickedUp;
         }
@@ -346,13 +345,13 @@ namespace CopperBend.Logic
             var space = SpaceMap.GetItem(targetCoord);
             if (space.IsTilled)
             {
-                WriteLineIfPlayer(being, "Ground here's already tilled.");
+                Messager.WriteLineIfPlayer(being, "Ground here's already tilled.");
                 return false;
             }
 
             if (!space.CanTill)
             {
-                WriteLineIfPlayer(being, $"Cannot till the {space.Terrain.Name}.");
+                Messager.WriteLineIfPlayer(being, $"Cannot till the {space.Terrain.Name}.");
                 return false;
             }
 
@@ -375,13 +374,13 @@ namespace CopperBend.Logic
             if (!space.IsTilled)
             {
                 string qualifier = space.CanTill ? "untilled " : string.Empty;
-                writeLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
+                Messager.WriteLine($"Cannot sow {qualifier}{space.Terrain.Name}.");
                 return false;
             }
 
             if (space.IsSown)
             {
-                writeLine($"The ground to my {command.Direction} is already sown with a seed.");
+                Messager.WriteLine($"The ground to my {command.Direction} is already sown with a seed.");
                 return false;
             }
 

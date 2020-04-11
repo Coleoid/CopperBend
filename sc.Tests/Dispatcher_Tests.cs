@@ -14,12 +14,20 @@ namespace CopperBend.Logic.Tests
     [TestFixture]
     public class Dispatcher_Tests : Dispatcher_Tests_Base
     {
-        void Assert_MessageSent_Iff_Player(bool isPlayer, string message)
+        void Assert_MLW_WL_Iff_Player(bool isPlayer, string message)
         {
             if (isPlayer)
-                __messageOutput.Received().WriteLine(message);
+                __msgLogWindow.Received().WriteLine(message);
             else
-                __messageOutput.DidNotReceive().WriteLine(message);
+                __msgLogWindow.DidNotReceive().WriteLine(message);
+        }
+
+        void Assert_Messager_WL_Iff_Player(bool isPlayer, string message)
+        {
+            if (isPlayer)
+                __messager.Received().WriteLine(message);
+            else
+                __messager.DidNotReceive().WriteLine(message);
         }
 
         Being player;
@@ -152,7 +160,7 @@ namespace CopperBend.Logic.Tests
 
             Assert.That(player.Position, Is.EqualTo(new Point(3, 2)));
 
-            __messageOutput.Received().WriteLine("I can't walk through a wall.");
+            __messager.Received().WriteLineIfPlayer(player, "I can't walk through a wall.");
         }
 
         [Test]
@@ -192,7 +200,7 @@ namespace CopperBend.Logic.Tests
             Assert.That(player.Position, Is.EqualTo(itemPoint));
             __schedule.Received().AddAgent(player, 12);
 
-            Assert_MessageSent_Iff_Player(isPlayer, "There is a knife here.");
+            Assert_Messager_WL_Iff_Player(isPlayer, "There is a knife here.");
         }
         #endregion
 

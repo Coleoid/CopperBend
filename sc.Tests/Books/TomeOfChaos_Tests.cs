@@ -1,5 +1,4 @@
 ﻿using CopperBend.Contract;
-using CopperBend.Logic;
 using NUnit.Framework;
 
 namespace CopperBend.Fabric.Tests
@@ -7,10 +6,23 @@ namespace CopperBend.Fabric.Tests
     [TestFixture]
     public class TomeOfChaos_Tests
     {
+        private ISadConEntityFactory __factory;
+        private BeingCreator _creator;
+
+        
+        [SetUp]
+        public void SetUp()
+        {
+            __factory = UTHelp.GetSubstituteFactory();
+
+            _creator = new BeingCreator(__factory);
+        }
+
         [Test]
         public void TopSeed_is_recorded()
         {
-            var tome = new TomeOfChaos("SampleTopSeed");
+            var tome = new TomeOfChaos();
+            tome.SetTopSeed("SampleTopSeed");
 
             Assert.That(tome.TopSeed, Is.EqualTo("SampleTopSeed"));
         }
@@ -19,8 +31,9 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void MapSeeds_lead_to_different_values(string topSeed)
         {
-            var tome_1 = Engine.InitTome(topSeed + "a");
-            var tome_2 = Engine.InitTome(topSeed + "b");
+            var publisher = new BookPublisher(_creator);
+            var tome_1 = publisher.Tome_FromNew(topSeed + "a");
+            var tome_2 = publisher.Tome_FromNew(topSeed + "b");
 
             int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
             int next_tf_2 = tome_2.MapRndNext(Maps.TackerFarm);
@@ -36,8 +49,9 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void MapSeeds_remain_stable_when_used_in_different_orders(string topSeed)
         {
-            var tome_1 = Engine.InitTome(topSeed);
-            var tome_2 = Engine.InitTome(topSeed);
+            var publisher = new BookPublisher(_creator);
+            var tome_1 = publisher.Tome_FromNew(topSeed);
+            var tome_2 = publisher.Tome_FromNew(topSeed);
 
             int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
             int next_tb_1 = tome_1.MapRndNext(Maps.TownBarricade);
@@ -53,8 +67,9 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void LearnableSeeds_lead_to_different_values(string topSeed)
         {
-            var tome_1 = Engine.InitTome(topSeed + "a");
-            var tome_2 = Engine.InitTome(topSeed + "b");
+            var publisher = new BookPublisher(_creator);
+            var tome_1 = publisher.Tome_FromNew(topSeed + "a");
+            var tome_2 = publisher.Tome_FromNew(topSeed + "b");
 
             int next_se_1 = tome_1.LearnableRndNext();
             int next_se_2 = tome_2.LearnableRndNext();

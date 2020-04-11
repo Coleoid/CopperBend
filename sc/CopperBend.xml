@@ -33,9 +33,6 @@
         <member name="M:CopperBend.Contract.IControlPanel.ScheduleAgent(CopperBend.Contract.IScheduleAgent,System.Int32)">
             <summary> When an agent will decide what to do when its turn comes. </summary>
         </member>
-        <member name="P:CopperBend.Contract.IControlPanel.PushEngineMode">
-            <summary> When an action interrupts the entire game, in some way. </summary>
-        </member>
         <member name="M:CopperBend.Contract.IMessageLogWindow.WriteLine(System.String)">
             <summary> add a complete line to the messages </summary>
         </member>
@@ -63,15 +60,6 @@
             stuffing them in a little zoo should keep them (and us) safe.
             </summary>
         </member>
-        <member name="M:CopperBend.Logic.AttackSystem.FirstTimeFor(CopperBend.Contract.Messages)">
-            <summary> First time running across this message in this game run? </summary>
-        </member>
-        <member name="M:CopperBend.Logic.AttackSystem.Message(CopperBend.Contract.IBeing,CopperBend.Contract.Messages)">
-            <summary>
-            This allows messages to adapt based on the Being involved and
-            what messages have already been seen, how many times, et c.
-            </summary>
-        </member>
         <member name="T:CopperBend.Logic.CommandDispatcher">
             <summary> This is the main logic slice of the CommandDispatcher. </summary>
             <summary> Holds utility behaviors to reduce clutter in logic file. </summary>
@@ -88,10 +76,9 @@
         </member>
         <member name="M:CopperBend.Logic.InputCommandSource.GetCommand(CopperBend.Contract.IBeing)">
             <summary>
-            The InputCommandSource builds a Command based on
-            keyboard input.  It may take thousands of Update()
-            callbacks before a Command other than CommandIncomplete
-            is returned.
+            The InputCommandSource builds a Command based on keyboard input.
+            It may take thousands of Update() callbacks before a Command
+            other than CommandIncomplete is returned.
             </summary>
         </member>
         <member name="M:CopperBend.Logic.InputCommandSource.NextStepIs(System.Func{SadConsole.Input.AsciiKey,CopperBend.Contract.IBeing,CopperBend.Contract.Command},System.String,CopperBend.Contract.IBeing)">
@@ -99,6 +86,18 @@
         </member>
         <member name="M:CopperBend.Logic.InputCommandSource.PickUp(CopperBend.Contract.IBeing)">
             <summary> 0.2:  Currently, grab the topmost.  Later, choose. </summary>
+        </member>
+        <member name="P:CopperBend.Logic.Messager.MessageWindow">
+            <summary> MessageWindow must be set on Messager after Engine constructs it. </summary>
+        </member>
+        <member name="M:CopperBend.Logic.Messager.FirstTimeFor(CopperBend.Contract.Messages)">
+            <summary> First time running across this message in this game run? </summary>
+        </member>
+        <member name="M:CopperBend.Logic.Messager.Message(CopperBend.Contract.IBeing,CopperBend.Contract.Messages)">
+            <summary>
+            This allows messages to adapt based on the Being involved and
+            what messages have already been seen, how many times, et c.
+            </summary>
         </member>
         <member name="M:CopperBend.Logic.Schedule.GetNextAction">
             <summary> Get next scheduled action, ordered by tick of occurrence, then FIFO per tick </summary>

@@ -11,11 +11,12 @@ namespace CopperBend.Fabric
     // All significant beings, their current state and relationships
     public class SocialRegister : IBook
     {
-        public BeingCreator BeingCreator { get; set; }
+        public BeingCreator BeingCreator { get; }
         public Dictionary<string, IBeing> WellKnownBeings { get; }
 
-        public SocialRegister()
+        public SocialRegister(BeingCreator creator)
         {
+            BeingCreator = creator;
             WellKnownBeings = new Dictionary<string, IBeing>();
         }
 
@@ -26,7 +27,7 @@ namespace CopperBend.Fabric
             player.Name = "Suvail";
             player.AddComponent(new EntityViewSyncComponent());
             player.Position = playerLocation;
-            player.Console.Position = playerLocation;
+            //player.Console.Position = playerLocation;
 
             //0.2: remove these pre-equipped items
             player.AddToInventory(Equipper.BuildItem("hoe"));

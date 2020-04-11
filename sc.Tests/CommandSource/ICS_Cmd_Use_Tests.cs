@@ -19,7 +19,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("cancelled.");
+            __messager.Received().WriteLine("cancelled.");
             Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
@@ -33,7 +33,7 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            __writeLine.Received().Invoke("Nothing usable on me.");
+            __messager.Received().WriteLine("Nothing usable on me.");
             Assert.That(_source.IsAssemblingCommand, Is.False);
         }
 
@@ -70,13 +70,13 @@ namespace CopperBend.Logic.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
-            __prompt.Received().Invoke("Use item: ");
+            __messager.Received().Prompt("Use item: ");
 
             Queue(Keys.C);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
-            __prompt.Received().Invoke("Direction to use the hoe, or [a-z?] to choose item: ");
+            __messager.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
 
             Queue(Keys.NumPad9);
             Cmd = _source.GetCommand(__being);
@@ -113,8 +113,8 @@ namespace CopperBend.Logic.Tests
             Queue(Keys.U, Keys.C, Keys.NumPad9);
             Cmd = _source.GetCommand(__being);
 
-            __prompt.DidNotReceive().Invoke(Arg.Any<string>());
-            __writeLine.DidNotReceive().Invoke(Arg.Any<string>());
+            __messager.DidNotReceive().Prompt(Arg.Any<string>());
+            __messager.DidNotReceive().WriteLine(Arg.Any<string>());
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
@@ -132,13 +132,13 @@ namespace CopperBend.Logic.Tests
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
-            __prompt.Received().Invoke("Direction to use the knife, or [a-z?] to choose item: ");
+            __messager.Received().Prompt("Direction to use the knife, or [a-z?] to choose item: ");
 
             Queue(Keys.C);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
-            __prompt.Received().Invoke("Direction to use the hoe, or [a-z?] to choose item: ");
+            __messager.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
 
             Queue(Keys.NumPad9);
             Cmd = _source.GetCommand(__being);
@@ -151,15 +151,15 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Use_unhappy_paths()
         {
-            var (_, fruit, hoe) = Fill_pack();
+            Fill_pack();
             __being.WieldedTool.Returns((IItem)null);
 
             Queue(Keys.U, Keys.D);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
-            __writeLine.Received().Invoke("The key [d] does not match an inventory item.  Pick another.");
-            __writeLine.ClearReceivedCalls();
+            __messager.Received().WriteLine("The key [d] does not match an inventory item.  Pick another.");
+            __messager.ClearReceivedCalls();
 
             //Queue(Keys.B);
             //Cmd = _source.GetCommand(__being);
@@ -172,15 +172,15 @@ namespace CopperBend.Logic.Tests
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
-            __writeLine.Received().Invoke("The key [.] does not match an inventory item.  Pick another.");
-            __writeLine.ClearReceivedCalls();
+            __messager.Received().WriteLine("The key [.] does not match an inventory item.  Pick another.");
+            __messager.ClearReceivedCalls();
 
             Queue(Keys.Right);
             Cmd = _source.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             Assert.That(_source.IsAssemblingCommand);
-            __writeLine.Received().Invoke("The key [Right] does not match an inventory item.  Pick another.");
-            __writeLine.ClearReceivedCalls();
+            __messager.Received().WriteLine("The key [Right] does not match an inventory item.  Pick another.");
+            __messager.ClearReceivedCalls();
         }
     }
 }

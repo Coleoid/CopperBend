@@ -32,7 +32,7 @@ namespace CopperBend.Logic.Tests
             _dispatcher.CommandBeing(player, cmd);
 
             __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
-            __messageOutput.Received().WriteLine("Cannot till the floor.");
+            __messager.Received().WriteLineIfPlayer(player, "Cannot till the floor.");
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace CopperBend.Logic.Tests
             _dispatcher.CommandBeing(player, cmd);
 
             __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
-            __messageOutput.Received().WriteLine("Ground here's already tilled.");
+            __messager.Received().WriteLineIfPlayer(player, "Ground here's already tilled.");
         }
 
         [Test]

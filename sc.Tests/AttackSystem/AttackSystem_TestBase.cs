@@ -1,10 +1,12 @@
-﻿using CopperBend.Contract;
+﻿using System.Collections.ObjectModel;
+using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using log4net;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
+using SadConsole.Components;
 using SadConsole.Entities;
 
 namespace CopperBend.Logic.Tests
@@ -31,7 +33,12 @@ namespace CopperBend.Logic.Tests
         {
             __sadConEntityFactory = Substitute.For<ISadConEntityFactory>();
             __sadConEntityFactory.GetSadCon(Arg.Any<ISadConInitData>())
-                .Returns(Substitute.For<IEntity>());
+                .Returns( ctx => {
+                    var ie = Substitute.For<IEntity>();
+                    var cs = new ObservableCollection<IConsoleComponent>();
+                    ie.Components.Returns(cs);
+                    return ie;
+                } );
             Engine.Cosmogenesis("attack!", __sadConEntityFactory);
             BeingCreator = Engine.BeingCreator;
         }

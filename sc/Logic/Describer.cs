@@ -13,12 +13,8 @@ namespace CopperBend.Logic
         public Herbal Herbal { get; set; }
         public TomeOfChaos TomeOfChaos { get; set; }
 
-        private AbstractGenerator rnd;
-
         public void Scramble()
         {
-            rnd = TomeOfChaos.LearnableGenerator;
-
             ScrambleSeeds();
             ScrambleFruit();
         }
@@ -68,7 +64,7 @@ namespace CopperBend.Logic
         private void ScrambleSeeds()
         {
             var shuffled = SeedAdjectives
-                .OrderBy(d => rnd.Next()).ToList();
+                .OrderBy(d => TomeOfChaos.LearnableRndNext()).ToList();
 
             foreach (var key in Herbal.PlantByID.Keys)
             {
@@ -112,7 +108,7 @@ namespace CopperBend.Logic
         private void ScrambleFruit()
         {
             var shuffled = FruitAdjectives
-                .OrderBy(d => rnd.Next()).ToList();
+                .OrderBy(d => TomeOfChaos.LearnableRndNext()).ToList();
 
             foreach (var key in Herbal.PlantByID.Keys)
             {

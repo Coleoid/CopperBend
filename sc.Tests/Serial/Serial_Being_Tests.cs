@@ -1,12 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
-using SadConsole.Entities;
 using YamlDotNet.Serialization;
 using CopperBend.Contract;
 using CopperBend.Model;
-using NSubstitute;
 using NUnit.Framework;
 using CopperBend.Fabric;
 using CopperBend.Logic;
+using CopperBend.Fabric.Tests;
 
 namespace CopperBend.Persist.Tests
 {
@@ -30,9 +29,8 @@ namespace CopperBend.Persist.Tests
                 .WithTypeConverter(ycIBeing)
                 .Build();
 
-            var entityFactory = Substitute.For<ISadConEntityFactory>();
-            entityFactory.GetSadCon(Arg.Any<ISadConInitData>())
-                .Returns(Substitute.For<IEntity>());
+            var entityFactory = UTHelp.GetSubstituteFactory();
+
             Engine.Cosmogenesis("serial being!", entityFactory);
             _beingCreator = Engine.BeingCreator;
             ycIBeing.BeingCreator = _beingCreator;

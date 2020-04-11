@@ -1,25 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Microsoft.Xna.Framework;
 using log4net;
-using CopperBend.Contract;
-using CopperBend.Fabric;
-using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
 using SadConsole.Entities;
-using System;
+using CopperBend.Contract;
+using CopperBend.Fabric;
+using System.Collections.ObjectModel;
+using SadConsole.Components;
 
 namespace CopperBend.Logic.Tests
 {
     public class Dispatcher_Tests_Base
     {
-        protected ILog __log = null;
         protected CommandDispatcher _dispatcher = null;
+
+        protected ILog __log = null;
         protected ISchedule __schedule = null;
         protected GameState _gameState = null;
         protected IDescriber __describer = null;
-        protected IMessageLogWindow __messageOutput = null;
+        protected IMessageLogWindow __msgLogWindow = null;
         protected ISadConEntityFactory __factory = null;
+        protected IMessager __messager = null;
         protected BeingCreator BeingCreator;
 
         protected TerrainType ttFloor;
@@ -100,7 +102,12 @@ namespace CopperBend.Logic.Tests
 
             __factory = Substitute.For<ISadConEntityFactory>();
             __factory.GetSadCon(Arg.Any<ISadConInitData>())
-                .Returns(Substitute.For<IEntity>());
+                .Returns(ctx => {
+                    var ie = Substitute.For<IEntity>();
+                    var cs = new ObservableCollection<IConsoleComponent>();
+                    ie.Components.Returns(cs);
+                    return ie;
+                });
 
             Engine.Cosmogenesis("bang", __factory);
             BeingCreator = Engine.BeingCreator;
@@ -121,13 +128,10 @@ namespace CopperBend.Logic.Tests
                 },
             };
             __describer = Substitute.For<IDescriber>();
-            __messageOutput = Substitute.For<IMessageLogWindow>();
-            Action<string> writeLine = (s) => { };
+            __msgLogWindow = Substitute.For<IMessageLogWindow>();
+            __messager = Substitute.For<IMessager>();
 
-            _dispatcher = new CommandDispatcher(__schedule, _gameState, __describer, writeLine, __log)
-            {
-                ClearPendingInput = () => { }
-            };
+            _dispatcher = new CommandDispatcher(__log, __schedule, _gameState, __describer, __messager);
         }
 
         public SpaceMap CreateSmallTestMap()
@@ -150,6 +154,5 @@ namespace CopperBend.Logic.Tests
 
             return spaceMap;
         }
-
     }
 }

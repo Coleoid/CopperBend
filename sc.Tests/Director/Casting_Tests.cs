@@ -1,8 +1,7 @@
-﻿using NSubstitute;
-using NUnit.Framework;
-using SadConsole.Entities;
+﻿using NUnit.Framework;
 using CopperBend.Contract;
 using Microsoft.Xna.Framework;
+using CopperBend.Fabric.Tests;
 
 namespace CopperBend.Logic.Tests
 {
@@ -12,9 +11,7 @@ namespace CopperBend.Logic.Tests
         [SetUp]
         public void SetUp()
         {
-            var entityFactory = Substitute.For<ISadConEntityFactory>();
-            entityFactory.GetSadCon(Arg.Any<ISadConInitData>())
-                .Returns(Substitute.For<IEntity>());
+            var entityFactory = UTHelp.GetSubstituteFactory();
 
             Engine.Cosmogenesis("casting", entityFactory);
             //var ourHero = Substitute.For<IBeing>();
@@ -40,7 +37,7 @@ namespace CopperBend.Logic.Tests
             IBeing kellet = director.FindBeing("Kellet Benison");
 
             Assert.That(kellet, Is.Not.Null);
-            Assert.That(kellet.Foreground, Is.EqualTo(Color.Red));
+            Assert.That(kellet.Foreground, Is.EqualTo(Color.AliceBlue));
         }
 
         [Test]

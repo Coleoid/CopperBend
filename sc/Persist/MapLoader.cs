@@ -477,17 +477,17 @@ terrain:
     public class MapData
     {
         public string Name { get; set; }
-        public Dictionary<string, string> Legend { get; } = new Dictionary<string, string>();
-        public List<string> Terrain { get; } = new List<string>();
-        public List<RotOverlayData> Rot { get; } = new List<RotOverlayData>();
-        public List<string> FirstSightMessage { get; } = new List<string>();
+        public Dictionary<string, string> Legend { get; set; } = new Dictionary<string, string>();
+        public List<string> Terrain { get; set; } = new List<string>();
+        public List<RotOverlayData> Rot { get; set; } = new List<RotOverlayData>();
+        public List<string> FirstSightMessage { get; set; } = new List<string>();
     }
 
     public class RotOverlayData
     {
         public string Name { get; set; }
         public string Location { get; set; }
-        public List<string> Terrain { get; } = new List<string>();
+        public List<string> Terrain { get; set; } = new List<string>();
     }
 #pragma warning restore SA1402 // File may only contain a single type
 }

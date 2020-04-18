@@ -27,7 +27,7 @@ namespace CopperBend.Fabric
             player.Name = "Suvail";
             player.AddComponent(new EntityViewSyncComponent());
             player.Position = playerLocation;
-            //player.Console.Position = playerLocation;
+            player.IsPlayer = true;
 
             //0.2: remove these pre-equipped items
             player.AddToInventory(Equipper.BuildItem("hoe"));

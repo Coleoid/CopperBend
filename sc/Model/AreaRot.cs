@@ -8,6 +8,7 @@ namespace CopperBend.Model
 {
     public class AreaRot : IHasID, IDelible, IAreaRot
     {
+        public string Name { get => "Area rot"; }
         public AreaRot(uint id = uint.MaxValue)
         {
             ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
@@ -24,7 +25,7 @@ namespace CopperBend.Model
 
         public int Health { get; set; }
 
-        #region IDestroyable
+        #region IDelible
         public int MaxHealth { get; set; } = 80;
 
         public void Heal(int amount)

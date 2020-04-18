@@ -6,7 +6,6 @@ namespace CopperBend.Contract
 {
     public interface IBeing : IDelible, IScheduleAgent, IHasID, IAttacker, IDefender
     {
-        string Name { get; set; }
         Color Foreground { get; }
         Color Background { get; }
         int Glyph { get; }

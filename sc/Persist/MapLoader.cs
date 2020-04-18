@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,23 +15,24 @@ using CopperBend.Model;
 
 namespace CopperBend.Persist
 {
-#pragma warning disable SA1402 // File may only contain a single type
     public class MapLoader
     {
         private readonly ILog log;
         //0.1: Extract Atlas into Compendium
-        private Dictionary<string, TerrainType> terrainTypes;
+        public Atlas Atlas { get; }
 
         public MapLoader(ILog logger)
         {
             log = logger;
-            InitTerrain();
+            Atlas = new Atlas();
+            InitLegend(Atlas);
         }
 
         //0.2: Bring this into Cosmogenesis
-        private void InitTerrain()
+        private void InitLegend(Atlas atlas)
         {
-            terrainTypes = SpaceMap.TerrainTypes;
+            //0.1 shift this depewndency
+            atlas.Legend = SpaceMap.TerrainTypes;
 
             var dirtBG = new Color(50, 30, 13);
             var growingBG = new Color(28, 54, 22);
@@ -45,7 +45,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = true,
                 Looks = new Cell(Color.DarkRed, Color.DarkRed, '?'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -55,7 +55,7 @@ namespace CopperBend.Persist
                 CanPlant = true,
                 Looks = new Cell(Color.DarkGray, dirtBG, '.'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
 
             type = new TerrainType
@@ -66,7 +66,7 @@ namespace CopperBend.Persist
                 CanPlant = true,
                 Looks = new Cell(Color.SaddleBrown, dirtBG, '~'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -76,7 +76,7 @@ namespace CopperBend.Persist
                 CanPlant = false,
                 Looks = new Cell(Color.ForestGreen, dirtBG, '~'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
 
             type = new TerrainType
@@ -86,7 +86,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = false,
                 Looks = new Cell(Color.DarkGray, stoneBG, '#'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -95,7 +95,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = false,
                 Looks = new Cell(Color.DarkGray, stoneBG, '+'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -104,7 +104,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = true,
                 Looks = new Cell(Color.DarkGray, stoneBG, '-'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -113,7 +113,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = false,
                 Looks = new Cell(Color.SaddleBrown, dirtBG, 'X'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -122,7 +122,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = false,
                 Looks = new Cell(Color.DarkGray, stoneBG, '='),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -131,7 +131,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = true,
                 Looks = new Cell(Color.DarkGray, stoneBG, '%'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -141,7 +141,7 @@ namespace CopperBend.Persist
                 CanPlant = true,
                 Looks = new Cell(Color.ForestGreen, growingBG, ','),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -150,7 +150,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = true,
                 Looks = new Cell(Color.ForestGreen, growingBG, 'w'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType
             {
@@ -159,7 +159,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = true,
                 Looks = new Cell(Color.BurlyWood, stoneBG, 'T'),
             };
-            StoreTerrainType(type);
+            atlas.StoreTerrainType(type);
 
             type = new TerrainType()
             {
@@ -168,15 +168,7 @@ namespace CopperBend.Persist
                 CanSeeThrough = true,
                 Looks = new Cell(Color.AliceBlue, stoneBG, '>'),
             };
-            StoreTerrainType(type);
-        }
-
-        public void StoreTerrainType(TerrainType type)
-        {
-            if (terrainTypes.ContainsKey(type.Name))
-                throw new Exception($"Already have type {type.Name} stored.");
-
-            terrainTypes[type.Name] = type;
+            atlas.StoreTerrainType(type);
         }
 
         public CompoundMap LoadDevMap(string mapName, GameState state)
@@ -296,8 +288,8 @@ namespace CopperBend.Persist
         public TerrainType TerrainFrom(string name)
         {
             name = name.ToLowerInvariant();
-            var foundType = terrainTypes.ContainsKey(name) ? name : "Unknown";
-            return terrainTypes[foundType];
+            var foundType = Atlas.Legend.ContainsKey(name) ? name : "Unknown";
+            return Atlas.Legend[foundType];
         }
 
         public MapData DataFromYAML(string mapYaml)
@@ -472,22 +464,4 @@ terrain:
         #endregion
 
     }
-
-
-    public class MapData
-    {
-        public string Name { get; set; }
-        public Dictionary<string, string> Legend { get; set; } = new Dictionary<string, string>();
-        public List<string> Terrain { get; set; } = new List<string>();
-        public List<RotOverlayData> Rot { get; set; } = new List<RotOverlayData>();
-        public List<string> FirstSightMessage { get; set; } = new List<string>();
-    }
-
-    public class RotOverlayData
-    {
-        public string Name { get; set; }
-        public string Location { get; set; }
-        public List<string> Terrain { get; set; } = new List<string>();
-    }
-#pragma warning restore SA1402 // File may only contain a single type
 }

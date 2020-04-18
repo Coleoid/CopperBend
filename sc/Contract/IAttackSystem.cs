@@ -8,7 +8,7 @@ namespace CopperBend.Contract
         Queue<Attack> AttackQueue { get; }
         Queue<IDelible> Destroyed { get; }
         IControlPanel Panel { get; set; }
-        IRotMap RotMap { get; set; }
+        IRotMap RotMap { get; }
 
         void AddAttack(Attack attack);
         void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense);
@@ -22,6 +22,5 @@ namespace CopperBend.Contract
         void ResolveAttackQueue();
         int RollDamage(IAttackEffect effect);
         IEnumerable<AttackDamage> RollDamages(IAttackMethod attack);
-        void SetRotMap(IRotMap rotMap);
     }
 }

@@ -77,14 +77,19 @@ Apply post-attack effects
     public class AttackSystem : IAttackSystem
     {
         public IControlPanel Panel { get; set; }
-        private readonly ILog log;
-        public AttackSystem(IControlPanel panel, ILog logger)
+        private ILog Log { get; set; }
+        private IGameState GameState { get; set; }
+
+        public IRotMap RotMap { get => GameState.Map.RotMap; }
+
+        public AttackSystem(IControlPanel panel, ILog logger, IGameState gameState)
         {
             Panel = panel;
-            log = logger;
-
+            Log = logger;
+            GameState = gameState;
             Destroyed = new Queue<IDelible>();
             AttackQueue = new Queue<Attack>();
+
         }
 
         public Queue<IDelible> Destroyed { get; }
@@ -138,7 +143,7 @@ Apply post-attack effects
                 ae.Type.StartsWith("physical", StringComparison.InvariantCulture))
             )
             {
-                log.Info("Rot strikeback");
+                Log.Info("Rot strikeback");
                 var newDefender = (IDefender)attack.Attacker;
                 var newAM = new AttackMethod("vital.rot.toxin", "3d3");
                 AttackQueue.Enqueue(new Attack
@@ -158,7 +163,7 @@ Apply post-attack effects
                 ae.Type.StartsWith("physical", StringComparison.InvariantCulture))
             )
             {
-                log.Info("Nature through our hero");
+                Log.Info("Nature through our hero");
                 var newAM = new AttackMethod("vital.nature.itself", "3d3");
                 AttackQueue.Enqueue(new Attack
                 {
@@ -213,7 +218,8 @@ Apply post-attack effects
                 //  (ツ)_/¯
                 //  Is this an angel?
                 Destroyed.Enqueue(target);
-                log.Info($"Target destroyed.");
+                Log.Info($"Target {target.Name} destroyed.");
+
             }
         }
 
@@ -225,13 +231,14 @@ Apply post-attack effects
                 {
                     if (being.IsPlayer)
                     {
-                        log.Info("Game over, man.");
+                        Log.Info("Game over, man.");
                         //1.+: Game modes (agent of power, hardcore, savescummer)
                         throw new PlayerDiedException();
                     }
 
                     //0.1: drop fewer items
-                    foreach (var it in being.Inventory)
+                    var items = new List<IItem>(being.Inventory);
+                    foreach (var it in items)
                     {
                         being.RemoveFromInventory(it);
                         Panel.PutItemOnMap(it, being.Position);
@@ -333,12 +340,6 @@ Apply post-attack effects
             }
 
             return damages;
-        }
-
-        public IRotMap RotMap { get; set; }
-        public void SetRotMap(IRotMap rotMap)
-        {
-            throw new NotImplementedException();
         }
     }
 }

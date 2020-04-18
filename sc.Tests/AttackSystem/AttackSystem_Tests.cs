@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using NUnit.Framework;
@@ -56,7 +57,7 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Damage_rolls_within_expected_ranges()
         {
-            var asys = new AttackSystem(null, __log);
+            var asys = new AttackSystem(null, __log, null);
             bool rolled_min = false;
             bool rolled_max = false;
             for (int i = 0; i < 1000; i++)
@@ -76,7 +77,7 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Can_resist_a_set_of_AttackDamages()
         {
-            var asys = new AttackSystem(null, __log);
+            var asys = new AttackSystem(null, __log, null);
             List<AttackDamage> damages = new List<AttackDamage>
             {
                 new AttackDamage(8, "physical.impact.blunt"),
@@ -102,7 +103,7 @@ namespace CopperBend.Logic.Tests
         [TestCase(9, "sausage", 4)]  //0.2: would be nice if this broke, to rule out typos.
         public void Default_resistance_when_type_has_no_match(int initial, string type, int expected)
         {
-            var asys = new AttackSystem(null, __log);
+            var asys = new AttackSystem(null, __log, null);
             List<AttackDamage> damages = new List<AttackDamage>
             {
                 new AttackDamage(initial, type),
@@ -116,7 +117,12 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Nature_strikes_the_rot_through_our_hero()
         {
-            var asys = new AttackSystem(null, __log);
+            GameState gs = new GameState();
+            var cm = new CompoundMap();
+            cm.RotMap = new RotMap();
+            gs.Map = cm;
+
+            var asys = new AttackSystem(null, __log, gs);
 
             var player = BeingCreator.CreateBeing("Suvail");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
@@ -131,7 +137,6 @@ namespace CopperBend.Logic.Tests
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
-            asys.RotMap = new RotMap();
             asys.CheckForSpecials(attack);
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(2));
@@ -150,7 +155,12 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Nature_does_not_strike_the_rot_via_other_sources()
         {
-            var asys = new AttackSystem(null, __log);
+            GameState gs = new GameState();
+            var cm = new CompoundMap();
+            cm.RotMap = new RotMap();
+            gs.Map = cm;
+
+            var asys = new AttackSystem(null, __log, gs);
 
             var flameRat = BeingCreator.CreateBeing("flame rat");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
@@ -165,7 +175,6 @@ namespace CopperBend.Logic.Tests
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
-            asys.RotMap = new RotMap();
             asys.CheckForSpecials(attack);
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(1));
@@ -195,7 +204,12 @@ namespace CopperBend.Logic.Tests
             rotMap.Add(nbor_2, (3, 1));
             rotMap.Add(stranger, (8, 2));
 
-            var asys = new AttackSystem(null, __log) { RotMap = rotMap };
+            GameState gs = new GameState();
+            var cm = new CompoundMap();
+            cm.RotMap = rotMap;
+            gs.Map = cm;
+
+            var asys = new AttackSystem(null, __log, gs);
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 

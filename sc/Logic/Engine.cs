@@ -39,45 +39,42 @@ namespace CopperBend.Logic
 
 
         // ===========  Constructor args
-        private readonly ILog log;
-        private ISchedule Schedule { get; set; }
+        //NEXT, these get folded into ServicePanel
         private ISadConEntityFactory SadConEntityFactory { get; set; }
         private Keyboard Keyboard { get; set; }
         private IUIBuilder UIBuilder { get; set; }
-        private IDescriber Describer { get; set; }
         private IGameState GameState { get; set; }
         private IControlPanel Dispatcher { get; set; }
-        private ModeNode ModeNode { get; set; }
-        private IMessager Messager { get; set; }
+
+        private IServicePanel ServicePanel { get; set; }
+        //private IDescriber Describer { get => ServicePanel.Describer; }
+        private IMessager Messager { get => ServicePanel.Messager; }
+        private ILog Log { get => ServicePanel.Log; }
+        private IGameMode GameMode { get => ServicePanel.GameMode; }
+        private ISchedule Schedule { get => ServicePanel.Schedule; }
+
 
         #region Init
         public Engine(
-                ILog logger,
-                ISchedule schedule,
+                IServicePanel servicePanel,
                 ISadConEntityFactory scef,
                 Keyboard keyboard,
                 Size gameSize,
                 IUIBuilder uiBuilder,
-                IDescriber describer,
                 IGameState gameState,
-                IControlPanel dispatcher,
-                ModeNode modeNode,
-                IMessager messager
+                IControlPanel dispatcher
             )
             : base()
         {
-            log = logger;
-            Parent = SadGlobal.CurrentScreen;
-            Schedule = schedule;
+            ServicePanel = servicePanel;
             SadConEntityFactory = scef;
             Keyboard = keyboard;
             GameSize = gameSize;
             UIBuilder = uiBuilder;
-            Describer = describer;  // (must be attached to Herbal &c per-game)
             GameState = gameState;
             Dispatcher = dispatcher;
-            ModeNode = modeNode;
-            Messager = messager;
+
+            Parent = SadGlobal.CurrentScreen;
         }
 
         //0.1: Tease apart distinct start-up goals:
@@ -92,7 +89,7 @@ namespace CopperBend.Logic
             IsFocused = true;
 
             GameInProgress = false;
-            ModeNode.PushEngineMode(EngineMode.NoGameRunning, null);
+            GameMode.PushEngineMode(EngineMode.NoGameRunning, null);
 
             MapWindowSize = new Size(GameSize.Width * 2 / 3, GameSize.Height - 8);
             MenuWindowSize = new Size(GameSize.Width - 20, GameSize.Height / 4);
@@ -103,6 +100,7 @@ namespace CopperBend.Logic
             Children.Add(MenuWindow);
 
             MessageWindow = UIBuilder.CreateMessageLog();
+            this.ServicePanel.Messager.MessageWindow = MessageWindow;
             Children.Add((SadConsole.Console)MessageWindow);
             MessageWindow.Show();
 
@@ -111,31 +109,31 @@ namespace CopperBend.Logic
 
         public void OpenGameMenu()
         {
-            Guard.Against(ModeNode.CurrentMode == EngineMode.MenuOpen);
+            Guard.Against(GameMode.CurrentMode == EngineMode.MenuOpen);
 
             MenuConsole.Clear();
             MenuConsole.Print(2, 4, GameInProgress ? "R) Return to game" : "B) Begin new game");
             MenuConsole.Print(2, 6, "Q) Quit");
 
             MenuWindow.Show();
-            ModeNode.PushEngineMode(EngineMode.MenuOpen, null);
+            GameMode.PushEngineMode(EngineMode.MenuOpen, null);
         }
 
         public void BeginNewGame()
         {
             if (TopSeed == null)
                 TopSeed = GenerateSimpleTopSeed();
-            log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
+            Log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
             Cosmogenesis(TopSeed, SadConEntityFactory);
             TopSeed = null;
-            Equipper.Herbal = Compendium.Herbal;
-            Describer.Scramble();
 
-            var loader = new Persist.MapLoader(log);
+            ServicePanel.Notify_NewGame_Startup(new GameDataEventArgs(Compendium.TomeOfChaos, Compendium.Herbal));
+
+            var loader = new Persist.MapLoader(Log);
             FullMap = loader.FarmMap();
 
-            Player = Engine.Compendium.SocialRegister.CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
-            log.Debug("Created player character.");
+            Player = Compendium.SocialRegister.CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
+            Log.Debug("Created player character.");
 
             Schedule.AddAgent(Player, 12);
 
@@ -149,19 +147,17 @@ namespace CopperBend.Logic
 
             GameState = new GameState
             {
-                Player = Player,
                 Map = FullMap,
                 Story = Engine.Compendium.Dramaticon,
             };
             Dispatcher.GameState = GameState;
-            Dispatcher.AttackSystem.SetRotMap(GameState.Map.RotMap);
 
-            Player.CommandSource = new InputCommandSource(log, Describer, GameState, Dispatcher, ModeNode, Messager);
+            Player.CommandSource = new InputCommandSource(ServicePanel, GameState, Dispatcher);
             MapConsole.CenterViewPortOnPoint(Player.Position);
 
-            ModeNode.PushEngineMode(EngineMode.WorldTurns, null);
+            GameMode.PushEngineMode(EngineMode.WorldTurns, null);
             GameInProgress = true;
-            log.Info("Began new game");
+            Log.Info("Began new game");
         }
 
         /// <summary> I hope you had fun! </summary>
@@ -175,7 +171,7 @@ namespace CopperBend.Logic
             WriteGameOverReport(pde);
             ClearStats();
 
-            ModeNode.PopEngineMode();
+            GameMode.PopEngineMode();
             GameInProgress = false;
 
             ShutDownGame();
@@ -188,11 +184,11 @@ namespace CopperBend.Logic
         private void ShutDownGame()
         {
             // Start by simply undoing many NewGame steps in reverse order
-            log.Info("Shutting down game");
+            Log.Info("Shutting down game");
 
             Player.CommandSource = null;
 
-            Dispatcher.AttackSystem.RotMap = null;
+            // ?!?? Dispatcher.AttackSystem = null;
             Dispatcher.GameState = null;
 
             GameState = null;
@@ -208,7 +204,7 @@ namespace CopperBend.Logic
             Player = null;
             FullMap = null;
 
-            log.Info("Shut down game");
+            Log.Info("Shut down game");
         }
         #endregion
 
@@ -237,7 +233,7 @@ namespace CopperBend.Logic
 
         internal void ActOnMode()
         {
-            switch (ModeNode.CurrentMode)
+            switch (GameMode.CurrentMode)
             {
             //  The game menu being open has priority
             case EngineMode.MenuOpen:
@@ -252,14 +248,14 @@ namespace CopperBend.Logic
 
             //  When the player is choosing their action
             case EngineMode.PlayerTurn:
-                ModeNode.CurrentCallback();
+                GameMode.CurrentCallback();
                 Messager.ResetMessagesSentSincePause();
                 break;
 
             //  When enough small messages have been printed that the
             //  UI is waiting with a '- more -' style prompt
             case EngineMode.MessagesPendingUserInput:
-                ModeNode.CurrentCallback();
+                GameMode.CurrentCallback();
                 break;
 
             //  The large message pane (inventory, log, ...) overlays most of the game
@@ -279,7 +275,7 @@ namespace CopperBend.Logic
                 }
                 else
                 {
-                    throw new Exception($"Hit the game loop in {ModeNode.CurrentMode} mode.");
+                    throw new Exception($"Hit the game loop in {GameMode.CurrentMode} mode.");
                 }
                 break;
             }
@@ -290,7 +286,7 @@ namespace CopperBend.Logic
             bool ShouldClear()
             {
                 MenuWindow.Show();
-                ModeNode.PushEngineMode(EngineMode.MenuOpen, () => { });
+                GameMode.PushEngineMode(EngineMode.MenuOpen, () => { });
                 return true;
             }
             Messager.ShouldClearQueueOnEscape = ShouldClear;
@@ -317,7 +313,7 @@ namespace CopperBend.Logic
                     // Return to game
                     if (press.Key == Keys.R || press.Key == Keys.Escape)
                     {
-                        ModeNode.PopEngineMode();
+                        GameMode.PopEngineMode();
                         MenuWindow.Hide();
                         return;
                     }
@@ -337,7 +333,7 @@ namespace CopperBend.Logic
                     // Begin new game
                     if (press.Key == Keys.B)
                     {
-                        ModeNode.PopEngineMode();
+                        GameMode.PopEngineMode();
                         MenuWindow.Hide();
                         BeginNewGame();
                         return;
@@ -346,7 +342,7 @@ namespace CopperBend.Logic
                     //0.0: Load saved game and resume play
                     if (press.Key == Keys.L)
                     {
-                        ModeNode.PopEngineMode();
+                        GameMode.PopEngineMode();
                         MenuWindow.Hide();
                         //PickAndResumeSavedGame();
                         TickWhenGameLastSaved = Schedule.CurrentTick;
@@ -360,7 +356,7 @@ namespace CopperBend.Logic
 
         public void HandleScheduledEvents()
         {
-            while (ModeNode.CurrentMode == EngineMode.WorldTurns)
+            while (GameMode.CurrentMode == EngineMode.WorldTurns)
             {
                 var nextAction = Schedule.GetNextAction();
                 Dispatcher.Dispatch(nextAction);

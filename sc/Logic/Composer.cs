@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Drawing;
 using log4net;
 using log4net.Config;
@@ -27,7 +28,7 @@ namespace CopperBend.Logic
         private int gameWidth;
         private int gameHeight;
 
-        public XNAGame GetGameInstance()
+        public XNAGame CreateGameInstance()
         {
             gameWidth = 160;
             gameHeight = 60;
@@ -44,29 +45,31 @@ namespace CopperBend.Logic
 
         public void InitializeEngine()
         {
-            Schedule sched = new Schedule(Logger);
+            var sched = new Schedule(Logger);
             var fmMap = SadGlobal.LoadFont("Cheepicus_14x14.font");
             var scefactory = new SadConEntityFactory(fmMap);
             var kbd = SadGlobal.KeyboardState;
 
             var szGame = new Size(gameWidth, gameHeight);
-            var uib = new UIBuilder(szGame, fmMap, Logger);
-            var describer = new Describer();  // (must be attached to Herbal &c per-game)
+            var uibuilder = new UIBuilder(szGame, fmMap, Logger);
             var gameState = new GameState();
+
+            var describer = new Describer();
             var node = new ModeNode(Logger);
             var msgr = new Messager(node);
+            IServicePanel servicePanel = new ServicePanel()
+                .Register(Logger)
+                .Register(sched)
+                .Register(describer)
+                .Register(msgr)
+                .Register(node);
 
-            IControlPanel dispatcher = new CommandDispatcher(
-                Logger, sched,
-                gameState, describer,
-                msgr
-            );
+            IControlPanel dispatcher = new CommandDispatcher(servicePanel, gameState);
 
             Engine engine = new Engine(
-                Logger, sched,
+                servicePanel,
                 scefactory, kbd,
-                szGame, uib, describer, gameState, dispatcher,
-                node, msgr
+                szGame, uibuilder, gameState, dispatcher
             );
 
             engine.Init(InitialSeed);
@@ -74,6 +77,31 @@ namespace CopperBend.Logic
             // this, next?
             //dispatcher.Init(engine, attackSystem);
         }
+
+
+        public void LaunchGame()
+        {
+            XNAGame game;
+            try
+            {
+                game = CreateGameInstance();
+            }
+            catch (Exception ex)
+            {
+                Logger.Fatal("Exception terminated construction", ex);
+                return;
+            }
+
+            try
+            {
+                game.Run();
+            }
+            catch (Exception ex)
+            {
+                Logger.Fatal("Exception terminated run", ex);
+            }
+        }
+
 
         public void Release()
         {

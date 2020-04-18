@@ -10,22 +10,21 @@ namespace CopperBend.Logic
     public class InputCommandSource : ICommandSource
     {
         private readonly Command commandIncomplete = new Command(CmdAction.Incomplete, CmdDirection.None);
-        private readonly ILog log;
 
-        private readonly IDescriber describer;
         private readonly IGameState gameState;
         private readonly IControlPanel controls;
-        private readonly ModeNode modeNode;
-        private IMessager Messager { get; set; }
 
-        public InputCommandSource(ILog logger, IDescriber describer, IGameState state, IControlPanel controls, ModeNode modeNode, IMessager messager)
+        private IServicePanel ServicePanel { get; set; }
+        private IMessager Messager { get => ServicePanel.Messager; }
+        private IDescriber Describer { get => ServicePanel.Describer; }
+        private ILog Log { get => ServicePanel.Log; }
+        private IGameMode GameMode { get => ServicePanel.GameMode; }
+
+        public InputCommandSource(IServicePanel isp, IGameState state, IControlPanel controls)
         {
-            this.log = logger;
-            this.describer = describer;
+            this.ServicePanel = isp;
             this.gameState = state;
             this.controls = controls;
-            this.modeNode = modeNode;
-            Messager = messager;
         }
 
         public bool IsAssemblingCommand => nextStep != null;
@@ -42,11 +41,11 @@ namespace CopperBend.Logic
                 if (actionWasTaken)
                 {
                     nextStep = null;
-                    modeNode.PopEngineMode();
+                    GameMode.PopEngineMode();
                 }
             }
 
-            modeNode.PushEngineMode(EngineMode.PlayerTurn, DeliverCommandFromInput);
+            GameMode.PushEngineMode(EngineMode.PlayerTurn, DeliverCommandFromInput);
             DeliverCommandFromInput();
         }
 
@@ -168,7 +167,7 @@ namespace CopperBend.Logic
             {
                 gameState.Story.HasClearedRot = true;
                 WriteLine("Yes.  Now.");
-                log.Info("Decided to clear Rot.");
+                Log.Info("Decided to clear Rot.");
                 return FinishedCommand(CmdAction.Direction, rotDirection);
             }
             else
@@ -194,7 +193,7 @@ namespace CopperBend.Logic
 
             var item = ItemInInventoryLocation(press, being);
             if (item == null) return SameStep($"Nothing in inventory slot {press.Character}.");
-            if (!item.IsIngestible) return SameStep($"I can't eat or drink {describer.Describe(item, DescMods.Article)}.");
+            if (!item.IsIngestible) return SameStep($"I can't eat or drink {Describer.Describe(item, DescMods.Article)}.");
 
             return FinishedCommand(CmdAction.Consume, CmdDirection.None, item);
         }
@@ -262,7 +261,7 @@ namespace CopperBend.Logic
 
             return NextStepIs(
                 Use_Has_Item,
-                $"Direction to use the {describer.Describe(thisUsedItem)}, or [a-z?] to choose item: ", being);
+                $"Direction to use the {Describer.Describe(thisUsedItem)}, or [a-z?] to choose item: ", being);
         }
         public Command Use_Pick_Item(AsciiKey press, IBeing being)
         {
@@ -277,14 +276,14 @@ namespace CopperBend.Logic
             var item = being.Inventory.ElementAt(selectedIndex);
             if (!item.IsUsable)
             {
-                return SameStep($"The {describer.Describe(item)} is not a usable item.  Pick another.");
+                return SameStep($"The {Describer.Describe(item)} is not a usable item.  Pick another.");
             }
 
             thisUsedItem = item;
 
             return NextStepIs(
                 Use_Has_Item,
-                $"Direction to use the {describer.Describe(thisUsedItem)}, or [a-z?] to choose item: ", being);
+                $"Direction to use the {Describer.Describe(thisUsedItem)}, or [a-z?] to choose item: ", being);
         }
 
         private Command Use_Has_Item(AsciiKey press, IBeing being)

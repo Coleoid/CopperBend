@@ -1,22 +1,48 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using CopperBend.Contract;
 using CopperBend.Fabric;
-using Troschuetz.Random.Generators;
 
 namespace CopperBend.Logic
 {
-    public class Describer : IDescriber
+    public class Describer : IDescriber, IPanelService
     {
-        public Herbal Herbal { get; set; }
-        public TomeOfChaos TomeOfChaos { get; set; }
+        private Herbal Herbal { get; set; }
 
-        public void Scramble()
+        public Describer()
         {
-            ScrambleSeeds();
-            ScrambleFruit();
+        }
+
+        public void RegisterWithPanel(IServicePanel isp)
+        {
+            //isp.GameEngine_Startup += this.GameEngine_Startup;
+            isp.NewGame_Startup += this.NewGame_Startup;
+            isp.ExistingGame_Load += this.ExistingGame_Load;
+        }
+
+        //private void GameEngine_Startup(object caller, EventArgs e)
+        //{
+        //}
+
+        private void NewGame_Startup(object caller, GameDataEventArgs e)
+        {
+            this.Herbal = e.Herbal;
+            Scramble(e.TomeOfChaos, Herbal);
+        }
+
+        private void ExistingGame_Load(object caller, GameDataEventArgs e)
+        {
+            this.Herbal = e.Herbal;
+        }
+
+        #region Scramble
+        public void Scramble(TomeOfChaos tome, Herbal herbal)
+        {
+            ScrambleSeeds(tome, herbal);
+            ScrambleFruit(tome, herbal);
         }
 
         public List<string> SeedAdjectives { get; } = new List<string>
@@ -61,14 +87,14 @@ namespace CopperBend.Logic
             "thorny",
         };
 
-        private void ScrambleSeeds()
+        private void ScrambleSeeds(TomeOfChaos tome, Herbal herbal)
         {
             var shuffled = SeedAdjectives
-                .OrderBy(d => TomeOfChaos.LearnableRndNext()).ToList();
+                .OrderBy(d => tome.LearnableRndNext()).ToList();
 
-            foreach (var key in Herbal.PlantByID.Keys)
+            foreach (var key in herbal.PlantByID.Keys)
             {
-                Herbal.PlantByID[key].SeedAdjective = shuffled[0];
+                herbal.PlantByID[key].SeedAdjective = shuffled[0];
                 shuffled.RemoveAt(0);
             }
         }
@@ -105,17 +131,18 @@ namespace CopperBend.Logic
             "velvety",
         };
 
-        private void ScrambleFruit()
+        private void ScrambleFruit(TomeOfChaos tome, Herbal herbal)
         {
             var shuffled = FruitAdjectives
-                .OrderBy(d => TomeOfChaos.LearnableRndNext()).ToList();
+                .OrderBy(d => tome.LearnableRndNext()).ToList();
 
-            foreach (var key in Herbal.PlantByID.Keys)
+            foreach (var key in herbal.PlantByID.Keys)
             {
-                Herbal.PlantByID[key].FruitAdjective = shuffled[0];
+                herbal.PlantByID[key].FruitAdjective = shuffled[0];
                 shuffled.RemoveAt(0);
             }
         }
+        #endregion Scramble
 
         public virtual string Describe(IItem item, DescMods mods = DescMods.None)
         {

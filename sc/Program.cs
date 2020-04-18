@@ -1,9 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using CopperBend.Logic;
+﻿using System.Diagnostics;
 using log4net;
 using McMaster.Extensions.CommandLineUtils;
-using Microsoft.Xna.Framework;
+using CopperBend.Logic;
 
 namespace CopperBend.Application
 {
@@ -35,33 +33,14 @@ namespace CopperBend.Application
             log.Info("\n======================================");
             log.Info("Run started");
 
-            LaunchGame(composer, log);
-
-            log.Info("Run ended");
-
-            composer.Release();
-        }
-
-        public void LaunchGame(Composer composer, ILog log)
-        {
-            Game game;
             try
             {
-                game = composer.GetGameInstance();
+                composer.LaunchGame();
             }
-            catch (Exception ex)
+            finally
             {
-                log.Fatal("Exception terminated construction", ex);
-                return;
-            }
-
-            try
-            {
-                game.Run();
-            }
-            catch (Exception ex)
-            {
-                log.Fatal("Exception terminated run", ex);
+                log.Info("Run ended");
+                composer.Release();
             }
         }
     }

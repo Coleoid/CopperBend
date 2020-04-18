@@ -8,7 +8,7 @@ using SadConsole.Input;
 
 namespace CopperBend.Logic
 {
-    public class Messager : IMessager
+    public class Messager : IMessager, IPanelService
     {
         private const int messageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
         private int messagesSentSincePause = 0;
@@ -21,6 +21,11 @@ namespace CopperBend.Logic
             ModeNode = node;
             InputQueue = new Queue<AsciiKey>();
             MessageQueue = new Queue<string>();
+        }
+
+        public void RegisterWithPanel(IServicePanel isp)
+        {
+            //  Maybe not much?  Still unsure how to sequence ISP events.
         }
 
         //POST-CONSTRUCTOR dependency:

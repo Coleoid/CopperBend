@@ -98,14 +98,20 @@ namespace CopperBend.Logic.Tests
                 },
             };
             __controls = Substitute.For<IControlPanel>();
-            __messager = Substitute.For<IMessager>();
+            __messager = Substitute.For<IMessager, IPanelService>();
             _inQ = new Queue<AsciiKey>();
             __messager.GetNextKeyPress()
                 .Returns((ci) => _inQ.Count > 0 ? _inQ.Dequeue() : new AsciiKey { Key = Keys.None });
             __messager.IsInputReady()
                 .Returns((ci) => _inQ.Count > 0);
 
-            _source = new InputCommandSource(__log, new Describer(), _gameState, __controls, new ModeNode(__log), __messager);
+            IServicePanel isp = new ServicePanel()
+                .Register(new Describer())
+                .Register(__messager as IPanelService)
+                .Register(__log)
+                .Register(new ModeNode(__log));
+
+            _source = new InputCommandSource(isp, _gameState, __controls);
             __being = Substitute.For<IBeing>();
             __being.IsPlayer = true;
         }

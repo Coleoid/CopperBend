@@ -5,7 +5,7 @@ using log4net;
 
 namespace CopperBend.Logic
 {
-    public class ModeNode
+    public class ModeNode : IGameMode, IPanelService
     {
         private readonly ILog log;
 
@@ -14,6 +14,13 @@ namespace CopperBend.Logic
             log = logger;
             modeStack = new Stack<EngineMode>();
             callbackStack = new Stack<Action>();
+
+        }
+
+        public void RegisterWithPanel(IServicePanel isp)
+        {
+            // Current idea is the logger lives on through new game
+            // boundaries, so may not care about any events.
         }
 
         //  We can stack modes of the game to any level.

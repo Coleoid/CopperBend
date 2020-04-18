@@ -19,29 +19,23 @@ namespace CopperBend.Logic
         // becomes external dependency soon
         public IAttackSystem AttackSystem { get; set; }
 
-        private readonly ILog log;
-        private ISchedule Schedule { get; set; }
+        private ILog Log { get => ServicePanel.Log; }
+        private IServicePanel ServicePanel { get; set; }
         public IGameState GameState { get; set; }
-        private readonly IDescriber describer;
         public bool PlayerMoved { get; set; }
-        public IMessager Messager { get; set; }
+        public IDescriber Describer { get => ServicePanel.Describer; }
+        public IMessager Messager { get => ServicePanel.Messager; }
+        private ISchedule Schedule { get => ServicePanel.Schedule; }
 
         public CommandDispatcher(
-            ILog logger,
-            ISchedule schedule,
-            IGameState gameState,
-            IDescriber describer,
-            IMessager messager
+            IServicePanel panel,
+            IGameState gameState
         )
         {
-            log = logger;
-            Schedule = schedule;
+            ServicePanel = panel;
             GameState = gameState;
-            this.describer = describer;
-            Messager = messager;
 
-            AttackSystem = new AttackSystem(this, logger);
-            AttackSystem.RotMap = gameState.Map.RotMap;
+            AttackSystem = new AttackSystem(this, Log, GameState);
         }
 
         public void Dispatch(ScheduleEntry nextAction)
@@ -92,7 +86,7 @@ namespace CopperBend.Logic
 
             IItem item = command.Item;
             Guard.AgainstNullArgument(item, "No item in consume command");
-            string description = describer.Describe(item);
+            string description = Describer.Describe(item);
             Guard.Against(item.Quantity < 1, $"Only have {item.Quantity} {description}.");
             //0.2: eat from ground, or directly from plant, or someone feeds someone
             Guard.Against(!being.HasInInventory(item), $"{description} to consume not found in inventory");
@@ -117,7 +111,7 @@ namespace CopperBend.Logic
                 // identify
                 plantType.FruitKnown = true;
                 plantType.SeedKnown |= seedCount > 0;
-                AddExperience(plantType.ID, Exp.EatFruit);
+                AddExperience(plantType.ID, XPType.EatFruit);
                 //0.K: Later, some plants remain mysterious?
             }
 
@@ -182,7 +176,7 @@ namespace CopperBend.Logic
 
             if (!SpaceMap.CanWalkThrough(newPosition))
             {
-                var np = describer.Describe(space.Terrain.Name, DescMods.Article);
+                var np = Describer.Describe(space.Terrain.Name, DescMods.Article);
                 Messager.WriteLineIfPlayer(being, $"I can't walk through {np}.");
 
                 Messager.ClearPendingInput();
@@ -217,7 +211,7 @@ namespace CopperBend.Logic
                 {
                     var item = itemsHere.ElementAt(0);
                     var beVerb = item.Quantity == 1 ? "is" : "are";
-                    var np = describer.Describe(item, DescMods.Article);
+                    var np = Describer.Describe(item, DescMods.Article);
                     Messager.WriteLine($"There {beVerb} {np} here.");
                 }
                 else
@@ -290,9 +284,9 @@ namespace CopperBend.Logic
                     break;
 
                 default:
-                    log.Error("usable isn't.");
+                    Log.Error("usable isn't.");
                     var vp = command.Usable.VerbPhrase;
-                    var np = describer.Describe(command.Item, DescMods.Article);
+                    var np = Describer.Describe(command.Item, DescMods.Article);
                     throw new Exception($"Don't have code to cause [{effect.Effect}] Effect when I {vp} {np}.");
                 }
             }
@@ -390,7 +384,7 @@ namespace CopperBend.Logic
             GameState.MarkDirtyCoord(coord);
 
             var growingPlant = toSow.Aspects.GetComponent<Plant>();
-            AddExperience(growingPlant.PlantDetails.ID, Exp.PlantSeed);
+            AddExperience(growingPlant.PlantDetails.ID, XPType.PlantSeed);
             ScheduleAgent(growingPlant, 100);
 
             return true;

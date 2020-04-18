@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
-    public class Engine_Tests
+    public class Engine_Tests : Tests_Base
     {
         [Test]
         public void Cosmogenesis_sets_ID_generator_service()
@@ -13,7 +13,7 @@ namespace CopperBend.Logic.Tests
             Item.SetIDGenerator(null);
             AreaRot.SetIDGenerator(null);
 
-            var sef = UTHelp.GetSubstituteFactory();
+            var sef = StubEntityFactory();
 
             Engine.Cosmogenesis("seed", sef);
 

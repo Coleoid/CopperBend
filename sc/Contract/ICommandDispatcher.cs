@@ -19,9 +19,9 @@ namespace CopperBend.Contract
         Action<EngineMode, Action> PushEngineMode { get; set; }
         Action<string> WriteLine { get; set; }
         Action<IBeing, string> WriteLineIfPlayer { get; set; }
-        Dictionary<Exp, int> XP { get; }
+        Dictionary<XPType, int> XP { get; }
 
-        void AddExperience(uint plantID, Exp experience);
+        void AddExperience(uint plantID, XPType experience);
         bool CanActorSeeTarget(IBeing being, Coord target);
         void CheckActorAtCoordEvent(IBeing being, Coord position);
         bool CommandBeing(IBeing being, Command command);

@@ -6,7 +6,6 @@ namespace CopperBend.Contract
     public interface IGameState
     {
         ICompoundMap Map { get; }
-        IBeing Player { get; }
         Dramaticon Story { get; }
 
         void MarkDirtyCoord(Coord newPosition);
@@ -16,7 +15,7 @@ namespace CopperBend.Contract
         //0.2.SAVE  include game mode and callback (stacks...)
         //0.2.SAVE  include Schedule
         //0.2.SAVE  include RNGs
-        //0.+.SAVE  watch player for new parts to save
-        //0.+.SAVE  NPC relationships
+        //1.+.SAVE  watch player for new parts to save
+        //1.+.SAVE  NPC relationships
     }
 }

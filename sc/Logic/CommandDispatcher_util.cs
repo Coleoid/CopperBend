@@ -108,8 +108,8 @@ namespace CopperBend.Logic
             SpaceMap.Till(space);
         }
 
-        public Dictionary<Exp, int> XP { get; } = new Dictionary<Exp, int>();
-        public void AddExperience(uint plantID, Exp experience)
+        public Dictionary<XPType, int> XP { get; } = new Dictionary<XPType, int>();
+        public void AddExperience(uint plantID, XPType experience)
         {
             if (!XP.ContainsKey(experience))
                 XP[experience] = 0;

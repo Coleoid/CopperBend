@@ -17,7 +17,7 @@ namespace CopperBend.Model.Aspects
         }
     }
 
-    //0.+:  At some point we'll want creatures with specific appetites,
+    //+.+:  At some point we'll want creatures with specific appetites,
     // and players able to engage in challenge Conducts.
     [Flags]
     public enum FoodCategoryFlags

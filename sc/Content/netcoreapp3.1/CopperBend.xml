@@ -31,7 +31,7 @@
             <summary> The main purpose of the CommandDispatcher. </summary>
         </member>
         <member name="M:CopperBend.Contract.IControlPanel.ScheduleAgent(CopperBend.Contract.IScheduleAgent,System.Int32)">
-            <summary> When an agent will decide what to do when its turn comes. </summary>
+            <summary> When an agent will next get a turn. </summary>
         </member>
         <member name="M:CopperBend.Contract.IMessageLogWindow.WriteLine(System.String)">
             <summary> add a complete line to the messages </summary>

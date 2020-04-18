@@ -5,7 +5,7 @@ namespace CopperBend.Contract
     public interface ISeed : IItem
     { }
 
-    public enum PlantPart  //0.+
+    public enum PlantPart  //+.+
     {
         Unset = 0,
         Root,
@@ -17,7 +17,7 @@ namespace CopperBend.Contract
     }
 
     [Flags]
-    public enum PlantUse  //0.+
+    public enum PlantUse  //+.+
     {
         Unset = 0,
         Food = 1,

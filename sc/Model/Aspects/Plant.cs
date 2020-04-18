@@ -52,6 +52,6 @@ namespace CopperBend.Model
         public string FruitAdjective { get; set; }
         public string SeedDescriptionAsKnown => $"{(SeedKnown ? MainName : SeedAdjective)} seed";
         public string FruitDescriptionAsKnown => FruitKnown ? MainName : $"{FruitAdjective} fruit";
-        public List<(PlantPart, PlantUse, string)> Uses { get; }  //0.+
+        public List<(PlantPart, PlantUse, string)> Uses { get; }  //+.+
     }
 }

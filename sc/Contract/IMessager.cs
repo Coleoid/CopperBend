@@ -6,10 +6,7 @@ namespace CopperBend.Contract
 {
     public interface IMessager
     {
-        //Action<string> WriteLine { get; set; }
-        //Action<string> Prompt { get; set; }
-        //Action More { get; set; }
-
+        IMessageLogWindow MessageWindow { get; set; }
         Func<bool> ShouldClearQueueOnEscape { get; set; }
         void QueueInput(IReadOnlyCollection<AsciiKey> keys);
         AsciiKey GetNextKeyPress();

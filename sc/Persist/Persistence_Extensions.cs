@@ -85,6 +85,10 @@ namespace CopperBend.Fabric
         {
             emitter.EmitKVP(key, value.ToString(CultureInfo.InvariantCulture));
         }
+        public static void EmitKVP(this IEmitter emitter, string key, bool value)
+        {
+            emitter.EmitKVP(key, value.ToString());
+        }
 
         public static void EmitKVP(this IEmitter emitter, string key, string value)
         {

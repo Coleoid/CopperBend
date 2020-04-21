@@ -11,6 +11,7 @@ namespace CopperBend.Fabric
         public Herbal Herbal { get; }
         public SocialRegister SocialRegister { get; }
         public Dramaticon Dramaticon { get; }
+        public Atlas Atlas { get; }
 
         public Compendium(
             IDGenerator idGen,
@@ -18,7 +19,8 @@ namespace CopperBend.Fabric
             TomeOfChaos tomeOfChaos,
             Herbal herbal,
             SocialRegister socialRegister,
-            Dramaticon dramaticon
+            Dramaticon dramaticon,
+            Atlas atlas
         )
         {
             IDGenerator = idGen;
@@ -27,6 +29,7 @@ namespace CopperBend.Fabric
             Herbal = herbal;
             SocialRegister = socialRegister;
             Dramaticon = dramaticon;
+            Atlas = atlas;
         }
     }
 }

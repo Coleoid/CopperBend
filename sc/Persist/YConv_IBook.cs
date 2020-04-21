@@ -51,6 +51,10 @@ namespace CopperBend.Persist
                 Publisher.Dramaticon_ToYaml(emitter, dramaticon);
                 break;
 
+            case Atlas atlas:
+                Publisher.Atlas_ToYaml(emitter, atlas);
+                break;
+
             default:
                 throw new NotImplementedException($"Not ready to Write book type [{value.GetType().Name}].");
             }
@@ -77,6 +81,7 @@ namespace CopperBend.Persist
                 "Herbal" => Publisher.Herbal_FromYaml(parser),
                 "SocialRegister" => Publisher.Register_FromYaml(parser, Creator),
                 "Dramaticon" => Publisher.Dramaticon_FromYaml(parser),
+                "Atlas" => Publisher.Atlas_FromYaml(parser),
                 //0.1.SAVE:  Read remainder of Compendium
                 _ => throw new NotImplementedException($"NI: Dispatch parse of book type [{type}]."),
             };

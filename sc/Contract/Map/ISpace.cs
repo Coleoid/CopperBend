@@ -11,6 +11,6 @@ namespace CopperBend.Contract
         bool IsKnown { get; set; }
         bool IsSown { get; set; }
         bool IsTilled { get; set; }
-        TerrainType Terrain { get; set; }
+        Terrain Terrain { get; set; }
     }
 }

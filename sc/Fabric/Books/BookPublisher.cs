@@ -9,6 +9,8 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using CopperBend.Model;
 using GoRogue;
+using Microsoft.Xna.Framework;
+using SadConsole;
 
 namespace CopperBend.Fabric
 {
@@ -34,6 +36,7 @@ namespace CopperBend.Fabric
             Herbal_ToYaml(emitter, compendium.Herbal);
             Register_ToYaml(emitter, compendium.SocialRegister, BeingCreator);
             Dramaticon_ToYaml(emitter, compendium.Dramaticon);
+            Atlas_ToYaml(emitter, compendium.Atlas);
 
             emitter.Emit(new MappingEnd());
         }
@@ -49,6 +52,7 @@ namespace CopperBend.Fabric
             Herbal herbal = null;
             SocialRegister register = null;
             Dramaticon drama = null;
+            Atlas atlas = null;
 
             while (parser.TryConsume<Scalar>(out var next))
             {
@@ -58,13 +62,14 @@ namespace CopperBend.Fabric
                 case "Herbal": herbal = Herbal_FromYaml(parser); break;
                 case "SocialRegister": register = Register_FromYaml(parser, BeingCreator); break;
                 case "Dramaticon": drama = Dramaticon_FromYaml(parser); break;
+                case "Atlas": atlas = Atlas_FromYaml(parser); break;
 
                 default:
                     throw new NotImplementedException($"Cannot yet parse a [{next.Value}] for Compendium.");
                 }
             }
 
-            var compendium = new Compendium(idGen, BeingCreator, tome, herbal, register, drama);
+            var compendium = new Compendium(idGen, BeingCreator, tome, herbal, register, drama, atlas);
 
             parser.Consume<MappingEnd>();
             return compendium;
@@ -85,8 +90,8 @@ namespace CopperBend.Fabric
             tome.Generators["MapTop"] = mapRNG = new NR3Generator(topRNG.Next());
             tome.Generators["Learnable"] = new NR3Generator(topRNG.Next());
 
-            tome.MapGenerators[Maps.TackerFarm] = new NR3Generator(mapRNG.Next());
-            tome.MapGenerators[Maps.TownBarricade] = new NR3Generator(mapRNG.Next());
+            tome.MapGenerators[MapEnum.TackerFarm] = new NR3Generator(mapRNG.Next());
+            tome.MapGenerators[MapEnum.TownBarricade] = new NR3Generator(mapRNG.Next());
 
             return tome;
         }
@@ -115,7 +120,7 @@ namespace CopperBend.Fabric
             while (!parser.TryConsume<MappingEnd>(out _))
             {
                 (k, v) = parser.GetKVP();
-                Maps key = Enum.Parse<Maps>(k);
+                MapEnum key = Enum.Parse<MapEnum>(k);
                 tome.MapGenerators[key] = RngFromBase64(v);
             }
 
@@ -362,6 +367,239 @@ namespace CopperBend.Fabric
             dramaticon.HasClearedRot = false;
             return dramaticon;
         }
+        #endregion
+
+
+        #region Atlas
+        public void Atlas_ToYaml(IEmitter emitter, IBook book)
+        {
+            if (book == null) return;
+            var atlas = (Atlas)book;
+
+            emitter.StartNamedMapping("Atlas");
+
+            foreach (var key in atlas.Legend.Keys)
+            {
+                Terrain_ToYaml(emitter, atlas.Legend[key]);
+            }
+
+            emitter.EndMapping();
+        }
+
+        public void Terrain_ToYaml(IEmitter emitter, Terrain terrain)
+        {
+            if (terrain == null) return;
+
+            emitter.StartNamedMapping("Terrain");
+            emitter.EmitKVP("Name", terrain.Name);
+
+            emitter.StartNamedMapping("Cell");
+            emitter.EmitKVP("FG", terrain.Cell.Foreground.ToString());
+            emitter.EmitKVP("BG", terrain.Cell.Background.ToString());
+            emitter.EmitKVP("Glyph", terrain.Cell.Glyph);
+            emitter.EndMapping();
+
+            emitter.EmitKVP("Transparent", terrain.CanSeeThrough);
+            emitter.EmitKVP("Walkable", terrain.CanWalkThrough);
+            emitter.EmitKVP("Plantable", terrain.CanPlant);
+            emitter.EndMapping();
+        }
+
+        public Atlas Atlas_FromYaml(IParser parser)
+        {
+            Atlas atlas = new Atlas();
+
+            parser.Consume<MappingStart>();
+            while (parser.TryConsume<Scalar>(out var evt) && evt.Value == "Terrain")
+            {
+                var terrain = Terrain_FromYaml(parser);
+                atlas.StoreTerrain(terrain);
+            }
+            parser.Consume<MappingEnd>();
+
+            return atlas;
+        }
+
+        public Terrain Terrain_FromYaml(IParser parser)
+        {
+            parser.Consume<MappingStart>();
+            Terrain terrain = new Terrain
+            {
+                Name = parser.GetKVP_string("Name"),
+                Cell = Cell_FromYaml(parser),
+                CanSeeThrough = parser.GetKVP_bool("Transparent"),
+                CanWalkThrough = parser.GetKVP_bool("Walkable"),
+                CanPlant = parser.GetKVP_bool("Plantable"),
+            };
+            parser.Consume<MappingEnd>();
+
+            return terrain;
+        }
+
+        public Cell Cell_FromYaml(IParser parser)
+        {
+            if (!parser.TryConsume<Scalar>(out var evt) || evt.Value != "Cell")
+                throw new Exception("Not a Cell at this location");
+
+            parser.Consume<MappingStart>();
+            var fg = parser.GetKVP_Color("FG");
+            var bg = parser.GetKVP_Color("BG");
+            var glyph = parser.GetKVP_int("Glyph");
+            parser.Consume<MappingEnd>();
+
+            return new Cell(fg, bg, glyph);
+        }
+
+        public Atlas Atlas_FromNew()
+        {
+            Atlas atlas = new Atlas();
+
+            InitLegend(atlas);
+            return atlas;
+        }
+
+
+        private void InitLegend(Atlas atlas)
+        {
+            //0.1 shift this depewndency
+            //atlas.Legend = SpaceMap.TerrainTypes;
+
+            var dirtBG = new Color(50, 30, 13);
+            var growingBG = new Color(28, 54, 22);
+            var stoneBG = new Color(28, 30, 22);
+
+            var terrain = new Terrain
+            {
+                Name = "Unknown",
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                Cell = new Cell(Color.DarkRed, Color.DarkRed, '?'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = TerrainEnum.Soil,
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                CanPlant = true,
+                Cell = new Cell(Color.DarkGray, dirtBG, '.'),
+            };
+            atlas.StoreTerrain(terrain);
+
+
+            terrain = new Terrain
+            {
+                Name = TerrainEnum.SoilTilled,
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                CanPlant = true,
+                Cell = new Cell(Color.SaddleBrown, dirtBG, '~'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = TerrainEnum.SoilPlanted,
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                CanPlant = false,
+                Cell = new Cell(Color.ForestGreen, dirtBG, '~'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = "stone wall",
+                CanWalkThrough = false,
+                CanSeeThrough = false,
+                Cell = new Cell(Color.DarkGray, stoneBG, '#'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = TerrainEnum.DoorClosed,
+                CanWalkThrough = false,
+                CanSeeThrough = false,
+                Cell = new Cell(Color.DarkGray, stoneBG, '+'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = TerrainEnum.DoorOpen,
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                Cell = new Cell(Color.DarkGray, stoneBG, '-'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = "wooden fence",
+                CanWalkThrough = false,
+                CanSeeThrough = false,
+                Cell = new Cell(Color.SaddleBrown, dirtBG, 'X'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = "wall",
+                CanWalkThrough = false,
+                CanSeeThrough = false,
+                Cell = new Cell(Color.DarkGray, stoneBG, '='),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = "gate",
+                CanWalkThrough = false,
+                CanSeeThrough = true,
+                Cell = new Cell(Color.DarkGray, stoneBG, '%'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = "grass",
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                CanPlant = true,
+                Cell = new Cell(Color.ForestGreen, growingBG, ','),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = "tall weeds",
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                Cell = new Cell(Color.ForestGreen, growingBG, 'w'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = "table",
+                CanWalkThrough = false,
+                CanSeeThrough = true,
+                Cell = new Cell(Color.BurlyWood, stoneBG, 'T'),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain()
+            {
+                Name = "stairs down",
+                CanWalkThrough = true,
+                CanSeeThrough = true,
+                Cell = new Cell(Color.AliceBlue, stoneBG, '>'),
+            };
+            atlas.StoreTerrain(terrain);
+        }
+
         #endregion
     }
 }

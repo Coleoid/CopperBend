@@ -2,6 +2,5 @@
 {
     public interface IBook
     {
-        //string BookType { get; }
     }
 }

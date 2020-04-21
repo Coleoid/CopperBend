@@ -15,18 +15,6 @@
         <member name="T:CopperBend.Contract.ICommandSource">
             <summary> A CommandSource supplies a being's action decisions </summary>
         </member>
-        <member name="P:CopperBend.Contract.ICompoundMap.VisibilityChanged">
-            <summary> When a space changes its CanSeeThrough, set this flag true </summary>
-        </member>
-        <member name="P:CopperBend.Contract.ICompoundMap.CoordsWithChanges">
-            <summary> When a space's appearance (may) change, add its coords to this list </summary>
-        </member>
-        <member name="M:CopperBend.Contract.ICompoundMap.CanPlant(GoRogue.Coord)">
-            <summary> Can Plant considering terrain, rot, existing plants, and ownership. </summary>
-        </member>
-        <member name="P:CopperBend.Contract.LocatedTrigger.Trigger">
-            <summary> Whatever moved into the </summary>
-        </member>
         <member name="M:CopperBend.Contract.IControlPanel.CommandBeing(CopperBend.Contract.IBeing,CopperBend.Contract.Command)">
             <summary> The main purpose of the CommandDispatcher. </summary>
         </member>
@@ -38,6 +26,18 @@
         </member>
         <member name="M:CopperBend.Contract.IMessageLogWindow.Prompt(System.String)">
             <summary> add an unfinished line to the messages </summary>
+        </member>
+        <member name="P:CopperBend.Contract.ICompoundMap.VisibilityChanged">
+            <summary> When a space changes its CanSeeThrough, set this flag true </summary>
+        </member>
+        <member name="P:CopperBend.Contract.ICompoundMap.CoordsWithChanges">
+            <summary> When a space's appearance (may) change, add its coords to this list </summary>
+        </member>
+        <member name="M:CopperBend.Contract.ICompoundMap.CanPlant(GoRogue.Coord)">
+            <summary> Can Plant considering terrain, rot, existing plants, and ownership. </summary>
+        </member>
+        <member name="P:CopperBend.Contract.LocatedTrigger.Trigger">
+            <summary> Whatever moved into the </summary>
         </member>
         <member name="M:CopperBend.Fabric.CompoundMap.SetInitialConsoleCells(SadConsole.ScrollingConsole,CopperBend.Contract.ISpaceMap)">
             <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known. </summary>
@@ -90,10 +90,10 @@
         <member name="P:CopperBend.Logic.Messager.MessageWindow">
             <summary> MessageWindow must be set on Messager after Engine constructs it. </summary>
         </member>
-        <member name="M:CopperBend.Logic.Messager.FirstTimeFor(CopperBend.Contract.Messages)">
+        <member name="M:CopperBend.Logic.Messager.FirstTimeFor(CopperBend.Contract.MessageEnum)">
             <summary> First time running across this message in this game run? </summary>
         </member>
-        <member name="M:CopperBend.Logic.Messager.Message(CopperBend.Contract.IBeing,CopperBend.Contract.Messages)">
+        <member name="M:CopperBend.Logic.Messager.Message(CopperBend.Contract.IBeing,CopperBend.Contract.MessageEnum)">
             <summary>
             This allows messages to adapt based on the Being involved and
             what messages have already been seen, how many times, et c.

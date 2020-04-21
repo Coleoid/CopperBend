@@ -35,11 +35,11 @@ namespace CopperBend.Fabric.Tests
             var tome_1 = publisher.Tome_FromNew(topSeed + "a");
             var tome_2 = publisher.Tome_FromNew(topSeed + "b");
 
-            int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
-            int next_tf_2 = tome_2.MapRndNext(Maps.TackerFarm);
+            int next_tf_1 = tome_1.MapRndNext(MapEnum.TackerFarm);
+            int next_tf_2 = tome_2.MapRndNext(MapEnum.TackerFarm);
 
-            int next_tb_1 = tome_1.MapRndNext(Maps.TownBarricade);
-            int next_tb_2 = tome_2.MapRndNext(Maps.TownBarricade);
+            int next_tb_1 = tome_1.MapRndNext(MapEnum.TownBarricade);
+            int next_tb_2 = tome_2.MapRndNext(MapEnum.TownBarricade);
 
             Assert.That(next_tb_1, Is.Not.EqualTo(next_tf_1));
             Assert.That(next_tb_2, Is.Not.EqualTo(next_tf_2));
@@ -53,11 +53,11 @@ namespace CopperBend.Fabric.Tests
             var tome_1 = publisher.Tome_FromNew(topSeed);
             var tome_2 = publisher.Tome_FromNew(topSeed);
 
-            int next_tf_1 = tome_1.MapRndNext(Maps.TackerFarm);
-            int next_tb_1 = tome_1.MapRndNext(Maps.TownBarricade);
+            int next_tf_1 = tome_1.MapRndNext(MapEnum.TackerFarm);
+            int next_tb_1 = tome_1.MapRndNext(MapEnum.TownBarricade);
 
-            int next_tb_2 = tome_2.MapRndNext(Maps.TownBarricade);
-            int next_tf_2 = tome_2.MapRndNext(Maps.TackerFarm);
+            int next_tb_2 = tome_2.MapRndNext(MapEnum.TownBarricade);
+            int next_tf_2 = tome_2.MapRndNext(MapEnum.TackerFarm);
 
             Assert.That(next_tb_1, Is.EqualTo(next_tb_2));
             Assert.That(next_tf_1, Is.EqualTo(next_tf_2));

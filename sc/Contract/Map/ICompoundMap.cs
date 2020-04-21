@@ -43,15 +43,6 @@ namespace CopperBend.Contract
         void UpdateViewOfCoords(ScrollingConsole console, IEnumerable<Coord> coords);
     }
 
-    public class TerrainType
-    {
-        public string Name { get; set; }
-        public Cell Looks { get; set; } // name for bleh
-        public bool CanSeeThrough { get; set; }
-        public bool CanWalkThrough { get; set; }
-        public bool CanPlant { get; set; }
-    }
-
     //public class Region
     //{
     //    public Region()
@@ -75,12 +66,6 @@ namespace CopperBend.Contract
 
     //        return false;
     //    }
-    //}
-
-    //public class RotRegion : Region
-    //{
-
-    //    public int Strength { get; set; }
     //}
 
     public class LocatedTrigger

@@ -18,157 +18,12 @@ namespace CopperBend.Persist
     public class MapLoader
     {
         private readonly ILog log;
-        //0.1: Extract Atlas into Compendium
         public Atlas Atlas { get; }
 
         public MapLoader(ILog logger)
         {
             log = logger;
             Atlas = new Atlas();
-            InitLegend(Atlas);
-        }
-
-        //0.2: Bring this into Cosmogenesis
-        private void InitLegend(Atlas atlas)
-        {
-            //0.1 shift this depewndency
-            atlas.Legend = SpaceMap.TerrainTypes;
-
-            var dirtBG = new Color(50, 30, 13);
-            var growingBG = new Color(28, 54, 22);
-            var stoneBG = new Color(28, 30, 22);
-
-            var type = new TerrainType
-            {
-                Name = "Unknown",
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                Looks = new Cell(Color.DarkRed, Color.DarkRed, '?'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = Terrains.Soil,
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                CanPlant = true,
-                Looks = new Cell(Color.DarkGray, dirtBG, '.'),
-            };
-            atlas.StoreTerrainType(type);
-
-
-            type = new TerrainType
-            {
-                Name = Terrains.SoilTilled,
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                CanPlant = true,
-                Looks = new Cell(Color.SaddleBrown, dirtBG, '~'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = Terrains.SoilPlanted,
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                CanPlant = false,
-                Looks = new Cell(Color.ForestGreen, dirtBG, '~'),
-            };
-            atlas.StoreTerrainType(type);
-
-
-            type = new TerrainType
-            {
-                Name = "stone wall",
-                CanWalkThrough = false,
-                CanSeeThrough = false,
-                Looks = new Cell(Color.DarkGray, stoneBG, '#'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = Terrains.DoorClosed,
-                CanWalkThrough = false,
-                CanSeeThrough = false,
-                Looks = new Cell(Color.DarkGray, stoneBG, '+'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = Terrains.DoorOpen,
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                Looks = new Cell(Color.DarkGray, stoneBG, '-'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = "wooden fence",
-                CanWalkThrough = false,
-                CanSeeThrough = false,
-                Looks = new Cell(Color.SaddleBrown, dirtBG, 'X'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = "wall",
-                CanWalkThrough = false,
-                CanSeeThrough = false,
-                Looks = new Cell(Color.DarkGray, stoneBG, '='),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = "gate",
-                CanWalkThrough = false,
-                CanSeeThrough = true,
-                Looks = new Cell(Color.DarkGray, stoneBG, '%'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = "grass",
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                CanPlant = true,
-                Looks = new Cell(Color.ForestGreen, growingBG, ','),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = "tall weeds",
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                Looks = new Cell(Color.ForestGreen, growingBG, 'w'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType
-            {
-                Name = "table",
-                CanWalkThrough = false,
-                CanSeeThrough = true,
-                Looks = new Cell(Color.BurlyWood, stoneBG, 'T'),
-            };
-            atlas.StoreTerrainType(type);
-
-            type = new TerrainType()
-            {
-                Name = "stairs down",
-                CanWalkThrough = true,
-                CanSeeThrough = true,
-                Looks = new Cell(Color.AliceBlue, stoneBG, '>'),
-            };
-            atlas.StoreTerrainType(type);
         }
 
         public CompoundMap LoadDevMap(string mapName, GameState state)
@@ -285,7 +140,7 @@ namespace CopperBend.Persist
             return farmhouseMap;
         }
 
-        public TerrainType TerrainFrom(string name)
+        public Terrain TerrainFrom(string name)
         {
             name = name.ToLowerInvariant();
             var foundType = Atlas.Legend.ContainsKey(name) ? name : "Unknown";

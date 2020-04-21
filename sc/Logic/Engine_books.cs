@@ -32,7 +32,9 @@ namespace CopperBend.Logic
 
             var dramaticon = publisher.Dramaticon_FromNew();
 
-            Compendium = new Compendium(generator, creator, tome, herbal, register, dramaticon);
+            var atlas = publisher.Atlas_FromNew();
+
+            Compendium = new Compendium(generator, creator, tome, herbal, register, dramaticon, atlas);
         }
 
         public static void ConnectIDGenerator(IDGenerator gen)

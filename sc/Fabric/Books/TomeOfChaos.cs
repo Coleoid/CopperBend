@@ -19,13 +19,13 @@ namespace CopperBend.Fabric
         public string TopSeed { get; private set; }
         public int TopSeedInt { get; private set; }
         public Dictionary<string, AbstractGenerator> Generators { get; }
-        public Dictionary<Maps, AbstractGenerator> MapGenerators { get; }
+        public Dictionary<MapEnum, AbstractGenerator> MapGenerators { get; }
 
 
         public TomeOfChaos()
         {
             Generators = new Dictionary<string, AbstractGenerator>();
-            MapGenerators = new Dictionary<Maps, AbstractGenerator>();
+            MapGenerators = new Dictionary<MapEnum, AbstractGenerator>();
         }
 
         public void SetTopSeed(string topSeed)
@@ -38,6 +38,6 @@ namespace CopperBend.Fabric
         }
 
         public int LearnableRndNext() => Generators["Learnable"].Next();
-        public int MapRndNext(Maps map) => MapGenerators[map].Next();
+        public int MapRndNext(MapEnum map) => MapGenerators[map].Next();
     }
 }

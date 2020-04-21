@@ -26,43 +26,43 @@ namespace CopperBend.Logic.Tests
         protected IMessager __messager;
 
         #region OTSU
-        protected TerrainType ttDoorOpen;
-        protected TerrainType ttDoorClosed;
-        protected TerrainType ttWall;
-        protected TerrainType ttFloor;
+        protected Terrain ttDoorOpen;
+        protected Terrain ttDoorClosed;
+        protected Terrain ttWall;
+        protected Terrain ttFloor;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             __log = Substitute.For<ILog>();
 
-            ttWall = new TerrainType
+            ttWall = new Terrain
             {
                 CanSeeThrough = false,
                 CanWalkThrough = false,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '#'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '#'),
                 Name = "wall"
             };
-            ttFloor = new TerrainType
+            ttFloor = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '.'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '.'),
                 Name = "floor"
             };
 
-            ttDoorOpen = new TerrainType
+            ttDoorOpen = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '-'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '-'),
                 Name = "open door"
             };
-            ttDoorClosed = new TerrainType
+            ttDoorClosed = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '+'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '+'),
                 Name = "closed door"
             };
 

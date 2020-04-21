@@ -1,13 +1,6 @@
 ﻿namespace CopperBend.Contract
 {
-    public enum Maps
-    {
-        Unset = 0,
-        TackerFarm,
-        TownBarricade,
-    }
-
-    public enum Messages
+    public enum MessageEnum
     {
         Unset = 0,
         BarehandRotDamage,

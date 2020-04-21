@@ -27,7 +27,7 @@ namespace CopperBend.Persist.Tests
         [Test]
         public void CRT_Space()
         {
-            var terrain = new TerrainType
+            var terrain = new Terrain
             {
                 Name = "berber carpet",
                 CanPlant = true,

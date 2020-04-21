@@ -17,7 +17,6 @@ namespace CopperBend.Model
         public int MaxHealth { get; set; }
         public int Energy { get; set; }
         public int MaxEnergy { get; set; }
-        public char Symbol { get; set; }
 
         public Color Foreground { get; set; }
         public Color Background { get; set; }
@@ -53,11 +52,12 @@ namespace CopperBend.Model
         }
 
         public int Awareness { get; set; }
-        //public IAreaMap Map { get; set; }
 
-        //  IDestroyable
+        //  IDelible
         public void Heal(int amount) => Health = Math.Min(Health + amount, MaxHealth);
         public void Hurt(int amount) => Health -= amount;
+
+        public string Name { get; set; }
 
         public ICommandSource CommandSource { get; set; }
 
@@ -117,17 +117,14 @@ namespace CopperBend.Model
 
         public bool IsPlayer { get; set; }
 
-        //  Inventory has extra game effects, so extra protection against
-        // accidentally manipulating the inventory from outside.
+        //  Inventory has extra game effects, so stop myself from
+        // accidentally manipulating the inventory from generic collection API.
         private readonly List<IItem> inventoryList;
 
         public IReadOnlyCollection<IItem> Inventory
         {
             get => new ReadOnlyCollection<IItem>(inventoryList);
         }
-
-        //public string Name { get => ScEntity.Name; set => ScEntity.Name = value; }
-        public string Name { get; set; }
 
         public void AddToInventory(IItem item)
         {

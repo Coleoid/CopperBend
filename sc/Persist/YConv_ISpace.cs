@@ -93,7 +93,7 @@ namespace CopperBend.Persist
             return space;
         }
 
-        private TerrainType GetTerrainType(string name)
+        private Terrain GetTerrainType(string name)
         {
             return null;
         }

@@ -67,10 +67,10 @@ namespace CopperBend.Logic
             if (being.IsPlayer) WriteLine(message);
         }
 
-        private Dictionary<Messages, bool> SeenMessages { get; } = new Dictionary<Messages, bool>();
+        private Dictionary<MessageEnum, bool> SeenMessages { get; } = new Dictionary<MessageEnum, bool>();
 
         /// <summary> First time running across this message in this game run? </summary>
-        public bool FirstTimeFor(Messages key)
+        public bool FirstTimeFor(MessageEnum key)
         {
             var firstTime = !SeenMessages.ContainsKey(key);
             if (firstTime)
@@ -83,14 +83,14 @@ namespace CopperBend.Logic
         /// This allows messages to adapt based on the Being involved and
         /// what messages have already been seen, how many times, et c.
         /// </summary>
-        public void Message(IBeing being, Messages messageKey)
+        public void Message(IBeing being, MessageEnum messageKey)
         {
-            Guard.Against(messageKey == Messages.Unset, "Must set message key");
+            Guard.Against(messageKey == MessageEnum.Unset, "Must set message key");
             if (!being.IsPlayer) return;
 
             switch (messageKey)
             {
-            case Messages.BarehandRotDamage:
+            case MessageEnum.BarehandRotDamage:
                 if (FirstTimeFor(messageKey))
                 {
                     //0.2  promote to alert
@@ -104,7 +104,7 @@ namespace CopperBend.Logic
 
                 break;
 
-            case Messages.RotDamageSpreads:
+            case MessageEnum.RotDamageSpreads:
                 WriteLine("The damage to this stuff spreads outward.  Good.");
                 break;
 

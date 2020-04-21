@@ -75,7 +75,7 @@ namespace CopperBend.Fabric
                     var space = spaceMap.GetItem((x, y));
                     if (space.IsKnown)
                     {
-                        knownCell.Glyph = space.Terrain.Looks.Glyph;
+                        knownCell.Glyph = space.Terrain.Cell.Glyph;
                         console.SetCellAppearance(x, y, knownCell);
                     }
                     else
@@ -102,7 +102,7 @@ namespace CopperBend.Fabric
                 //  Wiping the effect restores the original cell colors,
                 // so it must happen before setting OOV appearance
                 EffectsManager.SetEffect(console.Cells[location.Y * Width + location.X], null);
-                unseenCell.Glyph = SpaceMap.GetItem(location).Terrain.Looks.Glyph;
+                unseenCell.Glyph = SpaceMap.GetItem(location).Terrain.Cell.Glyph;
                 console.SetCellAppearance(location.X, location.Y, unseenCell);
             }
 
@@ -119,7 +119,7 @@ namespace CopperBend.Fabric
             foreach (var position in coords.Where(c => console.ViewPort.Contains(c)))
             {
                 var targetCell = new Cell();
-                var rawCell = SpaceMap.GetItem(position).Terrain.Looks;
+                var rawCell = SpaceMap.GetItem(position).Terrain.Cell;
                 targetCell.Background = rawCell.Background;
 
                 var beings = BeingMap.GetItems(position).ToList();

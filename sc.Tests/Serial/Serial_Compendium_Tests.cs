@@ -7,6 +7,7 @@ using CopperBend.Model;
 using CopperBend.Logic;
 using GoRogue;
 using CopperBend.Fabric.Tests;
+using Microsoft.Xna.Framework;
 
 namespace CopperBend.Persist.Tests
 {
@@ -43,9 +44,10 @@ namespace CopperBend.Persist.Tests
             var herbal = new Herbal();
             var socialRegister = new SocialRegister(creator);
             var dramaticon = new Dramaticon();
+            var atlas = new Atlas();
 
             var idGen = new IDGenerator(33);
-            var compendium = new Compendium(idGen, creator, tomeOfChaos, herbal, socialRegister, dramaticon);
+            var compendium = new Compendium(idGen, creator, tomeOfChaos, herbal, socialRegister, dramaticon, atlas);
 
             var yaml = _serializer.Serialize(compendium);
             Assert.That(yaml, Is.Not.Null);
@@ -62,6 +64,7 @@ namespace CopperBend.Persist.Tests
             Assert.That(newCompendium.Herbal, Is.Not.Null);
             Assert.That(newCompendium.SocialRegister, Is.Not.Null);
             Assert.That(newCompendium.Dramaticon, Is.Not.Null);
+            Assert.That(newCompendium.Atlas, Is.Not.Null);
         }
 
         [Test]
@@ -134,7 +137,7 @@ namespace CopperBend.Persist.Tests
         public void CRT_SocialRegister()
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            var creator = Engine.BeingCreator;
+            var creator = new BeingCreator(__factory);
             var ourHero = creator.CreateBeing("Suvail");
             var reg = new SocialRegister(creator);
             reg.LoadRegister(ourHero);
@@ -168,6 +171,37 @@ namespace CopperBend.Persist.Tests
             var newDramaticon = (Dramaticon)newBook;
 
             Assert.That(newDramaticon.HasClearedRot);
+        }
+
+        [Test]
+        public void CRT_Atlas()
+        {
+            //if (!Debugger.IsAttached) Debugger.Launch();
+            var atlas = new Atlas();
+            atlas.StoreTerrain(new Terrain
+            {
+                Name = "CanRoundTrip",
+                Cell = new SadConsole.Cell(new Color(1, 2, 3, 4), new Color(5, 6, 7, 8), 'C'),
+                CanPlant = true,
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+            });
+
+            var yaml = _serializer.Serialize(atlas);
+            Assert.That(yaml, Is.Not.Null);
+
+            var newBook = _deserializer.Deserialize<IBook>(yaml);
+            Assert.That(newBook, Is.TypeOf<Atlas>());
+            var newAtlas = (Atlas)newBook;
+
+            Assert.That(newAtlas.Legend, Is.Not.Null);
+            var terrain = newAtlas.Legend["CanRoundTrip"];
+            Assert.That(terrain, Is.Not.Null);
+            Assert.That(terrain.CanPlant);
+            Assert.That(terrain.CanSeeThrough);
+            Assert.That(terrain.CanWalkThrough);
+            Assert.That(terrain.Cell.Foreground.R, Is.EqualTo(1));
+            Assert.That(terrain.Cell.Foreground.A, Is.EqualTo(4));
         }
     }
 }

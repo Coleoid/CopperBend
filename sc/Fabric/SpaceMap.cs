@@ -6,9 +6,9 @@ namespace CopperBend.Fabric
 {
     public class SpaceMap : SpatialMap<ISpace>, ISpaceMap
     {
-        public static Dictionary<string, TerrainType> TerrainTypes { get; } = new Dictionary<string, TerrainType>();
-        public static TerrainType TilledSoil => TerrainTypes[Terrains.SoilTilled];
-        public static TerrainType PlantedSoil => TerrainTypes[Terrains.SoilPlanted];
+        public static Dictionary<string, Terrain> TerrainTypes { get; } = new Dictionary<string, Terrain>();
+        public static Terrain TilledSoil => TerrainTypes[TerrainEnum.SoilTilled];
+        public static Terrain PlantedSoil => TerrainTypes[TerrainEnum.SoilPlanted];
         public Coord PlayerStartPoint { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
@@ -106,7 +106,7 @@ namespace CopperBend.Fabric
         #endregion
 
         //public int Elevation;  //for later movement/attack mod
-        public TerrainType Terrain { get; set; }
+        public Terrain Terrain { get; set; }
 
         //0.2.MAP  check for modifiers (smoke, dust, giant creature, ...)
         public bool CanSeeThrough => Terrain.CanSeeThrough;

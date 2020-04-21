@@ -14,69 +14,69 @@ namespace CopperBend.Logic.Tests
 
         protected BeingCreator BeingCreator;
 
-        protected TerrainType ttFloor;
-        protected TerrainType ttWall;
-        protected TerrainType ttDoorOpen;
-        protected TerrainType ttDoorClosed;
-        protected TerrainType ttSoil;
-        protected TerrainType ttSoilTilled;
-        protected TerrainType ttSoilPlanted;
+        protected Terrain ttFloor;
+        protected Terrain ttWall;
+        protected Terrain ttDoorOpen;
+        protected Terrain ttDoorClosed;
+        protected Terrain ttSoil;
+        protected Terrain ttSoilTilled;
+        protected Terrain ttSoilPlanted;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            ttFloor = new TerrainType
+            ttFloor = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '.'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '.'),
                 Name = "floor"
             };
-            ttWall = new TerrainType
+            ttWall = new Terrain
             {
                 CanSeeThrough = false,
                 CanWalkThrough = false,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '#'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '#'),
                 Name = "wall"
             };
 
-            ttDoorOpen = new TerrainType
+            ttDoorOpen = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '-'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '-'),
                 Name = "open door"
             };
-            ttDoorClosed = new TerrainType
+            ttDoorClosed = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.White, Color.Black, '+'),
+                Cell = new SadConsole.Cell(Color.White, Color.Black, '+'),
                 Name = "closed door"
             };
 
-            ttSoil = new TerrainType
+            ttSoil = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.Brown, Color.Black, '.'),
-                Name = Terrains.Soil,
+                Cell = new SadConsole.Cell(Color.Brown, Color.Black, '.'),
+                Name = TerrainEnum.Soil,
                 CanPlant = true,
             };
-            ttSoilTilled = new TerrainType
+            ttSoilTilled = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.Brown, Color.Black, '~'),
-                Name = Terrains.SoilTilled,
+                Cell = new SadConsole.Cell(Color.Brown, Color.Black, '~'),
+                Name = TerrainEnum.SoilTilled,
                 CanPlant = true,
             };
-            ttSoilPlanted = new TerrainType
+            ttSoilPlanted = new Terrain
             {
                 CanSeeThrough = true,
                 CanWalkThrough = true,
-                Looks = new SadConsole.Cell(Color.Green, Color.Black, '~'),
-                Name = Terrains.SoilPlanted,
+                Cell = new SadConsole.Cell(Color.Green, Color.Black, '~'),
+                Name = TerrainEnum.SoilPlanted,
                 CanPlant = false,
             };
 

@@ -241,7 +241,7 @@ Apply post-attack effects
                     foreach (var it in items)
                     {
                         being.RemoveFromInventory(it);
-                        Panel.PutItemOnMap(it, being.Position);
+                        Panel.PutItemOnMap(it, being.GetPosition());
                     }
                 }
 

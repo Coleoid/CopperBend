@@ -50,8 +50,8 @@ namespace CopperBend.Logic
             var scefactory = new SadConEntityFactory(fmMap);
             var kbd = SadGlobal.KeyboardState;
 
-            var szGame = new Size(gameWidth, gameHeight);
-            var uibuilder = new UIBuilder(szGame, fmMap, Logger);
+            var gameSize = new Size(gameWidth, gameHeight);
+            var uibuilder = new UIBuilder(gameSize, fmMap, Logger);
             var gameState = new GameState();
 
             var describer = new Describer();
@@ -69,7 +69,7 @@ namespace CopperBend.Logic
             Engine engine = new Engine(
                 servicePanel,
                 scefactory, kbd,
-                szGame, uibuilder, gameState, dispatcher
+                gameSize, uibuilder, gameState, dispatcher
             );
 
             engine.Init(InitialSeed);

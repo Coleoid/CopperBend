@@ -2,10 +2,12 @@
 {
     public static class TerrainEnum
     {
-        public static string DoorClosed { get; } = "closed door";
-        public static string DoorOpen { get; } = "open door";
-        public static string Soil { get; } = "soil";
-        public static string SoilTilled { get; } = "tilled soil";
-        public static string SoilPlanted { get; } = "planted soil";
+        public const string DoorClosed = "closed door";
+        public const string DoorOpen = "open door";
+        public const string Floor = "floor";
+        public const string Wall = "wall";
+        public const string Soil = "soil";
+        public const string SoilTilled = "tilled soil";
+        public const string SoilPlanted = "planted soil";
     }
 }

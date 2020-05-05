@@ -36,9 +36,6 @@
         <member name="M:CopperBend.Contract.ICompoundMap.CanPlant(GoRogue.Coord)">
             <summary> Can Plant considering terrain, rot, existing plants, and ownership. </summary>
         </member>
-        <member name="P:CopperBend.Contract.LocatedTrigger.Trigger">
-            <summary> Whatever moved into the </summary>
-        </member>
         <member name="M:CopperBend.Fabric.CompoundMap.SetInitialConsoleCells(SadConsole.ScrollingConsole,CopperBend.Contract.ISpaceMap)">
             <summary> Set all cells to blank if unknown, or 'unseen' color of terrain if known. </summary>
         </member>

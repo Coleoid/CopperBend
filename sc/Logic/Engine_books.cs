@@ -52,7 +52,7 @@ namespace CopperBend.Logic
 
         public static void ConnectSocialRegister(SocialRegister register)
         {
-            var pc = register.CreatePlayer((0, 0));
+            var pc = register.CreatePlayer();
             register.LoadRegister(pc);
         }
 

@@ -12,7 +12,6 @@ namespace CopperBend.Contract
         Color Foreground { get; }
         int Glyph { get; }
 
-        Coord Location { get; set; }
         void MoveTo(Coord location);
 
         bool IsUsable { get; }

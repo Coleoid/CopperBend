@@ -81,7 +81,7 @@ namespace CopperBend.Persist
 
             var space = new Space(id)
             {
-                Terrain = GetTerrainType(parser.GetKVP_string("Terrain")),
+                Terrain = GetTerrain(parser.GetKVP_string("Terrain")),
             };
 
             var flagText = parser.GetKVP_string("Flags");
@@ -93,7 +93,7 @@ namespace CopperBend.Persist
             return space;
         }
 
-        private Terrain GetTerrainType(string name)
+        private Terrain GetTerrain(string name)
         {
             return null;
         }

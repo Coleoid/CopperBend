@@ -15,17 +15,16 @@ namespace CopperBend.Fabric
     {
         public CompoundMap()
         {
-            LocatedTriggers = new List<LocatedTrigger>();
         }
 
+        public string Name { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
 
         public ISpaceMap SpaceMap { get; set; }
-        public MultiSpatialMap<IBeing> BeingMap { get; set; }
+        public IBeingMap BeingMap { get; set; }
         public IItemMap ItemMap { get; set; }
         public IRotMap RotMap { get; set; }
-        public List<LocatedTrigger> LocatedTriggers { get; }
 
         public FOV FOV { get; set; }
         public bool VisibilityChanged { get; set; }

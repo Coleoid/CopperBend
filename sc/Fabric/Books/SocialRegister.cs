@@ -21,12 +21,11 @@ namespace CopperBend.Fabric
         }
 
 
-        public Being CreatePlayer(Coord playerLocation)
+        public Being CreatePlayer()
         {
             var player = BeingCreator.CreateBeing(Color.ForestGreen, Color.Black, '@');
             player.Name = "Suvail";
             player.AddComponent(new EntityViewSyncComponent());
-            player.Position = playerLocation;
             player.IsPlayer = true;
 
             //0.2: remove these pre-equipped items

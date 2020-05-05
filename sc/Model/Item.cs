@@ -19,14 +19,20 @@ namespace CopperBend.Model
         public string ItemType { get; set; } = "Item";
         public ComponentContainer Aspects { get; set; }
 
-        public Item(Coord location, int quantity = 1, uint id = uint.MaxValue)
+        public Item(int quantity = 1, uint id = uint.MaxValue)
         {
             ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
-            Location = location;
             Quantity = quantity;
 
             AttackMethod = new AttackMethod("physical.impact.blunt", "1d4");
             Aspects = new ComponentContainer();
+        }
+
+        public Item()
+            : this(1, uint.MaxValue)
+        {
+            //AttackMethod = new AttackMethod("physical.impact.blunt", "1d4");
+            //Aspects = new ComponentContainer();
         }
 
         public IAttackMethod AttackMethod { get; set; }
@@ -39,16 +45,14 @@ namespace CopperBend.Model
         public virtual string Adjective { get; set; } = string.Empty;
         public int Quantity { get; set; }
 
-        public Coord Location { get; set; }
-
         public void MoveTo(int x, int y)
         {
-            Location = (x, y);
+            //TODO: Location = (x, y);
         }
 
         public void MoveTo(Coord location)
         {
-            Location = location;
+            //TODO: Location = location;
         }
 
         public bool IsUsable => Aspects.HasComponent<IUsable>();

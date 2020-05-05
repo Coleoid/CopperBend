@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SadConsole;
 using SadConsole.Effects;
 using GoRogue;
@@ -11,14 +10,13 @@ namespace CopperBend.Contract
     {
         int Width { get; }
         int Height { get; }
-        bool IsWithinMap(Coord position);
 
         ISpaceMap SpaceMap { get; }
-        MultiSpatialMap<IBeing> BeingMap { get; }
-        IItemMap ItemMap { get; }
         IRotMap RotMap { get; }
+        IBeingMap BeingMap { get; }
+        IItemMap ItemMap { get; }
 
-        List<LocatedTrigger> LocatedTriggers { get; }
+        //TODO:  A collection of special areas on this map
 
 
         FOV FOV { get; set; }
@@ -27,6 +25,7 @@ namespace CopperBend.Contract
         /// <summary> When a space's appearance (may) change, add its coords to this list </summary>
         List<Coord> CoordsWithChanges { get; }
 
+        bool IsWithinMap(Coord position);
         bool CanSeeThrough(Coord position);
         bool CanWalkThrough(Coord position);
         /// <summary> Can Plant considering terrain, rot, existing plants, and ownership. </summary>
@@ -42,37 +41,4 @@ namespace CopperBend.Contract
         void UpdateFOV(ScrollingConsole console, Coord position);
         void UpdateViewOfCoords(ScrollingConsole console, IEnumerable<Coord> coords);
     }
-
-    //public class Region
-    //{
-    //    public Region()
-    //    {
-    //        Areas = new List<Rectangle>();
-    //    }
-
-    //    public List<Rectangle> Areas { get; }
-
-    //    public void AddArea(Rectangle area)
-    //    {
-
-    //    }
-
-    //    public bool Contains(Coord position)
-    //    {
-    //        foreach (var area in Areas)
-    //        {
-    //            if (area.Contains(position)) return true;
-    //        }
-
-    //        return false;
-    //    }
-    //}
-
-    public class LocatedTrigger
-    {
-        /// <summary> Whatever moved into the </summary>
-        public Func<IHasID, bool> Trigger { get; }
-        //public Region Region { get; }
-    }
-
 }

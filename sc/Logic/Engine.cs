@@ -10,7 +10,7 @@ using SadGlobal = SadConsole.Global;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
-using CopperBend.Model;
+using SadConsole.Ansi;
 
 namespace CopperBend.Logic
 {
@@ -28,8 +28,7 @@ namespace CopperBend.Logic
         private Window MenuWindow { get; set; }
         private ControlsConsole MenuConsole { get; set; }
 
-        //public Queue<AsciiKey> InputQueue { get; private set; }
-        private Being Player { get; set; }
+        private IBeing Player { get; set; }
 
         private bool GameInProgress { get; set; }
         private int TickWhenGameLastSaved { get; set; }
@@ -106,6 +105,7 @@ namespace CopperBend.Logic
 
             OpenGameMenu();
         }
+        #endregion
 
         public void OpenGameMenu()
         {
@@ -119,95 +119,7 @@ namespace CopperBend.Logic
             GameMode.PushEngineMode(EngineMode.MenuOpen, null);
         }
 
-        public void BeginNewGame()
-        {
-            if (TopSeed == null)
-                TopSeed = GenerateSimpleTopSeed();
-            Log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
-            Cosmogenesis(TopSeed, SadConEntityFactory);
-            TopSeed = null;
-
-            ServicePanel.Notify_NewGame_Startup(new GameDataEventArgs(Compendium.TomeOfChaos, Compendium.Herbal));
-
-            var loader = new Persist.MapLoader(Log);
-            FullMap = loader.FarmMap();
-
-            Player = Compendium.SocialRegister.CreatePlayer(FullMap.SpaceMap.PlayerStartPoint);
-            Log.Debug("Created player character.");
-
-            Schedule.AddAgent(Player, 12);
-
-            (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
-            Children.Add(MapWindow);
-            MapConsole.Children.Add(Player.Console);
-            FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
-            FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
-            FullMap.UpdateFOV(MapConsole, Player.Position);
-            MapWindow.Show();
-
-            GameState = new GameState
-            {
-                Map = FullMap,
-                Story = Engine.Compendium.Dramaticon,
-            };
-            Dispatcher.GameState = GameState;
-
-            Player.CommandSource = new InputCommandSource(ServicePanel, GameState, Dispatcher);
-            MapConsole.CenterViewPortOnPoint(Player.Position);
-
-            GameMode.PushEngineMode(EngineMode.WorldTurns, null);
-            GameInProgress = true;
-            Log.Info("Began new game");
-        }
-
-        /// <summary> I hope you had fun! </summary>
-        public void GameOver(IBeing player, PlayerDiedException pde)
-        {
-            //Dispatcher.WriteLine("After you're dead, the town of Copper Bend in Kulkecharra Valley is");
-            //Dispatcher.WriteLine("overrun by the Rot.  Every creature flees, is absorbed");
-            //Dispatcher.WriteLine("for energy, or suffers a brief quasi-life as the Rot");
-            //Dispatcher.WriteLine("strives to understand and replace life.  What will stand in its way?");
-
-            WriteGameOverReport(pde);
-            ClearStats();
-
-            GameMode.PopEngineMode();
-            GameInProgress = false;
-
-            ShutDownGame();
-            OpenGameMenu();
-        }
-
-        public void WriteGameOverReport(PlayerDiedException pde) { } //0.0: WriteGameOverReport
-        public void ClearStats() { } //0.0: ClearStats
-
-        private void ShutDownGame()
-        {
-            // Start by simply undoing many NewGame steps in reverse order
-            Log.Info("Shutting down game");
-
-            Player.CommandSource = null;
-
-            // ?!?? Dispatcher.AttackSystem = null;
-            Dispatcher.GameState = null;
-
-            GameState = null;
-
-            FullMap.FOV = null;
-
-            MapConsole.Children.Remove(Player.Console);
-            Children.Remove(MapWindow);
-            MapConsole = null;
-            MapWindow = null;
-
-            Schedule.Clear();
-            Player = null;
-            FullMap = null;
-
-            Log.Info("Shut down game");
-        }
-        #endregion
-
+        #region Event Loop
         public override void Update(TimeSpan timeElapsed)
         {
             QueueInput();
@@ -230,6 +142,18 @@ namespace CopperBend.Logic
             base.Update(timeElapsed);
         }
 
+        public void QueueInput()
+        {
+            bool ShouldClear()
+            {
+                MenuWindow.Show();
+                GameMode.PushEngineMode(EngineMode.MenuOpen, () => { });
+                return true;
+            }
+            Messager.ShouldClearQueueOnEscape = ShouldClear;
+            Messager.QueueInput(Keyboard.KeysPressed);
+            //1.+: Capturing mouse events can wait until post 1.0.
+        }
 
         internal void ActOnMode()
         {
@@ -279,19 +203,6 @@ namespace CopperBend.Logic
                 }
                 break;
             }
-        }
-
-        public void QueueInput()
-        {
-            bool ShouldClear()
-            {
-                MenuWindow.Show();
-                GameMode.PushEngineMode(EngineMode.MenuOpen, () => { });
-                return true;
-            }
-            Messager.ShouldClearQueueOnEscape = ShouldClear;
-            Messager.QueueInput(Keyboard.KeysPressed);
-            //1.+: Capturing mouse events can wait until post 1.0.
         }
 
         private void HandleGameMenu()
@@ -362,6 +273,98 @@ namespace CopperBend.Logic
                 Dispatcher.Dispatch(nextAction);
             }
         }
+        #endregion
+
+        public void BeginNewGame()
+        {
+            if (TopSeed == null)
+                TopSeed = GenerateSimpleTopSeed();
+            Log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
+            Cosmogenesis(TopSeed, SadConEntityFactory);
+            TopSeed = null;
+
+            ServicePanel.Notify_NewGame_Startup(new GameDataEventArgs(Compendium.TomeOfChaos, Compendium.Herbal));
+
+            var loader = new Persist.MapLoader(Log, Engine.Compendium.Atlas);
+            FullMap = loader.FarmMap();
+
+            Player = Compendium.SocialRegister.FindBeing("Suvail");
+            Player.MoveTo(FullMap.BeingMap);
+            Player.MoveTo(FullMap.SpaceMap.PlayerStartPoint);
+            Log.Debug("Created player character.");
+
+            Schedule.AddAgent(Player, 12);
+
+            (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
+            Children.Add(MapWindow);
+            MapConsole.Children.Add(Player.Console);
+            FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
+            FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
+            FullMap.UpdateFOV(MapConsole, Player.GetPosition());
+            MapWindow.Show();
+
+            GameState = new GameState
+            {
+                Map = FullMap,
+                Story = Engine.Compendium.Dramaticon,
+            };
+            Dispatcher.GameState = GameState;
+            Dispatcher.Compendium = Compendium;
+
+            Player.CommandSource = new InputCommandSource(ServicePanel, GameState, Dispatcher);
+            MapConsole.CenterViewPortOnPoint(Player.GetPosition());
+
+            GameMode.PushEngineMode(EngineMode.WorldTurns, null);
+            GameInProgress = true;
+            Log.Info("Began new game");
+        }
+
+        /// <summary> I hope you had fun! </summary>
+        public void GameOver(IBeing player, PlayerDiedException pde)
+        {
+            //Dispatcher.WriteLine("After you're dead, the town of Copper Bend in Kulkecharra Valley is");
+            //Dispatcher.WriteLine("overrun by the Rot.  Every creature flees, is absorbed");
+            //Dispatcher.WriteLine("for energy, or suffers a brief quasi-life as the Rot");
+            //Dispatcher.WriteLine("strives to understand and replace life.  What will stand in its way?");
+
+            WriteGameOverReport(pde);
+            ClearStats();
+
+            GameMode.PopEngineMode();
+            GameInProgress = false;
+
+            ShutDownGame();
+            OpenGameMenu();
+        }
+
+        public void WriteGameOverReport(PlayerDiedException pde) { } //0.0: WriteGameOverReport
+        public void ClearStats() { } //0.0: ClearStats
+
+        private void ShutDownGame()
+        {
+            // Start by simply undoing many NewGame steps in reverse order
+            Log.Info("Shutting down game");
+
+            Player.CommandSource = null;
+
+            // ?!?? Dispatcher.AttackSystem = null;
+            Dispatcher.GameState = null;
+
+            GameState = null;
+
+            FullMap.FOV = null;
+
+            MapConsole.Children.Remove(Player.Console);
+            Children.Remove(MapWindow);
+            MapConsole = null;
+            MapWindow = null;
+
+            Schedule.Clear();
+            Player = null;
+            FullMap = null;
+
+            Log.Info("Shut down game");
+        }
 
         public void SyncMapChanges()
         {
@@ -377,8 +380,8 @@ namespace CopperBend.Logic
             {
                 //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
 
-                FullMap.UpdateFOV(MapConsole, Player.Position);
-                MapConsole.CenterViewPortOnPoint(Player.Position);
+                FullMap.UpdateFOV(MapConsole, Player.GetPosition());
+                MapConsole.CenterViewPortOnPoint(Player.GetPosition());
                 Dispatcher.PlayerMoved = false;
             }
 

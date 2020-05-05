@@ -16,9 +16,11 @@ namespace CopperBend.Contract
 
         ICommandSource CommandSource { get; set; }
 
-        // Left awkward intentionally, avoiding clash with SadConsole.Console
-        Microsoft.Xna.Framework.Point Position { get; set; }
+        SadConsole.Console Console { get; }
+
+        void MoveTo(IBeingMap map);
         void MoveTo(Coord position);
+        Coord GetPosition();
 
         IReadOnlyCollection<IItem> Inventory { get; }
         void AddToInventory(IItem item);

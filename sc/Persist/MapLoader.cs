@@ -6,8 +6,6 @@ using System.Text.RegularExpressions;
 using log4net;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Color = Microsoft.Xna.Framework.Color;
-using SadConsole;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
@@ -20,10 +18,10 @@ namespace CopperBend.Persist
         private readonly ILog log;
         public Atlas Atlas { get; }
 
-        public MapLoader(ILog logger)
+        public MapLoader(ILog logger, Atlas atlas)
         {
             log = logger;
-            Atlas = new Atlas();
+            Atlas = atlas;
         }
 
         public CompoundMap LoadDevMap(string mapName, GameState state)
@@ -41,7 +39,8 @@ namespace CopperBend.Persist
 
         public CompoundMap MapFromYAML(string mapYaml)
         {
-            MapData data = DataFromYAML(mapYaml);
+            /*
+            CompoundMapData data = DataFromYAML(mapYaml);
             var width = data.Terrain.Max(t => t.Length);
             var height = data.Terrain.Count;
 
@@ -54,6 +53,8 @@ namespace CopperBend.Persist
                 ItemMap = new ItemMap(),
                 RotMap = new RotMap(),
             };
+
+            var tilledSoil = Atlas.Legend["tilled soil"];
 
             for (int y = 0; y < height; y++)
             {
@@ -69,16 +70,15 @@ namespace CopperBend.Persist
                     Space space = new Space
                     {
                         Terrain = type,
+                        IsTilled = (type == tilledSoil),
                     };
                     map.SpaceMap.Add(space, (x, y));
-
-                    if (type == SpaceMap.TilledSoil) map.SpaceMap.Till(space);
                 }
             }
 
-            foreach (var overlay in data.Rot ?? new List<RotOverlayData>())
+            foreach (var overlay in data.AreaRots ?? new List<IAreaRot>())
             {
-                var nums = Regex.Split(overlay.Location, ",");
+                var nums = Regex.Split(overlay., ",");
                 int x_off = int.Parse(nums[0], CultureInfo.InvariantCulture);
                 int y_off = int.Parse(nums[1], CultureInfo.InvariantCulture);
                 var w = overlay.Terrain.Max(t => t.Length);
@@ -99,6 +99,8 @@ namespace CopperBend.Persist
             }
 
             return map;
+            */
+            return null;
         }
 
         //0.1: Map loading is so hard-codey
@@ -142,19 +144,21 @@ namespace CopperBend.Persist
 
         public Terrain TerrainFrom(string name)
         {
-            name = name.ToLowerInvariant();
-            var foundType = Atlas.Legend.ContainsKey(name) ? name : "Unknown";
-            return Atlas.Legend[foundType];
+            var nameLI = name.ToLowerInvariant();
+
+            if (!Atlas.Legend.ContainsKey(nameLI))
+                log.Error($"Failed to find Terrain [{nameLI}].");
+            return Atlas.Legend[nameLI];
         }
 
-        public MapData DataFromYAML(string mapYaml)
+        public CompoundMapData DataFromYAML(string mapYaml)
         {
             using var reader = new StringReader(mapYaml);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            var mapData = deserializer.Deserialize<MapData>(reader);
+            var mapData = deserializer.Deserialize<CompoundMapData>(reader);
             return mapData;
         }
 

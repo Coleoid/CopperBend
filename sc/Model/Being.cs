@@ -21,6 +21,7 @@ namespace CopperBend.Model
         public Color Foreground { get; set; }
         public Color Background { get; set; }
         public int Glyph { get; set; }
+        private IBeingMap Map { get; set; }
 
         public Being(Guid blocker, Color foreground, Color background, int glyph, uint id = uint.MaxValue)
             : base(id)
@@ -38,18 +39,39 @@ namespace CopperBend.Model
         internal void SetSadCon(ISadConEntityFactory sadConEntityFactory)
         {
             SadConEntity = sadConEntityFactory.GetSadCon(this);
-            Position = new Point(0, 0);
         }
-
-        public Point Position { get => SadConEntity.Position; set => SadConEntity.Position = value; }
 
         public SadConsole.Console Console { get => (SadConsole.Console)SadConEntity; }
 
         //  IBeing
-        public void MoveTo(Coord point)
+        public void MoveTo(IBeingMap map)
         {
-            SadConEntity.Position = point;
+            if (map != Map)
+            {
+                Map?.Remove(this);
+            }
+            if (map != null)
+            {
+                var mapPosition = map.GetPosition(this);
+                if (mapPosition.X == int.MinValue)
+                {
+                    map.Add(this, this.GetPosition());
+                }
+            }
+            Map = map;
         }
+
+        public void MoveTo(Coord coord)
+        {
+            SadConEntity.Position = coord;
+            Map.Move(this, coord);
+        }
+
+        public Coord GetPosition()
+        {
+            return SadConEntity.Position;
+        }
+
 
         public int Awareness { get; set; }
 

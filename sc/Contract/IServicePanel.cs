@@ -8,7 +8,6 @@
 
 using System;
 using CopperBend.Fabric;
-using CopperBend.Logic;
 using log4net;
 
 namespace CopperBend.Contract

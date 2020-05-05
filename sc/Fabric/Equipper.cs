@@ -17,10 +17,10 @@ namespace CopperBend.Fabric
             var wantedPlant = Regex.Match(itemName, "^(seed|fruit):(.*)");
             if (wantedPlant.Success) return BuildPlant(wantedPlant);
 
-            var item = new Item((0, 0)) { Name = itemName, ItemType = itemName, Quantity = quantity };
+            var item = new Item() { Name = itemName, ItemType = itemName, Quantity = quantity };
             switch (itemName)
             {
-            case "hoe":
+            case ItemEnum.Hoe:
                 item.AddAspect(
                     new Usable("till ground with", UseTargetFlags.Direction)
                         .AddEffect("till", 1)
@@ -32,7 +32,7 @@ namespace CopperBend.Fabric
                 );
                 break;
 
-            case "knife":
+            case ItemEnum.Knife:
                 item.AddAspect(
                     new Weapon()
                         .AddAttackEffect("physical.impact.edge", "1d4+2")
@@ -40,12 +40,12 @@ namespace CopperBend.Fabric
                 );
                 break;
 
-            case "gadget":
-            case "widget":
+            case ItemEnum.Gadget:
+            case ItemEnum.Widget:
                 //  These items intentionally left useless
                 break;
 
-            case "gloves":
+            case ItemEnum.Gloves:
                 //  They affect the incident 'My Hands', is that rep'd here?
                 break;
 
@@ -74,7 +74,7 @@ namespace CopperBend.Fabric
 
         public static Item BuildPlant(string plantPart, PlantDetails details)
         {
-            var item = new Item((0, 0)) { Name = plantPart };
+            var item = new Item { Name = plantPart };
 
             switch (plantPart)
             {

@@ -1,4 +1,5 @@
-﻿using GoRogue;
+﻿using CopperBend.Fabric;
+using GoRogue;
 
 //  Functional completeness levels:
 //  0.0  ---  Code is needed, and doesn't exist or work at all
@@ -33,6 +34,7 @@ namespace CopperBend.Contract
         void AddExperience(uint plantID, XPType experience);
         bool PlayerMoved { get; set; }
         IAttackSystem AttackSystem { get; }
+        Compendium Compendium { get; set; }
 
         void Dispatch(ScheduleEntry nextAction);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SadConsole.Input;
 using Coord = GoRogue.Coord;
 using CopperBend.Contract;
+using CopperBend.Fabric;
 
 namespace CopperBend.Logic
 {
@@ -102,11 +103,15 @@ namespace CopperBend.Logic
             Schedule.RemoveAgent(agent);
         }
 
-
         public void Till(ISpace space)
         {
-            SpaceMap.Till(space);
+            if (!space.CanTill)
+                throw new Exception("Can't till this space.");
+
+            space.Terrain = Compendium.Atlas.Legend[TerrainEnum.SoilTilled];
+            space.IsTilled = true;
         }
+
 
         public Dictionary<XPType, int> XP { get; } = new Dictionary<XPType, int>();
         public void AddExperience(uint plantID, XPType experience)

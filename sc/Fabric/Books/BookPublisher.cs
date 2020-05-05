@@ -461,9 +461,6 @@ namespace CopperBend.Fabric
 
         private void InitLegend(Atlas atlas)
         {
-            //0.1 shift this depewndency
-            //atlas.Legend = SpaceMap.TerrainTypes;
-
             var dirtBG = new Color(50, 30, 13);
             var growingBG = new Color(28, 54, 22);
             var stoneBG = new Color(28, 30, 22);
@@ -550,6 +547,15 @@ namespace CopperBend.Fabric
                 CanWalkThrough = false,
                 CanSeeThrough = false,
                 Cell = new Cell(Color.DarkGray, stoneBG, '='),
+            };
+            atlas.StoreTerrain(terrain);
+
+            terrain = new Terrain
+            {
+                Name = TerrainEnum.Floor,
+                CanSeeThrough = true,
+                CanWalkThrough = true,
+                Cell = new SadConsole.Cell(Color.White, stoneBG, '.'),
             };
             atlas.StoreTerrain(terrain);
 

@@ -9,7 +9,10 @@ namespace CopperBend.Model
     public class AreaRot : IHasID, IDelible, IAreaRot
     {
         public string Name { get => "Area rot"; }
-        public AreaRot(uint id = uint.MaxValue)
+
+        public AreaRot()
+            : this(uint.MaxValue) { }
+        public AreaRot(uint id)
         {
             ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
         }

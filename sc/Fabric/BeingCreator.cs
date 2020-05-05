@@ -25,12 +25,11 @@ namespace CopperBend.Fabric
             Color bg = parser.GetKVP_Color("Background");
             int glyph = parser.GetKVP_string("Glyph")[0];
 
-            var being = CreateBeing(fg, bg, glyph, id);
+            var being = CreateBeing(fg, bg, glyph, id: id);
 
             being.Name = parser.GetKVP_string("Name");
             being.Awareness = parser.GetKVP_int("Awareness");
             being.Health = parser.GetKVP_int("Health");
-            being.Position = parser.GetKVP_Point("Position");
             being.BeingType = type;
 
             return being;
@@ -49,7 +48,6 @@ namespace CopperBend.Fabric
             emitter.EmitKVP("Name", being.Name ?? string.Empty);
             emitter.EmitKVP("Awareness", being.Awareness.ToString(CultureInfo.InvariantCulture));
             emitter.EmitKVP("Health", being.Health.ToString(CultureInfo.InvariantCulture));
-            emitter.EmitKVP("Position", being.Position.ToString());
         }
 
         public Being CreateBeing(string beingName)
@@ -58,25 +56,23 @@ namespace CopperBend.Fabric
             {
                 "Suvail" => new Being(Guid.NewGuid(), Color.LawnGreen, Color.Black, '@')
                 {
-                    Name = "Suvail",
                     IsPlayer = true,
                 },
-                "flame rat" => new Being(Guid.NewGuid(), Color.Red, Color.Black, 'r')
-                {
-                    Name = "flame rat",
-                },
+                "flame rat" => new Being(Guid.NewGuid(), Color.Red, Color.Black, 'r'),
+                "Phredde" => new Being(Guid.NewGuid(), Color.Gray, Color.Black, 'p'),
                 _ => throw new Exception($"Don't know how to CreateBeing(\"{beingName}\")."),
             };
-
+            being.Name = beingName;
             being.SetSadCon(SadConEntityFactory);
 
             return being;
         }
 
-        public Being CreateBeing(Color foreground, Color background, int glyph, uint id = uint.MaxValue)
+        public Being CreateBeing(Color foreground, Color background, int glyph, IBeingMap map = null, uint id = uint.MaxValue)
         {
             var being = new Being(Guid.NewGuid(), foreground, background, glyph, id);
             being.SetSadCon(SadConEntityFactory);
+            if (map != null) being.MoveTo(map);
             return being;
         }
     }

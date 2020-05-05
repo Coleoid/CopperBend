@@ -124,7 +124,7 @@ namespace CopperBend.Logic
 
         private Command Direction(IBeing being, CmdDirection dir)
         {
-            var newPosition = controls.CoordInDirection(being.Position, dir);
+            var newPosition = controls.CoordInDirection(being.GetPosition(), dir);
 
             var targetRot = gameState.Map.RotMap.GetItem(newPosition);
             if (targetRot != null)
@@ -155,7 +155,7 @@ namespace CopperBend.Logic
                 var dir = DirectionOf(press);
                 if (dir != CmdDirection.None)
                 {
-                    var dirCoord = controls.CoordInDirection(being.Position, dir);
+                    var dirCoord = controls.CoordInDirection(being.GetPosition(), dir);
                     var dirRot = gameState.Map.RotMap.GetItem(dirCoord);
 
                     affirm = (dirRot != null);
@@ -339,7 +339,7 @@ namespace CopperBend.Logic
         /// <summary> 0.2:  Currently, grab the topmost.  Later, choose. </summary>
         public Command PickUp(IBeing being)
         {
-            var items = gameState.Map.ItemMap.GetItems(being.Position);
+            var items = gameState.Map.ItemMap.GetItems(being.GetPosition());
             var topItem = items.LastOrDefault();
             if (topItem == null) return CancelMultiStep("Nothing to pick up here.");
 

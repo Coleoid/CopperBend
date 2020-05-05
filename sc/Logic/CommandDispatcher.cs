@@ -12,7 +12,7 @@ namespace CopperBend.Logic
     public partial class CommandDispatcher : IControlPanel
     {
         protected ISpaceMap SpaceMap => GameState.Map.SpaceMap;
-        private MultiSpatialMap<IBeing> BeingMap => GameState.Map.BeingMap;
+        private IBeingMap BeingMap => GameState.Map.BeingMap;
         private IItemMap ItemMap => GameState.Map.ItemMap;
         private IRotMap RotMap => GameState.Map.RotMap;
 
@@ -23,9 +23,11 @@ namespace CopperBend.Logic
         private IServicePanel ServicePanel { get; set; }
         public IGameState GameState { get; set; }
         public bool PlayerMoved { get; set; }
-        public IDescriber Describer { get => ServicePanel.Describer; }
-        public IMessager Messager { get => ServicePanel.Messager; }
-        private ISchedule Schedule { get => ServicePanel.Schedule; }
+        public IDescriber Describer => ServicePanel.Describer;
+        public IMessager Messager => ServicePanel.Messager;
+        private ISchedule Schedule => ServicePanel.Schedule;
+
+        public Compendium Compendium { get; set; }
 
         public CommandDispatcher(
             IServicePanel panel,
@@ -121,7 +123,8 @@ namespace CopperBend.Logic
         #region Direction
         private bool Do_Direction(IBeing being, CmdDirection direction)
         {
-            var newPosition = CoordInDirection(being.Position, direction);
+            var curPosition = being.GetPosition();
+            var newPosition = CoordInDirection(curPosition, direction);
 
             IDefender target = BeingMap.GetItems(newPosition).FirstOrDefault();
 
@@ -147,6 +150,17 @@ namespace CopperBend.Logic
             return true;
         }
 
+        public bool OpenDoor(ISpace space)
+        {
+            if (space.Terrain == Compendium.Atlas.Legend["closed door"])
+            {
+                space.Terrain = Compendium.Atlas.Legend["open door"];
+                return true;
+            }
+
+            return false;
+        }
+
         private bool Do_Move(IBeing being, Coord newPosition)
         {
             if (newPosition.X < 0 || newPosition.Y < 0
@@ -160,7 +174,7 @@ namespace CopperBend.Logic
 
             if (space.Terrain.Name == "closed door")
             {
-                var success = SpaceMap.OpenDoor(space);
+                var success = OpenDoor(space);
                 if (success)
                 {
                     ScheduleAgent(being, 4);
@@ -184,8 +198,14 @@ namespace CopperBend.Logic
             }
 
             int directionsMoved = 0;
-            if (being.Position.X != newPosition.X) directionsMoved++;
-            if (being.Position.Y != newPosition.Y) directionsMoved++;
+            var mapPosition = BeingMap.GetPosition(being);
+            var curPosition = being.GetPosition();
+            if (mapPosition != curPosition)
+            {
+                throw new Exception($"Disagreement between map position {mapPosition} and being [{being.Name}] position {curPosition}.");
+            }
+            if (curPosition.X != newPosition.X) directionsMoved++;
+            if (curPosition.Y != newPosition.Y) directionsMoved++;
             if (directionsMoved == 0)
                 throw new Exception("Moved nowhere?  Up/Down not yet handled.");
             else if (directionsMoved == 1)
@@ -193,7 +213,7 @@ namespace CopperBend.Logic
             else
                 ScheduleAgent(being, 17);  //0.2  get rid of constant move costs
 
-            being.Position = newPosition;
+            being.MoveTo(newPosition);
 
             if (being.IsPlayer)
             {
@@ -229,8 +249,8 @@ namespace CopperBend.Logic
             var item = being.RemoveFromInventory(command.Item);
             Guard.AgainstNullArgument(item, "Item to drop not found in inventory");
 
-            item.MoveTo(being.Position);
-            ItemMap.Add(item, item.Location);
+            var beingPosition = being.GetPosition();
+            ItemMap.Add(item, beingPosition);
             ScheduleAgent(being, 1);
             return true;
         }
@@ -335,7 +355,7 @@ namespace CopperBend.Logic
 
         private bool Till(IBeing being, Command command)
         {
-            var targetCoord = CoordInDirection(being.Position, command.Direction);
+            var targetCoord = CoordInDirection(being.GetPosition(), command.Direction);
             var space = SpaceMap.GetItem(targetCoord);
             if (space.IsTilled)
             {
@@ -362,7 +382,8 @@ namespace CopperBend.Logic
 
         private bool Plant(IBeing being, Command command)
         {
-            var coord = CoordInDirection(being.Position, command.Direction);
+            var curPosition = BeingMap.GetPosition(being);
+            var coord = CoordInDirection(curPosition, command.Direction);
             var space = SpaceMap.GetItem(coord);
 
             if (!space.IsTilled)
@@ -380,7 +401,7 @@ namespace CopperBend.Logic
 
             IItem toSow = being.RemoveFromInventory(command.Item, 1);
 
-            SpaceMap.MarkSpaceSown(space);
+            space.IsSown = true;
             GameState.MarkDirtyCoord(coord);
 
             var growingPlant = toSow.Aspects.GetComponent<Plant>();

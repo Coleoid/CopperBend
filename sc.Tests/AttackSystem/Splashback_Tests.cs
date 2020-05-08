@@ -1,5 +1,6 @@
 ﻿using CopperBend.Fabric;
 using CopperBend.Model;
+using GoRogue;
 using Microsoft.Xna.Framework;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
@@ -54,10 +55,11 @@ namespace CopperBend.Logic.Tests
             var am = new AttackMethod("physical.impact.point", "1d3 +2");
             var rot = new AreaRot();
 
-            flameRat.Position = new Point(3, 3);
-            //rot.Position = new Point(8, 8);  //  Not a thing.
-            var rotmap = new RotMap();
-            rotmap.Add(rot, new GoRogue.Coord(8, 8));
+            flameRat.MoveTo((3, 3));
+            var rotmap = new RotMap
+            {
+                { rot, new Coord(8, 8) }
+            };
 
             Attack attack = new Attack
             {

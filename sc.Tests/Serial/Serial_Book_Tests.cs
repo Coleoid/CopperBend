@@ -4,7 +4,6 @@ using CopperBend.Contract;
 using CopperBend.Fabric;
 using NUnit.Framework;
 using CopperBend.Model;
-using CopperBend.Logic;
 using GoRogue;
 using CopperBend.Fabric.Tests;
 using Microsoft.Xna.Framework;
@@ -12,7 +11,7 @@ using Microsoft.Xna.Framework;
 namespace CopperBend.Persist.Tests
 {
     [TestFixture]
-    public class Serial_Compendium_Tests
+    public class Serial_Book_Tests
     {
         private ISerializer _serializer;
         private IDeserializer _deserializer;
@@ -86,7 +85,8 @@ namespace CopperBend.Persist.Tests
 
             for (int i = 0; i < 10; i++)
             {
-                Assert.That(newTome.LearnableRndNext(), Is.EqualTo(tome.LearnableRndNext()));
+                Assert.That(newTome.LearnableRndNext(), Is.EqualTo(tome.LearnableRndNext()),
+                    "The numbers emitted from a serialized & deserialized RNG should match the RNG it was originally serialized from.");
             }
         }
 
@@ -160,8 +160,10 @@ namespace CopperBend.Persist.Tests
         public void CRT_Dramaticon()
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            var drama = new Dramaticon();
-            drama.HasClearedRot = true;
+            var drama = new Dramaticon
+            {
+                HasClearedRot = true
+            };
 
             var yaml = _serializer.Serialize(drama);
             Assert.That(yaml, Is.Not.Null);

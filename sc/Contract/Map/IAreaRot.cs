@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GoRogue;
+﻿using GoRogue;
 
 namespace CopperBend.Contract
 {

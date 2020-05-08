@@ -3,7 +3,7 @@ using GoRogue;
 
 namespace CopperBend.Contract
 {
-    public interface IItemMap
+    public interface IItemMap : IEnumerable<ISpatialTuple<IItem>>
     {
         IEnumerable<IItem> GetItems(Coord coord);
         bool Add(IItem item, Coord coord);

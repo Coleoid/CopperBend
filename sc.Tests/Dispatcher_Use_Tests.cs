@@ -10,9 +10,11 @@ namespace CopperBend.Logic.Tests
     [TestFixture]
     public class Dispatcher_Use_Tests : Dispatcher_Tests_Base
     {
-        private Being SetUp_being_at_coord(Coord coord, int glyph, bool isPlayer = false)
+        private Being Prep_being_at_coord(Coord coord, bool isPlayer = false)
         {
-            var being = BeingCreator.CreateBeing("Suvail");
+            string name = isPlayer ? "Suvail" : "Phredde";
+            var being = BeingCreator.CreateBeing(name);
+            being.MoveTo(_gameState.Map.BeingMap);
             being.MoveTo(coord);
             being.IsPlayer = isPlayer;
 
@@ -23,7 +25,7 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Cannot_till_untillable_terrain()
         {
-            var player = SetUp_being_at_coord((2, 2), '@', true);
+            var player = Prep_being_at_coord((2, 2), true);
             var hoe = Equipper.BuildItem("hoe");
             player.Wield(hoe);
 
@@ -38,13 +40,13 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Cannot_till_already_tilled_space()
         {
-            var player = SetUp_being_at_coord((2, 2), '@', true);
+            var player = Prep_being_at_coord((2, 2), true);
             var hoe = Equipper.BuildItem("hoe");
             player.Wield(hoe);
 
             var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
             sp.Terrain = ttSoil;
-            _gameState.Map.SpaceMap.Till(sp);
+            _dispatcher.Till(sp);
 
             var usable = hoe.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe, usable);
@@ -58,7 +60,7 @@ namespace CopperBend.Logic.Tests
         public void Can_till_tillable_space()
         {
             Coord coord = (2, 2);
-            var player = SetUp_being_at_coord(coord, '@');
+            var player = Prep_being_at_coord(coord);
             player.IsPlayer = true;
             var tool = Equipper.BuildItem("hoe");
             player.Wield(tool);
@@ -77,7 +79,7 @@ namespace CopperBend.Logic.Tests
         [TestCase(false, 30)]
         public void Use_unwielded_tool_takes_longer_and_wields_it(bool startsWielded, int tickOff)
         {
-            var player = SetUp_being_at_coord((2, 2), '@', true);
+            var player = Prep_being_at_coord((2, 2), true);
             var tool = Equipper.BuildItem("hoe");
             if (startsWielded)
                 player.Wield(tool);
@@ -102,13 +104,15 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Can_plant_in_tilled_space()
         {
-            var player = SetUp_being_at_coord((2, 2), '@', true);
+            Engine.Cosmogenesis("hiya", __factory);
+
+            var player = Prep_being_at_coord((2, 2), true);
             var seed = Equipper.BuildItem("seed:Healer");
             player.AddToInventory(seed);
 
             var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
             sp.Terrain = ttSoil;
-            _gameState.Map.SpaceMap.Till(sp);
+            _dispatcher.Till(sp);
 
             var usable = seed.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, seed, usable);

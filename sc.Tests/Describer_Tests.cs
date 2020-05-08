@@ -24,7 +24,7 @@ namespace CopperBend.Logic.Tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity)
+            var item = new Item(quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -41,7 +41,7 @@ namespace CopperBend.Logic.Tests
         {
             var describer = new Describer();
 
-            var item = new Item(new Coord(0, 0), quantity)
+            var item = new Item(quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -59,7 +59,7 @@ namespace CopperBend.Logic.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity)
+            var item = new Item(quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -76,7 +76,7 @@ namespace CopperBend.Logic.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity)
+            var item = new Item(quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -93,7 +93,7 @@ namespace CopperBend.Logic.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity)
+            var item = new Item(quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -110,7 +110,7 @@ namespace CopperBend.Logic.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity)
+            var item = new Item(quantity)
             {
                 Name = "rock",
                 Adjective = adjective,
@@ -127,7 +127,7 @@ namespace CopperBend.Logic.Tests
         {
             var describer = new Describer();
 
-            var item = new Item((0, 0), quantity)
+            var item = new Item(quantity)
             {
                 Name = "rock",
                 Adjective = adjective,

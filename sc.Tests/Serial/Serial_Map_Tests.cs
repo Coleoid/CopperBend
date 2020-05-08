@@ -1,60 +1,39 @@
-﻿//using SadConsole;
-//using Newtonsoft.Json;
+﻿//using NUnit.Framework;
+//using YamlDotNet.Serialization;
 //using CopperBend.Contract;
 //using CopperBend.Fabric;
 //using CopperBend.Model;
-//using NUnit.Framework;
-//using CopperBend.Engine;
+//using CopperBend.Logic;
+//using CopperBend.Fabric.Tests;
 
 //namespace CopperBend.Persist.Tests
 //{
 //    [TestFixture]
 //    public class Serial_Map_Tests
 //    {
+//        private ISerializer _serializer;
+//        private IDeserializer _deserializer;
+//        private BeingCreator _beingCreator;
+
 //        [SetUp]
 //        public void SetUp()
 //        {
-//            Engine.Cosmogenesis("seed");
-//        }
+//            var entityFactory = UTHelp.GetSubstituteFactory();
+//            Engine.Cosmogenesis("serial being!", entityFactory);
+//            _beingCreator = Engine.BeingCreator;
 
-//        [Test]
-//        public void CRT_TerrainType()
-//        {
-//            var tt = new TerrainType
-//            {
-//                Name = "dirt road",
-//                CanPlant = false,
-//                CanSeeThrough = true,
-//                CanWalkThrough = true,
-//            };
-//            var json = JsonConvert.SerializeObject(tt);
-//            //System.Console.Error.WriteLine(json);
-//            var newTT = JsonConvert.DeserializeObject<TerrainType>(json);
+//            var ycIBeing = new YConv_IBeing { BeingCreator = _beingCreator };
 
-//            Assert.That(newTT.Name, Is.EqualTo(tt.Name));
-//            Assert.That(newTT.CanPlant, Is.EqualTo(tt.CanPlant));
-//            Assert.That(newTT.CanSeeThrough, Is.EqualTo(tt.CanSeeThrough));
-//            Assert.That(newTT.CanWalkThrough, Is.EqualTo(tt.CanWalkThrough));
-//        }
+//            _serializer = new SerializerBuilder()
+//                .EnsureRoundtrip()
+//                .WithTypeConverter(new YConv_ISpace())
+//                .WithTypeConverter(ycIBeing)
+//                .Build();
 
-//        [Test]
-//        public void CRT_Space()
-//        {
-//            var space = new Space
-//            {
-//                IsKnown = true,
-//                IsSown = true,
-//                IsTilled = true
-//            };
-
-//            var json = JsonConvert.SerializeObject(space);
-
-//            //if (!Debugger.IsAttached) Debugger.Launch();
-//            var newSpace = JsonConvert.DeserializeObject<Space>(json);
-
-//            Assert.That(newSpace.IsKnown);
-//            Assert.That(newSpace.IsSown);
-//            Assert.That(newSpace.IsTilled);
+//            _deserializer = new DeserializerBuilder()
+//                .WithTypeConverter(new YConv_ISpace())
+//                .WithTypeConverter(ycIBeing)
+//                .Build();
 //        }
 
 //        [Test]
@@ -65,12 +44,11 @@
 //                PlayerStartPoint = (3, 3)
 //            };
 
-//            map.AddItem(new Space(888), (4, 4));
+//            map.Add(new Space(888), (4, 4));
 
-//            var json = JsonConvert.SerializeObject(map);
-//            //Debugger.Launch();
-//            //System.Console.Error.WriteLine(json);
-//            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
+//            var yaml = _serializer.Serialize(map);
+//            Assert.That(yaml, Is.Not.Null);
+//            var newMap = _deserializer.Deserialize<SpaceMap>(yaml);
 
 //            Assert.That(newMap.Height, Is.EqualTo(5));
 //            Assert.That(newMap.Width, Is.EqualTo(5));
@@ -81,89 +59,89 @@
 //        }
 
 //        [Test]
-//        public void CRT_AreaRot()
+//        public void CRT_Space()
 //        {
-//            var rot = new AreaRot(22) { Health = 14 };
+//            var terrain = new Terrain
+//            {
+//                Name = "berber carpet",
+//                CanPlant = true,
+//                CanSeeThrough = true,
+//                CanWalkThrough = true,
+//            };
+//            //if (!Debugger.IsAttached) Debugger.Launch();
+//            var space = new Space(22)
+//            {
+//                Terrain = terrain,
+//                IsKnown = true,
+//                IsSown = true,
+//                IsTilled = true,
+//            };
 
-//            var json = JsonConvert.SerializeObject(rot);
-//            //System.Console.Error.WriteLine(json);
-//            var newRot = JsonConvert.DeserializeObject<IAreaRot>(json);
+//            var yaml = _serializer.Serialize(space);
+//            Assert.That(yaml, Is.Not.Null);
+//            var newSpace = _deserializer.Deserialize<ISpace>(yaml);
+//            Assert.That(newSpace, Is.TypeOf<Space>());
 
-//            Assert.That(newRot.ID, Is.EqualTo(22));
-//            Assert.That(newRot.Health, Is.EqualTo(14));
+//            Assert.That(newSpace.ID, Is.EqualTo(space.ID));
+//            Assert.That(newSpace.IsKnown, Is.EqualTo(space.IsKnown));
+//            Assert.That(newSpace.IsSown, Is.EqualTo(space.IsSown));
+//            Assert.That(newSpace.IsTilled, Is.EqualTo(space.IsTilled));
+//            Assert.That(newSpace.Terrain.Name, Is.EqualTo(space.Terrain.Name));
+//        }
+
+//        [Test]
+//        public void CRT_Terrain()
+//        {
+//            var terrain = new Terrain
+//            {
+//                Name = "dirt road",
+//                CanPlant = false,
+//                CanSeeThrough = true,
+//                CanWalkThrough = true,
+//            };
+
+
+//            var yaml = _serializer.Serialize(terrain);
+//            Assert.That(yaml, Is.Not.Null);
+//            var newTT = _deserializer.Deserialize<Terrain>(yaml);
+
+//            Assert.That(newTT.Name, Is.EqualTo(terrain.Name));
+//            Assert.That(newTT.CanPlant, Is.EqualTo(terrain.CanPlant));
+//            Assert.That(newTT.CanSeeThrough, Is.EqualTo(terrain.CanSeeThrough));
+//            Assert.That(newTT.CanWalkThrough, Is.EqualTo(terrain.CanWalkThrough));
 //        }
 
 //        [Test]
 //        public void CRT_RotMap()
 //        {
 //            //0.2: int ctor arg = deserializing workaround
-//            var map = new RotMap(1) { Name = "Bofungus" };
+//            var map = new RotMap();
 //            var rot = new AreaRot(888) { Health = 11 };
-//            map.AddItem(rot, (7, 11));
-//            map.AddItem(new AreaRot() { Health = 8 }, (7, 12));
+//            map.Add(rot, (7, 11));
+//            map.Add(new AreaRot() { Health = 8 }, (7, 12));
 
-//            var json = JsonConvert.SerializeObject(map);
-//            //System.Console.Error.WriteLine(json);
-//            //Debugger.Launch();
-//            var newMap = JsonConvert.DeserializeObject<RotMap>(json);
+//            var yaml = _serializer.Serialize(map);
+//            Assert.That(yaml, Is.Not.Null);
+//            var newMap = _deserializer.Deserialize<RotMap>(yaml);
 
-//            Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
+//            //Assert.That(newMap.Name, Is.EqualTo("Bofungus"));
 //            var entry = newMap.GetItem((7, 11));
 //            Assert.That(entry, Is.Not.Null);
 //            Assert.That(entry.ID, Is.EqualTo(888));
 //        }
 
 //        [Test]
-//        public void CRT_SpaceMap_down_to_Cell()
+//        public void CRT_AreaRot()
 //        {
-//            Cell originalCell = new Cell
-//            {
-//                Glyph = '~',
-//            };
+//            var rot = new AreaRot(22) { Health = 14 };
 
-//            var originalTerrain = new TerrainType
-//            {
-//                Looks = originalCell
-//            };
+//            var yaml = _serializer.Serialize(rot);
+//            Assert.That(yaml, Is.Not.Null);
+//            var newRot = _deserializer.Deserialize<AreaRot>(yaml);
 
-//            var originalSpace = new Space(888)
-//            {
-//                Terrain = originalTerrain
-//            };
-
-//            var map = new SpaceMap(6, 6);
-
-//            map.AddItem(originalSpace, (4, 4));
-
-//            var json = JsonConvert.SerializeObject(map);
-//            //System.Console.Error.WriteLine(json);
-//            var newMap = JsonConvert.DeserializeObject<SpaceMap>(json);
-
-//            var space = newMap.GetItem((4, 4));
-//            var cell = space.Terrain.Looks;
-//            Assert.That(cell, Is.Not.Null);
-//            Assert.That(cell.Glyph, Is.EqualTo('~'));
+//            Assert.That(newRot.ID, Is.EqualTo(22));
+//            Assert.That(newRot.Health, Is.EqualTo(14));
 //        }
 
-//        //TODO: Bring these back to use when serializing random
-//        //public static byte[] ObjectToByteArray(object obj)
-//        //{
-//        //    BinaryFormatter bf = new BinaryFormatter();
-//        //    using (var ms = new MemoryStream())
-//        //    {
-//        //        bf.Serialize(ms, obj);
-//        //        return ms.ToArray();
-//        //    }
-//        //}
-
-//        //public static object ByteArrayToObject(byte[] arrBytes)
-//        //{
-//        //    using (var memStream = new MemoryStream(arrBytes))
-//        //    {
-//        //        var binForm = new BinaryFormatter();
-//        //        var obj = binForm.Deserialize(memStream);
-//        //        return obj;
-//        //    }
-//        //}
 //    }
 //}

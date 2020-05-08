@@ -40,7 +40,7 @@ namespace CopperBend.Persist.Tests
         public void CRT_Being()
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            var being = _beingCreator.CreateBeing(Color.Bisque, Color.Azure, 'g', 77);
+            var being = _beingCreator.CreateBeing(Color.Bisque, Color.Azure, 'g', id: 77);
 
             var yaml = _serializer.Serialize(being);
             Assert.That(yaml, Is.Not.Null);
@@ -57,11 +57,10 @@ namespace CopperBend.Persist.Tests
         public void CRT_Being_full()
         {
             //if (!Debugger.IsAttached) Debugger.Launch();
-            var being = _beingCreator.CreateBeing(Color.DarkSeaGreen, Color.Black, 'g', 77);
+            var being = _beingCreator.CreateBeing(Color.DarkSeaGreen, Color.Black, 'g', id: 77);
             being.Name = "Gred";
             being.Awareness = 2;
             being.Health = 22;
-            being.Position = new Point(4, 5);
 
             var yaml = _serializer.Serialize(being);
             Assert.That(yaml, Is.Not.Null);
@@ -71,7 +70,6 @@ namespace CopperBend.Persist.Tests
             Assert.That(newBeing.Name, Is.EqualTo(being.Name));
             Assert.That(newBeing.Awareness, Is.EqualTo(being.Awareness));
             Assert.That(newBeing.Health, Is.EqualTo(being.Health));
-            Assert.That(newBeing.Position, Is.EqualTo(being.Position));
         }
 
         //[Test]

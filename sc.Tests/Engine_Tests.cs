@@ -1,5 +1,4 @@
-﻿using CopperBend.Fabric.Tests;
-using CopperBend.Model;
+﻿using CopperBend.Model;
 using NUnit.Framework;
 
 namespace CopperBend.Logic.Tests
@@ -13,11 +12,9 @@ namespace CopperBend.Logic.Tests
             Item.SetIDGenerator(null);
             AreaRot.SetIDGenerator(null);
 
-            var sef = StubEntityFactory();
+            Engine.Cosmogenesis("seed", __factory);
 
-            Engine.Cosmogenesis("seed", sef);
-
-            var item = new Item((2, 2));
+            var item = new Item();
             var rot = new AreaRot();
 
             Assert.That(item, Is.Not.Null);

@@ -11,6 +11,7 @@ using CopperBend.Fabric;
 using CopperBend.Model;
 using SadConsole.Entities;
 using SadConsole.Components;
+using CopperBend.Fabric.Tests;
 
 namespace CopperBend.Logic.Tests
 {
@@ -26,59 +27,17 @@ namespace CopperBend.Logic.Tests
         protected IMessager __messager;
 
         #region OTSU
-        protected Terrain ttDoorOpen;
-        protected Terrain ttDoorClosed;
-        protected Terrain ttWall;
-        protected Terrain ttFloor;
+        //protected Terrain ttDoorOpen;
+        //protected Terrain ttDoorClosed;
+        //protected Terrain ttWall;
+        //protected Terrain ttFloor;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             __log = Substitute.For<ILog>();
 
-            ttWall = new Terrain
-            {
-                CanSeeThrough = false,
-                CanWalkThrough = false,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '#'),
-                Name = "wall"
-            };
-            ttFloor = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '.'),
-                Name = "floor"
-            };
-
-            ttDoorOpen = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '-'),
-                Name = "open door"
-            };
-            ttDoorClosed = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '+'),
-                Name = "closed door"
-            };
-
-            SpaceMap.TerrainTypes[ttWall.Name] = ttWall;
-            SpaceMap.TerrainTypes[ttFloor.Name] = ttFloor;
-            SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;
-            SpaceMap.TerrainTypes[ttDoorClosed.Name] = ttDoorClosed;
-
-            var sef = Substitute.For<ISadConEntityFactory>();
-            sef.GetSadCon(Arg.Any<ISadConInitData>())
-                .Returns(ctx => {
-                    var ie = Substitute.For<IEntity>();
-                    var cs = new ObservableCollection<IConsoleComponent>();
-                    ie.Components.Returns(cs);
-                    return ie;
-                });
+            var sef = UTHelp.GetSubstituteFactory();
 
             Engine.Cosmogenesis("bang", sef);
         }
@@ -91,7 +50,7 @@ namespace CopperBend.Logic.Tests
             {
                 Map = new CompoundMap
                 {
-                    BeingMap = new GoRogue.MultiSpatialMap<IBeing>(),
+                    BeingMap = new BeingMap(),
                     RotMap = new RotMap(),
                     SpaceMap = CreateSmallTestMap(),
                     ItemMap = new ItemMap(),
@@ -123,16 +82,17 @@ namespace CopperBend.Logic.Tests
             {
                 for (int y = 0; y < 5; y++)
                 {
-                    bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
+                    //TODO: fix my SmallTestMap
+                    //bool isEdge = x == 0 || y == 0 || x == 4 || y == 4;
                     var s = new Space()
                     {
-                        Terrain = isEdge ? ttWall : ttFloor
+                        //Terrain = isEdge ? ttWall : ttFloor
                     };
                     spaceMap.Add(s, (x, y));
                 }
             }
-            var sp = spaceMap.GetItem((3, 4));
-            sp.Terrain = ttDoorClosed;
+            //var sp = spaceMap.GetItem((3, 4));
+            //sp.Terrain = ttDoorClosed;
 
             return spaceMap;
         }

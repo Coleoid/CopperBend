@@ -6,6 +6,7 @@ using CopperBend.Contract;
 using CopperBend.Model;
 using NSubstitute;
 using NUnit.Framework;
+using GoRogue;
 
 namespace CopperBend.Logic.Tests
 {
@@ -46,7 +47,7 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Consume_nothing_available()
         {
-            var knife = new Item((0, 0));
+            var knife = new Item();
             __being.Inventory.Returns(new List<IItem> { knife });
             Queue(Keys.C);
             Cmd = _source.GetCommand(__being);
@@ -244,10 +245,9 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void PickUp_single()
         {
-            var widget = new Item((0, 0), 1);
+            var widget = new Item(1);
             _gameState.Map.ItemMap.Add(widget, (2, 2));
-            __being.Position.Returns(new Point(2, 2));  //0.2 .Posn vs BeingMap
-            //_gameState.Map.BeingMap.Add(__being, (2, 2));
+            __being.GetPosition().Returns(new Coord(2, 2));
 
             Queue(Keys.OemComma);
             Cmd = _source.GetCommand(__being);
@@ -259,11 +259,11 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void PickUp_multiple()
         {
-            var widget = new Item((0, 0)) { Name = "widget" };
-            var gadget = new Item((0, 0)) { Name = "gadget" };
+            var widget = new Item() { Name = "widget" };
+            var gadget = new Item() { Name = "gadget" };
             _gameState.Map.ItemMap.Add(widget, (2, 2));
             _gameState.Map.ItemMap.Add(gadget, (2, 2));
-            __being.Position.Returns(new Point(2, 2));  //0.2 .Posn vs BeingMap
+            __being.GetPosition().Returns(new Coord(2, 2));
 
             Queue(Keys.OemComma);
             Cmd = _source.GetCommand(__being);

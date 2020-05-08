@@ -1,13 +1,14 @@
 ﻿using System.Collections.ObjectModel;
+using log4net;
+using SadConsole.Components;
+using SadConsole.Entities;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
-using log4net;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using SadConsole.Components;
-using SadConsole.Entities;
+using CopperBend.Fabric.Tests;
 
 namespace CopperBend.Logic.Tests
 {
@@ -31,14 +32,7 @@ namespace CopperBend.Logic.Tests
 
         public void Prepare_game_entity_creation()
         {
-            __sadConEntityFactory = Substitute.For<ISadConEntityFactory>();
-            __sadConEntityFactory.GetSadCon(Arg.Any<ISadConInitData>())
-                .Returns( ctx => {
-                    var ie = Substitute.For<IEntity>();
-                    var cs = new ObservableCollection<IConsoleComponent>();
-                    ie.Components.Returns(cs);
-                    return ie;
-                } );
+            __sadConEntityFactory = UTHelp.GetSubstituteFactory();
             Engine.Cosmogenesis("attack!", __sadConEntityFactory);
             BeingCreator = Engine.BeingCreator;
         }

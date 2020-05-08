@@ -33,7 +33,7 @@ namespace CopperBend.Model.Aspects.Tests
         [Test]
         public void Usable_can_build_a_hoe()
         {
-            var hoe = new Item((0, 0));
+            var hoe = new Item();
             hoe.AddAspect(new Usable("till ground with", UseTargetFlags.Direction)
                 .AddEffect("till", 1)
                 .AddCosts(("time", 24), ("energy", 20)));
@@ -45,7 +45,7 @@ namespace CopperBend.Model.Aspects.Tests
         [Test]
         public void Usable_can_build_a_pen()
         {
-            var pen = new Item((0, 0));
+            var pen = new Item();
             pen.AddAspect(new Usable("write on object with", UseTargetFlags.Item)
                 .AddEffect("write", 1)
                 .AddCosts(("time", 20), ("energy", 2)));
@@ -54,7 +54,7 @@ namespace CopperBend.Model.Aspects.Tests
         [Test]
         public void Weapon_is_Usable_plus_Attack_stuff()
         {
-            var knife = new Item((0, 0));
+            var knife = new Item();
             var cutTargets = UseTargetFlags.Item | UseTargetFlags.Direction;
             knife.AddAspect(new Usable("cut target with", cutTargets)
                 .AddEffect("cut", 4)

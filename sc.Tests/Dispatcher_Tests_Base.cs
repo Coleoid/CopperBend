@@ -1,8 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CopperBend.Contract;
+using CopperBend.Fabric;
 using NSubstitute;
 using NUnit.Framework;
-using CopperBend.Contract;
-using CopperBend.Fabric;
 
 namespace CopperBend.Logic.Tests
 {
@@ -22,94 +21,54 @@ namespace CopperBend.Logic.Tests
         protected Terrain ttSoilTilled;
         protected Terrain ttSoilPlanted;
 
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
+        protected void Assert_MLW_WL_Iff_Player(bool isPlayer, string message)
         {
-            ttFloor = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '.'),
-                Name = "floor"
-            };
-            ttWall = new Terrain
-            {
-                CanSeeThrough = false,
-                CanWalkThrough = false,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '#'),
-                Name = "wall"
-            };
+            if (isPlayer)
+                __msgLogWindow.Received().WriteLine(message);
+            else
+                __msgLogWindow.DidNotReceive().WriteLine(message);
+        }
 
-            ttDoorOpen = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '-'),
-                Name = "open door"
-            };
-            ttDoorClosed = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.White, Color.Black, '+'),
-                Name = "closed door"
-            };
-
-            ttSoil = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.Brown, Color.Black, '.'),
-                Name = TerrainEnum.Soil,
-                CanPlant = true,
-            };
-            ttSoilTilled = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.Brown, Color.Black, '~'),
-                Name = TerrainEnum.SoilTilled,
-                CanPlant = true,
-            };
-            ttSoilPlanted = new Terrain
-            {
-                CanSeeThrough = true,
-                CanWalkThrough = true,
-                Cell = new SadConsole.Cell(Color.Green, Color.Black, '~'),
-                Name = TerrainEnum.SoilPlanted,
-                CanPlant = false,
-            };
-
-            SpaceMap.TerrainTypes[ttFloor.Name] = ttFloor;
-            SpaceMap.TerrainTypes[ttWall.Name] = ttWall;
-            SpaceMap.TerrainTypes[ttDoorOpen.Name] = ttDoorOpen;
-            SpaceMap.TerrainTypes[ttDoorClosed.Name] = ttDoorClosed;
-            SpaceMap.TerrainTypes[ttSoil.Name] = ttSoil;
-            SpaceMap.TerrainTypes[ttSoilTilled.Name] = ttSoilTilled;
-            SpaceMap.TerrainTypes[ttSoilPlanted.Name] = ttSoilPlanted;
+        protected void Assert_Messager_WL_Iff_Player(bool isPlayer, string message)
+        {
+            if (isPlayer)
+                __messager.Received().WriteLine(message);
+            else
+                __messager.DidNotReceive().WriteLine(message);
         }
 
         [SetUp]
-        public void SetUp()
+        public void Dispatcher_Tests_Base_SetUp()
         {
+            Engine.Cosmogenesis("bang", __factory);
+
+            var legend = Engine.Compendium.Atlas.Legend;
+            ttFloor = legend[TerrainEnum.Floor];
+            ttWall = legend[TerrainEnum.Wall];
+            ttDoorOpen = legend[TerrainEnum.DoorOpen];
+            ttDoorClosed = legend[TerrainEnum.DoorClosed];
+            ttSoil = legend[TerrainEnum.Soil];
+            ttSoilTilled = legend[TerrainEnum.SoilTilled];
+            ttSoilPlanted = legend[TerrainEnum.SoilPlanted];
+
             _gameState = new GameState
             {
                 Map = new CompoundMap
                 {
-                    BeingMap = new GoRogue.MultiSpatialMap<IBeing>(),
+                    BeingMap = new BeingMap(),
                     RotMap = new RotMap(),
                     SpaceMap = CreateSmallTestMap(),
                     ItemMap = new ItemMap(),
                 },
             };
             __msgLogWindow = Substitute.For<IMessageLogWindow>();
-            __factory = StubEntityFactory();
 
             var isp = StubServicePanel();
 
-            _dispatcher = new CommandDispatcher(isp, _gameState);
-
-            Engine.Cosmogenesis("bang", __factory);
+            _dispatcher = new CommandDispatcher(isp, _gameState)
+            {
+                Compendium = Engine.Compendium
+            };
             BeingCreator = Engine.BeingCreator;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GoRogue;
 
 namespace CopperBend.Persist
 {
@@ -6,7 +7,7 @@ namespace CopperBend.Persist
     public class RotOverlayData
     {
         public string Name { get; set; }
-        public string Location { get; set; }
+        public Coord Location { get; set; }
         public List<string> Terrain { get; set; } = new List<string>();
     }
 #pragma warning restore CA2227

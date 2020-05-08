@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using log4net;
-using NSubstitute;
+﻿using log4net;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using CopperBend.Fabric.Tests;
+using NSubstitute;
 using NUnit.Framework;
-using SadConsole.Entities;
-using SadConsole.Components;
 
 namespace CopperBend.Logic.Tests
 {
@@ -20,12 +17,13 @@ namespace CopperBend.Logic.Tests
         protected IMessager __messager = null;
 
         [SetUp]
-        public void BaseSetUp()
+        public void Tests_Base_SetUp()
         {
             __log = Substitute.For<ILog>();
             __schedule = Substitute.For<ISchedule, IPanelService>();
             __describer = Substitute.For<IDescriber, IPanelService>();
             __messager = Substitute.For<IMessager, IPanelService>();
+            __factory = UTHelp.GetSubstituteFactory();
         }
 
         public IServicePanel StubServicePanel()
@@ -38,20 +36,5 @@ namespace CopperBend.Logic.Tests
 
             return isp;
         }
-
-        public ISadConEntityFactory StubEntityFactory()
-        {
-            var fac = Substitute.For<ISadConEntityFactory>();
-            fac.GetSadCon(Arg.Any<ISadConInitData>())
-                .Returns(ctx => {
-                    var ie = Substitute.For<IEntity>();
-                    var cs = new ObservableCollection<IConsoleComponent>();
-                    ie.Components.Returns(cs);
-                    return ie;
-                });
-
-            return fac;
-        }
-
     }
 }

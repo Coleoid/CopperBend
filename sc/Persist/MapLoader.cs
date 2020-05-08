@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using log4net;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -10,6 +7,9 @@ using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
+using Microsoft.Xna.Framework;
+using System.Text;
+using System.Collections.Generic;
 
 namespace CopperBend.Persist
 {
@@ -39,22 +39,55 @@ namespace CopperBend.Persist
 
         public CompoundMap MapFromYAML(string mapYaml)
         {
-            /*
             CompoundMapData data = DataFromYAML(mapYaml);
+            CompoundMap map = MapFromData(data);
+            return map;
+        }
+
+        public CompoundMapData DataFromYAML(string mapYaml)
+        {
+            using var reader = new StringReader(mapYaml);
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeConverter(new YConv_Coord())
+                .Build();
+
+            var mapData = deserializer.Deserialize<CompoundMapData>(reader);
+            return mapData;
+        }
+
+        public string YAMLFromData(CompoundMapData data)
+        {
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithTypeConverter(new YConv_Coord())
+                .Build();
+
+            var yaml = serializer.Serialize(data);
+            return yaml;
+        }
+
+        public CompoundMap MapFromData(CompoundMapData data)
+        {
             var width = data.Terrain.Max(t => t.Length);
             var height = data.Terrain.Count;
+            if (data.Width != width)
+                log.Error($"Map {data.Name} declares width {data.Width} but has terrain {width} wide.");
+            if (data.Height != height)
+                log.Error($"Map {data.Name} declares height {data.Height} but has terrain {height} high.");
 
             var map = new CompoundMap
             {
+                Name = data.Name,
                 Width = width,
                 Height = height,
                 SpaceMap = new SpaceMap(width, height),
-                BeingMap = new MultiSpatialMap<IBeing>(),
+                BeingMap = new BeingMap(),
                 ItemMap = new ItemMap(),
                 RotMap = new RotMap(),
             };
 
-            var tilledSoil = Atlas.Legend["tilled soil"];
+            var tilledSoil = Atlas.Legend[TerrainEnum.SoilTilled];
 
             for (int y = 0; y < height; y++)
             {
@@ -76,31 +109,107 @@ namespace CopperBend.Persist
                 }
             }
 
-            foreach (var overlay in data.AreaRots ?? new List<IAreaRot>())
+            foreach (var coord in data.AreaRots.Keys)
             {
-                var nums = Regex.Split(overlay., ",");
-                int x_off = int.Parse(nums[0], CultureInfo.InvariantCulture);
-                int y_off = int.Parse(nums[1], CultureInfo.InvariantCulture);
+                map.RotMap.Add(data.AreaRots[coord], coord);
+            }
+
+            foreach (var overlay in data.RotOverlays)
+            {
+                int x_off = overlay.Location.X;
+                int y_off = overlay.Location.Y;
                 var w = overlay.Terrain.Max(t => t.Length);
                 var h = overlay.Terrain.Count;
                 for (int y = 0; y < h; y++)
                 {
-                    var row = overlay.Terrain[y].ToCharArray();
+                    var row = overlay.Terrain[y];
                     for (int x = 0; x < w; x++)
                     {
                         char symbol = (x < row.Length) ? row[x] : '.';
 
                         bool isD = '0' <= symbol && symbol <= '9';
-                        int extent = isD ? symbol - '0' : 0;
-                        if (extent > 0)
-                            map.RotMap.Add(new AreaRot { Health = extent }, (x + x_off, y + y_off));
+                        int health = isD ? symbol - '0' : 0;
+                        if (health > 0)
+                            map.RotMap.Add(new AreaRot { Health = health }, (x + x_off, y + y_off));
                     }
                 }
             }
 
             return map;
-            */
-            return null;
+        }
+
+        public CompoundMapData DataFromMap(CompoundMap map)
+        {
+            var data = new CompoundMapData
+            {
+                Name = map.Name,
+                Width = map.Width,
+                Height = map.Height,
+            };
+
+            // we don't need to put the master legend into our CMD
+            //foreach (var key in Atlas.Legend.Keys)
+            //{
+            //    var terr = Atlas.Legend[key];
+            //    var ch = ((char)terr.Cell.Glyph).ToString();
+            //    data.Legend[ch] = terr.Name;
+            //}
+
+            // we want to create a list of the distinct terrains
+            // used in this map
+            List<string> distinctTerrainNames = new List<string>();
+            foreach (var space in map.SpaceMap)
+            {
+                var name = space.Item.Terrain.Name;
+                if (!distinctTerrainNames.Contains(name))
+                {
+                    distinctTerrainNames.Add(name);
+                }
+            }
+            // ...then build the CMD legend from those
+            foreach (var name in distinctTerrainNames)
+            {
+                var kv = Atlas.Legend.Where(t => t.Value.Name == name).Single();
+                var ch = ((char)kv.Value.Cell.Glyph).ToString();
+                data.Legend[ch] = name;
+            }
+
+            //data.Legend["."] = "dot dirt dere";
+            //data.Legend["~"] = "tilde dirt";
+
+            for (int y = 0; y < map.SpaceMap.Height; y++)
+            {
+                var sb = new StringBuilder(map.SpaceMap.Width);
+                for (int x = 0; x < map.SpaceMap.Width; x++)
+                {
+                    var sp = map.SpaceMap.GetItem((x, y));
+                    sb.Append((char)sp.Terrain.Cell.Glyph);
+                }
+
+                data.Terrain.Add(sb.ToString());
+            }
+
+            var overlay = RotOverlayDataFromMap(map);
+            data.RotOverlays.Add(overlay);
+
+            foreach (var beingST in map.BeingMap)
+            {
+                data.MultiBeings[beingST.Item.ID] = beingST;
+            }
+
+            foreach (var itemST in map.ItemMap)
+            {
+                data.MultiItems[itemST.Item.ID] = itemST;
+            }
+
+            return data;
+        }
+
+        private static RotOverlayData RotOverlayDataFromMap(CompoundMap map)
+        {
+            RotOverlayData overlay = new RotOverlayData();
+            overlay.Name = $"{map.Name} rot";
+            return overlay;
         }
 
         //0.1: Map loading is so hard-codey
@@ -151,63 +260,11 @@ namespace CopperBend.Persist
             return Atlas.Legend[nameLI];
         }
 
-        public CompoundMapData DataFromYAML(string mapYaml)
-        {
-            using var reader = new StringReader(mapYaml);
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-
-            var mapData = deserializer.Deserialize<CompoundMapData>(reader);
-            return mapData;
-        }
-
-        internal CompoundMap DemoMap()
-        {
-            string demoMapYaml = @"---
-name:  Demo
-
-legend:
- '.': dirt
- '#': stone wall
- '+': closed door
-
-terrain:
- - '################'
- - '#..............#'
- - '#..####..####..#'
- - '#.##..##.#..##.#'
- - '#.#....+.####..#'
- - '#.##..##.#..##.#'
- - '#..####..####..#'
- - '#..............#'
- - '################'
-";
-            var map = MapFromYAML(demoMapYaml);
-
-            //var rock = new Item(new Point(5, 1))
-            //{
-            //    Name = "rock",
-            //    ColorForeground = Color.DimGray,
-            //    Symbol = '*',
-            //};
-            //map.Items.Add(rock);
-
-            //var glom = new Monster(Color.Green, Color.Transparent, 'g')
-            //{
-            //    Name = "glom",
-            //};
-            //map.Actors.Add(glom);
-
-            //map.LocationMessages[new Point(1, 6)] = new List<string> { "a shiversome feeling..." };
-
-            return map;
-        }
-
-
         #region Farm and farmhouse map YAML
         private readonly string farmMapYaml = @"---
 name:  Farm
+width: 46
+height: 32
 
 legend:
  '.': soil
@@ -263,9 +320,9 @@ terrain:
  - ',,,,,#,,,,,,,,,,,,,,,,,,,,wwww,,,,,,,,,,,,,,,#'  # 30
  - ',,,,,#########################################'
 
-rot:
+rotOverlays:
   - name: one
-    location: 6,0
+    location: (X=6, Y=0)
     terrain:
       - '..1221'
       - '...1211'
@@ -285,14 +342,14 @@ rot:
       - '..1........1'
       - '..11......11'
       - '..11......1'
-      - '...1......111'
-      - '...1.......111'
-      - '...111'
-      - '...111....1'
+      - '..........111'
+      - '...........111'
+      - '..........11'
+      - '.....1....1'
       - '...1111..11'
       - '....111111'
-      - '.....11111'
-      - '.......111'
+      - '...1123211'
+      - '.111..111'
       - '.......1'
 ";
 
@@ -322,5 +379,31 @@ terrain:
 ";
         #endregion
 
+
+        internal CompoundMap DemoMap()
+        {
+            string demoMapYaml = @"---
+name:  Demo
+
+legend:
+ '.': soil
+ '#': stone wall
+ '+': closed door
+
+terrain:
+ - '################'
+ - '#..............#'
+ - '#..####..####..#'
+ - '#.##..##.#..##.#'
+ - '#.#....+.####..#'
+ - '#.##..##.#..##.#'
+ - '#..####..####..#'
+ - '#..............#'
+ - '################'
+";
+            var map = MapFromYAML(demoMapYaml);
+
+            return map;
+        }
     }
 }

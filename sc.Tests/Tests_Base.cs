@@ -13,7 +13,7 @@ using CopperBend.Model;
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
-    public partial class Tests_Base
+    public class Tests_Base
     {
         /// <summary> Mocked if GetServicesToMock returns correct flag </summary>
         protected ILog __log = null;

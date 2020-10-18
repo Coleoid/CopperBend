@@ -1,18 +1,22 @@
-﻿using log4net;
-using CopperBend.Contract;
-using CopperBend.Fabric;
+﻿using CopperBend.Contract;
 using CopperBend.Model;
-using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using CopperBend.Fabric.Tests;
 using CopperBend.Creation;
 
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
-    public class AttackSystem_TestBase
+    public class AttackSystem_TestBase : Tests_Base
     {
+        protected override bool ShouldPrepDI => true;
+        protected override MockableServices GetServicesToMock()
+        {
+            return MockableServices.Log
+                | MockableServices.EntityFactory
+                | base.GetServicesToMock();
+        }
+
         public AttackMethod tac;
         public AttackEffect tac_impact;
         public AttackEffect tac_flame;
@@ -24,24 +28,13 @@ namespace CopperBend.Logic.Tests
         public DefenseMethod leather_armor;
         public DefenseMethod ring_armor;
 
-        public ILog __log;
-        public ISadConEntityFactory __factory;
-        public BeingCreator BeingCreator;
-
-        public void Prepare_game_entity_creation()
-        {
-            SourceMe.Build(new System.Drawing.Size(20, 20));
-            __factory = UTHelp.GetSubstituteFactory();
-            Engine.Cosmogenesis("attack!", __factory);
-            BeingCreator = new BeingCreator { SadConEntityFactory = __factory };
-            Basis.ConnectIDGenerator();
-        }
+        public IBeingCreator BeingCreator;
 
         [SetUp]
         public void SetUp()
         {
-            __log = Substitute.For<ILog>();
-            Prepare_game_entity_creation();
+            BeingCreator = SourceMe.The<IBeingCreator>();
+            Basis.ConnectIDGenerator();
 
             // Torch as club, crunch and burn
             tac = new AttackMethod();

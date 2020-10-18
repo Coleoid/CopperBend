@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CopperBend.Contract;
 using CopperBend.Creation;
 using CopperBend.Fabric;
 using CopperBend.Model;
@@ -52,6 +51,7 @@ namespace CopperBend.Logic.Tests
         public void AAA_Gather_Startup_Costs()
         {
             // Because AttackSystem_Tests is alphabetically first...
+            // Within that, AAA_Gather etc. is also first...
             __log.Info("This also seems to gather a bit more init cost.");
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Color = Microsoft.Xna.Framework.Color;
@@ -11,10 +12,11 @@ using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {
-    public class CompoundMap : ICompoundMap
+    public class CompoundMap : ICompoundMap, ITriggerHolder
     {
         public CompoundMap()
         {
+            Triggers = new List<Trigger>();
         }
 
         public string Name { get; set; }
@@ -36,6 +38,7 @@ namespace CopperBend.Fabric
         public bool CanSeeThrough(Coord location) => SpaceMap.CanSeeThrough(location);
         public bool CanWalkThrough(Coord location) => SpaceMap.CanWalkThrough(location);
         public bool CanPlant(Coord location) => SpaceMap.CanPlant(location);
+
 
         public IMapView<int> GetView_RotStrength()
         {
@@ -203,6 +206,19 @@ namespace CopperBend.Fabric
                 };
                 return highFade;
             }
+        }
+
+        public List<Trigger> Triggers { get; set; }
+        public ReadOnlyCollection<Trigger> ListTriggers() => Triggers.AsReadOnly();
+
+        public void AddTrigger(Trigger trigger)
+        {
+            Triggers.Add(trigger);
+        }
+
+        public void RemoveTrigger(Trigger trigger)
+        {
+            Triggers.Remove(trigger);
         }
     }
 }

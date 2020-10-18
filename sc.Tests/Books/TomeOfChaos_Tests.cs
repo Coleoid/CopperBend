@@ -1,28 +1,32 @@
 ﻿using CopperBend.Contract;
+using CopperBend.Creation;
+using CopperBend.Logic.Tests;
 using NUnit.Framework;
 
 namespace CopperBend.Fabric.Tests
 {
     [TestFixture]
-    public class TomeOfChaos_Tests
+    public class TomeOfChaos_Tests : Tests_Base
     {
-        private ISadConEntityFactory __factory;
-        private BeingCreator _creator;
+        protected override bool ShouldPrepDI => true;
+        protected override MockableServices GetServicesToMock()
+        {
+            return MockableServices.EntityFactory
+                | base.GetServicesToMock();
+        }
 
+        private BookPublisher _publisher;
         
         [SetUp]
         public void SetUp()
         {
-            __factory = UTHelp.GetSubstituteFactory();
-
-            _creator = new BeingCreator(__factory);
+            _publisher = SourceMe.The<BookPublisher>();
         }
 
         [Test]
         public void TopSeed_is_recorded()
         {
-            var tome = new TomeOfChaos();
-            tome.SetTopSeed("SampleTopSeed");
+            TomeOfChaos tome = new TomeOfChaos("SampleTopSeed");
 
             Assert.That(tome.TopSeed, Is.EqualTo("SampleTopSeed"));
         }
@@ -31,9 +35,8 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void MapSeeds_lead_to_different_values(string topSeed)
         {
-            var publisher = new BookPublisher(_creator);
-            var tome_1 = publisher.Tome_FromNew(topSeed + "a");
-            var tome_2 = publisher.Tome_FromNew(topSeed + "b");
+            var tome_1 = _publisher.Tome_FromNew(topSeed + "a");
+            var tome_2 = _publisher.Tome_FromNew(topSeed + "b");
 
             int next_tf_1 = tome_1.MapRndNext(MapEnum.TackerFarm);
             int next_tf_2 = tome_2.MapRndNext(MapEnum.TackerFarm);
@@ -49,9 +52,8 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void MapSeeds_remain_stable_when_used_in_different_orders(string topSeed)
         {
-            var publisher = new BookPublisher(_creator);
-            var tome_1 = publisher.Tome_FromNew(topSeed);
-            var tome_2 = publisher.Tome_FromNew(topSeed);
+            var tome_1 = _publisher.Tome_FromNew(topSeed);
+            var tome_2 = _publisher.Tome_FromNew(topSeed);
 
             int next_tf_1 = tome_1.MapRndNext(MapEnum.TackerFarm);
             int next_tb_1 = tome_1.MapRndNext(MapEnum.TownBarricade);
@@ -67,9 +69,8 @@ namespace CopperBend.Fabric.Tests
         [TestCase("B")]
         public void LearnableSeeds_lead_to_different_values(string topSeed)
         {
-            var publisher = new BookPublisher(_creator);
-            var tome_1 = publisher.Tome_FromNew(topSeed + "a");
-            var tome_2 = publisher.Tome_FromNew(topSeed + "b");
+            var tome_1 = _publisher.Tome_FromNew(topSeed + "a");
+            var tome_2 = _publisher.Tome_FromNew(topSeed + "b");
 
             int next_se_1 = tome_1.LearnableRndNext();
             int next_se_2 = tome_2.LearnableRndNext();

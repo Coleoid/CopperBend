@@ -6,8 +6,9 @@ using GoRogue.MapViews;
 
 namespace CopperBend.Contract
 {
-    public interface ICompoundMap
+    public interface ICompoundMap : ITriggerHolder
     {
+        string Name { get; }
         int Width { get; }
         int Height { get; }
 
@@ -17,6 +18,7 @@ namespace CopperBend.Contract
         IItemMap ItemMap { get; }
 
         //TODO:  A collection of special areas on this map
+        List<Trigger> Triggers { get; }
 
 
         FOV FOV { get; set; }

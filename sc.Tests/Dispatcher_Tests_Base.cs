@@ -1,4 +1,5 @@
 ﻿using CopperBend.Contract;
+using CopperBend.Creation;
 using CopperBend.Fabric;
 using NSubstitute;
 using NUnit.Framework;
@@ -7,11 +8,10 @@ namespace CopperBend.Logic.Tests
 {
     public class Dispatcher_Tests_Base : Tests_Base
     {
-        protected CommandDispatcher _dispatcher = null;
-        protected GameState _gameState = null;
-        protected IMessageLogWindow __msgLogWindow = null;
+        protected IControlPanel _controls = null;
+        protected IGameState _gameState = null;
 
-        protected BeingCreator BeingCreator;
+        protected IBeingCreator BeingCreator;
 
         protected Terrain ttFloor;
         protected Terrain ttWall;
@@ -21,28 +21,21 @@ namespace CopperBend.Logic.Tests
         protected Terrain ttSoilTilled;
         protected Terrain ttSoilPlanted;
 
-        protected void Assert_MLW_WL_Iff_Player(bool isPlayer, string message)
+        protected override MockableServices GetServicesToMock()
         {
-            if (isPlayer)
-                __msgLogWindow.Received().WriteLine(message);
-            else
-                __msgLogWindow.DidNotReceive().WriteLine(message);
+            return MockableServices.EntityFactory
+                | MockableServices.MessageLogWindow
+                | base.GetServicesToMock();
         }
-
-        protected void Assert_Messager_WL_Iff_Player(bool isPlayer, string message)
-        {
-            if (isPlayer)
-                __messager.Received().WriteLine(message);
-            else
-                __messager.DidNotReceive().WriteLine(message);
-        }
+        protected override bool ShouldPrepDI => true;
 
         [SetUp]
         public void Dispatcher_Tests_Base_SetUp()
         {
             Engine.Cosmogenesis("bang", __factory);
 
-            var legend = Engine.Compendium.Atlas.Legend;
+            var atlas = SourceMe.The<Atlas>();
+            var legend = atlas.Legend;
             ttFloor = legend[TerrainEnum.Floor];
             ttWall = legend[TerrainEnum.Wall];
             ttDoorOpen = legend[TerrainEnum.DoorOpen];
@@ -51,25 +44,17 @@ namespace CopperBend.Logic.Tests
             ttSoilTilled = legend[TerrainEnum.SoilTilled];
             ttSoilPlanted = legend[TerrainEnum.SoilPlanted];
 
-            _gameState = new GameState
+            _gameState = SourceMe.The<IGameState>();
+            _gameState.Map = new CompoundMap
             {
-                Map = new CompoundMap
-                {
-                    BeingMap = new BeingMap(),
-                    RotMap = new RotMap(),
-                    SpaceMap = CreateSmallTestMap(),
-                    ItemMap = new ItemMap(),
-                },
+                BeingMap = new BeingMap(),
+                RotMap = new RotMap(),
+                SpaceMap = CreateSmallTestMap(),
+                ItemMap = new ItemMap(),
             };
-            __msgLogWindow = Substitute.For<IMessageLogWindow>();
 
-            var isp = StubServicePanel();
-
-            _dispatcher = new CommandDispatcher(isp, _gameState)
-            {
-                Compendium = Engine.Compendium
-            };
-            BeingCreator = Engine.BeingCreator;
+            _controls = SourceMe.The<IControlPanel>();
+            BeingCreator = SourceMe.The<IBeingCreator>();
         }
 
         public SpaceMap CreateSmallTestMap()
@@ -91,6 +76,22 @@ namespace CopperBend.Logic.Tests
             sp.Terrain = ttDoorClosed;
 
             return spaceMap;
+        }
+
+        protected void Assert_MLW_WL_Iff_Player(bool isPlayer, string message)
+        {
+            if (isPlayer)
+                __msgLogWindow.Received().WriteLine(message);
+            else
+                __msgLogWindow.DidNotReceive().WriteLine(message);
+        }
+
+        protected void Assert_Messager_WL_Iff_Player(bool isPlayer, string message)
+        {
+            if (isPlayer)
+                __messager.Received().WriteLine(message);
+            else
+                __messager.DidNotReceive().WriteLine(message);
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using CopperBend.Contract;
-using GoRogue;
+﻿using GoRogue;
+using CopperBend.Contract;
 
 namespace CopperBend.Fabric
 {
     public class GameState : IGameState
     {
         public ICompoundMap Map { get; set; }
-        public Dramaticon Story { get; internal set; }
+        public IBeing Player { get; set; }
 
         public void MarkDirtyCoord(Coord newPosition)
         {

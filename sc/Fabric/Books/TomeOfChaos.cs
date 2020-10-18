@@ -21,20 +21,24 @@ namespace CopperBend.Fabric
         public Dictionary<string, AbstractGenerator> Generators { get; }
         public Dictionary<MapEnum, AbstractGenerator> MapGenerators { get; }
 
-
-        public TomeOfChaos()
-        {
-            Generators = new Dictionary<string, AbstractGenerator>();
-            MapGenerators = new Dictionary<MapEnum, AbstractGenerator>();
-        }
-
-        public void SetTopSeed(string topSeed)
+        public TomeOfChaos(
+            string topSeed,
+            Dictionary<string, AbstractGenerator> generators = null,
+            Dictionary<MapEnum, AbstractGenerator> mapGenerators = null
+        )
         {
             TopSeed = topSeed;
+            TopSeedInt = IntHashOfString(TopSeed);
 
+            Generators = generators ?? new Dictionary<string, AbstractGenerator>();
+            MapGenerators = mapGenerators ?? new Dictionary<MapEnum, AbstractGenerator>();
+        }
+
+        private int IntHashOfString(string thing)
+        {
             using SHA256 shaHasher = SHA256.Create();
-            var hashed = shaHasher.ComputeHash(Encoding.UTF8.GetBytes(TopSeed));
-            TopSeedInt = BitConverter.ToInt32(hashed, 0);
+            var hashed = shaHasher.ComputeHash(Encoding.UTF8.GetBytes(thing));
+            return BitConverter.ToInt32(hashed, 0);
         }
 
         public int LearnableRndNext() => Generators["Learnable"].Next();

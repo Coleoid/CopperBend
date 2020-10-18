@@ -11,42 +11,32 @@ namespace CopperBend.Logic
     /// <summary> This is the main logic slice of the CommandDispatcher. </summary>
     public partial class CommandDispatcher : IControlPanel
     {
+        [InjectProperty] private ILog Log { get; set; }
+        [InjectProperty] public IDescriber Describer { get; set; }
+        [InjectProperty] public IMessager Messager { get; set; }
+        [InjectProperty] private ISchedule Schedule { get; set; }
+        [InjectProperty] public ITriggerPuller Puller { get; set; }
+        [InjectProperty] private BeingStrategy_UserInput Strat_UserInput { get; set; }
+        [InjectProperty] private IAttackSystem AttackSystem { get; set; }
+        [InjectProperty] private Atlas Atlas { get; set; }
+        [InjectProperty] private Herbal Herbal { get; set; }
+        [InjectProperty] private Equipper Equipper { get; set; }
+
+        [InjectProperty] public IGameState GameState { get; set; }
         protected ISpaceMap SpaceMap => GameState.Map.SpaceMap;
         private IBeingMap BeingMap => GameState.Map.BeingMap;
         private IItemMap ItemMap => GameState.Map.ItemMap;
         private IRotMap RotMap => GameState.Map.RotMap;
 
-        // becomes external dependency soon
-        public IAttackSystem AttackSystem { get; set; }
-
-        private ILog Log { get => ServicePanel.Log; }
-        private IServicePanel ServicePanel { get; set; }
-        public IGameState GameState { get; set; }
         public bool PlayerMoved { get; set; }
-        public IDescriber Describer => ServicePanel.Describer;
-        public IMessager Messager => ServicePanel.Messager;
-        private ISchedule Schedule => ServicePanel.Schedule;
 
-        public Compendium Compendium { get; set; }
-
-        public CommandDispatcher(
-            IServicePanel panel,
-            IGameState gameState
-        )
-        {
-            ServicePanel = panel;
-            GameState = gameState;
-
-            AttackSystem = new AttackSystem(this, Log, GameState);
-        }
 
         public void Dispatch(ScheduleEntry nextAction)
         {
             switch (nextAction.Action)
             {
             case ScheduleAction.GetCommand:
-                var being = nextAction.Agent as IBeing;
-                being.GiveCommand();
+                DispatchCommand(nextAction.Agent as IBeing);
                 break;
 
             case ScheduleAction.SeedGrows:
@@ -60,6 +50,19 @@ namespace CopperBend.Logic
 
             default:
                 throw new Exception($"Need to write Dispatch() case for ScheduleAction.{nextAction.Action}.");
+            }
+        }
+
+        public void DispatchCommand(IBeing being)
+        {
+            switch (being.StrategyStyle)
+            {
+            case StrategyStyle.UserInput:
+                Strat_UserInput.GiveCommand(being);
+                break;
+
+            default:
+                throw new Exception($"Need to learn how to dispatch command for strategy [{being.StrategyStyle}].");
             }
         }
 
@@ -99,7 +102,7 @@ namespace CopperBend.Logic
 
             if (ingestible.IsFruit)
             {
-                var plantType = Engine.Compendium.Herbal.PlantByID[ingestible.PlantID];
+                var plantType = Herbal.PlantByID[ingestible.PlantID];
 
                 // pocket some seeds
                 int seedCount = 2; //0.1
@@ -152,9 +155,9 @@ namespace CopperBend.Logic
 
         public bool OpenDoor(ISpace space)
         {
-            if (space.Terrain == Compendium.Atlas.Legend["closed door"])
+            if (space.Terrain == Atlas.Legend["closed door"])
             {
-                space.Terrain = Compendium.Atlas.Legend["open door"];
+                space.Terrain = Atlas.Legend["open door"];
                 return true;
             }
 
@@ -217,6 +220,12 @@ namespace CopperBend.Logic
 
             if (being.IsPlayer)
             {
+                var playerMovedCats =
+                    TriggerCategories.PlayerLineOfSight
+                    | TriggerCategories.PlayerLocation
+                    | TriggerCategories.PlayerProximity;
+                Puller.Check(playerMovedCats);
+
                 PlayerMoved = true;
                 var itemsHere = ItemMap.GetItems(newPosition);
                 if (itemsHere.Count() > 7)

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using CopperBend.Contract;
-using CopperBend.Model;
+using CopperBend.Fabric;
 
 namespace CopperBend.Logic
 {
@@ -18,6 +17,9 @@ namespace CopperBend.Logic
         // finish
         // pull off script command sources
         // maybe send "refresh plan" to existing, reactivated CSes
+
+        [InjectProperty] private SocialRegister SocialRegister { get; set; }
+        [InjectProperty] private IBeingCreator BeingCreator { get; set; }
 
         public Dictionary<string, IBeing> Cast { get; }
 
@@ -52,15 +54,14 @@ namespace CopperBend.Logic
             IBeing being = null;
 
             // Phase 2: ?
-            being = Engine.Compendium.SocialRegister.FindBeing(entityWanted);
+            being = SocialRegister.FindBeing(entityWanted);
 
             return being;
         }
 
-        public Being BuildNewBeing(string entityWanted)
+        public IBeing BuildNewBeing(string entityWanted)
         {
-            var creator = Engine.Compendium.BeingCreator;
-            return creator.CreateBeing(entityWanted);
+            return BeingCreator.CreateBeing(entityWanted);
         }
     }
 

@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using log4net;
 using McMaster.Extensions.CommandLineUtils;
-using CopperBend.Logic;
+using CopperBend.Creation;
+
+[assembly: InternalsVisibleTo("sc.Tests")]
 
 namespace CopperBend.Application
 {
@@ -29,7 +32,7 @@ namespace CopperBend.Application
             Composer composer = new Composer();
             composer.Compose(InitialSeed, TestMode);
 
-            ILog log = composer.Logger;
+            ILog log = SourceMe.The<ILog>();
             log.Info("\n======================================");
             log.Info("Run started");
 

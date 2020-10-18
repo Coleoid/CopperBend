@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using log4net;
-using SadConsole.Components;
-using SadConsole.Entities;
+﻿using log4net;
 using CopperBend.Contract;
 using CopperBend.Fabric;
 using CopperBend.Model;
@@ -9,6 +6,7 @@ using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using CopperBend.Fabric.Tests;
+using CopperBend.Creation;
 
 namespace CopperBend.Logic.Tests
 {
@@ -27,14 +25,16 @@ namespace CopperBend.Logic.Tests
         public DefenseMethod ring_armor;
 
         public ILog __log;
-        public ISadConEntityFactory __sadConEntityFactory;
+        public ISadConEntityFactory __factory;
         public BeingCreator BeingCreator;
 
         public void Prepare_game_entity_creation()
         {
-            __sadConEntityFactory = UTHelp.GetSubstituteFactory();
-            Engine.Cosmogenesis("attack!", __sadConEntityFactory);
-            BeingCreator = Engine.BeingCreator;
+            SourceMe.Build(new System.Drawing.Size(20, 20));
+            __factory = UTHelp.GetSubstituteFactory();
+            Engine.Cosmogenesis("attack!", __factory);
+            BeingCreator = new BeingCreator { SadConEntityFactory = __factory };
+            Basis.ConnectIDGenerator();
         }
 
         [SetUp]

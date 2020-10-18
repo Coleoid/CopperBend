@@ -11,7 +11,7 @@ namespace CopperBend.Fabric
         public int Height { get; set; }
 
         public SpaceMap(int width, int height)
-        : base(width * height)
+            : base(width * height)
         {
             Width = width;
             Height = height;

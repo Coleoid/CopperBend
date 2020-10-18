@@ -1,23 +1,31 @@
 ﻿using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
 using GoRogue;
+using SadConsole.Components;
+using SadConsole.Entities;
 
 namespace CopperBend.Contract
 {
     public interface IBeing : IDelible, IScheduleAgent, IHasID, IAttacker, IDefender
     {
+        string BeingType { get; set; }
+        IEntity Entity { get; }
+        SadConsole.Console Console { get; }
+        StrategyStyle StrategyStyle { get; set; }
+        Dictionary<string, string> StrategyStorage { get; }
+
+        new string Name { get; set; }  // wrasslin' with IDelible
         Color Foreground { get; }
         Color Background { get; }
         int Glyph { get; }
-        string BeingType { get; set; }
 
         int Awareness { get; set; }
         bool IsPlayer { get; set; }
+        IItem WieldedTool { get; }
+        IItem Gloves { get; }
 
-        ICommandSource CommandSource { get; set; }
-
-        SadConsole.Console Console { get; }
-
+        void Wield(IItem item);
+        void Fatigue(int amount);
         void MoveTo(IBeingMap map);
         void MoveTo(Coord position);
         Coord GetPosition();
@@ -29,11 +37,6 @@ namespace CopperBend.Contract
         bool HasInInventory(IItem item);
         IEnumerable<IItem> ReachableItems();
 
-        IItem WieldedTool { get; }
-        IItem Gloves { get; }
-
-        void Wield(IItem item);
-        void GiveCommand();
-        void Fatigue(int amount);
+        void AddComponent(IConsoleComponent component);
     }
 }

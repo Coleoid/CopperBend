@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using SadConsole.Entities;
+﻿using SadConsole.Entities;
 using CopperBend.Contract;
 using SadConsole;
 
@@ -16,14 +15,15 @@ namespace CopperBend.Fabric
             MapFont = MapFontMaster.GetFont(Font.FontSizes.One);
         }
 
-        public IEntity GetSadCon(ISadConInitData cb)
+        public void SetIEntityOnPort(IEntityInitPort init)
         {
-            return NewSCEntity(cb.Foreground, cb.Background, cb.Glyph);
+            if (init.SadConEntity == null)
+                init.SadConEntity = GetIEntity(init);
         }
 
-        private IEntity NewSCEntity(Color foreground, Color background, int glyph)
+        private IEntity GetIEntity(IEntityInitPort init)
         {
-            return new Entity(foreground, background, glyph) { Font = MapFont };
+            return new Entity(init.Foreground, init.Background, init.Glyph) { Font = MapFont };
         }
     }
 }

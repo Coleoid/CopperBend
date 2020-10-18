@@ -10,14 +10,14 @@ namespace CopperBend.Fabric
 {
     public class UIBuilder : IUIBuilder
     {
-        private readonly Size gameSize;
         private readonly ILog log;
         public FontMaster MapFontMaster { get; set; }
         public Font MapFont { get; set; }
+        public Size GameSize { get; set; }
 
         public UIBuilder(Size gameSize, FontMaster mapFontMaster, ILog logger)
         {
-            this.gameSize = gameSize;
+            GameSize = gameSize;
             MapFontMaster = mapFontMaster;
             MapFont = MapFontMaster.GetFont(Font.FontSizes.One);
             log = logger;
@@ -25,9 +25,9 @@ namespace CopperBend.Fabric
 
         public IMessageLogWindow CreateMessageLog()
         {
-            var messageLog = new MessageLogWindow(gameSize.Width, 8, "Message Log")
+            var messageLog = new MessageLogWindow(GameSize.Width, 8, "Message Log")
             {
-                Position = new Coord(0, gameSize.Height - 8),
+                Position = new Coord(0, GameSize.Height - 8),
                 DefaultBackground = MG.Color.Black,
             };
 

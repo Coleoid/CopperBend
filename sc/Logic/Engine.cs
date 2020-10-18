@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using Size = System.Drawing.Size;
@@ -10,13 +11,28 @@ using SadGlobal = SadConsole.Global;
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
-using SadConsole.Ansi;
+using CopperBend.Creation;
 
 namespace CopperBend.Logic
 {
     /// <summary> Main game mechanisms. </summary>
-    public partial class Engine : ContainerConsole
+    public partial class Engine
     {
+        [InjectProperty] private ILog Log { get; set; }
+        [InjectProperty] private ISadConEntityFactory SadConEntityFactory { get; set; }
+        [InjectProperty] private Keyboard Keyboard { get; set; }
+        [InjectProperty] private IGameState GameState { get; set; }
+        [InjectProperty] private IControlPanel ControlPanel { get; set; }
+        [InjectProperty] private ITriggerPuller Puller { get; set; }
+
+        [InjectProperty] private IDescriber Describer { get; set; }
+        [InjectProperty] private IMessager Messager { get; set; }
+        [InjectProperty] private IGameMode GameMode { get; set; }
+        [InjectProperty] private ISchedule Schedule { get; set; }
+        [InjectProperty] private MapLoader MapLoader { get; set; }
+        [InjectProperty] private SocialRegister SocialRegister { get; set; }
+        private TomeOfChaos TomeOfChaos { get; set; }
+
         public Size GameSize { get; set; }
         public Size MapSize { get; set; }
         public Size MapWindowSize { get; set; }
@@ -37,43 +53,15 @@ namespace CopperBend.Logic
         private readonly bool jumpToDebugger = true;
 
 
-        // ===========  Constructor args
-        //NEXT, these get folded into ServicePanel
-        private ISadConEntityFactory SadConEntityFactory { get; set; }
-        private Keyboard Keyboard { get; set; }
         private IUIBuilder UIBuilder { get; set; }
-        private IGameState GameState { get; set; }
-        private IControlPanel Dispatcher { get; set; }
-
-        private IServicePanel ServicePanel { get; set; }
-        //private IDescriber Describer { get => ServicePanel.Describer; }
-        private IMessager Messager { get => ServicePanel.Messager; }
-        private ILog Log { get => ServicePanel.Log; }
-        private IGameMode GameMode { get => ServicePanel.GameMode; }
-        private ISchedule Schedule { get => ServicePanel.Schedule; }
+        private TopConsole Top { get; set; }
 
 
         #region Init
-        public Engine(
-                IServicePanel servicePanel,
-                ISadConEntityFactory scef,
-                Keyboard keyboard,
-                Size gameSize,
-                IUIBuilder uiBuilder,
-                IGameState gameState,
-                IControlPanel dispatcher
-            )
-            : base()
+        public Engine(IUIBuilder uiBuilder)
         {
-            ServicePanel = servicePanel;
-            SadConEntityFactory = scef;
-            Keyboard = keyboard;
-            GameSize = gameSize;
             UIBuilder = uiBuilder;
-            GameState = gameState;
-            Dispatcher = dispatcher;
-
-            Parent = SadGlobal.CurrentScreen;
+            GameSize = uiBuilder.GameSize;
         }
 
         //0.1: Tease apart distinct start-up goals:
@@ -84,9 +72,6 @@ namespace CopperBend.Logic
         {
             TopSeed = topSeed;
 
-            IsVisible = true;
-            IsFocused = true;
-
             GameInProgress = false;
             GameMode.PushEngineMode(EngineMode.NoGameRunning, null);
 
@@ -95,12 +80,18 @@ namespace CopperBend.Logic
 
             //0.2.MAP: Put map name in YAML -> CompoundMap -> CreateMapWindow
 
+            Top = new TopConsole();
+            Top.EngineUpdate = Update;
+            Top.Parent = SadGlobal.CurrentScreen;
+            Top.IsVisible = true;
+            Top.IsFocused = true;
+
             (MenuConsole, MenuWindow) = UIBuilder.CreateM2Window(MenuWindowSize, "Game Menu");
-            Children.Add(MenuWindow);
+            Top.Children.Add(MenuWindow);
 
             MessageWindow = UIBuilder.CreateMessageLog();
-            this.ServicePanel.Messager.MessageWindow = MessageWindow;
-            Children.Add((SadConsole.Console)MessageWindow);
+            Messager.MessageWindow = MessageWindow;
+            Top.Children.Add((SadConsole.Console)MessageWindow);
             MessageWindow.Show();
 
             OpenGameMenu();
@@ -112,15 +103,17 @@ namespace CopperBend.Logic
             Guard.Against(GameMode.CurrentMode == EngineMode.MenuOpen);
 
             MenuConsole.Clear();
-            MenuConsole.Print(2, 4, GameInProgress ? "R) Return to game" : "B) Begin new game");
-            MenuConsole.Print(2, 6, "Q) Quit");
+            MenuConsole.Print(2,  4, GameInProgress ? "R) Return to game" : "B) Begin new game");
+            MenuConsole.Print(2,  6, "S) Save game");
+            MenuConsole.Print(2,  8, "L) Load game");
+            MenuConsole.Print(2, 10, "Q) Quit");
 
             MenuWindow.Show();
             GameMode.PushEngineMode(EngineMode.MenuOpen, null);
         }
 
         #region Event Loop
-        public override void Update(TimeSpan timeElapsed)
+        public void Update(TimeSpan timeElapsed)
         {
             QueueInput();
 
@@ -138,8 +131,6 @@ namespace CopperBend.Logic
                 SyncMapChanges();
                 AnimateBackground(timeElapsed);
             }
-
-            base.Update(timeElapsed);
         }
 
         public void QueueInput()
@@ -188,7 +179,7 @@ namespace CopperBend.Logic
                 break;
 
             //  Reaching this branch is always developer error
-            case EngineMode.Unknown:
+            case EngineMode.Unset:
             case EngineMode.NoGameRunning:
             default:
                 // JumpToDebugger compiles to false for production builds
@@ -209,14 +200,29 @@ namespace CopperBend.Logic
         {
             for (AsciiKey press = Messager.GetNextKeyPress(); press.Key != Keys.None; press = Messager.GetNextKeyPress())
             {
+                string readable = Readable(press);
+                Log.Info($"At menu, pressed [{readable}]");
+
                 // Quit
                 if (press.Key == Keys.Q)
                 {
-                    if (GameInProgress && Schedule.CurrentTick > TickWhenGameLastSaved)
+                    if (ConfirmExit())
                     {
-                        //0.0: verify with player "Quit with unsaved changes?"
+                        Game.Instance.Exit();
                     }
-                    Game.Instance.Exit();
+                }
+
+                //0.0: Load saved game and resume play
+                if (press.Key == Keys.L)
+                {
+                    GameMode.PopEngineMode();
+                    MenuWindow.Hide();
+                    LoadSavedGame();
+
+                    // 1.+.SAVE: Hardcore/roguelike load game mode:
+                    // delete save file
+
+                    return;
                 }
 
                 if (GameInProgress)
@@ -229,13 +235,14 @@ namespace CopperBend.Logic
                         return;
                     }
 
-                    //0.0: Save and unload current game
+                    //0.0: Save current game
                     if (press.Key == Keys.S)
                     {
-                        TickWhenGameLastSaved = Schedule.CurrentTick;
-                        // ActuallySaveTheGame();
-                        GameInProgress = false;
-                        // UnloadManyFriends();
+                        SaveTheGame();
+
+                        // 1.+.SAVE: Hardcore/roguelike save game mode:
+                        // GameInProgress = false;
+                        // UnloadGane();
                         // redraw menu options
                     }
                 }
@@ -250,19 +257,59 @@ namespace CopperBend.Logic
                         return;
                     }
 
-                    //0.0: Load saved game and resume play
-                    if (press.Key == Keys.L)
-                    {
-                        GameMode.PopEngineMode();
-                        MenuWindow.Hide();
-                        //PickAndResumeSavedGame();
-                        TickWhenGameLastSaved = Schedule.CurrentTick;
-                        return;
-                    }
-
                     //0.0: Generate new seed, or enter new seed
                 }
             }
+        }
+
+        public string Readable(AsciiKey press)
+        {
+            if (32 <= press.Character && press.Character <= 126)
+                return press.Character.ToString();
+
+            if (1 <= press.Character && press.Character <= 26)
+                return $"Ctrl-{(char)(press.Character + 64)}";
+
+            return press.Key switch
+            {
+                Keys.Escape => "Esc",
+                _ => "[NP]"
+            };
+        }
+
+        private bool ConfirmExit()
+        {
+            bool okay = !GameInProgress || Schedule.CurrentTick == TickWhenGameLastSaved;
+            if (!okay)
+            {
+                //0.0: verify with player "Quit with unsaved changes?"
+                //okay = YesNoDialog("Quit with unsaved changes?");
+                okay = true;  // until I make the above happen
+            }
+
+            return okay;
+        }
+
+        private void SaveTheGame()
+        {
+            string fileName = "cb_1.save";
+            Log.Info($"Saving game file at {Path.Combine(Directory.GetCurrentDirectory(), fileName)}");
+
+            string saveYaml = MapLoader.YAMLFromMap(GameState.Map);
+            File.WriteAllText(fileName, saveYaml);
+
+            TickWhenGameLastSaved = Schedule.CurrentTick;
+        }
+
+        private void LoadSavedGame()
+        {
+            string fileName = "cb_1.save";
+            Log.Info($"Loading game file at {Path.Combine(Directory.GetCurrentDirectory(), fileName)}");
+
+            string loadYaml = File.ReadAllText(fileName);
+            ((GameState)GameState).Map = MapLoader.MapFromYAML(loadYaml);
+
+            TickWhenGameLastSaved = Schedule.CurrentTick;
         }
 
         public void HandleScheduledEvents()
@@ -270,7 +317,7 @@ namespace CopperBend.Logic
             while (GameMode.CurrentMode == EngineMode.WorldTurns)
             {
                 var nextAction = Schedule.GetNextAction();
-                Dispatcher.Dispatch(nextAction);
+                ControlPanel.Dispatch(nextAction);
             }
         }
         #endregion
@@ -280,23 +327,33 @@ namespace CopperBend.Logic
             if (TopSeed == null)
                 TopSeed = GenerateSimpleTopSeed();
             Log.InfoFormat("Beginning new game with Top Seed [{0}]", TopSeed);
-            Cosmogenesis(TopSeed, SadConEntityFactory);
+            TomeOfChaos = new TomeOfChaos(TopSeed);
+            //TomeOfChaos.SetTopSeed(TopSeed);
             TopSeed = null;
 
-            ServicePanel.Notify_NewGame_Startup(new GameDataEventArgs(Compendium.TomeOfChaos, Compendium.Herbal));
+            // ServicePanel.Notify_NewGame_Startup(new GameDataEventArgs(Compendium.TomeOfChaos, Compendium.Herbal));
 
-            var loader = new Persist.MapLoader(Log, Engine.Compendium.Atlas);
-            FullMap = loader.FarmMap();
+            FullMap = MapLoader.FarmMap();
+            GameState.Map = FullMap;
 
-            Player = Compendium.SocialRegister.FindBeing("Suvail");
-            Player.MoveTo(FullMap.BeingMap);
-            Player.MoveTo(FullMap.SpaceMap.PlayerStartPoint);
+            Player = SocialRegister.CreatePlayer();
+            SocialRegister.LoadRegister(Player);
             Log.Debug("Created player character.");
+            GameState.Player = Player;
+
+            Puller.AddTriggerHolderToScope(FullMap);
+
+            Player.MoveTo(FullMap.BeingMap);
+            //Player.MoveTo(FullMap.SpaceMap.PlayerStartPoint);
+
+            Puller.Check(TriggerCategories.MapChanged);
 
             Schedule.AddAgent(Player, 12);
 
             (MapConsole, MapWindow) = UIBuilder.CreateMapWindow(MapWindowSize, "A Farmyard", FullMap);
-            Children.Add(MapWindow);
+            Top.Children.Add(MapWindow);
+            //INPROG: Somewhere near here, pull triggers for MapEnter
+
             MapConsole.Children.Add(Player.Console);
             FullMap.SetInitialConsoleCells(MapConsole, FullMap.SpaceMap);
             FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
@@ -306,12 +363,10 @@ namespace CopperBend.Logic
             GameState = new GameState
             {
                 Map = FullMap,
-                Story = Engine.Compendium.Dramaticon,
             };
-            Dispatcher.GameState = GameState;
-            Dispatcher.Compendium = Compendium;
+            ControlPanel.GameState = GameState;
 
-            Player.CommandSource = new InputCommandSource(ServicePanel, GameState, Dispatcher);
+            Player.StrategyStyle = StrategyStyle.UserInput;
             MapConsole.CenterViewPortOnPoint(Player.GetPosition());
 
             GameMode.PushEngineMode(EngineMode.WorldTurns, null);
@@ -322,10 +377,13 @@ namespace CopperBend.Logic
         /// <summary> I hope you had fun! </summary>
         public void GameOver(IBeing player, PlayerDiedException pde)
         {
-            //Dispatcher.WriteLine("After you're dead, the town of Copper Bend in Kulkecharra Valley is");
-            //Dispatcher.WriteLine("overrun by the Rot.  Every creature flees, is absorbed");
-            //Dispatcher.WriteLine("for energy, or suffers a brief quasi-life as the Rot");
-            //Dispatcher.WriteLine("strives to understand and replace life.  What will stand in its way?");
+            //TODO: Message on player death
+            //Dispatcher.WriteLine("Shortly after you die, the town of Copper Bend is");
+            //Dispatcher.WriteLine("overrun by the Rot.  All creatures flee, die,");
+            //Dispatcher.WriteLine("or suffer brief quasi-lives when the Rot");
+            //Dispatcher.WriteLine("catches and animates them, to extend its spread.");
+            //Dispatcher.WriteLine("What will stand in its way?");
+            // Losing is Fun?
 
             WriteGameOverReport(pde);
             ClearStats();
@@ -345,17 +403,17 @@ namespace CopperBend.Logic
             // Start by simply undoing many NewGame steps in reverse order
             Log.Info("Shutting down game");
 
-            Player.CommandSource = null;
+            //Player.Strategy = null;
 
             // ?!?? Dispatcher.AttackSystem = null;
-            Dispatcher.GameState = null;
+            ControlPanel.GameState = null;
 
             GameState = null;
 
             FullMap.FOV = null;
 
             MapConsole.Children.Remove(Player.Console);
-            Children.Remove(MapWindow);
+            Top.Children.Remove(MapWindow);
             MapConsole = null;
             MapWindow = null;
 
@@ -372,17 +430,20 @@ namespace CopperBend.Logic
             if (FullMap.VisibilityChanged)
             {
                 FullMap.FOV = new FOV(FullMap.GetView_CanSeeThrough());
+                ControlPanel.PlayerMoved = true;
+
                 FullMap.VisibilityChanged = false;
-                Dispatcher.PlayerMoved = true;
             }
 
-            if (Dispatcher.PlayerMoved)
+            if (ControlPanel.PlayerMoved)
             {
                 //TODO:  Events at locations on map:  CheckActorAtCoordEvent(actor, tile);
 
                 FullMap.UpdateFOV(MapConsole, Player.GetPosition());
                 MapConsole.CenterViewPortOnPoint(Player.GetPosition());
-                Dispatcher.PlayerMoved = false;
+                Puller.Check(TriggerCategories.PlayerLineOfSight);
+
+                ControlPanel.PlayerMoved = false;
             }
 
             if (!FullMap.CoordsWithChanges.Any()) return;

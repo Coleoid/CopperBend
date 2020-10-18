@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using CopperBend.Contract;
 
+#pragma warning disable CA2227 // Allow collection setters for YAML s'zn
+#pragma warning disable SA1402 // File may only contain a single type
 namespace CopperBend.Model
 {
-#pragma warning disable SA1402 // File may only contain a single type
     public class AttackMethod : IAttackMethod
     {
-        public List<IAttackEffect> AttackEffects { get; }
-        public List<IModifier> AttackModifiers { get; }
+        public List<IAttackEffect> AttackEffects { get; set; }
+        public List<IModifier> AttackModifiers { get; set; }
 
         public AttackMethod(string type, string range)
             : this()
@@ -49,6 +50,6 @@ namespace CopperBend.Model
         public string Type { get; set; }
         public string DamageRange { get; set; }
     }
-#pragma warning restore SA1402 // File may only contain a single type
-
 }
+#pragma warning restore CA2227 // Allow collection setters for YAML s'zn
+#pragma warning restore SA1402 // File may only contain a single type

@@ -1,16 +1,34 @@
 ﻿using GoRogue;
 using CopperBend.Contract;
-using CopperBend.Model;
 using CopperBend.Fabric;
 using NSubstitute;
 using NUnit.Framework;
+using CopperBend.Creation;
 
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class Dispatcher_Use_Tests : Dispatcher_Tests_Base
     {
-        private Being Prep_being_at_coord(Coord coord, bool isPlayer = false)
+        protected override bool ShouldPrepDI => true;
+        protected override MockableServices GetServicesToMock()
+        {
+            return MockableServices.Log
+                | MockableServices.Schedule
+                | MockableServices.Messager
+                | base.GetServicesToMock();
+        }
+
+        private Equipper Equipper { get; set; }
+
+        [SetUp]
+        public void SetUp()
+        {
+            Equipper = SourceMe.The<Equipper>();
+        }
+
+
+        private IBeing Prep_being_at_coord(Coord coord, bool isPlayer = false)
         {
             string name = isPlayer ? "Suvail" : "Phredde";
             var being = BeingCreator.CreateBeing(name);
@@ -31,7 +49,7 @@ namespace CopperBend.Logic.Tests
 
             var usable = hoe.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe, usable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
             __messager.Received().WriteLineIfPlayer(player, "Cannot till the floor.");
@@ -46,11 +64,11 @@ namespace CopperBend.Logic.Tests
 
             var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
             sp.Terrain = ttSoil;
-            _dispatcher.Till(sp);
+            _controls.Till(sp);
 
             var usable = hoe.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, hoe, usable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
             __messager.Received().WriteLineIfPlayer(player, "Ground here's already tilled.");
@@ -70,7 +88,7 @@ namespace CopperBend.Logic.Tests
 
             var usable = tool.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, tool, usable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.Received().AddAgent(player, 24);
         }
@@ -91,7 +109,7 @@ namespace CopperBend.Logic.Tests
 
             var usable = tool.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, tool, usable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.Received().AddAgent(player, tickOff);
             Assert.That(player.WieldedTool, Is.SameAs(tool));
@@ -112,11 +130,11 @@ namespace CopperBend.Logic.Tests
 
             var sp = _gameState.Map.SpaceMap.GetItem((2, 1));
             sp.Terrain = ttSoil;
-            _dispatcher.Till(sp);
+            _controls.Till(sp);
 
             var usable = seed.Aspects.GetComponent<IUsable>();
             var cmd = new Command(CmdAction.Use, CmdDirection.North, seed, usable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.Received().AddAgent(player, 6);
         }

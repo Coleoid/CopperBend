@@ -8,7 +8,7 @@ namespace CopperBend.Model
 {
     public class AreaRot : IHasID, IDelible, IAreaRot
     {
-        public string Name { get => "Area rot"; }
+        public string Name { get => "Area rot"; set { } }
 
         public AreaRot()
             : this(uint.MaxValue) { }

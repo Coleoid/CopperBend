@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CopperBend.Contract;
-using CopperBend.Model;
-using GoRogue;
 using Microsoft.Xna.Framework;
 using SadConsole.Components;
 
@@ -11,17 +9,18 @@ namespace CopperBend.Fabric
     // All significant beings, their current state and relationships
     public class SocialRegister : IBook
     {
-        public BeingCreator BeingCreator { get; }
+        [InjectProperty] private Equipper Equipper { get; set; }
+        private IBeingCreator BeingCreator { get; set; }
+
         public Dictionary<string, IBeing> WellKnownBeings { get; }
 
-        public SocialRegister(BeingCreator creator)
+        public SocialRegister(IBeingCreator creator)
         {
             BeingCreator = creator;
             WellKnownBeings = new Dictionary<string, IBeing>();
         }
 
-
-        public Being CreatePlayer()
+        public IBeing CreatePlayer()
         {
             var player = BeingCreator.CreateBeing(Color.ForestGreen, Color.Black, '@');
             player.Name = "Suvail";
@@ -35,6 +34,10 @@ namespace CopperBend.Fabric
             return player;
         }
 
+        public void LoadRegister()
+        {
+            LoadRegister(CreatePlayer());
+        }
 
         public void LoadRegister(IBeing ourHero)
         {
@@ -60,10 +63,10 @@ namespace CopperBend.Fabric
 
         public void AddTownsfolk(string name)
         {
-            AddBeingFromdetails(name, Color.AliceBlue, Color.Black, name[0], "Townsfolk");
+            AddBeingFromDetails(name, Color.AliceBlue, Color.Black, name[0], "Townsfolk");
         }
 
-        public void AddBeingFromdetails(string name, Color fg, Color bg, int glyph, string beingType)
+        public void AddBeingFromDetails(string name, Color fg, Color bg, int glyph, string beingType)
         {
             if (WellKnownBeings.ContainsKey(name))
                 throw new Exception("We've already got one.");

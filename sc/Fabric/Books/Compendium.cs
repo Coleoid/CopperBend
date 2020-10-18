@@ -6,7 +6,7 @@ namespace CopperBend.Fabric
     public class Compendium : IBook
     {
         public IDGenerator IDGenerator { get; }
-        public BeingCreator BeingCreator { get; }
+        public IBeingCreator BeingCreator { get; }
         public TomeOfChaos TomeOfChaos { get; }
         public Herbal Herbal { get; }
         public SocialRegister SocialRegister { get; }
@@ -15,7 +15,7 @@ namespace CopperBend.Fabric
 
         public Compendium(
             IDGenerator idGen,
-            BeingCreator beingCreator,
+            IBeingCreator beingCreator,
             TomeOfChaos tomeOfChaos,
             Herbal herbal,
             SocialRegister socialRegister,

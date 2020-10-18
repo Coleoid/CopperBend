@@ -17,9 +17,8 @@ namespace CopperBend.Logic.Tests
         public void OneTimeSetUp()
         {
             __log = Substitute.For<ILog>();
-            var scef = UTHelp.GetSubstituteFactory();
-
-            Engine.Cosmogenesis("monobloc delenda est!", scef);
+            var __factory = UTHelp.GetSubstituteFactory();
+            Engine.Cosmogenesis("monobloc delenda est!", __factory);
         }
 
         [SetUp]

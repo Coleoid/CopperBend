@@ -6,6 +6,12 @@ namespace CopperBend.Model.Aspects.Tests
     [TestFixture]
     public class Usable_Tests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Basis.ConnectIDGenerator();
+        }
+
         [Test]
         public void Usable_Construction_not_Insane()
         {

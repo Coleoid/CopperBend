@@ -76,24 +76,21 @@ Apply post-attack effects
 
     public class AttackSystem : IAttackSystem
     {
-        public IControlPanel Panel { get; set; }
-        private ILog Log { get; set; }
-        private IGameState GameState { get; set; }
+        [InjectProperty] private ILog Log { get; set; }
+        [InjectProperty] public IControlPanel Panel { get; set; }
 
+        [InjectProperty] public IGameState GameState { get; set; }
         public IRotMap RotMap { get => GameState.Map.RotMap; }
 
-        public AttackSystem(IControlPanel panel, ILog logger, IGameState gameState)
-        {
-            Panel = panel;
-            Log = logger;
-            GameState = gameState;
-            Destroyed = new Queue<IDelible>();
-            AttackQueue = new Queue<Attack>();
-
-        }
-
         public Queue<IDelible> Destroyed { get; }
-        public Queue<Attack> AttackQueue { get; }
+        public Queue<IAttack> AttackQueue { get; }
+
+
+        public AttackSystem()
+        {
+            Destroyed = new Queue<IDelible>();
+            AttackQueue = new Queue<IAttack>();
+        }
 
         public void AddAttack(IAttacker attacker, IAttackMethod attack, IDefender defender, IDefenseMethod defense)
         {
@@ -105,7 +102,7 @@ Apply post-attack effects
                 DefenseMethod = defense,
             });
         }
-        public void AddAttack(Attack attack) => AttackQueue.Enqueue(attack);
+        public void AddAttack(IAttack attack) => AttackQueue.Enqueue(attack);
 
 
         public void ResolveAttackQueue()
@@ -118,7 +115,7 @@ Apply post-attack effects
             ReapDestroyed();
         }
 
-        public void ResolveAttack(Attack attack)
+        public void ResolveAttack(IAttack attack)
         {
             IEnumerable<AttackDamage> damages;
 
@@ -135,7 +132,7 @@ Apply post-attack effects
         /// There are only a few odd damage cases, for now, so
         /// stuffing them in a little zoo should keep them (and us) safe.
         /// </summary>
-        public void CheckForSpecials(Attack attack)
+        public void CheckForSpecials(IAttack attack)
         {
             //  Rot splashback
             if (attack.Defender is AreaRot rot &&
@@ -157,7 +154,7 @@ Apply post-attack effects
 
             //  Nature strikes the rot through our hero
             if (attack.Defender is AreaRot areaRot &&
-                attack.Attacker is Being being &&
+                attack.Attacker is Model.Being being &&
                 being.IsPlayer &&
                 attack.AttackMethod.AttackEffects.Any(ae =>
                 ae.Type.StartsWith("physical", StringComparison.InvariantCulture))
@@ -274,7 +271,7 @@ Apply post-attack effects
             }
         }
 
-        public string AttackMessage(Attack attack)
+        public string AttackMessage(IAttack attack)
         {
             string message = string.Empty;
 

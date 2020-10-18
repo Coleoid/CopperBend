@@ -17,7 +17,7 @@ namespace CopperBend.Logic.Tests
         {
             // Anyone directly physically assaulting rot is 
             // hit with immediate vital.rot.toxin damage.
-            var asys = new AttackSystem(null, __log, null);
+            var asys = new AttackSystem();
 
             var flameRat = BeingCreator.CreateBeing("flame rat");
             var am = new AttackMethod(damageType, "1d3 +2");
@@ -49,7 +49,7 @@ namespace CopperBend.Logic.Tests
         [Test, Ignore("Need to decide how to handle ranged damage")]
         public void Ranged_physical_damage_on_Rot_skips_splashback_damage()
         {
-            var asys = new AttackSystem(null, __log, null);
+            var asys = new AttackSystem();
 
             var flameRat = BeingCreator.CreateBeing("flame rat");
             var am = new AttackMethod("physical.impact.point", "1d3 +2");

@@ -3,7 +3,7 @@ using GoRogue;
 
 //  Functional completeness levels:
 //  0.0  ---  Code is needed, and doesn't exist or work at all
-//  0.1  ---  Placeholder code that doesn't completely fail
+//  0.1  ---  Stopgap code that doesn't completely fail
 //  0.2  ---  Code is less lame, yet not ready for initial release
 //  0.K  ---  Ready for initial release
 //  1.+  ---  Speculative thought for after initial release
@@ -33,8 +33,6 @@ namespace CopperBend.Contract
 
         void AddExperience(uint plantID, XPType experience);
         bool PlayerMoved { get; set; }
-        IAttackSystem AttackSystem { get; }
-        Compendium Compendium { get; set; }
 
         void Dispatch(ScheduleEntry nextAction);
 

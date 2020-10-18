@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using SadConsole.Input;
 using Coord = GoRogue.Coord;
 using CopperBend.Contract;
 using CopperBend.Fabric;
@@ -108,7 +107,7 @@ namespace CopperBend.Logic
             if (!space.CanTill)
                 throw new Exception("Can't till this space.");
 
-            space.Terrain = Compendium.Atlas.Legend[TerrainEnum.SoilTilled];
+            space.Terrain = Atlas.Legend[TerrainEnum.SoilTilled];
             space.IsTilled = true;
         }
 

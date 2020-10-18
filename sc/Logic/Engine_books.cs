@@ -1,59 +1,17 @@
 ﻿using System;
 using System.Text;
-using GoRogue;
 using CopperBend.Contract;
+using CopperBend.Creation;
 using CopperBend.Fabric;
-using CopperBend.Model;
 
 namespace CopperBend.Logic
 {
     /// <summary> This portion of the Engine handles Well-Knowns, in a book idiom. </summary>
     public partial class Engine
     {
-        public static Compendium Compendium { get; set; }
-        public static BeingCreator BeingCreator { get => Compendium.BeingCreator; }
-
-        public static void Cosmogenesis(string topSeed, ISadConEntityFactory factory)
+        // INPROG:  Remove Cosmogenesis?  Does it become relevant again for stirring TomeOfChaos?
+        public static void Cosmogenesis(string topSeed, ISadConEntityFactory factory = null)
         {
-            var generator = new IDGenerator();
-            ConnectIDGenerator(generator);
-
-            var creator = new BeingCreator(factory);
-
-            var publisher = new BookPublisher(creator);
-
-            var tome = publisher.Tome_FromNew(topSeed);
-
-            var herbal = publisher.Herbal_FromNew();
-            ConnectHerbal(herbal);
-
-            var register = publisher.Register_FromNew(creator);
-            ConnectSocialRegister(register);
-
-            var dramaticon = publisher.Dramaticon_FromNew();
-
-            var atlas = publisher.Atlas_FromNew();
-
-            Compendium = new Compendium(generator, creator, tome, herbal, register, dramaticon, atlas);
-        }
-
-        public static void ConnectIDGenerator(IDGenerator gen)
-        {
-            CbEntity.SetIDGenerator(gen);
-            Item.SetIDGenerator(gen);
-            Space.SetIDGenerator(gen);
-            AreaRot.SetIDGenerator(gen);
-        }
-
-        public static void ConnectHerbal(Herbal herbal)
-        {
-            Equipper.Herbal = herbal;
-        }
-
-        public static void ConnectSocialRegister(SocialRegister register)
-        {
-            var pc = register.CreatePlayer();
-            register.LoadRegister(pc);
         }
 
         private static string GenerateSimpleTopSeed()

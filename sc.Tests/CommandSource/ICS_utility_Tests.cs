@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
-    public class ICS_utility_Tests : ICS_TestBase
+    public class ICS_utility_Tests : InputStrategy_TestBase
     {
 //        [TestCase(RLKey.A)]
 //        [TestCase(RLKey.X)]

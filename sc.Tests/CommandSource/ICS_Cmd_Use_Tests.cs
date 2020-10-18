@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
-    public class ICS_Cmd_Use_Tests : ICS_TestBase
+    public class ICS_Cmd_Use_Tests : InputStrategy_TestBase
     {
         [Test]
         public void Use_then_cancel()
@@ -16,11 +16,11 @@ namespace CopperBend.Logic.Tests
             __being.WieldedTool.Returns((IItem)null);
             Queue(Keys.U, Keys.Escape);
 
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __messager.Received().WriteLine("cancelled.");
-            Assert.That(_source.IsAssemblingCommand, Is.False);
+            Assert.That(_strategy.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -30,11 +30,11 @@ namespace CopperBend.Logic.Tests
             __being.WieldedTool.Returns((IItem)null);
             Queue(Keys.U);
 
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
             __messager.Received().WriteLine("Nothing usable on me.");
-            Assert.That(_source.IsAssemblingCommand, Is.False);
+            Assert.That(_strategy.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -43,13 +43,13 @@ namespace CopperBend.Logic.Tests
             var (_, _, hoe) = Fill_pack();
             __being.WieldedTool.Returns(hoe);
             Queue(Keys.U, Keys.Left);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
 
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.West));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
 
-            Assert.That(_source.IsAssemblingCommand, Is.False);
+            Assert.That(_strategy.IsAssemblingCommand, Is.False);
         }
 
         // Use_with_nonUsable_wielded_must_choose_item()
@@ -66,24 +66,24 @@ namespace CopperBend.Logic.Tests
             __being.WieldedTool.Returns((IItem)null);
 
             Queue(Keys.U);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.IsAssemblingCommand);
+            Assert.That(_strategy.IsAssemblingCommand);
             __messager.Received().Prompt("Use item: ");
 
             Queue(Keys.C);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.IsAssemblingCommand);
+            Assert.That(_strategy.IsAssemblingCommand);
             __messager.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
 
             Queue(Keys.NumPad9);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
-            Assert.That(_source.IsAssemblingCommand, Is.False);
+            Assert.That(_strategy.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -93,12 +93,12 @@ namespace CopperBend.Logic.Tests
             __being.WieldedTool.Returns((IItem)null);
 
             Queue(Keys.U, Keys.C, Keys.NumPad9);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
-            Assert.That(_source.IsAssemblingCommand, Is.False);
+            Assert.That(_strategy.IsAssemblingCommand, Is.False);
 
             Queue(Keys.U, Keys.Down);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.South));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
@@ -111,14 +111,14 @@ namespace CopperBend.Logic.Tests
             __being.WieldedTool.Returns((IItem)null);
 
             Queue(Keys.U, Keys.C, Keys.NumPad9);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
 
             __messager.DidNotReceive().Prompt(Arg.Any<string>());
             __messager.DidNotReceive().WriteLine(Arg.Any<string>());
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
-            Assert.That(_source.IsAssemblingCommand, Is.False);
+            Assert.That(_strategy.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -128,24 +128,24 @@ namespace CopperBend.Logic.Tests
             __being.WieldedTool.Returns(knife);
 
             Queue(Keys.U);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
 
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.IsAssemblingCommand);
+            Assert.That(_strategy.IsAssemblingCommand);
             __messager.Received().Prompt("Direction to use the knife, or [a-z?] to choose item: ");
 
             Queue(Keys.C);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.IsAssemblingCommand);
+            Assert.That(_strategy.IsAssemblingCommand);
             __messager.Received().Prompt("Direction to use the hoe, or [a-z?] to choose item: ");
 
             Queue(Keys.NumPad9);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd.Action, Is.EqualTo(CmdAction.Use));
             Assert.That(Cmd.Direction, Is.EqualTo(CmdDirection.Northeast));
             Assert.That(Cmd.Item, Is.SameAs(hoe));
-            Assert.That(_source.IsAssemblingCommand, Is.False);
+            Assert.That(_strategy.IsAssemblingCommand, Is.False);
         }
 
         [Test]
@@ -155,9 +155,9 @@ namespace CopperBend.Logic.Tests
             __being.WieldedTool.Returns((IItem)null);
 
             Queue(Keys.U, Keys.D);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.IsAssemblingCommand);
+            Assert.That(_strategy.IsAssemblingCommand);
             __messager.Received().WriteLine("The key [d] does not match an inventory item.  Pick another.");
             __messager.ClearReceivedCalls();
 
@@ -169,16 +169,16 @@ namespace CopperBend.Logic.Tests
             //__writeLine.ClearReceivedCalls();
 
             Queue(Keys.OemPeriod);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.IsAssemblingCommand);
+            Assert.That(_strategy.IsAssemblingCommand);
             __messager.Received().WriteLine("The key [.] does not match an inventory item.  Pick another.");
             __messager.ClearReceivedCalls();
 
             Queue(Keys.Right);
-            Cmd = _source.GetCommand(__being);
+            Cmd = _strategy.GetCommand(__being);
             Assert.That(Cmd, Is.EqualTo(CommandIncomplete));
-            Assert.That(_source.IsAssemblingCommand);
+            Assert.That(_strategy.IsAssemblingCommand);
             __messager.Received().WriteLine("The key [Right] does not match an inventory item.  Pick another.");
             __messager.ClearReceivedCalls();
         }

@@ -6,11 +6,11 @@ using CopperBend.Model.Aspects;
 
 namespace CopperBend.Fabric
 {
-    public static class Equipper
+    public class Equipper
     {
-        public static Herbal Herbal { get; set; }
+        [InjectProperty] public Herbal Herbal { get; set; }
 
-        public static Item BuildItem(string itemName, int quantity = 1)
+        public Item BuildItem(string itemName, int quantity = 1)
         {
             Guard.AgainstNullArgument(itemName);
 
@@ -56,14 +56,14 @@ namespace CopperBend.Fabric
             return item;
         }
 
-        private static Item BuildPlant(Match wantedPlant)
+        private Item BuildPlant(Match wantedPlant)
         {
             string plantPart = wantedPlant.Groups[1].Value;
             string plantName = wantedPlant.Groups[2].Value;
             return BuildPlant(plantPart, plantName);
         }
 
-        public static Item BuildPlant(string plantPart, string plantName)
+        public Item BuildPlant(string plantPart, string plantName)
         {
             var byName = Herbal.PlantByName;
             if (!byName.ContainsKey(plantName))
@@ -72,7 +72,7 @@ namespace CopperBend.Fabric
             return BuildPlant(plantPart, byName[plantName]);
         }
 
-        public static Item BuildPlant(string plantPart, PlantDetails details)
+        public Item BuildPlant(string plantPart, PlantDetails details)
         {
             var item = new Item { Name = plantPart };
 

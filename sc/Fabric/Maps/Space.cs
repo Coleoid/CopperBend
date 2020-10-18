@@ -1,13 +1,19 @@
 ﻿using GoRogue;
 using CopperBend.Contract;
+using YamlDotNet.Serialization;
 
 namespace CopperBend.Fabric
 {
     public class Space : IHasID, ISpace
     {
-        public Space(uint id = uint.MaxValue)
+        public Space()
         {
-            ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
+            ID = IDGenerator.UseID();
+        }
+
+        public Space(uint id)
+        {
+            ID = id;
         }
 
         #region My IHasID
@@ -23,11 +29,15 @@ namespace CopperBend.Fabric
         public Terrain Terrain { get; set; }
 
         //0.2.MAP  check for modifiers (smoke, dust, giant creature, ...)
+        [YamlIgnore]
         public bool CanSeeThrough => Terrain.CanSeeThrough;
+        [YamlIgnore]
         public bool CanWalkThrough => Terrain.CanWalkThrough;
 
         //0.2.MAP  check for modifiers (permission, hostile aura, rot, ...)
+        [YamlIgnore]
         public bool CanPlant => Terrain.CanPlant && IsTilled && !IsSown;
+        [YamlIgnore]
         public bool CanTill => Terrain.CanPlant && !IsTilled;
 
         public bool IsTilled { get; set; }

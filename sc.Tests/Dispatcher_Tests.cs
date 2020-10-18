@@ -1,27 +1,38 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using SadConsole.Entities;
 using CopperBend.Contract;
 using CopperBend.Model;
 using CopperBend.Model.Aspects;
-using CopperBend.Fabric;
 using NSubstitute;
 using NUnit.Framework;
 using GoRogue;
+using CopperBend.Fabric;
+using CopperBend.Creation;
 
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
     public class Dispatcher_Tests : Dispatcher_Tests_Base
     {
-        Being player;
+        protected override bool ShouldPrepDI => true;
+        protected override MockableServices GetServicesToMock()
+        {
+            return MockableServices.Log
+                | MockableServices.Describer
+                | MockableServices.Schedule
+                | MockableServices.Messager
+                | base.GetServicesToMock();
+        }
+
+        private IBeing player;
+        private Equipper Equipper { get; set; }
 
         [SetUp]
         public void SetUp()
         {
             player = BeingCreator.CreateBeing("Suvail");
             player.MoveTo(_gameState.Map.BeingMap);
+            Equipper = SourceMe.The<Equipper>();
         }
 
         #region Consume
@@ -39,7 +50,7 @@ namespace CopperBend.Logic.Tests
             item.Aspects.AddComponent(consumable);
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item);
 
-            var ex = Assert.Throws<Exception>(() => _dispatcher.CommandBeing(player, cmd));
+            var ex = Assert.Throws<Exception>(() => _controls.CommandBeing(player, cmd));
             Assert.That(ex.Message, Is.EqualTo("Thing to consume not found in inventory"));
         }
 
@@ -59,7 +70,7 @@ namespace CopperBend.Logic.Tests
             player.AddToInventory(item);
 
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item, consumable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(player.Inventory.Count(), Is.EqualTo(1));
             var seed = player.Inventory.ElementAt(0);
@@ -82,7 +93,7 @@ namespace CopperBend.Logic.Tests
             player.Wield(item);
 
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item, consumable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(player.Inventory.ElementAt(0).Name, Is.EqualTo("seed"));
             Assert.That(player.WieldedTool, Is.Null);
@@ -101,7 +112,7 @@ namespace CopperBend.Logic.Tests
             player.Wield(item);
 
             var cmd = new Command(CmdAction.Consume, CmdDirection.None, item, consumable);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(player.Inventory.ElementAt(0), Is.SameAs(item));
             Assert.That(player.WieldedTool, Is.SameAs(item));
@@ -115,7 +126,7 @@ namespace CopperBend.Logic.Tests
         {
             player.MoveTo((2, 2));
             var cmd = new Command(CmdAction.Direction, direction, null);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.Received().AddAgent(player, tickOff);
         }
@@ -127,7 +138,7 @@ namespace CopperBend.Logic.Tests
             var newCoord = new Coord(newX, newY);
             player.MoveTo((2, 2));
             var cmd = new Command(CmdAction.Direction, direction, null);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(player.GetPosition(), Is.EqualTo(newCoord));
             var mapPosition = _gameState.Map.BeingMap.GetPosition(player);
@@ -143,7 +154,7 @@ namespace CopperBend.Logic.Tests
             player.MoveTo((3, 2));
             player.IsPlayer = true;
             var cmd = new Command(CmdAction.Direction, direction, null);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             var curPosition = player.GetPosition();
             Assert.That(curPosition, Is.EqualTo(new Coord(3, 2)));
@@ -162,7 +173,7 @@ namespace CopperBend.Logic.Tests
             Assert.That(doorSpace.Terrain.Name, Is.EqualTo(TerrainEnum.DoorClosed));
 
             var cmd = new Command(CmdAction.Direction, CmdDirection.South, null);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(player.GetPosition(), Is.EqualTo(startingCoord));
             Assert.That(doorSpace.Terrain.Name, Is.EqualTo(TerrainEnum.DoorOpen));
@@ -178,12 +189,12 @@ namespace CopperBend.Logic.Tests
             player.MoveTo(startingCoord);
 
             var itemCoord = new Coord(2, 1);
-            var item = Equipper.BuildItem("knife");
+            IItem item = Equipper.BuildItem("knife");
             _gameState.Map.ItemMap.Add(item, itemCoord);
             __describer.Describe(item, Arg.Any<DescMods>()).Returns("a knife");
 
             var cmd = new Command(CmdAction.Direction, CmdDirection.North, null);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(player.GetPosition(), Is.EqualTo(itemCoord));
             __schedule.Received().AddAgent(player, 12);
@@ -199,7 +210,7 @@ namespace CopperBend.Logic.Tests
             var item = new Item(1);
             var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
 
-            var ex = Assert.Throws<Exception>(() => _dispatcher.CommandBeing(player, drop));
+            var ex = Assert.Throws<Exception>(() => _controls.CommandBeing(player, drop));
             Assert.That(ex.Message, Is.EqualTo("Item to drop not found in inventory"));
         }
 
@@ -216,7 +227,7 @@ namespace CopperBend.Logic.Tests
             var items = _gameState.Map.ItemMap.GetItems(mySpot);
             Assert.That(items.Count(), Is.EqualTo(0));
 
-            _dispatcher.CommandBeing(player, drop);
+            _controls.CommandBeing(player, drop);
 
             Assert.That(player.Inventory.Count(), Is.EqualTo(0));
             items = _gameState.Map.ItemMap.GetItems(mySpot);
@@ -235,7 +246,7 @@ namespace CopperBend.Logic.Tests
             Assert.That(player.Inventory.Count(), Is.EqualTo(1));
 
             var drop = new Command(CmdAction.Drop, CmdDirection.None, item);
-            _dispatcher.CommandBeing(player, drop);
+            _controls.CommandBeing(player, drop);
 
             Assert.That(player.Inventory.Count(), Is.EqualTo(0));
 
@@ -270,7 +281,7 @@ namespace CopperBend.Logic.Tests
             var item = new Item(1);
 
             var cmd = new Command(CmdAction.PickUp, CmdDirection.None, item);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.DidNotReceive().AddAgent(player, Arg.Any<int>());
         }
@@ -284,7 +295,7 @@ namespace CopperBend.Logic.Tests
             _gameState.Map.ItemMap.Add(item, coord);
 
             var cmd = new Command(CmdAction.PickUp, CmdDirection.None, item);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             __schedule.Received().AddAgent(player, 4);
         }
@@ -300,7 +311,7 @@ namespace CopperBend.Logic.Tests
             _gameState.Map.ItemMap.Add(item, coord);
 
             var cmd = new Command(CmdAction.PickUp, CmdDirection.None, item);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(_gameState.Map.ItemMap.GetItems(coord), Does.Not.Contain(item));
             Assert.That(player.Inventory.ElementAt(0), Is.SameAs(item));
@@ -318,7 +329,7 @@ namespace CopperBend.Logic.Tests
             Assert.That(player.WieldedTool, Is.Null);
 
             var cmd = new Command(CmdAction.Wield, CmdDirection.None, item);
-            _dispatcher.CommandBeing(player, cmd);
+            _controls.CommandBeing(player, cmd);
 
             Assert.That(player.WieldedTool, Is.SameAs(item));
         }

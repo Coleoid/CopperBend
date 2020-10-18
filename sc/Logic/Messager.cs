@@ -8,24 +8,19 @@ using SadConsole.Input;
 
 namespace CopperBend.Logic
 {
-    public class Messager : IMessager, IPanelService
+    public class Messager : IMessager
     {
-        private const int messageLimitBeforePause = 3;  //0.1: artificially low for short-term testing
+        private const int messageLimitBeforePause = 5;  //0.1: artificially low for short-term testing
         private int messagesSentSincePause = 0;
 
-        private ModeNode ModeNode { get; set; }
+        private IGameMode GameMode { get; set; }
         public Queue<AsciiKey> InputQueue { get; private set; }
         public Queue<string> MessageQueue { get; private set; }
-        public Messager(ModeNode node)
+        public Messager(IGameMode mode)
         {
-            ModeNode = node;
+            GameMode = mode;
             InputQueue = new Queue<AsciiKey>();
             MessageQueue = new Queue<string>();
-        }
-
-        public void RegisterWithPanel(IServicePanel isp)
-        {
-            //  Maybe not much?  Still unsure how to sequence ISP events.
         }
 
         //POST-CONSTRUCTOR dependency:
@@ -105,7 +100,7 @@ namespace CopperBend.Logic
                 break;
 
             case MessageEnum.RotDamageSpreads:
-                WriteLine("The damage to this stuff spreads outward.  Good.");
+                WriteLine("The damage I did to this stuff spreads outward.  Good.");
                 break;
 
             default:
@@ -143,7 +138,7 @@ namespace CopperBend.Logic
         private void ShowMessages()
         {
             //0.2: There are probably other modes where we want to suspend messages.
-            while (ModeNode.CurrentMode != EngineMode.MessagesPendingUserInput && MessageQueue.Any())
+            while (GameMode.CurrentMode != EngineMode.MessagesPendingUserInput && MessageQueue.Any())
             {
                 if (messagesSentSincePause >= messageLimitBeforePause)
                 {
@@ -160,7 +155,7 @@ namespace CopperBend.Logic
         private void PromptUserForMoreAndPend()
         {
             MessageWindow.WriteLine("-- more --");
-            ModeNode.PushEngineMode(EngineMode.MessagesPendingUserInput, HandleMessagesPending);
+            GameMode.PushEngineMode(EngineMode.MessagesPendingUserInput, HandleMessagesPending);
         }
 
         private void HandleMessagesPending()
@@ -170,7 +165,7 @@ namespace CopperBend.Logic
                 if (k.Key == Keys.Space)
                 {
                     ResetMessagesSentSincePause();
-                    ModeNode.PopEngineMode();
+                    GameMode.PopEngineMode();
                     ShowMessages();  // ...which may have enough messages to pend us again.
                 }
             }

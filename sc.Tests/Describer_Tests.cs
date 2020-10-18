@@ -1,4 +1,3 @@
-using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Model;
 using NUnit.Framework;
@@ -12,8 +11,8 @@ namespace CopperBend.Logic.Tests
         [OneTimeSetUp]
         public void SetUp()
         {
-            var sef = UTHelp.GetSubstituteFactory();
-            Engine.Cosmogenesis("seed", sef);
+            var __factory = UTHelp.GetSubstituteFactory();
+            Engine.Cosmogenesis("seed", __factory);
         }
 
         [TestCase(1, "", "rock")]

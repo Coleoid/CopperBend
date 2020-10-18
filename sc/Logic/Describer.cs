@@ -8,37 +8,17 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Logic
 {
-    public class Describer : IDescriber, IPanelService
+    public class Describer : IDescriber
     {
-        private Herbal Herbal { get; set; }
-
-        public Describer()
-        {
-        }
-
-        public void RegisterWithPanel(IServicePanel isp)
-        {
-            //isp.GameEngine_Startup += this.GameEngine_Startup;
-            isp.NewGame_Startup += this.NewGame_Startup;
-            isp.ExistingGame_Load += this.ExistingGame_Load;
-        }
-
-        //private void GameEngine_Startup(object caller, EventArgs e)
-        //{
-        //}
-
-        private void NewGame_Startup(object caller, GameDataEventArgs e)
-        {
-            this.Herbal = e.Herbal;
-            Scramble(e.TomeOfChaos, Herbal);
-        }
-
-        private void ExistingGame_Load(object caller, GameDataEventArgs e)
-        {
-            this.Herbal = e.Herbal;
-        }
+        [InjectProperty] private Herbal Herbal { get; set; }
+        [InjectProperty] private TomeOfChaos Tome { get; set; }
 
         #region Scramble
+        public void Scramble()
+        {
+            Scramble(Tome, Herbal);
+        }
+
         public void Scramble(TomeOfChaos tome, Herbal herbal)
         {
             ScrambleSeeds(tome, herbal);

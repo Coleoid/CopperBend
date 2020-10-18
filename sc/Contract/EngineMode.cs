@@ -2,7 +2,7 @@
 {
     public enum EngineMode
     {
-        Unknown = 0,
+        Unset = 0,
         NoGameRunning,
         PlayerTurn,
         WorldTurns,

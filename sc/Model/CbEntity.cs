@@ -1,5 +1,7 @@
-﻿using SadConsole.Entities;
+﻿using System;
+using SadConsole.Entities;
 using GoRogue;
+using YamlDotNet.Serialization;
 
 namespace CopperBend.Model
 {
@@ -11,13 +13,15 @@ namespace CopperBend.Model
             IDGenerator = generator;
         }
         private static IDGenerator IDGenerator { get; set; }
-        public uint ID { get; private set; }
+        public uint ID { get; set; }
         #endregion
 
-        public IEntity SadConEntity { get; protected set; } = null;
+        [YamlIgnore]
+        public IEntity SadConEntity { get; set; } = null;
 
         protected CbEntity(uint id = uint.MaxValue)
         {
+            if (IDGenerator == null) throw new Exception("need CBEntity.SetIDGenerator() call.");
             ID = (id == uint.MaxValue ? IDGenerator.UseID() : id);
         }
     }

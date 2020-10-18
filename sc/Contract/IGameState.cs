@@ -1,12 +1,11 @@
-﻿using CopperBend.Fabric;
-using GoRogue;
+﻿using GoRogue;
 
 namespace CopperBend.Contract
 {
     public interface IGameState
     {
-        ICompoundMap Map { get; }
-        Dramaticon Story { get; }
+        ICompoundMap Map { get; set; }
+        IBeing Player { get; set; }
 
         void MarkDirtyCoord(Coord newPosition);
         //0.2.SAVE  include beings and items on levels

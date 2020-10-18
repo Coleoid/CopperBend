@@ -7,7 +7,7 @@ using CopperBend.Fabric;
 
 namespace CopperBend.Logic
 {
-    public class Schedule : ISchedule, IPanelService
+    public class Schedule : ISchedule
     {
         private readonly ILog log;
         private readonly SortedDictionary<int, List<ScheduleEntry>> tickEntries;
@@ -18,10 +18,6 @@ namespace CopperBend.Logic
             log = logger;
             tickEntries = new SortedDictionary<int, List<ScheduleEntry>>();
             CurrentTick = 0;
-        }
-
-        public void RegisterWithPanel(IServicePanel isp)
-        {
         }
 
         /// <summary> Get next scheduled action, ordered by tick of occurrence, then FIFO per tick </summary>

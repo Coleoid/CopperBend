@@ -1,28 +1,36 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.Xna.Framework;
 using CopperBend.Contract;
-using Microsoft.Xna.Framework;
-using CopperBend.Fabric.Tests;
+using NUnit.Framework;
+using CopperBend.Creation;
+using CopperBend.Model;
+using CopperBend.Fabric;
 
 namespace CopperBend.Logic.Tests
 {
     [TestFixture]
-    public class Casting_Tests
+    public class Casting_Tests : Tests_Base
     {
+        protected override bool ShouldPrepDI => true;
+        protected override MockableServices GetServicesToMock()
+        {
+            return MockableServices.Log
+                | MockableServices.EntityFactory
+                | base.GetServicesToMock();
+        }
+
+
+        private Director director;
+
         [SetUp]
         public void SetUp()
         {
-            var entityFactory = UTHelp.GetSubstituteFactory();
-
-            Engine.Cosmogenesis("casting", entityFactory);
-            //var ourHero = Substitute.For<IBeing>();
-            //Engine.Compendium.SocialRegister.LoadRegister(ourHero);
+            Basis.ConnectIDGenerator();
+            director = SourceMe.The<Director>();
         }
 
         [Test]
         public void Can_cast_new_being()
         {
-            var director = new Director();
-
             IBeing newRat = director.BuildNewBeing("flame rat");
 
             Assert.That(newRat, Is.Not.Null);
@@ -32,8 +40,8 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Can_cast_NPC()
         {
-            var director = new Director();
-
+            var reg = SourceMe.The<SocialRegister>();
+            reg.LoadRegister();
             IBeing kellet = director.FindBeing("Kellet Benison");
 
             Assert.That(kellet, Is.Not.Null);

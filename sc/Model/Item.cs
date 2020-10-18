@@ -2,6 +2,7 @@
 using GoRogue;
 using CopperBend.Contract;
 using CopperBend.Fabric;
+using YamlDotNet.Serialization;
 
 namespace CopperBend.Model
 {
@@ -55,7 +56,9 @@ namespace CopperBend.Model
             //TODO: Location = location;
         }
 
+        [YamlIgnore]
         public bool IsUsable => Aspects.HasComponent<IUsable>();
+        [YamlIgnore]
         public virtual bool IsIngestible => Aspects.HasComponent<IIngestible>();
 
         public virtual void ApplyTo(Coord position, IControlPanel controls, ILogWindow output, CmdDirection direction)
@@ -80,7 +83,9 @@ namespace CopperBend.Model
             Guard.Against(Quantity < 1, $"Somehow there's no {Name} here.");
             Guard.Against(Quantity < quantity, $"Want {quantity} of {Name} but there are only {Quantity}.");
 
-            Item newStack = Equipper.BuildItem(ItemType, quantity);
+            //INPROG: Move Item.SplitFromStack into... Equipper?
+            //Item newStack = Equipper.BuildItem(ItemType, quantity);
+            Item newStack = null;
             Quantity -= quantity;
 
             return newStack;

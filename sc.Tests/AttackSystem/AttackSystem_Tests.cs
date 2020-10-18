@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CopperBend.Contract;
+using CopperBend.Creation;
 using CopperBend.Fabric;
 using CopperBend.Model;
 using NUnit.Framework;
@@ -57,7 +58,7 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Damage_rolls_within_expected_ranges()
         {
-            var asys = new AttackSystem(null, __log, null);
+            var asys = new AttackSystem();
             bool rolled_min = false;
             bool rolled_max = false;
             for (int i = 0; i < 1000; i++)
@@ -77,7 +78,7 @@ namespace CopperBend.Logic.Tests
         [Test]
         public void Can_resist_a_set_of_AttackDamages()
         {
-            var asys = new AttackSystem(null, __log, null);
+            var asys = new AttackSystem();
             List<AttackDamage> damages = new List<AttackDamage>
             {
                 new AttackDamage(8, "physical.impact.blunt"),
@@ -103,7 +104,7 @@ namespace CopperBend.Logic.Tests
         [TestCase(9, "sausage", 4)]  //0.2: would be nice if this broke, to rule out typos.
         public void Default_resistance_when_type_has_no_match(int initial, string type, int expected)
         {
-            var asys = new AttackSystem(null, __log, null);
+            var asys = new AttackSystem();
             List<AttackDamage> damages = new List<AttackDamage>
             {
                 new AttackDamage(initial, type),
@@ -122,7 +123,9 @@ namespace CopperBend.Logic.Tests
             cm.RotMap = new RotMap();
             gs.Map = cm;
 
-            var asys = new AttackSystem(null, __log, gs);
+            var asys = new AttackSystem();
+            asys.GameState = gs;
+            SourceMe.InjectProperties(asys);
 
             var player = BeingCreator.CreateBeing("Suvail");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
@@ -160,7 +163,9 @@ namespace CopperBend.Logic.Tests
             cm.RotMap = new RotMap();
             gs.Map = cm;
 
-            var asys = new AttackSystem(null, __log, gs);
+            //var asys = new AttackSystem();
+            var asys = SourceMe.The<AttackSystem>();
+            asys.GameState = gs;
 
             var flameRat = BeingCreator.CreateBeing("flame rat");
             var am = new AttackMethod("physical.impact.blunt", "1d3 +2");
@@ -209,7 +214,8 @@ namespace CopperBend.Logic.Tests
             cm.RotMap = rotMap;
             gs.Map = cm;
 
-            var asys = new AttackSystem(null, __log, gs);
+            var asys = new AttackSystem { GameState = gs };
+            SourceMe.InjectProperties(asys);
 
             Assert.That(asys.AttackQueue.Count, Is.EqualTo(0));
 
